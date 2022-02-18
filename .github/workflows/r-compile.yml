@@ -22,7 +22,7 @@ jobs:
         uses: r-lib/actions/setup-r@master
             
       - name: Install NetCDF and Latex
-        run: sudo apt-get update && sudo apt-get install -yq libnetcdf-dev texlive-latex-base texlive-fonts-recommended texlive-fonts-extra
+        run:  sudo apt-get install -yq libnetcdf-dev texlive-latex-base texlive-fonts-recommended texlive-fonts-extra
 
       - name: Cache R dependencies
         id: r-dep
@@ -43,10 +43,10 @@ jobs:
         shell: Rscript {0}
 
       - name: Build Osmose without vignettes
-        run: R CMD build --no-build-vignettes .
+        run:  R CMD build --no-build-vignettes .
 
       - name: Check Osmose without vignettes
         run: |
             file=`ls *tar.gz`
             echo $file
-            R CMD check --as-cran --ignore-vignettes ${file} 
+            R CMD check --as-cran --ignore-vignettes ${file}

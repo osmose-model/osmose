@@ -26,7 +26,8 @@ public class TestNcSteps {
     
     private Configuration cfg;
     private final NetcdfFileWriter.Version NC_VERSION = NetcdfFileWriter.Version.netcdf3;
-    
+
+    /** Prepare the Osmose object for the tests. */
     @BeforeAll
     public void prepareData() {
     
@@ -47,7 +48,7 @@ public class TestNcSteps {
     public void TestNcSteps1() throws IOException, InvalidRangeException {
         
         // Resource files has 24 steps per years
-        String filename = this.createSingleLtlFile("test1", "test1_ltl_", 24);
+        String filename = this.createSingleLtlFile("test1_ltl_", 24);
         ForcingFile forcingFile = new ForcingFile("ltl", filename, 24, 0.0, 1.0, ForcingFileCaching.NONE);
         forcingFile.init();
         
@@ -75,12 +76,13 @@ public class TestNcSteps {
         
     }
 
-        /** Test of a seasonal file, which contains one value per osmose dt **/
+        /** Test of a seasonal file, which contains two values per osmose dt (i.e 
+         * one every 30 days) **/
         @Test
         public void TestNcSteps2() throws IOException, InvalidRangeException {
             
             // Resource files has 24 steps per years
-            String filename = this.createSingleLtlFile("test2", "test2_ltl_", 12);
+            String filename = this.createSingleLtlFile("test2_ltl_", 12);
             ForcingFile forcingFile = new ForcingFile("ltl", filename, 12, 0.0, 1.0, ForcingFileCaching.NONE);
             forcingFile.init();
             
@@ -113,7 +115,7 @@ public class TestNcSteps {
         public void TestNcSteps3() throws IOException, InvalidRangeException {
             
             // Resource files has 24 steps per years
-            String filename = this.createSingleLtlFile("test3", "test3_ltl_", 5*12);
+            String filename = this.createSingleLtlFile("test3_ltl_", 5*12);
             ForcingFile forcingFile = new ForcingFile("ltl", filename, 12, 0.0, 1.0, ForcingFileCaching.NONE);
             forcingFile.init();
             
@@ -146,9 +148,9 @@ public class TestNcSteps {
      public void TestNcSteps4() throws IOException, InvalidRangeException {
          
          // Resource files has 24 steps per years
-         String filename1 = this.createSingleLtlFile("test4", "test4_a_ltl_", 12);
-         String filename2 = this.createSingleLtlFile("test4", "test4_b_ltl_", 2 * 12);
-         String filename3 = this.createSingleLtlFile("test4", "test4_c_ltl_", 3 * 12);
+         String filename1 = this.createSingleLtlFile("test4_a_ltl_", 12);
+         String filename2 = this.createSingleLtlFile("test4_b_ltl_", 2 * 12);
+         String filename3 = this.createSingleLtlFile("test4_c_ltl_", 3 * 12);
          
          String directory = new File(filename1).getParent();
          String pattern = new File(directory, "test4_[abc]_ltl_.*").getAbsolutePath();
@@ -156,6 +158,8 @@ public class TestNcSteps {
          ForcingFile forcingFile = new ForcingFile("ltl", pattern, 12, 0.0, 1.0, ForcingFileCaching.NONE);
          forcingFile.init();
          
+         // We remove the files, in order to make sure that for the next running of tests,
+         // only the newly created files are used.
          File tempFile;
          
          tempFile = new File(filename1);
@@ -166,7 +170,7 @@ public class TestNcSteps {
          
          tempFile = new File(filename3);
          tempFile.delete();
-         
+                  
          // test on the total number of time steps
          assertEquals(72, forcingFile.getTimeLength());
          
@@ -199,7 +203,8 @@ public class TestNcSteps {
          // Check the proper conversion from Osmose time-step to NetCDf time step
          assertEquals(5, forcingFile.getNcStep(10));
          assertEquals(34, forcingFile.getNcStep(69));
-
+        
+         // check for the cyclicity, when the first 6 years have been read
          assertEquals(5, forcingFile.getNcStep(10 + 6 * 24));
          assertEquals(34, forcingFile.getNcStep(69 + 6 * 24));
 
@@ -209,8 +214,15 @@ public class TestNcSteps {
      }
         
         
-        
-    private String createSingleLtlFile(String directory, String prefix, int nSteps) throws IOException, InvalidRangeException {
+     /**
+      * Create a temporary LTL file used in the different tests.
+      * 
+      * @param prefix
+      *            File prefix
+      * @param nSteps
+      *            Number of time steps in the file.
+      */
+    private String createSingleLtlFile(String prefix, int nSteps) throws IOException, InvalidRangeException {
          
         String fileName = File.createTempFile(prefix, ".nc").getAbsolutePath();
         NetcdfFileWriter nc = NetcdfFileWriter.createNew(NC_VERSION, fileName);

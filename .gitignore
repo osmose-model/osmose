@@ -3,6 +3,9 @@
 .Rapp.history
 .RData
 
+**/**ipynb**
+**/*~lock*
+
 
 # Example code in package build process
 *-Ex.R

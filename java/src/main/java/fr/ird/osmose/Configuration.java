@@ -642,6 +642,22 @@ public class Configuration extends OLogger {
     public Species getSpecies(int index) {
         return species[index];
     }
+    
+    /**
+     * Get a species
+     *
+     * @param name,
+     *            the name of the species
+     * @return the {@code name} species.
+     */
+    public Species getSpecies(String name) {
+        for (int i = 0; i < getNSpecies(); i++) {
+            if (getSpecies(i).getName().equalsIgnoreCase(name)) {
+                return getSpecies(i);
+            }
+        }
+        return null;
+    }
 
     /**
      * Gets the specified resource group.

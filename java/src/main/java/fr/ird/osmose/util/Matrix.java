@@ -99,15 +99,25 @@ public class Matrix extends OsmoseLinker {
     private final ClassGetter classGetter;
     
     private boolean sortMatrix;
+    
+    private float[][] predClasses;
+    private float[][] preyClasses;
+    private int[][] predIndex;
+    private int[][] preyIndex;
 
-    /*public abstract int getIndexPred(String namePred);
-
-    public abstract int getIndexPrey(String namePrey);
-
-    public abstract int getIndexPrey(IAggregation pred);
-
-    public abstract int getIndexPred(IAggregation prey);
-     */
+    /** Functional interface for the finding of predator index in access. matrix */
+    private interface IndexPred {
+        public int getIndexPred(IAggregation pred);
+    }
+    
+    /** Functional interface for the finding of prey index in access. matrix */
+    private interface IndexPrey {
+        public int getIndexPrey(IAggregation prey);
+    }
+    
+    IndexPrey indexingPrey;
+    IndexPred indexingPred;
+    
     /**
      * Class constructor.The reading of the file is done here
      *
@@ -115,10 +125,7 @@ public class Matrix extends OsmoseLinker {
      * @param classGetter
      */
     public Matrix(String filename, ClassGetter classGetter) {
-        this.filename = filename;
-        this.classGetter = classGetter;
-        this.sortMatrix = true;
-        this.read();
+        this(filename, classGetter, true);
     }
     
     public Matrix(String filename, ClassGetter classGetter, boolean sortMatrix) {
@@ -201,6 +208,85 @@ public class Matrix extends OsmoseLinker {
         }
         debug(this.toString());
         
+        if(classGetter == null) { 
+            // If class getter is null, then the NoClass methods are used.
+            this.indexingPred = (school -> this.getIndexPredNoClass(school));
+            this.indexingPrey = (school -> this.getIndexPreyNoClass(school));
+        } else {
+            if(this.sortMatrix) {
+                // If class getter is not null, then the Class methods are used.
+                this.indexingPred = (school -> this.getIndexPredClassSorted(school));
+                this.indexingPrey = (school -> this.getIndexPreyClassSorted(school));
+            } else {
+                // If class getter is not null, then the Class methods are used.
+                this.indexingPred = (school -> this.getIndexPredClass(school));
+                this.indexingPrey = (school -> this.getIndexPreyClass(school));
+            }
+        }       
+        
+        if (this.sortMatrix) {
+            // Init an array with the prey classes for each species
+            // size is [nPrey][nSizePrey]
+            this.preyClasses = new float[this.getNAllSpecies()][];
+            this.preyIndex = new int[this.getNAllSpecies()][];
+            // We loop over all the species (focal, resource, bkg)
+            for (int iSpecies = 0; iSpecies < this.getNAllSpecies(); iSpecies++) {
+                int cpt = 0;
+                // Species name that we consider
+                String speciesName = getISpecies(iSpecies).getName();
+                // We count the number of entries for the species (i.e the number of size-classes)
+                for (String name : this.namesPrey) {
+                    if (name.equals(speciesName)) {
+                        cpt++;
+                    }
+                }
+
+                // We initialize the number of classes for the prey
+                this.preyClasses[iSpecies] = new float[cpt];
+                this.preyIndex[iSpecies] = new int[cpt];
+                cpt = 0;
+                int i = 0;
+                for (String name : this.namesPrey) {
+                    if (name.equals(speciesName)) {
+                        this.preyClasses[iSpecies][i] = this.classPrey[cpt];
+                        this.preyIndex[iSpecies][i] = cpt;
+                        i++;
+                    }
+                    cpt++;
+                }
+            } // end of prey loop
+
+            // Init an array with the prey classes for each species
+            // size is [nPrey][nSizePrey]
+            this.predClasses = new float[this.getNPredSpecies()][];
+            this.predIndex = new int[this.getNPredSpecies()][];
+            // We loop over all the species (focal, resource, bkg)
+            for (int iSpecies = 0; iSpecies < this.getNPredSpecies(); iSpecies++) {
+                int cpt = 0;
+                // Species name that we consider
+                String speciesName = getISpecies(iSpecies).getName();
+                // We count the number of entries for the species
+                for (String name : this.namesPred) {
+                    if (name.equals(speciesName)) {
+                        cpt++;
+                    }
+                }
+
+                // We initialize the number of classes for the pred
+                this.predClasses[iSpecies] = new float[cpt];
+                this.predIndex[iSpecies] = new int[cpt];
+                cpt = 0;
+                int i = 0;
+                for (String name : this.namesPred) {
+                    if (name.equals(speciesName)) {
+                        this.predClasses[iSpecies][i] = this.classPred[cpt];
+                        this.predIndex[iSpecies][i] = cpt;
+                        i++;
+                    }
+                    cpt++;
+                }
+            }  // end of predator loop
+        } // end of issorted test
     }
     
     /**
@@ -214,6 +300,10 @@ public class Matrix extends OsmoseLinker {
     public double getValue(int iprey, int ipred) {
         return this.accessibilityMatrix[iprey][ipred];
     }
+    
+    public double[][] getValues() {
+        return this.accessibilityMatrix;   
+    }
 
     public int getNPred() {
         return this.nPred;
@@ -221,6 +311,22 @@ public class Matrix extends OsmoseLinker {
 
     public int getNPrey() {
         return this.nPreys;
+    }
+    
+    public String[] getPreyNames() {
+        return namesPrey;
+    }
+
+    public String[] getPredNames() {
+        return namesPred;
+    }
+
+    public float[] getPreyClasses() {
+        return classPrey;
+    }
+
+    public float[] getPredClasses() {
+        return classPred;
     }
 
     public String getPreyName(int i) {
@@ -238,34 +344,107 @@ public class Matrix extends OsmoseLinker {
     public double getPredClass(int i) {
         return classPred[i];
     }
-
-    /**
+    
+    /** Method that returns the column of predator in access matrix. It calls
+     * the function in the functional interface. */
+    public int getIndexPred(IAggregation pred) {
+        return this.indexingPred.getIndexPred(pred);   
+    }
+    
+     /**
      * Extracts the matrix column for the given predator.
      *
-     * Based on full correspondance of the name (class < thres).
+     * Based on full correspondance of the name and (class < thres).
      *
      * @param pred
      * @return
      */
-    public int getIndexPred(IAggregation pred) {
+     public int getIndexPredClass(IAggregation pred) {
+
+         String predname = pred.getSpeciesName();
+         double classVal = classGetter.getVariable(pred);
+         for (int i = 0; i < this.getNPred(); i++) {
+             if (predname.equals(this.getPredName(i)) && (classVal < this.getPredClass(i))) {
+                 return i;
+             }
+         }
+
+         String message = String.format("No accessibility found for predator %s class %f", pred.getSpeciesName(),
+                 classGetter.getVariable(pred));
+         error(message, new IllegalArgumentException());
+         return -1;
+     }
+
+    /**
+     * Extracts the matrix column for the given predator.
+     *
+     * Based on partial correspondance of the name (used in fisheries).
+     *
+     * @param pred
+     * @return
+     */
+    public int getIndexPredNoClass(IAggregation pred) {
 
         String predname = pred.getSpeciesName();
-
-        if (this.classGetter == null) {
-            for (int i = 0; i < this.getNPred(); i++) {
-                if (predname.equals(this.getPredName(i))) {
-                    return i;
-                }
-            }
-        } else {
-            double classVal = classGetter.getVariable(pred);
-            for (int i = 0; i < this.getNPred(); i++) {
-                if (predname.equals(this.getPredName(i)) && (classVal < this.getPredClass(i))) {
-                    return i;
-                }
+        for (int i = 0; i < this.getNPred(); i++) {
+            if (predname.equals(this.getPredName(i))) {
+                return i;
             }
         }
         String message = String.format("No accessibility found for predator %s class %f", pred.getSpeciesName(), classGetter.getVariable(pred));
+        error(message, new IllegalArgumentException());
+        return -1;
+    }
+    
+    /** Get the prey row in the accessibility matrix. Based on the 
+     * functional interface that defines which value is used. */
+    public int getIndexPrey(IAggregation prey) {
+        return this.indexingPrey.getIndexPrey(prey);   
+    }
+    
+    /**
+     * Extracts the matrix column for the given prey.
+     *
+     * Based on full correspondance of the name (class < thres).
+     *
+     * @param prey
+     * @return
+     */
+    public int getIndexPreyClass(IAggregation prey) {
+        
+        String preyname = prey.getSpeciesName();
+        double classVal = classGetter.getVariable(prey);
+        for (int i = 0; i < this.getNPrey(); i++) {
+            if (preyname.equals(this.getPreyName(i)) && (classVal < this.getPreyClass(i))) {
+                return i;
+            }
+        }
+
+        String message = String.format("No accessibility found for prey %s class %f", prey.getSpeciesName(), classGetter.getVariable(prey));
+        error(message, new IllegalArgumentException());
+        return -1;
+
+    }
+    
+    /**
+     * Extracts the matrix column for the given prey.
+     *
+     * Based on full correspondance of the name (class < thres).
+     *
+     * @param prey
+     * @return
+     */
+    public int getIndexPreyClassSorted(IAggregation prey) {
+        
+        int iSpecies = prey.getSpeciesIndex();
+        float[] classes = this.preyClasses[iSpecies];
+        for(int i = 0; i < classes.length; i++) {
+            if(classGetter.getVariable(prey) < classes[i]) { 
+                return this.preyIndex[iSpecies][i];   
+            }
+        }
+
+        String message = String.format("No accessibility found for prey %s class %f", prey.getSpeciesName(), classGetter.getVariable(prey));
         error(message, new IllegalArgumentException());
         return -1;
     }
@@ -278,25 +457,33 @@ public class Matrix extends OsmoseLinker {
      * @param prey
      * @return
      */
-    public int getIndexPrey(IAggregation prey) {
+    public int getIndexPredClassSorted(IAggregation pred) {
         
-        String preyname = prey.getSpeciesName();
-        
-        if (this.classGetter == null) {
-            for (int i = 0; i < this.getNPrey(); i++) {
-                if (preyname.equals(this.getPreyName(i))) {
-                    return i;
-                }
-            }
-        } else {
-            double classVal = classGetter.getVariable(prey);
-            for (int i = 0; i < this.getNPrey(); i++) {
-                if (preyname.equals(this.getPreyName(i)) && (classVal < this.getPreyClass(i))) {
-                    return i;
-                }
+        int iSpecies = pred.getSpeciesIndex();
+        float[] classes = this.predClasses[iSpecies];
+        for(int i = 0; i < classes.length; i++) {
+            if(classGetter.getVariable(pred) < classes[i]) { 
+                return this.predIndex[iSpecies][i];   
             }
         }
-        String message = String.format("No accessibility found for prey %s class %f", prey.getSpeciesName(), classGetter.getVariable(prey));
+
+        String message = String.format("No accessibility found for pred %s class %f", pred.getSpeciesName(), classGetter.getVariable(pred));
+        error(message, new IllegalArgumentException());
+        return -1;
+    }
+    
+    public int getIndexPreyNoClass(IAggregation prey) {
+        
+        String preyname = prey.getSpeciesName();
+
+        for (int i = 0; i < this.getNPrey(); i++) {
+            if (preyname.equals(this.getPreyName(i))) {
+                return i;
+            }
+        }
+
+        String message = String.format("No accessibility found for prey %s class %f", prey.getSpeciesName(),
+                classGetter.getVariable(prey));
         error(message, new IllegalArgumentException());
         return -1;
 

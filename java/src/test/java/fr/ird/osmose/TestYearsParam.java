@@ -52,6 +52,9 @@ import fr.ird.osmose.util.YearParameters;
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public class TestYearsParam {
 
+    /** First test is to test a default year parameter, i.e. without
+     * any associated parameters. Result should be years ranging from 0 to
+     * nstep - 1 */
     @Test
     public void TestParam1() {
 
@@ -68,6 +71,7 @@ public class TestYearsParam {
 
     }
     
+    /** Second test is to test year parameters with explicit years provided. */
     @Test
     public void TestParam2() {
 
@@ -80,6 +84,9 @@ public class TestYearsParam {
 
     }
 
+    /** Third test is to test year parameters with explicit years provided, but with
+     * some years that are beyond the total number of years and must be discarded. 
+     */
     @Test
     public void TestParam3() {
 
@@ -92,13 +99,14 @@ public class TestYearsParam {
 
     }
     
+    /** Fourth test is for years provided as initial and last year. */
     @Test
     public void TestParam4() {
 
         int N = 73 - 54 + 1;
         int[] expected = new int[N];
 
-        int cpt = 0;
+        int cpt = 0;    
         for (int i = 54; i <= 73; i++) {
             expected[cpt++] = i;
         }
@@ -110,6 +118,7 @@ public class TestYearsParam {
 
     }
     
+    /** Same as previous test except that last years must be discarded. */
     @Test
     public void TestParam5() {
 
@@ -129,12 +138,14 @@ public class TestYearsParam {
     }
     
     
-    
+    /** Preparation of data used to testing the year parameters. */
     @BeforeAll
     public void prepareData() throws Exception {
 
         Osmose osmose = Osmose.getInstance();
         osmose.getLogger().setLevel(Level.SEVERE);
+        
+        // Load default configuration file.
         String configurationFile = this.getClass().getClassLoader().getResource("osmose-eec/eec_all-parameters.csv").getFile();
         
         // Adding HashMap to overwrite default setting
