@@ -52,3 +52,5 @@ nbproject
 **/.settings
 **/.project
 **/*jar-with-dependencies.jar
+
+**/*.ipynb
