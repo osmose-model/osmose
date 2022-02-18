@@ -446,12 +446,14 @@ public class FisheryMapSet extends OsmoseLinker {
             getLogger().warning("One map should be provided for fishery");   
         }
     
+        indexMaps = new int[this.getConfiguration().getNStep()];    
+    
         // Recover the first map number.
         imap = mapNumber.get(0);
         
         String ncFilePattern = cfg.getFile(prefix + ".file.map" + imap);
         String varName = cfg.getString(prefix + ".variable.map" + imap);
-        int ncPerYear = cfg.getInt(prefix + ".steps.year.map" + imap);
+        int ncPerYear = cfg.getInt(prefix + ".nsteps.year.map" + imap);
       
         // Init a NetCDF file containing movements NetCDF forcings.
         ForcingFile forcingFile = new ForcingFile(varName, ncFilePattern, ncPerYear, 0, 1, ForcingFileCaching.ALL);
