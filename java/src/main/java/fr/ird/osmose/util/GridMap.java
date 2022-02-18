@@ -69,6 +69,17 @@ public class GridMap extends OsmoseLinker {
             }
         }
     }
+    
+    public GridMap(double[][] input) {
+        matrix = new float[getGrid().get_ny()][getGrid().get_nx()];
+        for (Cell cell : getGrid().getCells()) {
+            if (cell.isLand()) {
+                matrix[cell.get_jgrid()][cell.get_igrid()] = Cell.LAND_VALUE;
+            } else {
+                matrix[cell.get_jgrid()][cell.get_igrid()] = (float) input[cell.get_jgrid()][cell.get_igrid()];
+            }
+        }
+    }
 
     public GridMap() {
         this(0);
@@ -113,7 +124,7 @@ public class GridMap extends OsmoseLinker {
             error("Error reading CSV map " + csvFile, ex);
         }
     }
-
+ 
     public void setValue(int i, int j, float value) {
         matrix[j][i] = value;
     }
