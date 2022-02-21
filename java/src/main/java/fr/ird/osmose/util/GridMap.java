@@ -152,7 +152,9 @@ public class GridMap extends OsmoseLinker {
         float output = 0;
         for (int j = 0; j < getGrid().get_ny(); j++) {
             for (int i = 0; i < getGrid().get_nx(); i++) {
-                output += matrix[j][i];
+                if (!Float.isNaN(matrix[j][i])) {
+                    output += matrix[j][i];
+                }
             }
         }
 
@@ -171,7 +173,13 @@ public class GridMap extends OsmoseLinker {
 
         for (int j = 0; j < getGrid().get_ny(); j++) {
             for (int i = 0; i < getGrid().get_nx(); i++) {
-                if (matrix[j][i] != map2.getValue(i, j)) {
+                float val1 = matrix[j][i];
+                float val2 =  map2.getValue(i, j);
+                // manage the case where both values are NaN
+                if(Float.isNaN(val1) && Float.isNaN(val2)) { 
+                    continue;
+                }
+                if (val1 != val2) {
                     return false;
                 }
             }
