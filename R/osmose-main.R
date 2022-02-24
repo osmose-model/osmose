@@ -264,21 +264,18 @@ get_var = function(object, what, how, ...){
 #' @param row.names either a logical value indicating whether the row names of x 
 #' are to be written along with x, or a character vector of row names to be 
 #' written.
+#' @param append Append to 'file' or create a new one?
 #' @param ... Extra arguments passed to \code{write.table} funtion.
 #' 
 #' @export
-write_osmose = function(x, file, sep = ",", col.names = NA, quote = FALSE, 
-                        row.names = TRUE, append=FALSE, ...) {
-  
-  if(isTRUE(append)) cat("\n", file=file, append=TRUE)
-  write.table(x = x, file = file, sep = sep, col.names = col.names, quote = quote,
-              row.names = row.names, append=append, ...)
+write_osmose = function(x, file, sep=",", ...) {
+  UseMethod("write_osmose")
 }
 
 
 #' @title Generates required OSMOSE configuration files to run a demo.
 #' 
-#' @description Thins function 
+#' @description Run demo 
 #' 
 #' @param path Path where to put the Osmose configuration file.
 #' @param config Reference configuration to run ("eec_4.3.0"). 
