@@ -437,9 +437,8 @@ public class Matrix extends OsmoseLinker {
     public int getIndexPreyClassSorted(IAggregation prey) {
         
         int iSpecies = prey.getSpeciesIndex();
-        float[] classes = this.preyClasses[iSpecies];
-        for(int i = 0; i < classes.length; i++) {
-            if(classGetter.getVariable(prey) < classes[i]) { 
+        for(int i = 0; i < this.preyClasses[iSpecies].length; i++) {
+            if(classGetter.getVariable(prey) < this.preyClasses[iSpecies][i]) { 
                 return this.preyIndex[iSpecies][i];   
             }
         }
@@ -460,9 +459,8 @@ public class Matrix extends OsmoseLinker {
     public int getIndexPredClassSorted(IAggregation pred) {
         
         int iSpecies = pred.getSpeciesIndex();
-        float[] classes = this.predClasses[iSpecies];
-        for(int i = 0; i < classes.length; i++) {
-            if(classGetter.getVariable(pred) < classes[i]) { 
+        for(int i = 0; i < this.predClasses[iSpecies].length; i++) {
+            if(classGetter.getVariable(pred) < this.predClasses[iSpecies][i]) { 
                 return this.predIndex[iSpecies][i];   
             }
         }
