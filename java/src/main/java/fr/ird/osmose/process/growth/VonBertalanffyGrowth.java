@@ -114,7 +114,7 @@ public class VonBertalanffyGrowth extends AbstractGrowth {
             if (length < lInf) {
                 age = t0 - (Math.log(1 - length / lInf) / K);
             } else {
-                age = getSpecies().getLifespanDt();
+                age = getSpecies().getLifespanDt() / getConfiguration().getNStepYear();
             }
         } else {
             age = growthAgeThreshold * (length - eggSize) / (lengthAtAgePart - eggSize);
