@@ -91,6 +91,12 @@ abstract public class AbstractOutput extends SimulationLinker implements IOutput
     abstract String getDescription();
 
     abstract String[] getHeaders();
+    
+    private interface FlushMethod {
+        public void flushFile(PrintWriter prw);
+    }
+    
+    FlushMethod flushMethod;
 
 ///////////////
 // Constructors
@@ -101,6 +107,11 @@ abstract public class AbstractOutput extends SimulationLinker implements IOutput
         this.name = name;
         separator = getConfiguration().getOutputSeparator();
         nOutputRegion = getConfiguration().getOutputRegions().size();
+        if(getConfiguration().isFlushEnabled()) {
+            flushMethod = (prw) -> prw.flush();    
+        } else {
+            flushMethod = (prw -> {});   
+        }
     }
 
 ////////////////////////////
@@ -170,7 +181,7 @@ abstract public class AbstractOutput extends SimulationLinker implements IOutput
                     prw[i].print(quote(header));
                 }
                 prw[i].println();
-                prw[i].flush();
+                flushMethod.flushFile(prw[i]);
             }
             i++;
         }
@@ -203,7 +214,7 @@ abstract public class AbstractOutput extends SimulationLinker implements IOutput
             prw[region].print(sval);
         }
         prw[region].println();
-        prw[region].flush();
+        flushMethod.flushFile(prw[region]);
     }
 
     void writeVariable(int region, float time, double[][] variable) {
@@ -217,7 +228,7 @@ abstract public class AbstractOutput extends SimulationLinker implements IOutput
                 prw[region].print(sval);
             }
             prw[region].println();
-            prw[region].flush();
+            flushMethod.flushFile(prw[region]);
         }
     }
     
