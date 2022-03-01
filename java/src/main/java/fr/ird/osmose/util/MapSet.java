@@ -116,7 +116,7 @@ public class MapSet extends OsmoseLinker {
     /**
      * List of the maps.
      */
-    protected HashMap<Integer, GridMap> maps;
+    protected GridMap[] maps;
     
     private final boolean removeDuplicate;
     
@@ -147,14 +147,14 @@ public class MapSet extends OsmoseLinker {
     }
 
     public int getNMap() {
-        return maps.size();
+        return maps.length;
     }
 
     public GridMap getMap(int numMap) {
-        return maps.get(numMap);
+        return maps[numMap];
     }
 
-    public HashMap<Integer, GridMap> getMaps() {
+    public GridMap[] getMaps() {
         return maps;
     }
 
@@ -247,7 +247,7 @@ public class MapSet extends OsmoseLinker {
             imap++;
         }
 
-        maps = new HashMap<>();
+        HashMap<Integer, GridMap> tempMaps = new HashMap<>();
         mapFile = new String[mapNumber.size()];
         
         List<String> mapFileList = new ArrayList<>();
@@ -300,21 +300,29 @@ public class MapSet extends OsmoseLinker {
             if (!getConfiguration().isNull(prefix + ".file" + ".map" + imap)) {
                 String csvFile = getConfiguration().getFile(prefix + ".file" + ".map" + imap);
                 mapFile[n] = csvFile;
-                maps.put(n, new GridMap(csvFile));
+                tempMaps.put(n, new GridMap(csvFile));
                 mapFileList.add(csvFile);
             } else {
                 mapFile[n] = null;
-                maps.put(n, null);
+                tempMaps.put(n, null);
                 mapFileList.add("null");
             }
             
             mapIndexList.add(null);
-            
+                
+        }
+        
+        int nMaps = mapIndexList.size();
+        maps = new GridMap[nMaps];
+        for (int i = 0; i <nMaps; i++) {
+            maps[i] = tempMaps.get(i);   
         }
         
         if(this.checkMaps) { 
             this.writeMovementsChecks(mapFileList, mapIndexList);    
         }
+        
+        tempMaps.clear();
         
     }
 
@@ -352,7 +360,7 @@ public class MapSet extends OsmoseLinker {
                     if (file.equals(mapFile[l])) {
                         mapIndexNoTwin[k] = mapIndexNoTwin[l];
                         // Delete twin maps
-                        maps.put(k, null);
+                        maps[k] = null;
                         break;
                     }
                 }
@@ -372,17 +380,17 @@ public class MapSet extends OsmoseLinker {
      */
     private void eliminateTwinMapNC() {
 
-        int[] mapIndexNoTwin = new int[maps.size()];
-        for (int k = 0; k < maps.size(); k++) {
-            GridMap mapK = maps.get(k);
+        int[] mapIndexNoTwin = new int[maps.length];
+        for (int k = 0; k < maps.length; k++) {
+            GridMap mapK = maps[k];
             mapIndexNoTwin[k] = k;
             if (null != mapK) {
                 for (int l = k - 1; l >= 0; l--) {
-                    GridMap mapL = maps.get(l);
+                    GridMap mapL = maps[l];
                     if ((mapL != null) && mapK.equals(mapL)) {
                         mapIndexNoTwin[k] = mapIndexNoTwin[l];
                         // Delete twin maps
-                        maps.put(k, null);
+                        maps[k] = null;
                         break;
                     }
                 }
@@ -435,7 +443,7 @@ public class MapSet extends OsmoseLinker {
         }
         
         // One map per timestep and per age number
-        maps = new HashMap<>(); // dimension = [nMaps][ntime]
+        HashMap<Integer, GridMap> tempMaps = new HashMap<>(); // dimension = [nMaps][ntime]
         int iii = 0;
                 
         for (Integer im : mapNumber) {
@@ -467,7 +475,8 @@ public class MapSet extends OsmoseLinker {
                 if(gridMap.count() == 0) { 
                     gridMap = null;   
                 }
-                maps.put(iii, gridMap);
+                
+                tempMaps.put(iii, gridMap);
                 
                 // now we create the indexMaps by looping over all age classes and 
                 // all time-steps.
@@ -484,12 +493,20 @@ public class MapSet extends OsmoseLinker {
                 iii++;
                 
             }
-            
-            if(this.checkMaps) {
-                this.writeMovementsChecks(mapNcFiles, mapNcSteps);   
-            }
-
         } // end of loop on map number
+        
+        int nMaps = tempMaps.size();
+        maps = new GridMap[nMaps];
+        for(int i = 0; i < nMaps; i++) { 
+            maps[i] = tempMaps.get(i);   
+        }
+        
+        tempMaps.clear();
+        
+        if(this.checkMaps) {
+            this.writeMovementsChecks(mapNcFiles, mapNcSteps);   
+        }
+        
     }  // end of method
     
     
