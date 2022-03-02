@@ -162,7 +162,8 @@ public class MortalityProcess extends AbstractProcess {
     @Override
     public void init() {
         
-        int nCPU = getConfiguration().getNCpu();
+        // get the number of processors that can be used 
+        int nCPU = Math.max(1, getConfiguration().getNCpu() / getConfiguration().getNSimulation());
         if(nCPU > 1) {
             parallelManager = () -> this.computeMortalityParallel();   
         } else {
