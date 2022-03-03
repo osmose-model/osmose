@@ -109,7 +109,7 @@ public class FisheryMapSet extends OsmoseLinker {
     /**
      * List of the maps.
      */
-    protected HashMap<Integer, GridMap> maps;
+    protected GridMap[] maps;
 
     /**
      * List of the pathnames of the CSV files.
@@ -162,11 +162,11 @@ public class FisheryMapSet extends OsmoseLinker {
     }
 
     public int getNMap() {
-        return maps.size();
+        return maps.length;
     }
 
     public GridMap getMap(int numMap) {
-        return maps.get(numMap);
+        return maps[numMap];
     }
 
     public String getMapFile(int numMap) {
@@ -195,7 +195,7 @@ public class FisheryMapSet extends OsmoseLinker {
 
             key = String.format("%s.%s.map%d", prefix, suffix, imap);
 
-// This is done if the indexing of fishering maps start with one for instance
+            // This is done if the indexing of fishering maps start with one for instance
             while (cfg.isNull(key)) {
                 imap++;
                 key = String.format("%s.%s.map%d", prefix, suffix, imap);
@@ -214,7 +214,7 @@ public class FisheryMapSet extends OsmoseLinker {
         }  // end of nmapmax loop
 
         // Initialize NSTEP arrays of gridmaps, and initialize their index to -1
-        maps = new HashMap<>();
+        HashMap<Integer, GridMap> tempMaps = new HashMap<>();
         mapFile = new String[mapNumber.size()];
         int nSteps = Math.max(cfg.getNStep(), cfg.getNStepYear());
         indexMaps = new int[nSteps];
@@ -262,13 +262,21 @@ public class FisheryMapSet extends OsmoseLinker {
             if (!cfg.isNull(prefix + ".file" + ".map" + imap)) {
                 String csvFile = cfg.getFile(prefix + ".file" + ".map" + imap);
                 mapFile[n] = csvFile;
-                maps.put(n, new GridMap(csvFile));
+                tempMaps.put(n, new GridMap(csvFile));
             } else {
                 mapFile[n] = null;
-                maps.put(n, null);
+                tempMaps.put(n, null);
             }
-
         } // end of loop on good map numbers
+            
+        maps = new GridMap[tempMaps.size()];
+        for(int i = 0; i < tempMaps.size(); i++) { 
+            maps[i] = tempMaps.get(i);
+        }
+        
+        tempMaps.clear();
+            
+        
     }  // end of method
 
     /**
@@ -313,7 +321,7 @@ public class FisheryMapSet extends OsmoseLinker {
                     if (file.equals(mapFile[l])) {   // if the file of map k matches the map of map l.
                         mapIndexNoTwin[k] = mapIndexNoTwin[l];   // the k map is removed and the twin index is set equal to the twin map of l
                         // Delete twin maps
-                        maps.put(k, null);
+                        maps[k] = null;
                         break;
                     }
                 }
@@ -334,7 +342,7 @@ public class FisheryMapSet extends OsmoseLinker {
      */
     private void normalizeAllMaps() {
         // Loop over all the map files files (looping over map indexes).
-        for (GridMap map : maps.values()) {
+        for (GridMap map : maps) {
             normalize_map(map);
         }
     }
@@ -466,12 +474,19 @@ public class FisheryMapSet extends OsmoseLinker {
         }
     
         // One map per timestep
-        maps = new HashMap<>(); // dimension = [ntimeNc]
+        HashMap<Integer, GridMap> tempMaps = new HashMap<>(); // dimension = [ntimeNc]
         HashMap<Integer, double[][][]> forcingValues = forcingFile.getCachedVariable();
         for(int i : forcingValues.keySet()) { 
            double[][] values = forcingValues.get(i)[0];
-           maps.put(i, new GridMap(values));    
+           tempMaps.put(i, new GridMap(values));    
         }
+        
+        maps = new GridMap[tempMaps.size()];
+        for(int i = 0; i < tempMaps.size(); i++) { 
+            maps[i] = tempMaps.get(i);   
+        }
+        
+        tempMaps.clear();
 
     }  // end of method
 

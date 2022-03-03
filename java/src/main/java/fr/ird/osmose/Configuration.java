@@ -173,6 +173,10 @@ public class Configuration extends OLogger {
      * @see fr.ird.osmose.util.Separator
      */
     private String outputSeparator;
+    
+    /** True if output files should be flushed any time they are written. */
+    private boolean flushEnabled;
+    
     /**
      * Number of CPUs allocated to {@code Osmose} for running the simulations
      * concurrently. Parameter <i>simulation.ncpu</i>
@@ -346,6 +350,8 @@ public class Configuration extends OLogger {
         // Output path
         outputPathname = getFile("output.dir.path");
 
+        this.flushEnabled = getBoolean("output.flush.enabled");
+        
         // Show the output folder
         info("Output folder set to " + outputPathname);
 
@@ -1455,6 +1461,10 @@ public class Configuration extends OLogger {
      */
     public int[] getFocalIndex() {
         return this.focalIndex;
+    }
+
+    public boolean isFlushEnabled() {
+        return this.flushEnabled;   
     }
 
     /**

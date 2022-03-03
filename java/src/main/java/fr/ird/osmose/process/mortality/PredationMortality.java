@@ -274,18 +274,19 @@ public class PredationMortality extends AbstractMortality {
 
         for (int iPrey = 0; iPrey < preys.size(); iPrey++) {
             IAggregation prey = (IAggregation) preys.get(iPrey);
-            int iAccessPrey = accessibilityMatrix.getIndexPrey(prey);
             // The prey is an other school
             if (preys.get(iPrey) instanceof AbstractSchool) {
                 if (prey.equals(predator)) {
                     continue;
                 }
                 if (prey.getLength() >= preySizeMin && prey.getLength() < preySizeMax) {
+                    int iAccessPrey = accessibilityMatrix.getIndexPrey(prey);
                     accessibility[iPrey] = accessibilityMatrix.getValue(iAccessPrey, iAccessPred);
                 } else {
                     accessibility[iPrey] = 0.d; // no need to do it since initialization already set it to zero
                 }
             } else {
+                int iAccessPrey = accessibilityMatrix.getIndexPrey(prey);
                 int iSpecPrey = preys.get(iPrey).getSpeciesIndex(); // get species index with offset
                 // The prey is a resource group
                 accessibility[iPrey] = accessibilityMatrix.getValue(iAccessPrey, iAccessPred)
