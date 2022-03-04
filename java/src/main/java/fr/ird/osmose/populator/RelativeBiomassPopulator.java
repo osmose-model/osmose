@@ -80,6 +80,9 @@ public class RelativeBiomassPopulator extends AbstractPopulator {
     /** Size lengths of the released schools. Dimensions = [nSpecies][nLenghts] */
     private double[][] trophicLevels;
 
+    /** Age of the released schools. Dimensions = [nSpecies][nLenghts] */
+    private int[][] ageDt;
+
     private int[] nSize;
 
     private GrowthProcess growthProcess;
@@ -127,14 +130,16 @@ public class RelativeBiomassPopulator extends AbstractPopulator {
         sizeMax = new double[nSpecies][];
         cpt = 0;
         for (int iSpeciesFiles : this.getFocalIndex()) {
-            sizeMin[cpt] = cfg.getArrayDouble("population.initialization.size.sp" + iSpeciesFiles);
-            nSize[cpt] = sizeMin[cpt].length;
-            sizeMax[cpt] = new double[nSize[cpt]];
-            for (int p = 0; p < nSize[cpt] - 1; p++) {
-                sizeMax[cpt][p] = sizeMin[cpt][p + 1];
+            // Should be of size NClass + 1
+            double sizeTemp[] = cfg.getArrayDouble("population.initialization.size.sp" + iSpeciesFiles);
+            nSize[cpt] = sizeTemp.length - 1;
+            for (int iClass = 0; iClass < nSize[cpt]; iClass++) {
+                sizeMin[cpt][iClass] = sizeTemp[iClass];
+                sizeMax[cpt][iClass] = sizeTemp[iClass + 1];
             }
-            sizeMax[cpt][nSize[cpt] - 1] = lInf[cpt];
+   
             cpt++;
+    
         }
 
         // Init the trophic levels for each species and each size class.
@@ -161,6 +166,29 @@ public class RelativeBiomassPopulator extends AbstractPopulator {
             }
             cpt++;
         }
+        
+        // Init the age for each species and each size class.
+        ageDt = new int[nSpecies][];
+        cpt = 0;
+        for (int iSpeciesFile : this.getFocalIndex()) {
+
+            // load ages in years
+            double temp[] = cfg.getArrayDouble("population.initialization.age.sp" + iSpeciesFile);
+
+            if (temp.length != nSize[cpt]) {
+                String message = String.format("Parameter %s must contain %d values",
+                        "population.initialization.age.sp" + iSpeciesFile, nSize[cpt]);
+                error(message, new Exception());
+            }
+            cpt++;
+
+            ageDt[cpt] = new int[temp.length];
+            for (int k = 0; k < temp.length; k++) {
+                ageDt[cpt][k] = (int) (temp[k] * getConfiguration().getNStepYear());
+            }
+
+        }
+        
     }
 
     @Override
@@ -175,6 +203,7 @@ public class RelativeBiomassPopulator extends AbstractPopulator {
 
                 double lengthMin = this.sizeMin[iSpecies][iLength];
                 double lengthMax = this.sizeMax[iSpecies][iLength];
+                int ageDt = this.ageDt[iSpecies][iLength];
 
                 // Biomass in tons
                 double biomass = this.seedingBiomass[iSpecies] * this.biomassProportion[iSpecies][iLength];
@@ -183,7 +212,7 @@ public class RelativeBiomassPopulator extends AbstractPopulator {
                 }
 
                 for (int s = 0; s < nSchool; s++) {
-                    School school0 = this.generateSchool(biomass / nSchool, lengthMin, lengthMax, iSpecies);
+                    School school0 = this.generateSchool(biomass / nSchool, lengthMin, lengthMax, ageDt, iSpecies);
                     getSchoolSet().add(school0);
                     biomass -= school0.getBiomass();
                 }
@@ -191,9 +220,9 @@ public class RelativeBiomassPopulator extends AbstractPopulator {
         }        
     }
 
-    private School generateSchool(double biomass, double lengthMin, double lengthMax, int iSpecies) {
+    private School generateSchool(double biomass, double lengthMin, double lengthMax, int ageDt, int iSpecies) {
 
-        Configuration cfg = getConfiguration();
+        // Configuration cfg = getConfiguration();
         Species species = getSpecies(iSpecies);
 
         // Ramdom draft of length
@@ -202,14 +231,14 @@ public class RelativeBiomassPopulator extends AbstractPopulator {
             length = species.getEggSize();
         }
 
-        AbstractGrowth growth = growthProcess.getGrowth(iSpecies);
-        int ageDt;
-        if (length == species.getEggSize()) {
-            ageDt = 0;
-        } else {
-            ageDt = (int) Math.round(growth.lengthToAge(length) * cfg.getNStepYear());
-        }
-        ageDt = Math.min(ageDt, species.getLifespanDt() - 1);
+        // AbstractGrowth growth = growthProcess.getGrowth(iSpecies);
+        // int ageDt;
+        // if (length == species.getEggSize()) {
+        //     ageDt = 0;
+        // } else {
+        //     ageDt = (int) Math.round(growth.lengthToAge(length) * cfg.getNStepYear());
+        // }
+        // ageDt = Math.min(ageDt, species.getLifespanDt() - 1);
 
         double weight;
         if (length == species.getEggSize()) {
