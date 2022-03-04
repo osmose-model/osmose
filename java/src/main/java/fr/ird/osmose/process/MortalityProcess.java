@@ -144,6 +144,12 @@ public class MortalityProcess extends AbstractProcess {
     private boolean fishingMortalityEnabled;
     private boolean initCatchDiscards = true;
     
+    private interface ParallelManager {
+        public void computeMortality();   
+    }
+    
+    ParallelManager parallelManager;
+    
     /*
      * The set of resource aggregations
      */
@@ -155,6 +161,14 @@ public class MortalityProcess extends AbstractProcess {
 
     @Override
     public void init() {
+        
+        // get the number of processors that can be used 
+        int nCPU = Math.max(1, getConfiguration().getNCpu() / getConfiguration().getNSimulation());
+        if(nCPU > 1) {
+            parallelManager = () -> this.computeMortalityParallel();   
+        } else {
+            parallelManager = () -> this.computeMortalitySequential();     
+        }
 
         // Possibility to use a seed in the definition of mortality algorithm
         String key = "stochastic.mortality.seed";
@@ -361,25 +375,9 @@ public class MortalityProcess extends AbstractProcess {
             }
         }
 
-        int[] ncellBatch = dispatchCells();
-        int nbatch = ncellBatch.length;
-        for (int idt = 0; idt < subdt; idt++) {
-            if (fishingMortalityEnabled && (!fisheryEnabled)) {
-                fishingMortality.assessFishableBiomass();
-            }
-            CountDownLatch doneSignal = new CountDownLatch(nbatch);
-            int iStart = 0, iEnd = 0;
-            for (int ibatch = 0; ibatch < nbatch; ibatch++) {
-                iEnd += ncellBatch[ibatch];
-                new Thread(new MortalityWorker(iStart, iEnd, doneSignal)).start();
-                iStart += ncellBatch[ibatch];
-            }
-            try {
-                doneSignal.await();
-            } catch (InterruptedException ex) {
-                error("Multithread mortality process terminated unexpectedly.", ex);
-            }
-        }
+        // Call the computation of mortality either in parallel
+        // or in sequential mode.
+        parallelManager.computeMortality();
 
         // Update starvation mortality rate and trophic level
         for (School school : getSchoolSet().getSchools()) {
@@ -410,6 +408,46 @@ public class MortalityProcess extends AbstractProcess {
         }
     }
 
+    private void computeMortalityParallel() { 
+        int[] ncellBatch = dispatchCells();
+        int nbatch = ncellBatch.length;
+        for (int idt = 0; idt < subdt; idt++) {
+            if (fishingMortalityEnabled && (!fisheryEnabled)) {
+                fishingMortality.assessFishableBiomass();
+            }
+            CountDownLatch doneSignal = new CountDownLatch(nbatch);
+            int iStart = 0, iEnd = 0;
+            for (int ibatch = 0; ibatch < nbatch; ibatch++) {
+                iEnd += ncellBatch[ibatch];
+                new Thread(new MortalityWorker(iStart, iEnd, doneSignal)).start();
+                iStart += ncellBatch[ibatch];
+            }
+            try {
+                doneSignal.await();
+            } catch (InterruptedException ex) {
+                error("Multithread mortality process terminated unexpectedly.", ex);
+            }
+        }   
+    }
+    
+    private void computeMortalitySequential() {
+        
+        for (int idt = 0; idt < subdt; idt++) {
+            if (fishingMortalityEnabled && (!fisheryEnabled)) {
+                fishingMortality.assessFishableBiomass();
+            }
+
+            List<Cell> cells = getGrid().getOceanCells();
+            for (Cell cell : cells) {
+                try {
+                    computeMortality(subdt, cell);
+                } catch (Exception ex) {
+                    Logger.getLogger(MortalityProcess.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
+        }
+    }
+    
     /**
      * Stochastic mortality algorithm > It is assumed that every cause compete with
      * each other. > Stochasticity and competition within predation process. >
