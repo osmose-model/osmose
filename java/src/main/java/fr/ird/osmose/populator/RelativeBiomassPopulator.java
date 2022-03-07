@@ -82,6 +82,9 @@ public class RelativeBiomassPopulator extends AbstractPopulator {
 
     /** Age of the released schools. Dimensions = [nSpecies][nLenghts] */
     private int[][] ageDt;
+    
+    /** Number of released schools. Dimensions = [nSpecies][nLenghts] */
+    private int[][] nSchools;
 
     private int[] nSize;
 
@@ -191,6 +194,27 @@ public class RelativeBiomassPopulator extends AbstractPopulator {
             cpt++;
         }
         
+        // Init the number of schools for each species and each size class.
+        nSchools = new int[nSpecies][];
+        cpt = 0;
+        for (int iSpeciesFile : this.getFocalIndex()) {
+
+            double temp[] = cfg.getArrayDouble("population.initialization.nschool.sp" + iSpeciesFile);
+
+            if (temp.length != nSize[cpt]) {
+                String message = String.format("Parameter %s must contain %d values",
+                        "population.initialization.nschool.sp" + iSpeciesFile, nSize[cpt]);
+                error(message, new Exception());
+            }
+
+            nSchools[cpt] = new int[temp.length];
+            for (int k = 0; k < temp.length; k++) {
+                nSchools[cpt][k] = (int) temp[k];
+            }
+
+            cpt++;
+        }
+        
     }
 
     @Override
@@ -199,13 +223,13 @@ public class RelativeBiomassPopulator extends AbstractPopulator {
         int nSpecies = this.getNSpecies();
         for (int iSpecies = 0; iSpecies < nSpecies; iSpecies++) {
 
-            int nSchool = getConfiguration().getNSchool(iSpecies);
-
             for (int iLength = 0; iLength < nSize[iSpecies]; iLength++) {
 
                 double lengthMin = this.sizeMin[iSpecies][iLength];
                 double lengthMax = this.sizeMax[iSpecies][iLength];
                 int ageDt = this.ageDt[iSpecies][iLength];
+                //int nSchool = getConfiguration().getNSchool(iSpecies);
+                int nSchool = this.nSchools[iSpecies][iLength];
 
                 // Biomass in tons
                 double biomass = this.seedingBiomass[iSpecies] * this.biomassProportion[iSpecies][iLength];
