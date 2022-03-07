@@ -129,10 +129,12 @@ public class RelativeBiomassPopulator extends AbstractPopulator {
         sizeMin = new double[nSpecies][];
         sizeMax = new double[nSpecies][];
         cpt = 0;
-        for (int iSpeciesFiles : this.getFocalIndex()) {
+        for (int i : this.getFocalIndex()) {
             // Should be of size NClass + 1
-            double sizeTemp[] = cfg.getArrayDouble("population.initialization.size.sp" + iSpeciesFiles);
+            double sizeTemp[] = cfg.getArrayDouble("population.initialization.size.sp" + i);
             nSize[cpt] = sizeTemp.length - 1;
+            sizeMin[cpt] = new double[nSize[cpt]];
+            sizeMax[cpt] = new double[nSize[cpt]];
             for (int iClass = 0; iClass < nSize[cpt]; iClass++) {
                 sizeMin[cpt][iClass] = sizeTemp[iClass];
                 sizeMax[cpt][iClass] = sizeTemp[iClass + 1];
