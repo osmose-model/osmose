@@ -214,7 +214,7 @@ public class RelativeBiomassPopulator extends AbstractPopulator {
                 }
 
                 for (int s = 0; s < nSchool; s++) {
-                    School school0 = this.generateSchool(biomass / nSchool, lengthMin, lengthMax, ageDt, iSpecies);
+                    School school0 = this.generateSchool(biomass / (nSchool - s), lengthMin, lengthMax, ageDt, iSpecies);
                     getSchoolSet().add(school0);
                     biomass -= school0.getBiomass();
                 }
