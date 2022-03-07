@@ -182,13 +182,13 @@ public class RelativeBiomassPopulator extends AbstractPopulator {
                         "population.initialization.age.sp" + iSpeciesFile, nSize[cpt]);
                 error(message, new Exception());
             }
-            cpt++;
 
             ageDt[cpt] = new int[temp.length];
             for (int k = 0; k < temp.length; k++) {
                 ageDt[cpt][k] = (int) (temp[k] * getConfiguration().getNStepYear());
             }
 
+            cpt++;
         }
         
     }
