@@ -227,10 +227,12 @@ public class RelativeBiomassPopulator extends AbstractPopulator {
         // Configuration cfg = getConfiguration();
         Species species = getSpecies(iSpecies);
 
-        // Ramdom draft of length
-        double length = lengthMin + rand.nextDouble() * (lengthMax - lengthMin);
-        if (length == 0) {
+        // Ramdom draft of length, force eggSize if ageDt==0
+        double length;
+        if (ageDt == 0) {
             length = species.getEggSize();
+        } else {
+            length = lengthMin + rand.nextDouble() * (lengthMax - lengthMin);
         }
 
         // AbstractGrowth growth = growthProcess.getGrowth(iSpecies);
