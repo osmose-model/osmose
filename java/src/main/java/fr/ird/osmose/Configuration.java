@@ -568,7 +568,7 @@ public class Configuration extends OLogger {
                 .map(rgKey -> Integer.valueOf(rgKey.substring(rgKey.lastIndexOf(".sr") + 3)))
                 .collect(Collectors.toList()));
 
-        // Do some test in order to insure that surveys and output
+        // Do some test in order to ensure that surveys and output
         // regions have no duplicate indexes
         HashSet<Integer> total = new HashSet<>();
         total.addAll(rg);
