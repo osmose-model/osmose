@@ -60,21 +60,22 @@ readOsmoseFiles = function(path, type, bySpecies=FALSE, ext="csv", ...) {
   extFiles = allFiles[grepl(pattern = paste0(".", ext), x = allFiles)]
   
   # Read files 
-  if(isTRUE(bySpecies)){
+  if(isTRUE(bySpecies)) {
+    
     # Subset list of files
     files  = extFiles[grepl(pattern = paste0(type, "-"), x = extFiles)]
-    
     # Split path names by species 
     files  = .bySpecies(files = files)
-    
     # Read files
     output = lapply(files, .readFilesList, path = path, type = type, ...)
-  }else{
+    
+  } else {
+    
     # Subset list of files
     files  = extFiles[grepl(pattern = paste0(type, "_"), x = extFiles)]
-    
     # Read files
     output = .readFilesList(files = files, path = path, type = type, ...)
+    
   }
   
   # Define a class for output
