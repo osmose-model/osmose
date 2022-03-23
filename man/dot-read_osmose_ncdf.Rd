@@ -4,7 +4,7 @@
 \alias{.read_osmose_ncdf}
 \title{Function to read osmose netcdf files}
 \usage{
-.read_osmose_ncdf(files, path, ...)
+.read_osmose_ncdf(files, path, varid, ...)
 }
 \arguments{
 \item{files}{String of name of the file that will be read.}
