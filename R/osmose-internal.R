@@ -40,7 +40,7 @@
 # Parsing input files -----------------------------------------------------
 
 
-.getVersion = function(version){
+.getVersion = function(version) {
   
   if(length(version) > 1) stop("Only one 'version' value must be provided.")
   
@@ -212,7 +212,7 @@
 }
 
 
-.readFilesList = function(files, path, type, ...) {
+.readFilesList = function(files, path, type, varid=NA, ...) {
   output = tryCatch(
     switch(type,
            abundance       =  .read_1D(files=files, path=path, ...),
@@ -239,7 +239,7 @@
            
            # fisheries
            # temporal output reading
-           fisheriesOutput = .read_osmose_ncdf(files=files, path=path, ...),
+           yieldByFishery = .read_osmose_ncdf(files=files, path=path, varid=varid, ...),
            
            #bioen
            sizeMature = .read_1D(files=files, path=path, ...),
@@ -433,12 +433,12 @@
 #' @param path String of path of the file that will be read
 #' @param ... Extra arguments 
 #'
-.read_osmose_ncdf = function(files, path, ...) {
+.read_osmose_ncdf = function(files, path, varid, ...) {
   
   if(length(files)!=0) {
     
     nc = nc_open(file.path(path, files[1]))
-    x = ncvar_get(nc) # assumes only one variable in the file
+    x = ncvar_get(nc, varid=varid) # assumes only one variable in the file
     nc_close(nc)
     
     output = array(dim = c(dim(x), length(files)))
@@ -448,7 +448,7 @@
     if(length(files)>1) {
       for(i in seq_along(files[-1])) {
         nc = nc_open(file.path(path, files[i+1]))
-        x = ncvar_get(nc) # assumes only one variable in the file
+        x = ncvar_get(nc, varid=varid) # assumes only one variable in the file
         nc_close(nc)
         output[, , , i+1]= x
       }
@@ -554,13 +554,14 @@ osmose2R.v4r0 = function (path=NULL, species.names=NULL) {
                     abundanceByTL = readOsmoseFiles(path = path, type = "abundanceDistribByTL"),
                     
                     # Fisheries outputs
-                    yieldByFishery = readOsmoseFiles(path = path, type = "fisheriesOutput", ext="nc"),
+                    yieldByFishery = readOsmoseFiles(path = path, type = "yieldByFishery", varid="landings", ext="nc"),
                     yield = readOsmoseFiles(path = path, type = "yield"), 
                     yieldN = readOsmoseFiles(path = path, type = "yieldN"), 
                     yieldBySize = readOsmoseFiles(path = path, type = "yieldDistribBySize"),  
                     yieldNBySize = readOsmoseFiles(path = path, type = "yieldNDistribBySize"),  
                     yieldByAge = readOsmoseFiles(path = path, type = "yieldDistribByAge"),  
                     yieldNByAge = readOsmoseFiles(path = path, type = "yieldNDistribByAge"),  
+                    discards = readOsmoseFiles(path = path, type = "yieldByFishery", varid="discards", ext="nc"),
                     
                     # bioen variables
                     sizeMature = readOsmoseFiles(path = path, type = "sizeMature"),
