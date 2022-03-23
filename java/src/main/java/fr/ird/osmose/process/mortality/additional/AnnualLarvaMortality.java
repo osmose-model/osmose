@@ -96,4 +96,8 @@ public class AnnualLarvaMortality extends AbstractMortalitySpecies {
     public double getRate(School school) {
         return mortRate[getSimulation().getIndexTimeSimu()];
     }
+    
+    public double[] getRates() {
+        return mortRate;   
+    }
 }
