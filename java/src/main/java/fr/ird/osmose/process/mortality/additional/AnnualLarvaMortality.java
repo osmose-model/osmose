@@ -82,6 +82,7 @@ public class AnnualLarvaMortality extends AbstractMortalitySpecies {
         
         // reading season
         SeasonTimeSeries season = new SeasonTimeSeries("mortality.additional.larva.rate.seasonality", "sp" + getFileSpeciesIndex());
+        season.init();
         double[] seasonValues = season.getValues();
         
         // computing final mortality rate
