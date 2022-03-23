@@ -44,28 +44,54 @@ package fr.ird.osmose.process.mortality.additional;
 import fr.ird.osmose.School;
 import fr.ird.osmose.Species;
 import fr.ird.osmose.process.mortality.AbstractMortalitySpecies;
+import fr.ird.osmose.util.timeseries.ByRegimeTimeSeries;
+import fr.ird.osmose.util.timeseries.SeasonTimeSeries;
 
 /**
  * Constant larval mortality rate over time.
  *
  * @author P. Verley
  */
-public class ConstantLarvaMortality extends AbstractMortalitySpecies {
+public class AnnualLarvaMortality extends AbstractMortalitySpecies {
 
     // Larval mortality rate expressed in [time_step^-1]
-    private double Dlarva;
+    private double[] mortRate;
 
-    public ConstantLarvaMortality(int rank, Species species) {
+    public AnnualLarvaMortality(int rank, Species species) {
         super(rank, species);
     }
-    
+
     @Override
     public void init() {
-            Dlarva = getConfiguration().getDouble("mortality.additional.larva.rate.sp" + getFileSpeciesIndex());
+        
+        // reading base mortality rate
+        String keyShift = String.format("mortality.additional.larva.rate.shift.sp%d", getFileSpeciesIndex());
+        String keyVal = String.format("mortality.additional.larva.rate.sp%d", getFileSpeciesIndex());
+        ByRegimeTimeSeries mortRateSeries = new ByRegimeTimeSeries(keyShift, keyVal);
+        double[] mortRateBase = mortRateSeries.getValues();
+        
+        // reading multiplier
+        double multiplier;
+        if (getConfiguration().isNull("mortality.additional.larva.rate.multiplier.sp" + getFileSpeciesIndex())) {
+            multiplier = 1;
+        } else {
+            multiplier = getConfiguration()
+                    .getDouble("mortality.additional.larva.rate.multiplier.sp" + getFileSpeciesIndex());
+        }
+        
+        // reading season
+        SeasonTimeSeries season = new SeasonTimeSeries("mortality.additional.larva.rate.seasonality", "sp" + getFileSpeciesIndex());
+        double[] seasonValues = season.getValues();
+        
+        // computing final mortality rate
+        mortRate = new double[getConfiguration().getNStep()];
+        for(int i = 0; i < getConfiguration().getNStep(); i++) {
+            mortRate[i] = multiplier * mortRateBase[i] * seasonValues[i];   
+        }
     }
-    
+
     @Override
     public double getRate(School school) {
-        return Dlarva;
+        return mortRate[getSimulation().getIndexTimeSimu()];
     }
 }
