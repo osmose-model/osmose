@@ -68,6 +68,7 @@ public class AnnualAdditionalMortality extends AbstractMortalitySpecies {
         String keyShift = String.format("mortality.additional.rate.shift.sp%d", getFileSpeciesIndex());
         String keyVal = String.format("mortality.additional.rate.sp%d", getFileSpeciesIndex());
         ByRegimeTimeSeries mortRateSeries = new ByRegimeTimeSeries(keyShift, keyVal);
+        mortRateSeries.init();
         double[] mortRateBase = mortRateSeries.getValues();
 
         // reading multiplier
@@ -82,6 +83,7 @@ public class AnnualAdditionalMortality extends AbstractMortalitySpecies {
         // reading season
         SeasonTimeSeries season = new SeasonTimeSeries("mortality.additional.rate.seasonality",
                 "sp" + getFileSpeciesIndex());
+        season.init();
         double[] seasonValues = season.getValues();
 
         // computing final mortality rate
@@ -94,5 +96,9 @@ public class AnnualAdditionalMortality extends AbstractMortalitySpecies {
     @Override
     public double getRate(School school) {
         return mortRate[getSimulation().getIndexTimeSimu()];
+    }
+    
+    public double[] getRates() { 
+        return mortRate;   
     }
 }
