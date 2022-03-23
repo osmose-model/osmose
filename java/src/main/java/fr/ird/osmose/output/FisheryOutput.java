@@ -129,15 +129,15 @@ public class FisheryOutput extends SimulationLinker implements IOutput {
         timeVar.addAttribute(new Attribute("calendar", "360_day"));
         timeVar.addAttribute(new Attribute("description", "time ellapsed, in days, since the beginning of the simulation"));
 
-        biomassVar = nc.addVariable(null, "biomass", DataType.FLOAT, new ArrayList<>(Arrays.asList(timeDim, speciesDim, fisheriesDim)));
+        biomassVar = nc.addVariable(null, "landings", DataType.FLOAT, new ArrayList<>(Arrays.asList(timeDim, speciesDim, fisheriesDim)));
         biomassVar.addAttribute(new Attribute("units", "ton"));
-        biomassVar.addAttribute(new Attribute("description", "biomass, in tons, per species and per cell"));
+        biomassVar.addAttribute(new Attribute("description", "landings, in tons, by species and by fishery"));
         biomassVar.addAttribute(new Attribute("_FillValue", -99.f));
         biomassVar.addAttribute(new Attribute("species_names", attr));
         
         discardsVar = nc.addVariable(null, "discards", DataType.FLOAT, new ArrayList<>(Arrays.asList(timeDim, speciesDim, fisheriesDim)));
         discardsVar.addAttribute(new Attribute("units", "ton"));
-        discardsVar.addAttribute(new Attribute("description", "biomass, in tons, per species and per cell"));
+        discardsVar.addAttribute(new Attribute("description", "discards, in tons, by species and by fishery"));
         discardsVar.addAttribute(new Attribute("_FillValue", -99.f));
         discardsVar.addAttribute(new Attribute("species_names", attr));
 
@@ -239,7 +239,7 @@ public class FisheryOutput extends SimulationLinker implements IOutput {
         StringBuilder filename = new StringBuilder(path.getAbsolutePath());
         filename.append(File.separatorChar);
         filename.append(getConfiguration().getString("output.file.prefix"));
-        filename.append("_fisheryOutput_Simu");
+        filename.append("_yieldByFishery_Simu");
         filename.append(getRank());
         filename.append(".nc.part");
         return filename.toString();
