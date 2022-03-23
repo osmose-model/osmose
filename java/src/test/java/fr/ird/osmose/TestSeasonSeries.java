@@ -63,7 +63,8 @@ public class TestSeasonSeries {
         double[] actual = ts1.getValues();   
         double[] expected = new double[cfg.getNStep()];
         for(int i = 0; i < expected.length; i++) {
-            expected[i] = 1.0 / cfg.getNStepYear();
+            expected[i] = 1.0;
+            //expected[i] = 1.0 / cfg.getNStepYear();
         }
         
         assertArrayEquals(expected, actual);

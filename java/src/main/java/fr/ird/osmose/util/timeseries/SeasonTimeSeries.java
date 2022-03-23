@@ -36,7 +36,8 @@ public class SeasonTimeSeries extends OsmoseLinker {
             // if no values is provided, season is forced as a constant
             if (getConfiguration().isNull(keyVal)) {
                 for (int i = 0; i < nStep; i++) {
-                    values[i] = (1.0 / getConfiguration().getNStepYear());
+                    values[i] = 1.0;
+                    //values[i] = (1.0 / getConfiguration().getNStepYear());
                 }
             } else {
                 double[] tempValues = getConfiguration().getArrayDouble(keyVal);
