@@ -68,6 +68,7 @@ public class AnnualLarvaMortality extends AbstractMortalitySpecies {
         String keyShift = String.format("mortality.additional.larva.rate.shift.sp%d", getFileSpeciesIndex());
         String keyVal = String.format("mortality.additional.larva.rate.sp%d", getFileSpeciesIndex());
         ByRegimeTimeSeries mortRateSeries = new ByRegimeTimeSeries(keyShift, keyVal);
+        mortRateSeries.init();
         double[] mortRateBase = mortRateSeries.getValues();
         
         // reading multiplier
