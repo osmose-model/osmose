@@ -147,7 +147,14 @@ public class ResourceForcing extends OsmoseLinker {
             // check resource is properly defined in the NetCDF file
             String name = getConfiguration().getString("species.name.sp" + fileindex);
             String ncFile = getConfiguration().getFile("species.file.sp" + fileindex);
-            int ncPerYear = getConfiguration().getInt("species.biomass.nsteps.year.sp" + fileindex);
+            
+            int ncPerYear;
+            if (!getConfiguration().isNull("species.biomass.nsteps.year.sp" + fileindex)) {
+                ncPerYear = getConfiguration().getInt("species.biomass.nsteps.year.sp" + fileindex);
+            } else {
+                ncPerYear = getConfiguration().getInt("species.biomass.nsteps.year" + fileindex);
+            }
+
             if (!getConfiguration().isNull("species.file.caching.sp" + fileindex)) {
                 caching = ForcingFileCaching
                         .valueOf(getConfiguration().getString("species.file.caching.sp" + fileindex).toUpperCase());
