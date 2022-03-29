@@ -537,8 +537,7 @@ init_sofia = function(input, file=NULL, test=FALSE, ...) {
     
   }
   
-  opt = calibrar::calibrate(par=log(c(sim$R, sim$Fguess)), 
-                            fn = .simF, method = "L-BFGS-B")
+  opt = calibrate(par=log(c(sim$R, sim$Fguess)), fn = .simF, method = "L-BFGS-B")
   
   output = c(.simF(opt$par, value=TRUE),  opt=list(opt))
   
