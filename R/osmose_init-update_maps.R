@@ -22,7 +22,7 @@ update_maps = function(input, output, conf, sep = ",", na.strings = -99, test=FA
   smap = .getPar(mcon, "species")
   allsp = unique(unlist(smap))
 
-  rpath = R.utils::getRelativePath(output, relativeTo=dirname(conf))
+  rpath = getRelativePath(output, relativeTo=dirname(conf))
 
   out = NULL
   nmap = 0
