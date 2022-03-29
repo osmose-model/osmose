@@ -837,6 +837,7 @@ configureCalibration = function(L1) {
 
 .add_surveys = function(x, out, type) {
   if(is.null(x)) return(out)
+  if(length(x)==0) return(out)
   names(x) = paste(type, names(x), sep=".")
   for(i in seq_along(x)) class(x[[i]]) = c(sprintf("osmose.%s", type), class(x[[i]]))
   out = c(out, x)
