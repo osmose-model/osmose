@@ -29,3 +29,5 @@ cran-comments.md
 ^java/.vscode$
 ^osmose.Rcheck$
 ^RELEASE.md$
+^.vscode$
+^.*ipynb.*$
