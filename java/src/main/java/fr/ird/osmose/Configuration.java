@@ -1520,7 +1520,7 @@ public class Configuration extends OLogger {
         
         // Control of the NetCdf output version from a configuration file.
         // If not provided, NetCdf4 is used.
-        ncOutVersion = NetcdfFileWriter.Version.netcdf4;
+        ncOutVersion = NetcdfFileWriter.Version.netcdf3;
         if (!isNull("output.netcdf.format")) {
             String outputFormat = getString("output.netcdf.format");
             switch (outputFormat) {
