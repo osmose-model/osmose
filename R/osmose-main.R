@@ -119,7 +119,7 @@ run_osmose = function(input, parameters = NULL, output = NULL, log = "osmose.log
     # else, overwrites the Osmose output parameter
     if(.compareVersion(version, versionRef) < 0) {
       outDir = output
-    }else{
+    } else {
       # changes for version 4 or higher
       outDir = paste0("-Poutput.dir.path=", output)
     }
@@ -140,6 +140,10 @@ run_osmose = function(input, parameters = NULL, output = NULL, log = "osmose.log
   if(isTRUE(verbose)) message(sprintf("Running: %s", command))
   
   system2(java, args = args, stdout = stdout, stderr = stderr, wait = TRUE)
+  
+  conf = .readConfiguration(input)
+  prefix = .getPar(conf, "output.file.prefix")
+  write_osmose.osmose.configuration(conf, file = file.path(output, sprintf("%s-configuration.osm", prefix)))
   
   return(invisible(command))
 }
@@ -185,8 +189,10 @@ read_osmose = function(path = NULL, input = NULL, version = "4.3.2",
   # If both path and input are NULL, then show an error message
   if(is.null(path) & is.null(input)) stop("No output or configuration path has been provided.")
   
-  # If config is not NULL, then read ir
-  config = if(!is.null(input)) readOsmoseConfiguration(file = input, absolute = absolute) else NULL
+  # If config is not NULL, then read it
+  if(is.null(input)) input = file.path(path, dir(path, pattern="-configuration.osm$")) 
+  config = if(length(input)==1) suppressWarnings(.readConfiguration(file = input)) else NULL
+  class(config) = "osmose.configuration"
   
   # If path is NULL, just return config
   if(is.null(path)) return(config)
@@ -205,7 +211,7 @@ read_osmose = function(path = NULL, input = NULL, version = "4.3.2",
                   v3r0 = osmose2R.v3r0(path = path, species.names = species.names, ...),
                   v3r1 = osmose2R.v3r1(path = path, species.names = species.names, ...),
                   v3r2 = osmose2R.v3r2(path = path, species.names = species.names, ...),
-                  v4r0 = osmose2R.v4r0(path = path, species.names = species.names, ...),
+                  v4r0 = osmose2R.v4r0(path = path, species.names = species.names, conf=config, ...),
                   stop(sprintf("Incorrect osmose version %s", version)))
   
   # Add config info
