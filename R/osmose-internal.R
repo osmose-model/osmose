@@ -563,6 +563,11 @@ osmose2R.v4r0 = function (path=NULL, species.names=NULL) {
                     yieldNByAge = readOsmoseFiles(path = path, type = "yieldNDistribByAge"),  
                     discards = readOsmoseFiles(path = path, type = "yieldByFishery", varid="discards", ext="nc"),
                     
+                    # survey outputs
+                    surveyBiomass = readOsmoseFiles(path = path, type = "biomass", bySpecies = TRUE),  
+                    surveyAbundance = readOsmoseFiles(path = path, type = "abundance", bySpecies = TRUE),  
+                    surveyYield = readOsmoseFiles(path = path, type = "yield", bySpecies = TRUE),
+                    
                     # bioen variables
                     sizeMature = readOsmoseFiles(path = path, type = "sizeMature"),
                     ageMature = readOsmoseFiles(path = path, type = "ageMature"),
@@ -583,16 +588,20 @@ osmose2R.v4r0 = function (path=NULL, species.names=NULL) {
                     maintenanceBySize = readOsmoseFiles(path=path, type="meanMaintDistribBySize")
   )
   
-  if(!is.null(outputData$yieldByFishery)) {
-    # temporal
-    outputData$yield = aperm(apply(outputData$yieldByFishery, 2:4, sum, na.rm=TRUE), 
-                             perm = c(2,1,3))
-    rownames(outputData$yield) = seq_len(nrow(outputData$yield)) - 1
-    colnames(outputData$yield) = colnames(outputData$biomass)
-    
-    class(outputData$yield) = "osmose.yield"
-    # end of temporal
-  }
+  # if(!is.null(outputData$yieldByFishery)) {
+  #   # temporal
+  #   outputData$yield = aperm(apply(outputData$yieldByFishery, 2:4, sum, na.rm=TRUE), 
+  #                            perm = c(2,1,3))
+  #   rownames(outputData$yield) = seq_len(nrow(outputData$yield)) - 1
+  #   colnames(outputData$yield) = colnames(outputData$biomass)
+  #   
+  #   class(outputData$yield) = "osmose.yield"
+  #   # end of temporal
+  # }
+  
+  outputData = .add_surveys(x=outputData$surveyBiomass, out=outputData, type="biomass")
+  outputData = .add_surveys(x=outputData$surveyAbundance, out=outputData, type="abundance")
+  outputData = .add_surveys(x=outputData$surveyYield, out=outputData, type="yield")
   
   model = list(version = "4",
                model = .getModelName(path = path),
@@ -823,4 +832,12 @@ configureCalibration = function(L1) {
   
   return(L2)
   
+}
+
+.add_surveys = function(x, out, type) {
+  if(is.null(x)) return(out)
+  names(x) = paste(type, names(x), sep=".")
+  for(i in seq_along(x)) class(x[[i]]) = c(sprintf("osmose.%s", type), class(x[[i]]))
+  out = c(out, x)
+  return(out)
 }
