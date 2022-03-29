@@ -29,6 +29,7 @@ vignettes/*.pdf
 
 inst/extdata/Rplots.pdf
 inst/extdata/plot_test.R
+**/osmose-Ex*
 
 inst/extdata/eec/make_netcdf_mask.R
 *.swp
