@@ -44,6 +44,8 @@ NULL
 NULL
 #' @importFrom utils read.csv read.table write.table tail write.csv head packageVersion read.csv2 type.convert
 NULL
+#' @importFrom R.utils getRelativePath
+NULL
 #' @importFrom rlist list.merge
 NULL
 #' @importFrom stringr str_split str_trim str_sub
@@ -59,4 +61,6 @@ NULL
 #' @importFrom stats predict approx splinefun weighted.mean
 NULL
 #' @importFrom fields image.plot tim.colors
+NULL
+#' @importFrom calibrar calibrate
 NULL
