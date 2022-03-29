@@ -52,6 +52,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import ucar.ma2.ArrayFloat;
 import ucar.ma2.ArrayInt;
+import ucar.ma2.DataType;
 import ucar.ma2.InvalidRangeException;
 import ucar.nc2.Dimension;
 import ucar.nc2.Variable;
@@ -117,6 +118,8 @@ public abstract class AbstractDistribOutput_Netcdf extends AbstractOutput_Netcdf
 
         Dimension speciesDim = getNc().addDimension(null, "species", getNSpecies());
         Dimension classDim = getNc().addDimension(null, this.getDisName(), this.distrib.getNClass());
+        Variable species = getNc().addVariable(null, "species", DataType.INT, "species");
+        Variable classVar = getNc().addVariable(null, this.getDisName(), DataType.FLOAT, this.getDisName());
         
         this.createSpeciesAttr();
         

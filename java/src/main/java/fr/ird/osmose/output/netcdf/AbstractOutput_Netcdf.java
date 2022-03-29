@@ -273,6 +273,7 @@ abstract public class AbstractOutput_Netcdf extends SimulationLinker implements 
     void init_nc_dims_coords() {
 
         Dimension speciesDim = nc.addDimension(null, "species", getNSpecies());
+        Variable species = nc.addVariable(null, "species", DataType.INT, "species");
         this.createSpeciesAttr();
         outDims = new ArrayList<>();
         outDims.add(timeDim);
