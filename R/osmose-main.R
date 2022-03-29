@@ -94,6 +94,7 @@ run_osmose = function(input, parameters = NULL, output = NULL, log = "osmose.log
     } else {
        osmose_name = sprintf("osmose_%s-jar-with-dependencies.jar", package_version)
        osmose = shQuote(system.file("java", osmose_name, package = "osmose"))
+       version = package_version
     }
   }
   
