@@ -598,7 +598,7 @@ osmose2R.v4r0 = function (path=NULL, species.names=NULL, conf=NULL, ...) {
     names(outputData$yieldByFishery) = nm
     # end of temporal
   }
-  
+
   outputData = .add_surveys(x=outputData$surveyBiomass, out=outputData, type="biomass")
   outputData = .add_surveys(x=outputData$surveyAbundance, out=outputData, type="abundance")
   outputData = .add_surveys(x=outputData$surveyYield, out=outputData, type="yield")
@@ -837,6 +837,7 @@ configureCalibration = function(L1) {
 
 .add_surveys = function(x, out, type) {
   if(is.null(x)) return(out)
+  if(length(x) == 0) return(out)
   names(x) = paste(type, names(x), sep=".")
   for(i in seq_along(x)) class(x[[i]]) = c(sprintf("osmose.%s", type), class(x[[i]]))
   out = c(out, x)
@@ -865,4 +866,3 @@ configureCalibration = function(L1) {
   for(i in seq_along(out)) dimnames(out[[i]]) = nm
   return(out)
 }
-
