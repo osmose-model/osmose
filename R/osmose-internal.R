@@ -49,7 +49,7 @@
   version = suppressWarnings(as.numeric(version))
   
   # Check if version has a valid form
-  if(any(is.na(version)) | length(version) > 3 | any(version < 0, na.rm = TRUE)){
+  if(any(is.na(version)) | length(version) > 3 | any(version < 0, na.rm = TRUE)) {
     stop("Version must be of the form X, X.Y or X.Y.Z")
   }
   
@@ -523,7 +523,7 @@
 #
 # @return A list of list containing the output functions
 #
-osmose2R.v4r0 = function (path=NULL, species.names=NULL) {
+osmose2R.v4r0 = function (path=NULL, species.names=NULL, conf=NULL, ...) {
   
   # Output data
   outputData = list(biomass = readOsmoseFiles(path = path, type = "biomass"),  
@@ -588,20 +588,21 @@ osmose2R.v4r0 = function (path=NULL, species.names=NULL) {
                     maintenanceBySize = readOsmoseFiles(path=path, type="meanMaintDistribBySize")
   )
   
-  # if(!is.null(outputData$yieldByFishery)) {
-  #   # temporal
-  #   outputData$yield = aperm(apply(outputData$yieldByFishery, 2:4, sum, na.rm=TRUE), 
-  #                            perm = c(2,1,3))
-  #   rownames(outputData$yield) = seq_len(nrow(outputData$yield)) - 1
-  #   colnames(outputData$yield) = colnames(outputData$biomass)
-  #   
-  #   class(outputData$yield) = "osmose.yield"
-  #   # end of temporal
-  # }
+  if(!is.null(outputData$yieldByFishery)) {
+    # temporal
+    dmn = dimnames(outputData$biomass)
+    rf = .getPar(conf, "output.recordfrequency.ndt")
+    outputData$yieldByFishery = .reshapeFishery(outputData$yieldByFishery, nm=dmn, rf=rf)
+    nm = sprintf("fishery%d", seq_along(outputData$yieldByFishery) - 1)
+    if(!is.null(conf)) nm = unlist(.getPar(conf, "fisheries.name"))
+    names(outputData$yieldByFishery) = nm
+    # end of temporal
+  }
   
   outputData = .add_surveys(x=outputData$surveyBiomass, out=outputData, type="biomass")
   outputData = .add_surveys(x=outputData$surveyAbundance, out=outputData, type="abundance")
   outputData = .add_surveys(x=outputData$surveyYield, out=outputData, type="yield")
+  outputData = .add_surveys(x=outputData$yieldByFishery, out=outputData, type="yield")
   
   model = list(version = "4",
                model = .getModelName(path = path),
@@ -841,3 +842,27 @@ configureCalibration = function(L1) {
   out = c(out, x)
   return(out)
 }
+
+.reshapeFishery = function(x, nm, rf) {
+  
+  if(is.null(x)) return(x)
+  
+  .agg = function(x, rf) {
+    ind = rep(seq_len(nrow(x)), each=rf, length.out=nrow(x))
+    xy = apply(x, 2:3, FUN=rowsum, group=ind)
+    return(xy)
+  }
+  
+  out = lapply(1:dim(x)[1], FUN = function(i, x) x[i,,,], x=x)
+  .addRep = function(x) {
+    if(length(dim(x))==2) dim(x) = c(dim(x), 1)
+    return(x)
+  }
+  out = lapply(out, FUN=.addRep)
+  out = lapply(out, FUN=aperm, perm=c(2,1,3))
+  out = lapply(out, FUN=.agg, rf=rf)
+  
+  for(i in seq_along(out)) dimnames(out[[i]]) = nm
+  return(out)
+}
+
