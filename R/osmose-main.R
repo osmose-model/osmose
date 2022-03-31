@@ -145,7 +145,7 @@ run_osmose = function(input, parameters = NULL, output = NULL, log = "osmose.log
   prefix = .getPar(conf, "output.file.prefix")
   if(is.null(prefix)) prefix = "osmose"
   write_osmose.osmose.configuration(conf, file = file.path(output, sprintf("%s-configuration.osm", prefix)))
-  
+
   return(invisible(command))
 }
 
@@ -193,7 +193,7 @@ read_osmose = function(path = NULL, input = NULL, version = "4.3.2",
   # If config is not NULL, then read it
   if(is.null(input)) input = file.path(path, dir(path, pattern="-configuration.osm$")) 
   config = if(length(input)==1) suppressWarnings(.readConfiguration(file = input)) else NULL
-  class(config) = "osmose.configuration"
+  if(!is.null(config)) class(config) = "osmose.configuration"
   
   # If path is NULL, just return config
   if(is.null(path)) return(config)
