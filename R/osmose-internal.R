@@ -238,7 +238,6 @@
            mortalityRate             = .read_MortStage(files=files, path=path, ...),
            
            # fisheries
-           # temporal output reading
            yieldByFishery = .read_osmose_ncdf(files=files, path=path, varid=varid, ...),
            
            #bioen
@@ -439,6 +438,12 @@
     
     nc = nc_open(file.path(path, files[1]))
     x = ncvar_get(nc, varid=varid) # assumes only one variable in the file
+    att = ncatt_get(nc, varid, attname="species_names")
+    if(att$hasatt) {
+      species_names = att$value
+      species_names = unlist(strsplit(species_names, split=", "))
+    } else species_names = NULL
+    
     nc_close(nc)
     
     output = array(dim = c(dim(x), length(files)))
@@ -457,6 +462,8 @@
   } else {
     output = NULL
   }
+
+  if(!is.null(species_names)) attr(output, which="species_names") = species_names
   
   return(output)
 }
@@ -847,6 +854,8 @@ configureCalibration = function(L1) {
 .reshapeFishery = function(x, nm, rf) {
   
   if(is.null(x)) return(x)
+
+  nm = attr(x, "species_names")
   
   .agg = function(x, rf) {
     ind = rep(seq_len(nrow(x)), each=rf, length.out=nrow(x))
@@ -863,7 +872,10 @@ configureCalibration = function(L1) {
   out = lapply(out, FUN=aperm, perm=c(2,1,3))
   out = lapply(out, FUN=.agg, rf=rf)
   
-  for(i in seq_along(out)) dimnames(out[[i]]) = nm
+  # if(!is.null(species_names)) {
+  #   for(i in seq_along(out)) dimnames(out[[i]][[2]]) = nm
+  # }
+  
   return(out)
 }
 
