@@ -112,10 +112,14 @@ run_osmose = function(input, parameters = NULL, output = NULL, log = "osmose.log
   version = .getVersion(version)
   versionRef = .getVersion("3.4")
   
+  conf = read_osmose(input = input)
+  
   if(is.null(output)){
     # If output is NULL, file output path is used.
     outDir = ""
     output = .getPar(conf, "output.dir.path")
+    input_dir = dirname(input)
+    output = file.path(input_dir, output)
   }else{
     # else, overwrites the Osmose output parameter
     if(.compareVersion(version, versionRef) < 0) {
@@ -141,8 +145,7 @@ run_osmose = function(input, parameters = NULL, output = NULL, log = "osmose.log
   if(isTRUE(verbose)) message(sprintf("Running: %s", command))
   
   system2(java, args = args, stdout = stdout, stderr = stderr, wait = TRUE)
-  
-  conf = read_osmose(input = input)
+
   prefix = .getPar(conf, "output.file.prefix")
   if(is.null(prefix)) prefix = "osmose"
   write_osmose.osmose.configuration(conf, file = file.path(output, sprintf("%s-configuration.osm", prefix)))
