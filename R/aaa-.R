@@ -48,7 +48,7 @@ NULL
 NULL
 #' @importFrom rlist list.merge
 NULL
-#' @importFrom stringr str_split str_trim str_sub
+#' @importFrom stringr str_split str_trim str_sub str_locate
 NULL
 #' @importFrom rmarkdown render
 NULL
