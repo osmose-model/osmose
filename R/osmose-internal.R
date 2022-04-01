@@ -434,6 +434,8 @@
 #'
 .read_osmose_ncdf = function(files, path, varid, ...) {
   
+  species_names = NULL
+  
   if(length(files)!=0) {
     
     nc = nc_open(file.path(path, files[1]))
