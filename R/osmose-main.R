@@ -115,6 +115,7 @@ run_osmose = function(input, parameters = NULL, output = NULL, log = "osmose.log
   if(is.null(output)){
     # If output is NULL, file output path is used.
     outDir = ""
+    output = .getPar(conf, "output.dir.path")
   }else{
     # else, overwrites the Osmose output parameter
     if(.compareVersion(version, versionRef) < 0) {
