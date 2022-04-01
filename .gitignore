@@ -41,7 +41,7 @@ inst/doc
 /vignettes/plot_method_cache
 /vignettes/create_run_read_cache
 
-target
+java/target
 **sh
 **.html
 build
