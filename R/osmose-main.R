@@ -195,8 +195,13 @@ read_osmose = function(path = NULL, input = NULL, version = "4.3.2",
   if(is.null(path) & is.null(input)) stop("No output or configuration path has been provided.")
   
   # If config is not NULL, then read it
-  if(is.null(input)) input = file.path(path, dir(path, pattern="-configuration.osm$")) 
-  config = if(length(input)==1) suppressWarnings(.readConfiguration(file = input)) else NULL
+  recursive = TRUE
+  if(is.null(input)) {
+    input = file.path(path, dir(path, pattern="-configuration.osm$"))
+    recursive = FALSE
+  }  
+  if(length(input)>1) stop("Only one 'input' file must be provided.")
+  config = if(length(input)==1) suppressWarnings(.readConfiguration(file = input, recursive=recursive)) else NULL
   if(!is.null(config)) class(config) = "osmose.configuration"
   
   # If path is NULL, just return config

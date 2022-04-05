@@ -3,7 +3,7 @@
 # Main --------------------------------------------------------------------
 
 #' @export
-.readConfiguration = function(file, usePath=TRUE, ...) {
+.readConfiguration = function(file, usePath=TRUE, recursive=TRUE, ...) {
   
   if(!is.null(attr(file, "path"))) file = c(file.path(attr(file, "path"), file))
   if(!file.exists(file)) {
@@ -84,7 +84,7 @@
   
   
   ii = grep(names(values), pattern="osmose.configuration")
-  if(length(ii) == 0) return(values)
+  if(length(ii) == 0 | !isTRUE(recursive)) return(values)
   
   cpath = NULL
   
