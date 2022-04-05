@@ -88,18 +88,21 @@
   
   cpath = NULL
   
+  ovalues = values
+  
   while(length(ii) > 0) {
     
-    if(!file.exists(values[[ii[1]]])) 
-      stop(sprintf("Configuration file '%s = %s not found'.", names(values)[ii[1]] ,values[[ii[1]]]))
-    values = append(values, .readConfiguration(values[[ii[1]]]), ii[1])
+    if(!file.exists(ovalues[[ii[1]]])) 
+      stop(sprintf("Configuration file '%s = %s not found'.", names(ovalues)[ii[1]], ovalues[[ii[1]]]))
+    
+    values = append(values, .readConfiguration(ovalues[[ii[1]]]), ii[1])
     cpath = c(cpath, values[ii[1]])
-    values = values[-ii[1]]
+    # values = values[-ii[1]]
     ii = ii[-1]
     # ii = grep(names(values), pattern="osmose.configuration")
   }
   
-  values = c(values, cpath)
+  # values = c(values, cpath)
   
   return(values)
 }
