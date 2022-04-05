@@ -90,6 +90,8 @@
   
   while(length(ii) > 0) {
     
+    if(!file.exists(values[[ii[1]]])) 
+      stop(sprintf("Configuration file '%s = %s not found'.", names(values)[ii[1]] ,values[[ii[1]]]))
     values = append(values, .readConfiguration(values[[ii[1]]]), ii[1])
     cpath = c(cpath, values[ii[1]])
     values = values[-ii[1]]
