@@ -96,7 +96,7 @@
     ifile = file.path(attr(ifile, "path"), ifile)
     
     if(!file.exists(ifile)) 
-      stop(sprintf("Configuration file '%s = %s not found'.", names(ovalues)[ii[1]], ovalues[[ii[1]]]))
+      stop(sprintf("Configuration file '%s = %s not found'. \n (%s not found.)", names(ovalues)[ii[1]], ovalues[[ii[1]]], ifile))
 
     values = append(values, .readConfiguration(ifile), ii[1])
     cpath = c(cpath, values[ii[1]])
