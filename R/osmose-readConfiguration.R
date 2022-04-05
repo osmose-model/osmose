@@ -93,7 +93,8 @@
     values = append(values, .readConfiguration(values[[ii[1]]]), ii[1])
     cpath = c(cpath, values[ii[1]])
     values = values[-ii[1]]
-    ii = grep(names(values), pattern="osmose.configuration")
+    ii = ii[-1]
+    # ii = grep(names(values), pattern="osmose.configuration")
   }
   
   values = c(values, cpath)
