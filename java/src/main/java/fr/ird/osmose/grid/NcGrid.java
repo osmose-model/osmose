@@ -198,6 +198,7 @@ public class NcGrid extends AbstractGrid {
                 double tmpLon = arrLon.getDouble(lonIndex);
                 grid[j][i] = new Cell((j * nx + i), i, j, (float) tmpLat, (float) tmpLon, land);
                 if (this.strSurf != null) {
+                    surfIndex.set(j, i);
                     double surf = arrLat.getDouble(surfIndex);
                     grid[j][i].setSurface((float) surf);
                 }
