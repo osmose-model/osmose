@@ -599,7 +599,7 @@ public class School extends AbstractSchool {
      *
      * @return the gonadic weight on the fish, in tonne.
      */
-    public float getGonadWeight() {
+    public double getGonadWeight() {
         return gonadWeight;
     }
 
@@ -895,6 +895,11 @@ public class School extends AbstractSchool {
     @Override
     public int getFirstFeedingAgeDt() {
         return this.species.getFirstFeedingAgeDt();
+    }
+
+    @Override
+    public boolean isSexuallyMature() {
+        return this.getSpecies().isSexuallyMature(this);
     }
 
 }
