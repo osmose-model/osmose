@@ -41,6 +41,10 @@
 
 package fr.ird.osmose.output;
 
+import java.util.List;
+
+import fr.ird.osmose.background.BackgroundSchool;
+
 /**
  *
  * @author nbarrier
@@ -73,7 +77,7 @@ public class SpeciesOutput extends AbstractOutput {
 
     @Override
     public void reset() {
-        int nSpecies = this.getNSpecies();
+        int nSpecies = this.getNSpecies() + this.getNBkgSpecies();
         value = new double[nSpecies][];
         for (int i = 0; i < nSpecies; i++) {
             value[i] = new double[getNOutputRegion()];
@@ -82,6 +86,8 @@ public class SpeciesOutput extends AbstractOutput {
 
     @Override
     public void update() {
+        
+        // recover the values for the focal schools
         int timeStep = this.getSimulation().getIndexTimeSimu();
         getSchoolSet().getAliveSchools().stream()
                 .forEach(school -> {
@@ -94,17 +100,31 @@ public class SpeciesOutput extends AbstractOutput {
                         irg++;
                     }
                 });
+                
+        // Init the biomass of background species by using the ResourceForcing class
+        for (List<BackgroundSchool> bkgSchoolList : this.getBkgSchoolSet().getValues()) { // loop over the cells
+            for (BackgroundSchool bkg : bkgSchoolList) { // loop over the resources
+                int irg = 0;
+                for (AbstractOutputRegion region : getOutputRegions()) {
+                    if (region.contains(timeStep, bkg)) {
+                        double select = region.getSelectivity(timeStep, bkg);
+                        value[bkg.getSpeciesIndex()][irg] += select * schoolVariable.getVariable(bkg);
+                    }
+                    irg++;
+                }
+            }
+        }
     }
 
     @Override
     public void write(float time) {
 
         double nsteps = getRecordFrequency();
-        int nSpecies = this.getNSpecies();
+        int nSpecies = this.getNSpecies() + this.getNBkgSpecies();
         
         // Loop over the output regions 
         for (int irg = 0; irg < getNOutputRegion(); irg++) {
-            double[] output = new double[this.getNSpecies()];
+            double[] output = new double[nSpecies];
             for (int i = 0; i < nSpecies; i++) {
                 output[i] = value[i][irg];
                 if (this.computeAverage) {
@@ -119,9 +139,9 @@ public class SpeciesOutput extends AbstractOutput {
 
     @Override
     final String[] getHeaders() {
-        String[] species = new String[getNSpecies()];
-        for (int cpt = 0; cpt < getNSpecies(); cpt++) {
-            species[cpt] = getSpecies(cpt).getName();
+        String[] species = new String[getNSpecies() + getNBkgSpecies()];
+        for (int cpt = 0; cpt < getNSpecies() + getNBkgSpecies(); cpt++) {
+            species[cpt] = getISpecies(cpt).getName();
         }
         return species;
     }
