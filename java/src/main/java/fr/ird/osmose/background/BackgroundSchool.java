@@ -233,7 +233,7 @@ public class BackgroundSchool extends AbstractSchool {
     }
 
     @Override
-    public double getGonadWeight() {
+    public float getGonadWeight() {
         // TODO Auto-generated method stub
         return 0;
     }

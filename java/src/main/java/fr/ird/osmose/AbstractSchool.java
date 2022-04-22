@@ -127,7 +127,7 @@ public abstract class AbstractSchool extends GridPoint implements IAggregation {
     public abstract double getENet();
     public abstract double getKappa();
     public abstract double getIngestion();
-    public abstract double getGonadWeight();
+    public abstract float getGonadWeight();
     public abstract double getIngestionTot();
     public abstract double getAgeMat();
     public abstract boolean isSexuallyMature();

@@ -599,7 +599,7 @@ public class School extends AbstractSchool {
      *
      * @return the gonadic weight on the fish, in tonne.
      */
-    public double getGonadWeight() {
+    public float getGonadWeight() {
         return gonadWeight;
     }
 
