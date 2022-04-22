@@ -545,7 +545,7 @@ public class OutputManager extends SimulationLinker {
         // Debugging outputs
         if (getConfiguration().getBoolean("output.ssb.enabled", NO_WARNING)) {
             outputs.add(new SpeciesOutput(rank, null, "SSB", "Spawning Stock Biomass (tonne)",
-                    school -> school.getSpecies().isSexuallyMature(school) ? school.getInstantaneousBiomass() : 0.d));
+                    school -> school.isSexuallyMature() ? school.getInstantaneousBiomass() : 0.d));
         }
 
         if (getConfiguration().getBoolean("output.nschool.enabled", NO_WARNING)) {
