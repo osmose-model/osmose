@@ -224,7 +224,7 @@ public class AdditionalMortality extends AbstractMortality {
         if (scenarios.isEmpty()) {
             StringBuilder msg = new StringBuilder();
             msg.append("Set a Larva Additional Mortality scenario among ");
-            msg.append(Arrays.toString(Scenario.values()));
+            msg.append(Arrays.toString(ScenarioLarva.values()));
             error("No Larva Additional Mortality scenario has been defined for species " + fileSpeciesIndex, new NullPointerException(msg.toString()));
         }
 
