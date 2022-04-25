@@ -897,4 +897,9 @@ public class School extends AbstractSchool {
         return this.species.getFirstFeedingAgeDt();
     }
 
+    @Override
+    public boolean isSexuallyMature() {
+        return this.getSpecies().isSexuallyMature(this);
+    }
+
 }

@@ -122,7 +122,17 @@ public abstract class AbstractSchool extends GridPoint implements IAggregation {
     protected double[] fishedBiomass;
     
     protected double[] discardedBiomass;
-        
+    
+    public abstract double getEMaint();
+    public abstract double getENet();
+    public abstract double getKappa();
+    public abstract double getIngestion();
+    public abstract float getGonadWeight();
+    public abstract double getIngestionTot();
+    public abstract double getAgeMat();
+    public abstract boolean isSexuallyMature();
+    public abstract double getSizeMat();
+    
     @Override
     public void incrementNdead(MortalityCause cause, double nDead) {
         this.nDead[cause.index] += nDead;
