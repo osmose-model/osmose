@@ -292,9 +292,9 @@
            abundanceDistribByTL            = .read_2D(files=files, path=path, ...),
            
            # outputs for calibration of the Osmose model.
-           meanWeightDistribByAge = .read_2D(files=files, path=path),
-           meanWeightDistribBySize = .read_2D(files=files, path=path),
-           meanWeightDistribByWeight = .read_2D(files=files, path=path),
+           meanWeightDistribByAge = .read_2D(files=files, path=path, ...),
+           meanWeightDistribBySize = .read_2D(files=files, path=path, ...),
+           meanWeightDistribByWeight = .read_2D(files=files, path=path, ...),
       
            biomassDistribByWeight         = .read_2D(files=files, path=path, ...),     
            abundanceDistribByWeight         = .read_2D(files=files, path=path, ...),
