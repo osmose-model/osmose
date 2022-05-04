@@ -265,6 +265,8 @@ public class Configuration extends OLogger {
      * Species index for focal, background and resource indexes.
      */
     private int[] focalIndex, bkgIndex, rscIndex;
+    
+    private boolean isEconomyEnabled;
 
     private NetcdfFileWriter.Version ncOutVersion;
     
@@ -341,8 +343,11 @@ public class Configuration extends OLogger {
         String keybioen = "simulation.bioen.enabled";
         this.bioenEnabled = this.getBoolean(keybioen);
 
-        String key = "simulation.genetic.enabled";
-        this.geneticEnabled = this.getBoolean(key);
+        this.geneticEnabled = false;
+        if (this.bioenEnabled) {
+            String key = "simulation.genetic.enabled";
+            this.geneticEnabled = this.getBoolean(key);
+        }
 
         String keyincom = "simulation.incoming.flux.enabled";
         this.incomingFluxEnabled = this.getBoolean(keyincom);
@@ -481,7 +486,7 @@ public class Configuration extends OLogger {
         }
 
         // barrier.n: add number of background species
-        key = "simulation.nbackground";
+        String key = "simulation.nbackground";
         int nBackground_test = 0;
         if (canFind(key)) {
             nBackground_test = getInt(key);
@@ -512,7 +517,8 @@ public class Configuration extends OLogger {
 
         // Fisheries
         boolean fisheryEnabled = getBoolean("fisheries.enabled");
-        
+        this.isEconomyEnabled = getBoolean("economy.enabled");
+
         // true if fishingMortality is enabled or not (v3 or v4)
         if (!isNull("simulation.fishing.mortality.enabled")) {
             fishingMortalityEnabled = getBoolean("simulation.fishing.mortality.enabled");
@@ -540,7 +546,6 @@ public class Configuration extends OLogger {
             }
         }
         
-
         // Output regions
         outputRegions = new ArrayList<>();
         // special case region0, the whole domain
@@ -618,6 +623,10 @@ public class Configuration extends OLogger {
     
     public boolean isFishingMortalityEnabled() { 
         return this.fishingMortalityEnabled;   
+    }
+
+    public boolean isEconomyEnabled() {
+        return isEconomyEnabled;
     }
 
     /**

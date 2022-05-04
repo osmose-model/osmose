@@ -43,10 +43,17 @@ package fr.ird.osmose.stage;
 
 import fr.ird.osmose.util.OsmoseLinker;
 /**
+ * 
+ * If no thresholds are provided, then assume one single class, of index 0.
+ * If N thresholds are provided, assumes that N + 1 classes are provided.
+ * The threshold provide the upper limit of the threshold, so that a school belongs
+ * to size class s if:
+ * 
+ * T(s - 1) <= V < T(s)
  *
  * @author pverley
  */
-abstract class AbstractStage extends OsmoseLinker implements IStage {
+public abstract class AbstractStage extends OsmoseLinker implements IStage {
 
     private float[][] thresholds;
 
@@ -74,9 +81,10 @@ abstract class AbstractStage extends OsmoseLinker implements IStage {
             if (nStage > 1) {
                 thresholds[cpt] = getConfiguration().getArrayFloat(key + i);
             } else {
+                // if no threshold, init an empty array of length 0, to insure that
+                // stage index is always 0.
                 thresholds[cpt] = new float[0];
             }
-            
             cpt++;
             
         }

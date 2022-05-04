@@ -50,7 +50,9 @@ import fr.ird.osmose.process.mortality.fishery.FisheryPeriod;
 import fr.ird.osmose.process.mortality.fishery.FisherySeasonality;
 import fr.ird.osmose.process.mortality.fishery.FisheryMapSet;
 import fr.ird.osmose.process.mortality.fishery.FisherySelectivity;
+import fr.ird.osmose.stage.SizeStage;
 import fr.ird.osmose.util.Matrix;
+
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.PrintWriter;
@@ -74,7 +76,10 @@ public class FishingGear extends AbstractMortality {
     private FisheryBase fishingBase;
     private FisheryPeriod fishingPeriod;
     private FisherySeasonality fishingSeasonality;
-
+    
+    // If economy is on, define a size stage array for fisheries.
+    private boolean isEconomyEnabled;
+    
     /**
      * Fishery map set.
      */
@@ -95,17 +100,20 @@ public class FishingGear extends AbstractMortality {
     public void init() {
 
         Configuration cfg = Osmose.getInstance().getConfiguration();
+        
         int nspecies = cfg.getNSpecies();
         int nbackground = cfg.getNBkgSpecies();
-
+        this.isEconomyEnabled = cfg.isEconomyEnabled();
+        
         catchability = new double[nspecies + nbackground];
         discards = new double[nspecies + nbackground];
 
         // set-up the name of the fishery
         name = cfg.getString("fisheries.name.fsh" + fileFisheryIndex);
 
+        // True if fishing mortality components are to be saved for inspection
         checkFisheryEnabled = cfg.getBoolean("fisheries.check.enabled");
-
+        
         // Initialize the time varying array
         fishingBase = new FisheryBase(fileFisheryIndex);
         fishingBase.init();
@@ -303,5 +311,12 @@ public class FishingGear extends AbstractMortality {
             discards[cpt] = matrix.getValue(speciesIndex, fishIndex);
         }
     }
-
+    
+    /** Returns the gear selectivity. 
+     * Used to compute available biomass.
+     */
+    public double getSelectivity(int index, AbstractSchool school) {
+        return selectivity.getSelectivity(index, school);
+    }
+    
 }

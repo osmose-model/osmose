@@ -1,0 +1,4 @@
+{
+    "java.autobuild.enabled": false,
+    "java.configuration.updateBuildConfiguration": "automatic"
+}

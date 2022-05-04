@@ -42,6 +42,7 @@
 package fr.ird.osmose;
 
 import fr.ird.osmose.background.BackgroundSchoolSet;
+import fr.ird.osmose.eco.EconomicModule;
 import fr.ird.osmose.output.SchoolSetSnapshot;
 import fr.ird.osmose.populator.PopulatingProcess;
 import fr.ird.osmose.process.genet.Trait;
@@ -80,6 +81,9 @@ public class Simulation extends OsmoseLinker {
      * The rank of the simulation. (among replicated simulations)
      */
     private final int rank;
+    
+    private EconomicModule economicModule;
+    
     /**
      * The set of schools.
      */
@@ -92,6 +96,7 @@ public class Simulation extends OsmoseLinker {
      * forcings for bkg species. Indexes from [nbkg, nbkg + nrsc - 1] are for LTL.
      */
     private ResourceForcing[] resourceForcing;
+
     /**
      * Current year of the simulation.
      */
@@ -219,26 +224,26 @@ public class Simulation extends OsmoseLinker {
                 error("Failed to open restart file " + ncfile, ex);
             }
         }
- 
+
         if (this.getConfiguration().isGeneticEnabled()) {
 
-            // List all the trait mean parameters 
+            // List all the trait mean parameters
             List<String> genet_keys = this.getConfiguration().findKeys("*.trait.mean.sp*");
-            
+
             // Remove the "sp#"
             List<String> output_keys = new ArrayList<>();
-            for(String strOut : genet_keys) { 
+            for (String strOut : genet_keys) {
                 String prefix = strOut.substring(0, strOut.indexOf(".sp"));
-                output_keys.add(prefix);    
+                output_keys.add(prefix);
             }
-            
-            // Removes duplicates.    
+
+            // Removes duplicates.
             List<String> prefix_keys = output_keys.stream().distinct().collect(Collectors.toList());
-        
+
             // Init the arrays
             this.nEvolvingTrait = prefix_keys.size();
             this.evolvingTrait = new ArrayList<>();
-            
+
             for (int p = 0; p < this.nEvolvingTrait; p++) {
                 String key = prefix_keys.get(p);
                 // recovers the trait prefix
@@ -247,6 +252,11 @@ public class Simulation extends OsmoseLinker {
                 trait.init();
                 this.evolvingTrait.add(trait);
             }
+        }
+        
+        if(getConfiguration().isEconomyEnabled()) { 
+            economicModule = new EconomicModule(rank);
+            economicModule.init();
         }
 
         // Init resource forcing
@@ -467,6 +477,10 @@ public class Simulation extends OsmoseLinker {
 
     public BackgroundSchoolSet getBkgSchoolSet() {
         return this.backSchoolSet;
+    }
+    
+    public EconomicModule getEconomicModule() {
+        return this.economicModule;   
     }
 
 }

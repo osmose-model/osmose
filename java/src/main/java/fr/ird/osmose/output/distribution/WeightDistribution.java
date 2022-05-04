@@ -39,31 +39,43 @@
  * 
  */
 
-package fr.ird.osmose.stage;
+package fr.ird.osmose.output.distribution;
 
 import fr.ird.osmose.IMarineOrganism;
 
 /**
  *
- * @author P.Verley (philippe.verley@ird.fr)
- * @version 3.0 2013/09/01
+ * @author pverley
  */
-public class SizeStage extends AbstractStage {
+public class WeightDistribution extends AbstractDistribution {
+    
+    public WeightDistribution(int indexSpecies) {
+        super(DistributionType.WEIGHT, indexSpecies);
+    }
 
-    public SizeStage(String key) {
-        super(key);
+    public WeightDistribution() {
+        super(DistributionType.WEIGHT);
     }
 
     @Override
-    public int getStage(IMarineOrganism school) {
-        int stage = 0;
-        int iSpec = school.getSpeciesIndex();
-        for (float threshold : this.getThresholds(iSpec)) {
-            if (school.getLength() < threshold) {
-                break;
-            } 
-            stage++;
-        }
-        return stage;
+    float getDefaultMin() {
+        return 0.f;
+    }
+
+    @Override
+    float getDefaultMax() {
+        return 10.f;
+    }
+
+    @Override
+    float getDefaultIncr() {
+        return 0.25f;
+    }
+
+    /** Returns the weight in kg. Weight is computed in tons,
+     * it is converted back in kg here. */
+    @Override
+    float getValue(IMarineOrganism school) {
+        return school.getWeight() * 1e3f;
     }
 }

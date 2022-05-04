@@ -41,6 +41,8 @@
 
 package fr.ird.osmose;
 
+import fr.ird.osmose.util.timeseries.ByClassTimeSeries;
+
 /**
  * This class represents a species. It is characterised by the following
  * variables:
@@ -120,6 +122,8 @@ public class Species implements ISpecies {
     
     private double beta_bioen;
 
+    // private ByClassTimeSeries prices;
+    
     //////////////
     // Constructor
     //////////////
@@ -141,6 +145,13 @@ public class Species implements ISpecies {
         name = cfg.getString("species.name.sp" + fileIndex);
         c = cfg.getFloat("species.length2weight.condition.factor.sp" + fileIndex);
         bPower = cfg.getFloat("species.length2weight.allometric.power.sp" + fileIndex);
+        
+        // If the economic module is on, then we read the file containing the prices for different
+        // size classes.
+        // if(cfg.isEconomyEnabled()) { 
+        //     prices = new ByClassTimeSeries();
+        //     prices.read(cfg.getFile("species.prices.file.sp" + fileIndex));
+        // }
 
         if (!cfg.isBioenEnabled()) {
 
@@ -319,10 +330,16 @@ public class Species implements ISpecies {
      * @param biomass
      * @return
      */
+
     /*
      * private boolean isVulnerable(double biomass) { double Bv = 0.d; double Sv =
      * 1.d; return (Math.random() > (1.d / (1.d + Math.exp(Sv * (Bv - biomass)))));
      * }
      */
+
+    // /* Returns the prices for the given species. */
+    // public ByClassTimeSeries getPrices() {
+    //     return prices;
+    // }
 
 }
