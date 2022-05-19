@@ -112,7 +112,7 @@ public class BackgroundMapSet extends OsmoseLinker {
 
     /**
      * Array of map indexes for every age class and simulation time step.
-     * int[lifeSpan][N_STEP_SIMU]
+     * int[nClass][N_STEP_SIMU]
      */
     protected int[][] indexMaps;
 
@@ -180,8 +180,8 @@ public class BackgroundMapSet extends OsmoseLinker {
         return mapFile[numMap];
     }
 
-    public int getIndexMap(int iAge, int iStepSimu) {
-        return indexMaps[iAge][iStepSimu];
+    public int getIndexMap(int iClass, int iStepSimu) {
+        return indexMaps[iClass][iStepSimu];
     }
 
     public void loadMaps() throws IOException, InvalidRangeException {
@@ -190,12 +190,12 @@ public class BackgroundMapSet extends OsmoseLinker {
 
         // Initialisation of the indexMaps array (valid for both NetCDF and CSV maps
         int nSteps = Math.max(getConfiguration().getNStep(), getConfiguration().getNStepYear());
-        int lifespan = getSpecies(iSpecies).getLifespanDt();
-        indexMaps = new int[lifespan][];
-        for (int iAge = 0; iAge < lifespan; iAge++) {
-            indexMaps[iAge] = new int[nSteps];
+        int nClass = getBkgSpecies(iSpecies).getNClass();
+        indexMaps = new int[nClass][];
+        for (int iClass = 0; iClass < nClass; iClass++) {
+            indexMaps[iClass] = new int[nSteps];
             for (int iStep = 0; iStep < nSteps; iStep++) {
-                indexMaps[iAge][iStep] = -1;
+                indexMaps[iClass][iStep] = -1;
             }
         }
 
@@ -263,9 +263,7 @@ public class BackgroundMapSet extends OsmoseLinker {
             /*
              * read age min and age max concerned by this map
              */
-            int ageMin = (int) Math.round(getConfiguration().getFloat(prefix + ".initialAge" + ".map" + imap) * getConfiguration().getNStepYear());
-            int ageMax = (int) Math.round(getConfiguration().getFloat(prefix + ".lastAge" + ".map" + imap) * getConfiguration().getNStepYear());
-            ageMax = Math.min(ageMax, getSpecies(iSpecies).getLifespanDt() - 1);
+            int iClass = (int) Math.round(getConfiguration().getFloat(prefix + ".class" + ".map" + imap) * getConfiguration().getNStepYear());
 
             /*
              * read the time steps over the year concerned by this map
@@ -283,13 +281,12 @@ public class BackgroundMapSet extends OsmoseLinker {
              * Assign number of maps to numMap array
              */
             int nStepYear = getConfiguration().getNStepYear();
-            for (int iAge = ageMin; iAge <= ageMax; iAge++) {
-                for (int iYear : mapYears) {
-                    for (int iSeason : mapSeason) {
-                        int iStep = iYear * nStepYear + iSeason;
-                        if (iStep < indexMaps[iAge].length) {
-                            indexMaps[iAge][iStep] = n;
-                        }
+
+            for (int iYear : mapYears) {
+                for (int iSeason : mapSeason) {
+                    int iStep = iYear * nStepYear + iSeason;
+                    if (iStep < indexMaps[iClass].length) {
+                        indexMaps[iClass][iStep] = n;
                     }
                 }
             }
@@ -434,7 +431,7 @@ public class BackgroundMapSet extends OsmoseLinker {
                 imap++;
             }
             String key = prefix + ".species" + ".map" + imap;
-            Species species = getSpecies(getConfiguration().getString(key));
+            BackgroundSpecies species = getBkgSpecies(getConfiguration().getString(key));
             if (null != species) {
                 if (species.getSpeciesIndex() == iSpecies) {
                     mapNumber.add(imap);
@@ -456,9 +453,7 @@ public class BackgroundMapSet extends OsmoseLinker {
             // Recovery of the number of time steps per year in the file
             int ncPerYear = getConfiguration().getInt(prefix + ".nsteps.year." + suffix + im);
 
-            int ageMin = (int) Math.round(getConfiguration().getDouble(prefix + ".initialAge." + suffix + im) * dt);
-            int ageMax = (int) Math.round(getConfiguration().getDouble(prefix + ".lastAge." + suffix + im) * dt);
-            ageMax = Math.min(ageMax, getSpecies(iSpecies).getLifespanDt() - 1);
+            int iClass = (int) Math.round(getConfiguration().getDouble(prefix + ".class." + suffix + im) * dt);
 
             ForcingFile forcingFile = new ForcingFile(varName, ncFilePattern, ncPerYear, 0, 1, ForcingFileCaching.ALL);
             forcingFile.init();
@@ -482,12 +477,10 @@ public class BackgroundMapSet extends OsmoseLinker {
                 // now we create the indexMaps by looping over all age classes and
                 // all time-steps.
                 // If nStepNc match the one for the current map,
-                for (int iAge = ageMin; iAge <= ageMax; iAge++) {
-                    for (int iStep = 0; iStep < getConfiguration().getNStep(); iStep++) {
-                        int fileNcStep = forcingFile.getNcStep(iStep);
-                        if(fileNcStep == iStepNc) {
-                            indexMaps[iAge][iStep] = iii;
-                        }
+                for (int iStep = 0; iStep < getConfiguration().getNStep(); iStep++) {
+                    int fileNcStep = forcingFile.getNcStep(iStep);
+                    if (fileNcStep == iStepNc) {
+                        indexMaps[iClass][iStep] = iii;
                     }
                 }
 
