@@ -922,4 +922,10 @@ public class School extends AbstractSchool {
         return this.getSpecies().isSexuallyMature(this);
     }
 
+    @Override
+    public int getClassIndex() {
+        error("Not implemented yet", new Exception());
+        return 0;
+    }
+
 }
