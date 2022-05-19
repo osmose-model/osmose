@@ -84,6 +84,27 @@ public class OsmoseLinker extends OLogger {
         }
     }
 
+    final public ISpecies getISpecies(String name) {
+        for(int i = 0; i < getNSpecies(); i++) {
+            if(name.compareTo(getSpecies(i).getName()) == 0) {
+                return getSpecies(i);
+            }
+        }
+        for(int i = 0; i < getNBkgSpecies(); i++) {
+            if(name.compareTo(getBkgSpecies(i).getName()) == 0) {
+                return getBkgSpecies(i);
+            }
+        }
+        for(int i = 0; i < getNRscSpecies(); i++) {
+            if(name.compareTo(getRscSpecies(i).getName()) == 0) {
+                return getRscSpecies(i);
+            }
+        }
+
+        return null;
+
+    }
+
     final public Species getSpecies(String name) {
         return getConfiguration().getSpecies(name);
     }
