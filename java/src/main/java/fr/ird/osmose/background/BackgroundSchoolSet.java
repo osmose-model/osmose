@@ -41,22 +41,19 @@
 
 package fr.ird.osmose.background;
 
-import fr.ird.osmose.Cell;
-import fr.ird.osmose.ISpecies;
-import fr.ird.osmose.process.mortality.MortalityCause;
-import fr.ird.osmose.util.OsmoseLinker;
-import fr.ird.osmose.util.filter.AliveSchoolFilter;
-import fr.ird.osmose.util.filter.FilteredSet;
-import fr.ird.osmose.util.filter.FilteredSets;
-import fr.ird.osmose.util.filter.OldSchoolFilter;
-import fr.ird.osmose.util.filter.OutSchoolFilter;
-import fr.ird.osmose.util.filter.PresentSchoolFilter;
-import fr.ird.osmose.util.filter.SpeciesFilter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+
+import fr.ird.osmose.Cell;
+import fr.ird.osmose.ISpecies;
+import fr.ird.osmose.util.OsmoseLinker;
+import fr.ird.osmose.util.filter.FilteredSet;
+import fr.ird.osmose.util.filter.FilteredSets;
+import fr.ird.osmose.util.filter.PresentSchoolFilter;
+import fr.ird.osmose.util.filter.SpeciesFilter;
 
 /**
  * This class is a set that contains all the school of the simulation. It
