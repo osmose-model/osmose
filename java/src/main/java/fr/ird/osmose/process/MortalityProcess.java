@@ -370,12 +370,11 @@ public class MortalityProcess extends AbstractProcess {
         }
 
         // Update resources biomass
-        int offset = this.getNBkgSpecies();
         for (List<Resource> resources : resourcesSet.values()) { // loop over the cells
             for (Resource resource : resources) { // loop over the resources
                 int iRsc = resource.getSpeciesIndex() - nSpecies - nBkg; // [0, nrsc - 1]
                 double accessibleBiom = getConfiguration().getResourceSpecies(iRsc).getAccessibility(iStepSimu)
-                        * getResourceForcing(iRsc + offset).getBiomass(resource.getCell());
+                        * getResourceForcing(iRsc).getBiomass(resource.getCell());
                 resource.setBiomass(accessibleBiom);
             }
         }

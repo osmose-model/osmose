@@ -308,23 +308,24 @@ public class Simulation extends OsmoseLinker {
      */
     private void initResourceForcing() {
 
-        int nTot = this.getNBkgSpecies() + this.getNRscSpecies();
+        // int nTot = this.getNBkgSpecies() + this.getNRscSpecies();
+        int nTot = this.getNRscSpecies();
         resourceForcing = new ResourceForcing[nTot];
 
         int resourceIndex = 0;
 
-        // Init resources for background species
-        for (int fileIndex : this.getConfiguration().getBackgroundIndex()) {
-            ResourceForcing resForcing = new ResourceForcing(fileIndex, resourceIndex);
-            try {
-                resForcing.init();
-            } catch (IOException ex) {
-                Logger.getLogger(Simulation.class.getName()).log(Level.SEVERE, null, ex);
-            }
-            resourceForcing[resourceIndex] = resForcing;
-            resourceIndex++;
-            // Name must contain only alphanumerical characters
-        }
+        // // Init resources for background species
+        // for (int fileIndex : this.getConfiguration().getBackgroundIndex()) {
+        //     ResourceForcing resForcing = new ResourceForcing(fileIndex, resourceIndex);
+        //     try {
+        //         resForcing.init();
+        //     } catch (IOException ex) {
+        //         Logger.getLogger(Simulation.class.getName()).log(Level.SEVERE, null, ex);
+        //     }
+        //     resourceForcing[resourceIndex] = resForcing;
+        //     resourceIndex++;
+        //     // Name must contain only alphanumerical characters
+        // }
 
         for (int fileIndex : this.getConfiguration().getResourceIndex()) {
             ResourceForcing resForcing = new ResourceForcing(fileIndex, resourceIndex);
