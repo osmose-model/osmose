@@ -205,6 +205,10 @@ public class BackgroundSchool extends AbstractSchool {
         return this.bkgSpecies.getSpeciesIndex();
     }
 
+    public BackgroundSpecies getSpecies() {
+        return this.bkgSpecies;
+    }
+
     @Override
     public int getFirstFeedingAgeDt() {
         return -1;
@@ -262,6 +266,10 @@ public class BackgroundSchool extends AbstractSchool {
     @Override
     public double getNEggs() {
         return 0;
+    }
+
+    public int getClassIndex() {
+        return this.getClassIndex();
     }
 
 }
