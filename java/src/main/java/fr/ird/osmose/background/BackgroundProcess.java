@@ -55,7 +55,7 @@ public class BackgroundProcess extends AbstractProcess {
 
             // Loop over all the size classes
             for (int iClass = 0; iClass < nClass; iClass++) {
-                if (mapDistribution[iSpecies].mapChange(iStepSimu, iClass)) {
+                if (!mapDistribution[iSpecies].mapIsUnchanged(iStepSimu, iClass)) {
                     // if the map change, the existing schools are killed and
                     // new schools are created
                     this.redistributeSchools(iSpecies, iClass);

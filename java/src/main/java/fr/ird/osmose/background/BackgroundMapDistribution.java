@@ -128,7 +128,7 @@ public class BackgroundMapDistribution extends OsmoseLinker {
      * cohort zero and first time-step of the simulation we can assert sameMap =
      * false;
      */
-    public boolean mapChange(int iStepSimu, int classIndex) {
+    public boolean mapIsUnchanged(int iStepSimu, int classIndex) {
 
         boolean sameMap = false;
         int indexMap = maps.getIndexMap(classIndex, iStepSimu);
@@ -155,7 +155,7 @@ public class BackgroundMapDistribution extends OsmoseLinker {
         int indexMap = maps.getIndexMap(school.getClassIndex(), iStepSimu);
         GridMap map = maps.getMap(indexMap);
 
-        boolean sameMap = this.mapChange(iStepSimu, school.getClassIndex());
+        boolean sameMap = this.mapIsUnchanged(iStepSimu, school.getClassIndex());
 
         // Move the school
         if (!sameMap || school.isUnlocated()) {
