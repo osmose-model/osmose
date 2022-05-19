@@ -234,6 +234,10 @@ public class BackgroundSpecies extends OsmoseLinker implements ISpecies {
         }
     }
 
+    public double getBiomass(int timeStep, int iClass) {
+        return this.biomass[timeStep][iClass];
+    }
+
     /** Get the species index as defined in the file.
      *
      * @return
