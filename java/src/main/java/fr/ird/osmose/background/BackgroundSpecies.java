@@ -1,10 +1,10 @@
-/* 
- * 
+/*
+ *
  * OSMOSE (Object-oriented Simulator of Marine Ecosystems)
  * http://www.osmose-model.org
- * 
+ *
  * Copyright (C) IRD (Institut de Recherche pour le Développement) 2009-2020
- * 
+ *
  * Osmose is a computer program whose purpose is to simulate fish
  * populations and their interactions with their biotic and abiotic environment.
  * OSMOSE is a spatial, multispecies and individual-based model which assumes
@@ -15,7 +15,7 @@
  * processes of fish life cycle (growth, explicit predation, additional and
  * starvation mortalities, reproduction and migration) and fishing mortalities
  * (Shin and Cury 2001, 2004).
- * 
+ *
  * Contributor(s):
  * Yunne SHIN (yunne.shin@ird.fr),
  * Morgane TRAVERS (morgane.travers@ifremer.fr)
@@ -23,20 +23,20 @@
  * Philippe VERLEY (philippe.verley@ird.fr)
  * Laure VELEZ (laure.velez@ird.fr)
  * Nicolas Barrier (nicolas.barrier@ird.fr)
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation (version 3 of the License). Full description
  * is provided on the LICENSE file.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
- * 
+ *
  */
 package fr.ird.osmose.background;
 
@@ -44,6 +44,8 @@ import fr.ird.osmose.Configuration;
 import fr.ird.osmose.Osmose;
 import fr.ird.osmose.util.OsmoseLinker;
 import fr.ird.osmose.util.timeseries.ByClassTimeSeries;
+import fr.ird.osmose.util.timeseries.ByRegimeTimeSeries;
+
 import java.io.IOException;
 import ucar.ma2.InvalidRangeException;
 import fr.ird.osmose.ISpecies;
@@ -57,15 +59,15 @@ public class BackgroundSpecies extends OsmoseLinker implements ISpecies {
 ///////////////////////////////
 // Declaration of the variables
 ///////////////////////////////
-    
+
     private interface Proportion {
         double getProportion(int iClass, int step);
     }
-    
-    
+
+
     private final Proportion proportion;
-       
-    
+
+
     /**
      * Index of the species. [0 : number of background - 1]
      */
@@ -104,8 +106,11 @@ public class BackgroundSpecies extends OsmoseLinker implements ISpecies {
 
     private final int index;
     private final int offset;
-    
+
     private double betaBioen;
+
+    private double[][] biomass;
+
 
     /**
      * Constructor of background species.
@@ -127,12 +132,12 @@ public class BackgroundSpecies extends OsmoseLinker implements ISpecies {
 
         // Initialiaze the index of the Background species
         this.fileindex = fileindex;
-        
-        if(getConfiguration().isBioenEnabled()) { 
+
+        if(getConfiguration().isBioenEnabled()) {
             String key = String.format("species.beta.sp%d", fileindex);
             betaBioen = cfg.getDouble(key);
         }
-        
+
         // Initialization of parameters
         name = cfg.getString("species.name.sp" + fileindex);
 
@@ -184,7 +189,7 @@ public class BackgroundSpecies extends OsmoseLinker implements ISpecies {
                 message = String.format("species.size.proportion.sp%d must sum to 1.0", fileindex);
                 isOk = false;
             }
-            
+
             proportion = (iClass, i) -> this.proportionConst(iClass, i);
 
         }
@@ -211,11 +216,27 @@ public class BackgroundSpecies extends OsmoseLinker implements ISpecies {
             error(message, new IOException());
         }
 
+        // Reading the biomass time-series. So far, it is a yearly time-series
+        // to see if we update that to any kind of time-series
+        String keyVal = "species.biomass.sp" + fileindex;
+        String keyShift = "species.biomass.shift.sp" + fileindex;
+        ByRegimeTimeSeries biomassSeries = new ByRegimeTimeSeries(keyShift, keyVal);
+        biomassSeries.init();
+
+        // Combine yearly time-series and size-proportion to reconstruct
+        // by time/ by size time series of biomass.
+        double[] biomassVect = biomassSeries.getValues();
+        biomass = new double[biomassVect.length][nClass];
+        for (int t = 0; t < biomassVect.length; t++) {
+            for (int s = 0; s < nClass; s++) {
+                biomass[t][s] = biomassVect[t] * proportion.getProportion(s, t);
+            }
+        }
     }
 
     /** Get the species index as defined in the file.
-     * 
-     * @return 
+     *
+     * @return
      */
     @Override
     public int getFileSpeciesIndex() {
@@ -274,23 +295,23 @@ public class BackgroundSpecies extends OsmoseLinker implements ISpecies {
         return this.length[iClass];
     }
 
-    /** Get the class proportion of a given class at 
+    /** Get the class proportion of a given class at
      * a given step.
-     * 
+     *
      * Call a different method depending on whether constant
      * of by-class time series are provided.
-     * 
+     *
      * @param iClass
      * @param step
-     * @return 
+     * @return
      */
     public double getProportion(int iClass, int step) {
         return proportion.getProportion(iClass, step);
     }
-    
+
     /**
      * Returns the proportion of a given class if varying over time.
-     * 
+     *
      * Must be defined in a {@link ByClassTimeSeries()} object.
      *
      * @param iClass
@@ -302,10 +323,10 @@ public class BackgroundSpecies extends OsmoseLinker implements ISpecies {
     }
 
     /** Returns the proportion of a given class if constant over time.
-     * 
+     *
      * @param iClass
      * @param step Time step (not used)
-     * @return 
+     * @return
      */
     private double proportionConst(int iClass, int step) {
         return this.classProportion[iClass];
