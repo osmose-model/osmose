@@ -42,6 +42,7 @@
 package fr.ird.osmose.util;
 
 import fr.ird.osmose.Configuration;
+import fr.ird.osmose.ISpecies;
 import fr.ird.osmose.School;
 import fr.ird.osmose.Species;
 import fr.ird.osmose.util.io.ForcingFile;
@@ -236,7 +237,7 @@ public class MapSet extends OsmoseLinker {
                 imap++;
             }
             String key = prefix + ".species" + ".map" + imap;
-            Species species = getSpecies(getConfiguration().getString(key));
+            ISpecies species = getISpecies(getConfiguration().getString(key));
             if (null != species) {
                 if (species.getSpeciesIndex() == iSpecies) {
                     mapNumber.add(imap);
