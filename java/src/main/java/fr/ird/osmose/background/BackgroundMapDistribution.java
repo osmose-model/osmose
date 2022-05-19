@@ -143,6 +143,11 @@ public class BackgroundMapDistribution extends OsmoseLinker {
 
     }
 
+    public GridMap getGridMap(int classIndex, int iStep) {
+        int indexMap = maps.getIndexMap(classIndex, iStep);
+        GridMap map = maps.getMap(indexMap);
+        return map;
+    }
 
     private void mapsDistribution(BackgroundSchool school, int iStepSimu) {
 
