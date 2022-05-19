@@ -212,61 +212,55 @@ public class BackgroundSchool extends AbstractSchool {
 
     @Override
     public double getEMaint() {
-        // TODO Auto-generated method stub
         return 0;
     }
 
     @Override
     public double getENet() {
-        // TODO Auto-generated method stub
         return 0;
     }
 
     @Override
     public double getKappa() {
-        // TODO Auto-generated method stub
         return 0;
     }
 
     @Override
     public double getIngestion() {
-        // TODO Auto-generated method stub
         return 0;
     }
 
     @Override
     public float getGonadWeight() {
-        // TODO Auto-generated method stub
         return 0;
     }
 
     @Override
     public double getIngestionTot() {
-        // TODO Auto-generated method stub
         return 0;
     }
 
     @Override
     public double getAgeMat() {
-        // TODO Auto-generated method stub
         return 0;
     }
 
     @Override
     public boolean isSexuallyMature() {
-        // TODO Auto-generated method stub
         return false;
     }
 
     @Override
     public double getSizeMat() {
-        // TODO Auto-generated method stub
         return 0;
+    }
+
+    public boolean isAlive() {
+        return true;
     }
 
     @Override
     public double getNEggs() {
-        // TODO Auto-generated method stub
         return 0;
     }
 
