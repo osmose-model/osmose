@@ -104,6 +104,8 @@ public class BackgroundSpecies extends OsmoseLinker implements ISpecies {
 
     private final int index;
     private final int offset;
+    
+    private double betaBioen;
 
     /**
      * Constructor of background species.
@@ -125,7 +127,12 @@ public class BackgroundSpecies extends OsmoseLinker implements ISpecies {
 
         // Initialiaze the index of the Background species
         this.fileindex = fileindex;
-
+        
+        if(getConfiguration().isBioenEnabled()) { 
+            String key = String.format("species.beta.sp%d", fileindex);
+            betaBioen = cfg.getDouble(key);
+        }
+        
         // Initialization of parameters
         name = cfg.getString("species.name.sp" + fileindex);
 
@@ -247,6 +254,10 @@ public class BackgroundSpecies extends OsmoseLinker implements ISpecies {
      */
     public float computeWeight(float length) {
         return (float) (c * (Math.pow(length, bPower)));
+    }
+
+    public double getBetaBioen() {
+        return this.betaBioen;
     }
 
     /**

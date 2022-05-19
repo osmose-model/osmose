@@ -65,7 +65,7 @@ write_osmose.osmose.configuration = function(x, file, sep = " = ", append=FALSE,
     return(out)
   }
   
-  x = as.matrix(lapply(x, FUN=format_par, sep=par.sep))
+  x = as.matrix(lapply(x, FUN=.format_par, sep=par.sep))
   
   write_osmose.default(x=x, file=file, sep=sep, col.names=FALSE, quote = FALSE, 
                                   row.names = TRUE, append=append, ...)

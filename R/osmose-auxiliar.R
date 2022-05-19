@@ -45,7 +45,7 @@
 #' @param ... Additional arguments
 #'
 #' @return Output data frame
-readOsmoseFiles = function(path, type, bySpecies=FALSE, ext="csv", ...) {
+readOsmoseFiles = function(path, type, bySpecies=FALSE, ext="csv", varid=NA, ...) {
   
   # Build the class name pasting osmose + type
   xclass = paste("osmose", type, sep = ".")
@@ -57,24 +57,25 @@ readOsmoseFiles = function(path, type, bySpecies=FALSE, ext="csv", ...) {
   allFiles = dir(path = path, recursive = TRUE, include.dirs = FALSE)
   
   # Get files with the selected extensio: ext
-  extFiles = allFiles[grepl(pattern = paste0(".", ext), x = allFiles)]
+  extFiles = allFiles[grepl(pattern = paste0("\\.", ext), x = allFiles)]
   
   # Read files 
-  if(isTRUE(bySpecies)){
+  if(isTRUE(bySpecies)) {
+    
     # Subset list of files
     files  = extFiles[grepl(pattern = paste0(type, "-"), x = extFiles)]
-    
     # Split path names by species 
     files  = .bySpecies(files = files)
-    
     # Read files
-    output = lapply(files, .readFilesList, path = path, type = type, ...)
-  }else{
+    output = lapply(files, .readFilesList, path = path, type = type, varid=varid, ...)
+    
+  } else {
+    
     # Subset list of files
     files  = extFiles[grepl(pattern = paste0(type, "_"), x = extFiles)]
-    
     # Read files
-    output = .readFilesList(files = files, path = path, type = type, ...)
+    output = .readFilesList(files = files, path = path, type = type, varid=varid, ...)
+    
   }
   
   # Define a class for output

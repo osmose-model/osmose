@@ -66,7 +66,9 @@ Imports:
   utils,
   ncdf4,
   mgcv,
-  fields
+  fields,
+  calibrar,
+  R.utils
 URL: http://www.osmose-model.org/ 
 LazyData: FALSE
 BugReports: https://github.com/osmose-model/osmose/issues

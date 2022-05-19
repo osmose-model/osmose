@@ -117,18 +117,19 @@ abstract public class AbstractOutput extends SimulationLinker implements IOutput
 ////////////////////////////
 // Definition of the methods
 ////////////////////////////
-    final String getFilename(int region) {
+    final String getFilename(int region, String regionName) {
         StringBuilder filename = new StringBuilder();
         if (null != subfolder && !subfolder.isEmpty()) {
             filename.append(subfolder).append(File.separatorChar);
         }
         filename.append(getConfiguration().getString("output.file.prefix"));
-        filename.append("_").append(name).append("_Simu");
+        filename.append("_").append(name);
+        if (region > 0) {
+            filename.append("-").append(regionName);
+        }
+        filename.append("_Simu");
         filename.append(getRank());
         filename.append(".csv");
-        if (region > 0) {
-            filename.append(".").append(region);
-        }
         return filename.toString();
     }
 
@@ -162,7 +163,7 @@ abstract public class AbstractOutput extends SimulationLinker implements IOutput
 
         int i = 0;
         for (AbstractOutputRegion region : getOutputRegions()) {
-            File file = new File(path, getFilename(region.getIndex()));
+            File file = new File(path, getFilename(region.getIndex(), region.getName()));
             boolean fileExists = file.exists();
             file.getParentFile().mkdirs();
             try {

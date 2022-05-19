@@ -82,6 +82,9 @@ public class RelativeBiomassPopulator extends AbstractPopulator {
 
     /** Age of the released schools. Dimensions = [nSpecies][nLenghts] */
     private int[][] ageDt;
+    
+    /** Number of released schools. Dimensions = [nSpecies][nLenghts] */
+    private int[][] nSchools;
 
     private int[] nSize;
 
@@ -129,10 +132,12 @@ public class RelativeBiomassPopulator extends AbstractPopulator {
         sizeMin = new double[nSpecies][];
         sizeMax = new double[nSpecies][];
         cpt = 0;
-        for (int iSpeciesFiles : this.getFocalIndex()) {
+        for (int i : this.getFocalIndex()) {
             // Should be of size NClass + 1
-            double sizeTemp[] = cfg.getArrayDouble("population.initialization.size.sp" + iSpeciesFiles);
+            double sizeTemp[] = cfg.getArrayDouble("population.initialization.size.sp" + i);
             nSize[cpt] = sizeTemp.length - 1;
+            sizeMin[cpt] = new double[nSize[cpt]];
+            sizeMax[cpt] = new double[nSize[cpt]];
             for (int iClass = 0; iClass < nSize[cpt]; iClass++) {
                 sizeMin[cpt][iClass] = sizeTemp[iClass];
                 sizeMax[cpt][iClass] = sizeTemp[iClass + 1];
@@ -180,13 +185,34 @@ public class RelativeBiomassPopulator extends AbstractPopulator {
                         "population.initialization.age.sp" + iSpeciesFile, nSize[cpt]);
                 error(message, new Exception());
             }
-            cpt++;
 
             ageDt[cpt] = new int[temp.length];
             for (int k = 0; k < temp.length; k++) {
                 ageDt[cpt][k] = (int) (temp[k] * getConfiguration().getNStepYear());
             }
 
+            cpt++;
+        }
+        
+        // Init the number of schools for each species and each size class.
+        nSchools = new int[nSpecies][];
+        cpt = 0;
+        for (int iSpeciesFile : this.getFocalIndex()) {
+
+            double temp[] = cfg.getArrayDouble("population.initialization.nschool.sp" + iSpeciesFile);
+
+            if (temp.length != nSize[cpt]) {
+                String message = String.format("Parameter %s must contain %d values",
+                        "population.initialization.nschool.sp" + iSpeciesFile, nSize[cpt]);
+                error(message, new Exception());
+            }
+
+            nSchools[cpt] = new int[temp.length];
+            for (int k = 0; k < temp.length; k++) {
+                nSchools[cpt][k] = (int) temp[k];
+            }
+
+            cpt++;
         }
         
     }
@@ -197,13 +223,13 @@ public class RelativeBiomassPopulator extends AbstractPopulator {
         int nSpecies = this.getNSpecies();
         for (int iSpecies = 0; iSpecies < nSpecies; iSpecies++) {
 
-            int nSchool = getConfiguration().getNSchool(iSpecies);
-
             for (int iLength = 0; iLength < nSize[iSpecies]; iLength++) {
 
                 double lengthMin = this.sizeMin[iSpecies][iLength];
                 double lengthMax = this.sizeMax[iSpecies][iLength];
                 int ageDt = this.ageDt[iSpecies][iLength];
+                //int nSchool = getConfiguration().getNSchool(iSpecies);
+                int nSchool = this.nSchools[iSpecies][iLength];
 
                 // Biomass in tons
                 double biomass = this.seedingBiomass[iSpecies] * this.biomassProportion[iSpecies][iLength];
@@ -212,7 +238,7 @@ public class RelativeBiomassPopulator extends AbstractPopulator {
                 }
 
                 for (int s = 0; s < nSchool; s++) {
-                    School school0 = this.generateSchool(biomass / nSchool, lengthMin, lengthMax, ageDt, iSpecies);
+                    School school0 = this.generateSchool(biomass / (nSchool - s), lengthMin, lengthMax, ageDt, iSpecies);
                     getSchoolSet().add(school0);
                     biomass -= school0.getBiomass();
                 }
@@ -225,10 +251,12 @@ public class RelativeBiomassPopulator extends AbstractPopulator {
         // Configuration cfg = getConfiguration();
         Species species = getSpecies(iSpecies);
 
-        // Ramdom draft of length
-        double length = lengthMin + rand.nextDouble() * (lengthMax - lengthMin);
-        if (length == 0) {
+        // Ramdom draft of length, force eggSize if ageDt==0
+        double length;
+        if (ageDt == 0) {
             length = species.getEggSize();
+        } else {
+            length = lengthMin + rand.nextDouble() * (lengthMax - lengthMin);
         }
 
         // AbstractGrowth growth = growthProcess.getGrowth(iSpecies);

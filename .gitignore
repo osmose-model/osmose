@@ -29,6 +29,7 @@ vignettes/*.pdf
 
 inst/extdata/Rplots.pdf
 inst/extdata/plot_test.R
+**/osmose-Ex*
 
 inst/extdata/eec/make_netcdf_mask.R
 *.swp
@@ -40,7 +41,7 @@ inst/doc
 /vignettes/plot_method_cache
 /vignettes/create_run_read_cache
 
-target
+java/target
 **sh
 **.html
 build

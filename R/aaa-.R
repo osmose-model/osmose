@@ -42,11 +42,13 @@ NULL
 NULL
 #' @importFrom stats median sd quantile setNames dlnorm dnorm qnorm
 NULL
-#' @importFrom utils read.csv read.table write.table tail write.csv
+#' @importFrom utils read.csv read.table write.table tail write.csv head packageVersion read.csv2 type.convert
+NULL
+#' @importFrom R.utils getRelativePath
 NULL
 #' @importFrom rlist list.merge
 NULL
-#' @importFrom stringr str_split str_trim str_sub
+#' @importFrom stringr str_split str_trim str_sub str_locate
 NULL
 #' @importFrom rmarkdown render
 NULL
@@ -56,7 +58,9 @@ NULL
 NULL
 #' @importFrom mgcv gam
 NULL
-#' @importFrom stats predict
+#' @importFrom stats predict approx splinefun weighted.mean
 NULL
 #' @importFrom fields image.plot tim.colors
+NULL
+#' @importFrom calibrar calibrate
 NULL
