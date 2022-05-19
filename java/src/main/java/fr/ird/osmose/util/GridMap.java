@@ -1,10 +1,10 @@
-/* 
- * 
+/*
+ *
  * OSMOSE (Object-oriented Simulator of Marine Ecosystems)
  * http://www.osmose-model.org
- * 
+ *
  * Copyright (C) IRD (Institut de Recherche pour le Développement) 2009-2020
- * 
+ *
  * Osmose is a computer program whose purpose is to simulate fish
  * populations and their interactions with their biotic and abiotic environment.
  * OSMOSE is a spatial, multispecies and individual-based model which assumes
@@ -15,7 +15,7 @@
  * processes of fish life cycle (growth, explicit predation, additional and
  * starvation mortalities, reproduction and migration) and fishing mortalities
  * (Shin and Cury 2001, 2004).
- * 
+ *
  * Contributor(s):
  * Yunne SHIN (yunne.shin@ird.fr),
  * Morgane TRAVERS (morgane.travers@ifremer.fr)
@@ -23,20 +23,20 @@
  * Philippe VERLEY (philippe.verley@ird.fr)
  * Laure VELEZ (laure.velez@ird.fr)
  * Nicolas Barrier (nicolas.barrier@ird.fr)
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation (version 3 of the License). Full description
  * is provided on the LICENSE file.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
- * 
+ *
  */
 
 package fr.ird.osmose.util;
@@ -69,7 +69,7 @@ public class GridMap extends OsmoseLinker {
             }
         }
     }
-    
+
     public GridMap(double[][] input) {
         matrix = new float[getGrid().get_ny()][getGrid().get_nx()];
         for (Cell cell : getGrid().getCells()) {
@@ -124,13 +124,17 @@ public class GridMap extends OsmoseLinker {
             error("Error reading CSV map " + csvFile, ex);
         }
     }
- 
+
     public void setValue(int i, int j, float value) {
         matrix[j][i] = value;
     }
 
     public float getValue(int i, int j) {
         return matrix[j][i];
+    }
+
+    public float[][] getValues() {
+        return matrix;
     }
 
     public void setValue(Cell cell, float value) {
@@ -176,7 +180,7 @@ public class GridMap extends OsmoseLinker {
                 float val1 = matrix[j][i];
                 float val2 =  map2.getValue(i, j);
                 // manage the case where both values are NaN
-                if(Float.isNaN(val1) && Float.isNaN(val2)) { 
+                if(Float.isNaN(val1) && Float.isNaN(val2)) {
                     continue;
                 }
                 if (val1 != val2) {
@@ -200,7 +204,7 @@ public class GridMap extends OsmoseLinker {
     public void read(NetcdfFile nc, int mapIndex) throws IOException, InvalidRangeException {
         this.read(nc, mapIndex, "map");
     }
-    
+
     public void read(NetcdfFile nc, int mapIndex, String varname) throws IOException, InvalidRangeException {
 
         // Defines the indexes of the NetCDF variable to read
@@ -214,7 +218,7 @@ public class GridMap extends OsmoseLinker {
         if (!nc.findVariable(varname).getAttributes().isEmpty()) {
             // Loop over all the attributes to define a size.
             for (int k = 0; k < nc.findVariable(varname).getAttributes().size(); k++) {
-                if(nc.findVariable(varname).getAttributes().get(k).getFullName().toLowerCase().equals("_fillvalue")) { 
+                if(nc.findVariable(varname).getAttributes().get(k).getFullName().toLowerCase().equals("_fillvalue")) {
                     fillValue = nc.findVariable(varname).getAttributes().get(k).getNumericValue().doubleValue();
                     break;
                 }
@@ -231,7 +235,7 @@ public class GridMap extends OsmoseLinker {
             }
         }
     }
-    
+
     public void read(NetcdfFile nc, int mapIndex, int classIndex, String varname) throws IOException, InvalidRangeException {
 
         // Defines the indexes of the NetCDF variable to read
@@ -245,7 +249,7 @@ public class GridMap extends OsmoseLinker {
         if (!nc.findVariable(varname).getAttributes().isEmpty()) {
             // Loop over all the attributes to define a fill value.
             for (int k = 0; k < nc.findVariable(varname).getAttributes().size(); k++) {
-                if(nc.findVariable(varname).getAttributes().get(k).getFullName().toLowerCase().equals("_fillvalue")) { 
+                if(nc.findVariable(varname).getAttributes().get(k).getFullName().toLowerCase().equals("_fillvalue")) {
                     fillValue = nc.findVariable(varname).getAttributes().get(k).getNumericValue().doubleValue();
                     break;
                 }
@@ -262,5 +266,5 @@ public class GridMap extends OsmoseLinker {
             }
         }
     }
-    
+
 }
