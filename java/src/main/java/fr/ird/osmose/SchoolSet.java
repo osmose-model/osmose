@@ -178,7 +178,7 @@ public class SchoolSet extends OsmoseLinker {
      * this species
      * @return a list of schools of this {@code species}
      */
-    public List<School> getSchools(Species species, boolean update) {
+    public List<School> getSchools(ISpecies species, boolean update) {
         if (update || hasSpeciesChanged[species.getSpeciesIndex()]) {
             schoolBySpecies.put(species.getSpeciesIndex(), FilteredSets.subset(schoolset, new ArrayList<>(Arrays.asList(new SpeciesFilter(species.getSpeciesIndex()), new AliveSchoolFilter()))));
             hasSpeciesChanged[species.getSpeciesIndex()] = false;
