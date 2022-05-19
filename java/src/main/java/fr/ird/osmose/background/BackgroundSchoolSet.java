@@ -164,6 +164,20 @@ public class BackgroundSchoolSet extends OsmoseLinker {
     }
 
     /**
+     * Returns a list of schools of the given species.
+     *
+     * @param species,
+     *            the species to select
+     * @param update,
+     *            if {@code false} returns the cached list of schools for this
+     *            species
+     * @return a list of schools of this {@code species}
+     */
+    public List<BackgroundSchool> getSchools(ISpecies species, int iClass, boolean update) {
+        return FilteredSets.subset(schoolset, new ArrayList<>(Arrays.asList(new SpeciesFilter(species.getSpeciesIndex()), new BackgroundClassFilter(iClass))));
+    }
+
+    /**
      * Returns an up to date list of schools of the given species.
      *
      * @param species, the species to select
