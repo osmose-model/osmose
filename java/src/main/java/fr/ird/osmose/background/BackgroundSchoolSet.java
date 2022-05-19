@@ -125,17 +125,18 @@ public class BackgroundSchoolSet extends OsmoseLinker {
     /**
      * Remove dead schools from the set
      */
-    public void removeDeadSchools() {
+    public void removeSchools(int iSpecies, int iClass) {
 
-        // Iterator<BackgroundSchool> it = schoolset.iterator();
-        // while (it.hasNext()) {
-        //     if (!it.next().isAlive()) {
-        //         it.remove();
-        //     }
-        // }
-        // for (int i = 0; i < getConfiguration().getNBkgSpecies(); i++) {
-        //     hasSpeciesChanged[i] = true;
-        // }
+        Iterator<BackgroundSchool> it = schoolset.iterator();
+        while (it.hasNext()) {
+            BackgroundSchool temp = it.next();
+            if ((temp.getClassIndex() == iClass) && (temp.getSpeciesIndex()== iSpecies)) {
+                it.remove();
+            }
+        }
+        for (int i = 0; i < getConfiguration().getNBkgSpecies(); i++) {
+            hasSpeciesChanged[i] = true;
+        }
     }
 
     /**
