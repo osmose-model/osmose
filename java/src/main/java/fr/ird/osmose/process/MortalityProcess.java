@@ -361,11 +361,11 @@ public class MortalityProcess extends AbstractProcess {
 
         // Init the biomass of background species by using the ResourceForcing class
         for (BackgroundSchool bkg : this.getBkgSchoolSet().getSchools()) { // loop over the resources
-            int ibkg = bkg.getSpeciesIndex() - nSpecies; // bkg index: [0, nbkg - 1]
-            double accessibleBiom = getResourceForcing(ibkg).getBiomass(bkg.getCell());
-            // note that here, the multiplication by proportion value is made in the
-            // setbiomass method
-            bkg.setBiomass(accessibleBiom, iStepSimu);
+            // int ibkg = bkg.getSpeciesIndex() - nSpecies; // bkg index: [0, nbkg - 1]
+            // double accessibleBiom = getResourceForcing(ibkg).getBiomass(bkg.getCell());
+            // // note that here, the multiplication by proportion value is made in the
+            // // setbiomass method
+            // bkg.setBiomass(accessibleBiom, iStepSimu);
             bkg.init(); // reset ndead prior predation
         }
 
