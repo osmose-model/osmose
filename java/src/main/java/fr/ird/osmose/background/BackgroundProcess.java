@@ -65,6 +65,9 @@ public class BackgroundProcess extends AbstractProcess {
                 }
            }
         }
+
+        getBkgSchoolSet().updateSchoolMap();
+
     }
 
     private void redistributeSchools(int iSpecies, int iClass) {
