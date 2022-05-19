@@ -42,6 +42,7 @@
 package fr.ird.osmose.background;
 
 import fr.ird.osmose.Configuration;
+import fr.ird.osmose.ISpecies;
 import fr.ird.osmose.Species;
 import fr.ird.osmose.util.GridMap;
 import fr.ird.osmose.util.OsmoseLinker;
@@ -239,14 +240,17 @@ public class BackgroundMapSet extends OsmoseLinker {
                 imap++;
             }
             String key = prefix + ".species" + ".map" + imap;
-            Species species = getSpecies(getConfiguration().getString(key));
+            ISpecies species = getISpecies(getConfiguration().getString(key));
             if (null != species) {
-                if (species.getSpeciesIndex() == iSpecies) {
+                if (species.getFileSpeciesIndex() == iSpeciesFile) {
                     mapNumber.add(imap);
                 }
             } else {
-                error("Wrong species name in spatial map series '" + prefix + ".map*'", new IOException("Parameter " + key + " = " + getConfiguration().getString(key) + " does not match any predefined species name."));
+                error("Wrong species name in spatial map series '" + prefix + ".map*'",
+                        new IOException("Parameter " + key + " = " + getConfiguration().getString(key)
+                                + " does not match any predefined species name."));
             }
+
             imap++;
         }
 
@@ -263,7 +267,7 @@ public class BackgroundMapSet extends OsmoseLinker {
             /*
              * read age min and age max concerned by this map
              */
-            int iClass = (int) Math.round(getConfiguration().getFloat(prefix + ".class" + ".map" + imap) * getConfiguration().getNStepYear());
+            int iClass = getConfiguration().getInt(prefix + ".class" + ".map" + imap);
 
             /*
              * read the time steps over the year concerned by this map
@@ -329,14 +333,14 @@ public class BackgroundMapSet extends OsmoseLinker {
         boolean isMapOK = true;
         int nSteps = getConfiguration().getNStep();
         int nStepYear = getConfiguration().getNStepYear();
-        int lifespan = getSpecies(iSpecies).getLifespanDt();
-        for (int iAge = 0; iAge < lifespan; iAge++) {
+        int nClass = getBkgSpecies(iSpecies).getNClass();
+        for (int iClass = 0; iClass < nClass; iClass++) {
             for (int iStep = 0; iStep < nSteps; iStep++) {
-                if (indexMaps[iAge][iStep] < 0) {
+                if (indexMaps[iClass][iStep] < 0) {
                     isMapOK = false;
                     int year = iStep / nStepYear;
                     int step = iStep % nStepYear;
-                    warning("No map assigned for {0} age (dt) {1} year {2} step {3}", new Object[]{getSpecies(iSpecies).getName(), iAge, year, step});
+                    warning("No map assigned for {0} class {1} year {2} step {3}", new Object[]{getBkgSpecies(iSpecies).getName(), iClass, year, step});
                 }
             }
         }
