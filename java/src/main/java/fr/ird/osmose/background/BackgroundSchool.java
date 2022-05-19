@@ -185,8 +185,8 @@ public class BackgroundSchool extends AbstractSchool {
         return this.bkgSpecies.getProportion(this.classIndex, step);
     }
 
-    public void setBiomass(double biomass, int step) {
-        this.biomass = this.instantaneousBiomass = biomass * this.getProportion(step);
+    public void setBiomass(double biomass) {
+        this.biomass = this.instantaneousBiomass = biomass;
         this.abundance = this.instantaneousAbundance = this.biom2abd(biomass);
     }
 
