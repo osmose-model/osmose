@@ -65,6 +65,9 @@ public class BackgroundMapDistribution extends OsmoseLinker {
     private Random rd1, rd2, rd3;
     private BackgroundMapSet maps;
     private float[] maxProbaPresence;
+    private final BackgroundSpecies bkgSpecies;
+
+
     /*
      * Ranges of movement in cell during one Osmose time step
      */
@@ -73,6 +76,7 @@ public class BackgroundMapDistribution extends OsmoseLinker {
     public BackgroundMapDistribution(int iSpeciesFile, int iSpecies) {
         this.iSpeciesFile = iSpeciesFile;
         this.iSpecies = iSpecies;
+        this.bkgSpecies = this.getBkgSpecies(iSpecies);
     }
 
     public void init() {
@@ -121,10 +125,8 @@ public class BackgroundMapDistribution extends OsmoseLinker {
 
     private void mapsDistribution(BackgroundSchool school, int iStepSimu) {
 
-        int age = school.getAgeDt();
-
         // Get current map and max probability of presence
-        int indexMap = maps.getIndexMap(school.getAgeDt(), iStepSimu);
+        int indexMap = maps.getIndexMap(school.getClassIndex(), iStepSimu);
         GridMap map = maps.getMap(indexMap);
 
         /*
@@ -134,8 +136,8 @@ public class BackgroundMapDistribution extends OsmoseLinker {
          * assert sameMap = false;
          */
         boolean sameMap = false;
-        if (age > 0 && iStepSimu > 0) {
-            int previousIndexMap = maps.getIndexMap(age - 1, iStepSimu - 1);
+        if (iStepSimu > 0) {
+            int previousIndexMap = maps.getIndexMap(school.getClassIndex(), iStepSimu - 1);
             if (indexMap == previousIndexMap) {
                 sameMap = true;
             }
@@ -160,7 +162,7 @@ public class BackgroundMapDistribution extends OsmoseLinker {
                     bld.append("The maximum number of iterations for map distribution has been reached\n");
                     String outFmt = String.format("Check movements for species %s", school.getSpecies().getName());
                     bld.append(outFmt);
-                    outFmt = String.format(" and for age %f\n", (float) age / getConfiguration().getNStepYear());
+                    outFmt = String.format(" and for class %d\n", (int) school.getClassIndex());
                     bld.append(outFmt);
                     error(bld.toString(), new Exception());
                 }
