@@ -130,7 +130,7 @@ public class BiomassDietStageOutput extends AbstractOutput {
         int nSpecies = this.getNSpecies();
         int nBkg = this.getNBkgSpecies();
         for (int cpt = 0; cpt < this.getNRscSpecies(); cpt++) {
-            biomassStage[nSpecies + nBkg + cpt][0] += getTotalBiomass(cpt + nBkg);
+            biomassStage[nSpecies + nBkg + cpt][0] += getTotalBiomass(cpt);
         }
 
     }
