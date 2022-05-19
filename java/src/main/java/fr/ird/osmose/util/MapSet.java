@@ -241,6 +241,10 @@ public class MapSet extends OsmoseLinker {
                 if (species.getSpeciesIndex() == iSpecies) {
                     mapNumber.add(imap);
                 }
+            } else {
+                error("Wrong species name in spatial map series '" + prefix + ".map*'",
+                        new IOException("Parameter " + key + " = " + getConfiguration().getString(key)
+                                + " does not match any predefined species name."));
             }
             imap++;
         }
