@@ -77,6 +77,24 @@ public class BackgroundSchool extends AbstractSchool {
         this.moveToCell(cell);
     }
 
+     /**
+     * Public constructor.Initialisation from background species, class index
+ and time step.
+     *
+     * @param species
+     * @param classIndex
+     * @param cell
+     */
+    public BackgroundSchool(BackgroundSpecies species, int classIndex) {
+        this.bkgSpecies = species;
+        abundanceHasChanged = false;
+        preys = new HashMap<>();
+        fishedBiomass = new double[getConfiguration().getNFishery()];
+        discardedBiomass = new double[getConfiguration().getNFishery()];
+        this.classIndex = classIndex;
+        this.setOffGrid();
+    }
+
     /**
      * Initialisation of background species school by the values (ts and maps)
      * provided in file.
@@ -269,7 +287,7 @@ public class BackgroundSchool extends AbstractSchool {
     }
 
     public int getClassIndex() {
-        return this.getClassIndex();
+        return this.classIndex;
     }
 
 }
