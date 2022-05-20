@@ -1,10 +1,10 @@
-/* 
- * 
+/*
+ *
  * OSMOSE (Object-oriented Simulator of Marine Ecosystems)
  * http://www.osmose-model.org
- * 
+ *
  * Copyright (C) IRD (Institut de Recherche pour le Développement) 2009-2020
- * 
+ *
  * Osmose is a computer program whose purpose is to simulate fish
  * populations and their interactions with their biotic and abiotic environment.
  * OSMOSE is a spatial, multispecies and individual-based model which assumes
@@ -15,7 +15,7 @@
  * processes of fish life cycle (growth, explicit predation, additional and
  * starvation mortalities, reproduction and migration) and fishing mortalities
  * (Shin and Cury 2001, 2004).
- * 
+ *
  * Contributor(s):
  * Yunne SHIN (yunne.shin@ird.fr),
  * Morgane TRAVERS (morgane.travers@ifremer.fr)
@@ -23,20 +23,20 @@
  * Philippe VERLEY (philippe.verley@ird.fr)
  * Laure VELEZ (laure.velez@ird.fr)
  * Nicolas Barrier (nicolas.barrier@ird.fr)
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation (version 3 of the License). Full description
  * is provided on the LICENSE file.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
- * 
+ *
  */
 
 package fr.ird.osmose.output;
@@ -82,7 +82,7 @@ public class ResourceOutput extends SimulationLinker implements IOutput {
      * Resource biomass array after predation process.
      */
     private double[][][] rscBiomass1;
-    
+
     private int index;
     private Variable timeVar, rscBiomVar, rscBiomPredVar, lonVar, latVar;
 
@@ -158,11 +158,10 @@ public class ResourceOutput extends SimulationLinker implements IOutput {
 
                 int i = cell.get_igrid();
                 int j = cell.get_jgrid();
-                int nBackground = this.getNBkgSpecies();
                 for (int cpt = 0; cpt < this.getNRscSpecies(); cpt++) {
                     // rscBiomass0 is the resource biomass at the beginning of the time step
                     // adding an offset, since resourceForcing starts with bkgSpecies
-                    rscBiomass0[cpt][j][i] = getSimulation().getResourceForcing(cpt + nBackground).getBiomass(cell);
+                    rscBiomass0[cpt][j][i] = getSimulation().getResourceForcing(cpt).getBiomass(cell);
                     // rscBiomass1 is the resource biomass remaining in the water column after the predation process
                     rscBiomass1[cpt][j][i] = rscBiomass0[cpt][j][i] - preyedResources[cpt];
                 }
@@ -220,7 +219,7 @@ public class ResourceOutput extends SimulationLinker implements IOutput {
         } catch (IOException ex) {
             Logger.getLogger(ResourceOutput.class.getName()).log(Level.SEVERE, null, ex);
         }
- 
+
         /*
          * Create dimensions
          */
@@ -235,21 +234,21 @@ public class ResourceOutput extends SimulationLinker implements IOutput {
         timeVar.addAttribute(new Attribute("units", "days since 1-1-1 0:0:0"));
         timeVar.addAttribute(new Attribute("calendar", "360_day"));
         timeVar.addAttribute(new Attribute("description", "time ellapsed, in days, since the beginning of the simulation"));
-        
+
         rscBiomVar = nc.addVariable(null, "rsc_biomass", DataType.FLOAT, new ArrayList<>(Arrays.asList(timeDim, rscDim, nyDim, nxDim)));
         rscBiomVar.addAttribute(new Attribute("units", "tons per cell"));
         rscBiomVar.addAttribute(new Attribute("description", "resource biomass in osmose cell, in tons integrated on water column, per group and per cell"));
         rscBiomVar.addAttribute(new Attribute("_FillValue", -99.f));
-        
+
         rscBiomPredVar = nc.addVariable(null, "rsc_biomass_pred", DataType.FLOAT, new ArrayList<>(Arrays.asList(timeDim, rscDim, nyDim, nxDim)));
         rscBiomPredVar.addAttribute(new Attribute("units", "tons per cell"));
         rscBiomPredVar.addAttribute(new Attribute("description", "resource biomass after predation process in osmose cell, in tons integrated on water column, per group and per cell"));
         rscBiomPredVar.addAttribute(new Attribute("_FillValue", -99.f));
-        
+
         latVar = nc.addVariable(null, "latitude", DataType.FLOAT,  new ArrayList<>(Arrays.asList(nyDim, nxDim)));
         latVar.addAttribute(new Attribute( "units", "degree"));
         latVar.addAttribute(new Attribute("description", "latitude of the center of the cell"));
-        
+
         lonVar = nc.addVariable(null, "longitude", DataType.FLOAT,  new ArrayList<>(Arrays.asList(nyDim, nxDim)));
         lonVar.addAttribute(new Attribute("units", "degree"));
         lonVar.addAttribute(new Attribute("description", "longitude of the center of the cell"));

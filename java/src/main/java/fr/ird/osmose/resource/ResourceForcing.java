@@ -91,7 +91,7 @@ public class ResourceForcing extends OsmoseLinker {
     private double offset;
 
     /**
-     * Resource index. [0, nbkg -1] for background species, [nbkg, nbkg + nrsc - 1]
+     * Resource index. [0, nrsc -1]
      * for resource species.
      */
     private int index;
