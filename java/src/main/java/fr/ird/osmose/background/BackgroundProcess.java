@@ -41,6 +41,8 @@ public class BackgroundProcess extends AbstractProcess {
             cpt++;
         }
 
+        this.initializeSchools();
+
     }
 
     @Override
@@ -68,6 +70,32 @@ public class BackgroundProcess extends AbstractProcess {
 
         getBkgSchoolSet().updateSchoolMap();
 
+    }
+
+    private void initializeSchools() {
+
+        int iStepSimu = this.getSimulation().getIndexTimeSimu();
+
+        for (int iSpecies = 0; iSpecies < getNBkgSpecies(); iSpecies++) {
+
+            BackgroundSpecies species = getBkgSpecies(iSpecies);
+            int nClass = species.getNClass();
+
+            for (int iClass = 0; iClass < nClass; iClass++) {
+                // get the biomass for the given size-class and the given time
+                double biomass = this.getBkgSpecies(iSpecies).getBiomass(iStepSimu, iClass);
+
+                int nschool = nSchools[iSpecies];
+
+                double biomassPerSchool = biomass / nschool;
+
+                for (int i = 0; i < nschool; i++) {
+                    BackgroundSchool bkgSchool = new BackgroundSchool(species, iClass);
+                    bkgSchool.setBiomass(biomassPerSchool);
+                    getBkgSchoolSet().add(bkgSchool);
+                }
+            }
+        }
     }
 
     private void redistributeSchools(int iSpecies, int iClass) {
