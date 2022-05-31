@@ -15,25 +15,50 @@ update_maps = function(input, output, conf, sep = ",", na.strings = -99, test=FA
 
   xconf = .readConfiguration(input)
   ndt = .getPar(xconf, "simulation.time.ndtperyear")
-  nrow = .getPar(xconf, "nline")
-  ncol = .getPar(xconf, "ncol")
-
-  mcon = .getPar(xconf, "movement.map")
+  
+  if(!is.null(.getPar(xconf, "grid.netcdf.file"))) {
+    gfile = .getPar(xconf, "grid.netcdf.file")
+    gfile = file.path(attr(gfile, "path"), gfile)
+    gvar  = .getPar(xconf, "grid.var.mask") 
+    grid = nc_open(gfile)
+    on.exit(nc_close(grid))
+    mask = ncvar_get(grid, varid=gvar)
+    ncol = dim(mask)[1]
+    nrow = dim(mask)[2]
+  } else {
+    nrow = .getPar(xconf, "nline")
+    ncol = .getPar(xconf, "ncol")
+  }
+  
+  mcon = .getPar(.getPar(xconf, "movement"), "map")
   smap = .getPar(mcon, "species")
   allsp = unique(unlist(smap))
 
   rpath = getRelativePath(output, relativeTo=dirname(conf))
 
+  amin0 = .getPar(mcon, "age.min")
+  amin1 = .getPar(mcon, "initialage")
+  if(length(amin0) > length(amin1)) {
+    minkey = "age.min"
+    maxkey = "age.max"
+  } else {
+    minkey = "initialage"
+    maxkey = "lastage"
+  }
+  step0 = .getPar(mcon, "season")
+  step1 = .getPar(mcon, "steps")
+  skey = ifelse(length(step0) > length(step1), "season", "steps")
+  
   out = NULL
   nmap = 0
   for(i in seq_along(allsp)) {
     ind = names(smap)[unlist(smap)==allsp[i]]
     mat = data.frame(sp=unlist(mcon[ind]),
-                     min=unlist(mcon[gsub(ind, pattern="species", replacement = "age.min")]),
-                     max=unlist(mcon[gsub(ind, pattern="species", replacement = "age.max")]))
+                     min=unlist(mcon[gsub(ind, pattern="species", replacement = minkey)]),
+                     max=unlist(mcon[gsub(ind, pattern="species", replacement = maxkey)]))
     maps = split(ind, f=as.list(mat), drop=TRUE, lex.order=TRUE, sep="__")
     yy = lapply(maps, .mergeMaps, conf=mcon, dim=c(ncol, nrow, ndt), sep=sep, 
-                na.strings=na.strings, test=test)
+                na.strings=na.strings, key=skey, test=test)
 
     file = file.path(output, sprintf("%s.nc", allsp[i]))
     vars = sprintf("stage%d", seq_along(yy)-1)
@@ -80,10 +105,10 @@ update_maps = function(input, output, conf, sep = ",", na.strings = -99, test=FA
 
 .writelabel = function(x) sprintf("%s (%s-%s years)", x[1], x[2], x[3])
 
-.mergeMaps = function(x, conf, dim, sep=",", na.strings="-99", test=FALSE) {
+.mergeMaps = function(x, conf, dim, sep=",", na.strings="-99", key="season", test=FALSE) {
 
   files  = conf[gsub(x, pattern="species", replacement = "file")]
-  season = conf[gsub(x, pattern="species", replacement = "season")]
+  season = conf[gsub(x, pattern="species", replacement = key)]
 
   dat = lapply(files, FUN = .readthis, sep=sep, na.strings=na.strings)
 
