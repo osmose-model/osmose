@@ -1,0 +1,7 @@
+movement.file.map#;Name of distribution map #
+movement.species.map#;Focal functional group for which distribution map # was produced
+movement.age.min.map#;Minimum age (in years) of the individuals affected by distribution map #
+movement.age.max.map#;Maximum age (in years) of the individuals affected by distribution map #
+movement.season.map#;Time steps within a year for which distribution map # was produced
+movement.year.min.map#;Minimum year affected by distribution map #
+movement.year.max.map#;Maximum year affected by distribution map #

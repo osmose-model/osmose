@@ -1,0 +1,29 @@
+.. _geo:
+
+Defining the spatial domain
+***********************************
+
+Geographical extension
+------------------------
+
+Osmose is a spatial model and as a consequence you must carefully define the geographical extension of the 
+simulated domain, taking into account biological considerations and technical constraints. The 
+domain should encompass all the natural habitats of the focus species (species explicitly modelled in Osmose) 
+to ensure that their full life cycle occurs within the boundaries. Osmose provides a few processes to account 
+for migration (inward and outward the domain) but it should be avoided since what happens outside the 
+simulated domain is sort of a black box. 
+
+.. Details about migration processes is provided further down in section #.
+
+Another consideration that may influence the geographical extension of you domain is the existence of a biogeochemical model (BGC model) for inputting low trophic levels compartiments into Osmose. If you do have such model outputs then Osmose domain should either match the BGC spatial extension or fall within the boundaries.
+
+Spatial resolution
+--------------------
+
+Once you have delimited the geographical extension of the domain, you must define the spatial resolution of the grid, i.e. what will be the size of the cells. The area of the cell should be of the same order of magnitude than the smallest foraging range of the focus species within one time step. The foraging amplitude in Osmose is expressed 
+in number of cells per time steps.
+As a consequence the size of the cell is tightly linked to the time step of the model.
+
+.. (for details refer to parameter description movement.randomwalk.range.sp# in section #). 
+
+Another practical consideration for determining the spatial resolution is how precisely will you be able or willing to build the spatial distribution maps ? 

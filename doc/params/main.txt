@@ -1,0 +1,32 @@
+Main parameters
+---------------------------------------------
+
+This section describes the main parameters of the Osmose configuration: number of species, multi-threading, time control, restart, etc.
+
+:samp:`simulation.time.nyear` is the umber of years of the simulation.
+
+:samp:`simulation.time.ndtPerYear` is the number of time steps in one year of simulation. For instance simulation.time.ndtPerYear = 24 means the year is divided in 24 time steps of identical length, 15 days each.
+
+:samp:`simulation.nsimulation` is the number of replicated simulations with identical set of parameters
+
+By default OSMOSE will try to run the replicates in multi-thread environment. If you do not want OSMOSE to use all of them, the :samp:`simulation.ncpu` defines the number of CPUs that OSMOSE is allowed to use. If this parameter is not defined or the value is higher than the number of CPUs on your computer, OSMOSE will run on the maximum number of CPUs available on the computer. If :samp:`simulation.ncpu` is smaller than 1 or null, OSMOSE will only use one CPU.
+
+:samp:`simulation.nspecies` is the number of focal species
+
+:samp:`simulation.nplankton` is the number of biotic resource (read from NetCDF file)
+
+:samp:`simulation.nschool` controls how many new schools will be added to the population for each species at each reproduction event. simulation.nschool=15 means that, for a given species at a given time step, the spawning stock biomass will be homogeneously split among 15 new schools. If simulation.nschool is not defined, then OSMOSE assumes that simulation.nschool=10
+
+:samp:`simulation.nschool.spX` has the same meaning as :samp:`simulation.nschool`, but at species level. This parameter has priority over simulation.nschool. If missing for one species then OSMOSE will use the parameter simulation.nschool.
+
+:samp:`simulation.restart.file` defines whether OSMOSE should be run from one or several restart files. If the file exists, all the replicates (if any) will restart on this file. If the file does not exist, OSMOSE assumes that there is instead as many NetCDF restart files as replicates with the following names: :samp:`filename.nc.0`, :samp:`filename.nc.1`, :samp:`filename.nc.#`. If null, no restart is used.
+
+:samp:`simulation.restart.recordfrequency.ndt` is the record frequency (expressed in number of time steps) for the restart file. If null then OSMOSE will write only one restart file, at the end of the simulation.
+
+:samp:`simulation.onestep` defines whether only one step should be run (debugging purpose)
+
+:samp:`osmose.version` is the Osmose version associated with the configuration file (format "Osmose X Update Y (YYYY/MM/DD)"). **If the version is inconsistent with the version of the Osmose JAVA, parameters must be updated (TODO)**
+
+
+
+

@@ -1,0 +1,46 @@
+Fishing data
++++++++++++++++++++++++++++++
+
+.. csv-table:: Shared data used in fishing calculation
+    
+    simulation.time.nyear,2.0,,,
+    simulation.time.ndtperyear,12,,,
+    mortality.fishing.useFiles,FALSE,,,
+
+.. csv-table:: Constant fishing data
+
+    mortality.fishing.rate.method.sp0,constant,,,
+    mortality.fishing.rate.sp0,3,,,
+
+
+.. csv-table::  Linear fishing data
+
+    mortality.fishing.rate.method.sp1,linear,,,
+    mortality.fishing.rate.sp1,0.4,,,
+    mortality.fishing.rate.slope.sp1,2.0,,,
+    mortality.fishing.periodsperyear.sp1,4,,, 
+
+.. csv-table:: Yearly fishing data
+    
+    mortality.fishing.rate.method.sp2,byyear,,,
+    mortality.fishing.rate.byyear.sp2,1,1.7,1.8,2.4
+    mortality.fishing.periodsperyear.sp2,4,,,
+
+.. csv-table:: Time-step fishing data
+    
+    mortality.fishing.rate.method.sp3   bydt            
+    mortality.fishing.rate.bydt.sp3 1,8,4,9,3
+
+.. csv-table:: By-regime fishing data
+    
+    mortality.fishing.rate.method.sp4,byregime,,,
+    mortality.fishing.rate.byRegime.shift.sp4,3,5,15,
+    mortality.fishing.rate.byRegime.sp4,1,5,3,7
+
+    
+.. literalinclude:: _static/read_fishing.R
+    :language: R
+
+
+.. program-output:: Rscript rosmose/_static/read_fishing.R
+

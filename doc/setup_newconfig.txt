@@ -1,0 +1,110 @@
+Setting up a new configuration
+#######################################
+
+You ran successfully the default configuration, you may have explored quickly the input parameters and you managed to play a bit with some outputs. You are now convinced that Osmose is the model you would like to apply to your own ecosystem. This chapter guides you through the different steps, conceptual and technical, for setting up a new Osmose configuration from scratch.
+
+.. toctree::
+    :maxdepth: 2
+    :caption: Contents:
+    
+    newconf/geo.rst
+    newconf/ltl.rst
+    newconf/grid.rst
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+.. Defining the ecosystem to model
+.. ***********************************
+.. 
+.. Geographical extension
+.. ------------------------
+.. 
+.. Osmose is a spatial model and as a consequence you must carefully define the geographical extension of the simulated domain, taking into account biological considerations and technical constraints. The domain should encompass all the natural habitats of the focus species (species explicitly modelled in Osmose) to ensure that their full life cycle occurs within the boundaries. Osmose provides a few processes to account for migration (inward and outward the domain) but it should be avoided since what happens outside the simulated domain is sort of a black box. Details about migration processes is provided further down in section #.
+.. 
+.. Another consideration that may influence the geographical extension of you domain is the existence of a biogeochemical model (BGC model) for inputting low trophic levels compartiments into Osmose. If you do have such model outputs then Osmose domain should either match the BGC spatial extension or fall within the boundaries.
+.. 
+.. Spatial resolution
+.. --------------------
+.. 
+.. Once you have delimited the geographical extension of the domain, you must define the spatial resolution of the grid, i.e. what will be the size of the cells. The area of the cell should be of the same order of magnitude than the smallest foraging range of the focus species within one time step. The foraging amplitude in Osmose is expressed in number of cells per time steps (for details refer to parameter description movement.randomwalk.range.sp# in section #). As a consequence the size of the cell is tightly linked to the time step of the model.
+.. 
+.. Another practical consideration for determining the spatial resolution is how precisely will you be able or willing to build the spatial distribution maps ? 
+.. 
+.. Identifying focus species & background groups
+.. ----------------------------------------------
+.. 
+.. Identifying which species will be explicitly modelled in Osmose and which will not is a crucial step for the success of the configuration. It is not a question of how many species to include but rather whether the species assemblage - focus plus background, is ecologically relevant and energetically consistent (in terms of biomass transfer among the trophic levels).
+.. 
+.. The focus species must represent a significant portion of the total system biomass. Another way to look at it is to ask which species is too important, from an ecological point of view or for the expected outcome in the model, to be discarded ? 
+.. 
+.. The background species will not be explicitly modelled by Osmose but they are essential in the system foodweb. There are several reasons for considering some species as background groups: either because they are out of the modelling scope of Osmose such as low trophic level compartiments or because you know too little about the life cycle or because they mostly participate to the dynamics of the system as food sources.
+.. 
+.. Once you have a list of focus and background species, you may realize that (i) you do not have enough data or knowledge about some species to represent them individually or that (ii) given the data/knowledge you have on two or more species they are almost identically represented in Osmose (which would unmistakably lead to a mutual exclusion and a collapse of all but one). In such case, you may think of grouping the species with similar life traits, habitats and trophic characteristics.
+.. 
+.. Predators such as marine birds or marine mammals cannot be explicitly modelled (not yet ?). The only way to account for the predation is through the additional mortality process. Refer to section # for details on this mortality process.
+.. 
+.. Gathering input parameters
+.. -----------------------------
+.. 
+.. Which biological parameters, and knowledge must be available to parameterize the model?
+.. 
+.. For the focus species you need life history traits (growth, reproduction, diverse mortality sources), spatial distribution maps, fishing pressure and size-based predator/prey ratios. Such data can be found in the scientific literature, life traits databases or from experts on the ecosystem. Details about the parameters can be found in section #. 
+.. 
+.. For additional mortality, fishing mortality or larval mortality Osmose allows several degrees of refinement, from annual mortality rate, to time series of mortality rates per age or size class. In a preliminary stage you may start with constant mortality rates for the sake of simplicity and then refine depending on the availability of the data.
+.. 
+.. Collecting data for forcing the model
+.. --------------------------------------
+.. 
+.. Background species are not explicitly modelled in Osmose. They must be seen as food sources with spatio temporal dynamics. Low trophic level compartments such as zooplankton or phytoplankton are ideally provided by a biogeochemical model (BGC model). If such model is not available on the ecosystem, you will have to find estimates from surveys, or derived remote sensing data or extrapolate from the available scientific literature.
+.. 
+.. Collecting data for calibrating the model
+.. --------------------------------------------
+.. 
+.. Which data are necessary to calibrate the model (biomass indices, commercial catches)
+.. 
+.. Filling up the input files
+.. ******************************* 
+.. 
+.. Start from Osmose default configuration
+.. 
+.. Refer to section # for exhaustive description of the input parameters.
+.. 
+.. Preliminary runs
+.. *******************
+.. 
+.. .. warning::
+.. 
+..     - avoiding species collapses: hints
+..     - critical parameters
+..     - critical output to scan
+..     - FAQ

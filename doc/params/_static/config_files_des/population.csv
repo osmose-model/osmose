@@ -1,0 +1,4 @@
+population.seeding.biomass.spX;Seeding biomass (in tons) for collapsed species.
+population.seeding.year.max;Number of year where seeding on collapse species is applied. If null, maximum lifespan is used.
+
+population.initialization.file;NetCDF file used in population initialisation.

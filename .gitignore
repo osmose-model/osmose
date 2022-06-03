@@ -58,3 +58,24 @@ nbproject
 **/*jar-with-dependencies.jar
 
 **/*.ipynb
+
+# doc
+**/_build
+**/eec_4.3.0
+**/gog
+**/*calib_demo*
+doc/osmose/_static/plot_step_chart.pdf
+doc/osmose/mort/_static/fishing-period.pdf
+doc/osmose/mort/_static/size_ratio.pdf
+doc/osmose/process/_static/gom.pdf
+doc/osmose/process/_static/size_ratio.pdf
+doc/osmose/process/_static/vb.pdf
+**/_static/*svg
+**.log
+**.aux
+
+**/verif_fisheries*.png
+doc/rosmose/_static/*png
+**/_static/**/*.png
+
+

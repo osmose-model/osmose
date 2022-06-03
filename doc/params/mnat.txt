@@ -1,0 +1,98 @@
+Natural mortality
+---------------------------------------------
+
+.. Constant annual rate/catches by species
+.. ############################################
+
+.. Constant annual rate by species
+.. ++++++++++++++++++++++++++++++++++++++
+
+In a similar way to fishing, the parametrization of the natural mortality takes into account different levels of time variability.
+
+Larval mortality
+##################
+
+The larval mortality rate is expressed in :math:`dt^{-1}`. This term represents sources of mortality for age class 0 (age class zero in OSMOSE lasts for one time step) such as the non-fecundation of eggs, a starvation more pronounced than at older ages (rel to CC), or predation by species that are not explicitly considered in OSMOSE:
+
+.. math::
+    
+    N_{dead_{0}}(t) = N(t) \times (1 – e^{-M})
+
+Constant larval mortality is activated by setting the :samp:`mortality.natural.larva.rate.sp#` parameter, while
+larval mortality by time-step is activated by setting the :samp:`mortality.natural.larva.rate.byDt.file.sp#` parameter.
+The latter parameter is the path of a CSV file that contains a time series of larval mortality rates:
+
+.. _table_paros_larmort:
+.. table:: Example of larval mortality rate by time-step
+
+    .. csv-table::
+        :delim: ;
+        :header-rows: 1
+        :widths: 50, 50
+
+        Time step; Larval mortality rate
+        0;0.03
+        1;0.03
+        2;0.025
+        3;0.025
+        4;0.03
+
+The time value does not matter. Osmose does not read it and assume that there is one line per time step. 
+
+The number of time steps in the CSV file must be a multiple of the number of time steps per year. 
+If the time series is shorter than the duration of the simulation, Osmose will loop over it. 
+If the time series is longer than the duration of the simulation, Osmose will ignore the exceeding steps.
+
+Natural mortality
+############################
+
+The natural mortality rate includes all type of mortalities that are not explicitly represented in OSMOSE, such as mortality due to other predators (seals, seabirds).
+Annual natural mortality is activated by setting the :samp:`mortality.natural.rate.sp#` parameter. It is expressed in :math:`year^{-1}`) such as :
+
+.. math::
+
+    N_{dead_{natural}}(t) = N(t) \times (1 – e^{-D / n_{dt_{year}}})
+
+
+Natural mortality rate by time-step is activated by setting the :samp:`mortality.natural.rate.byDt.file.sp#` parameter, which
+is the path of a CSV file that contains a time series of natural mortality rates (expressed in :math:`dt^{-1}`, same as larval mortality rate by time-step).
+
+Natural mortality rate by time step and by age/size class is activated by setting either the 
+:samp:`mortality.natural.rate.byDt.byAge.file.sp#` or :samp:`mortality.natural.rate.byDt.bySize.file.sp#` parameter, which contain the 
+path of the CSV file that contains time series of natural mortality rate (expressed in :math:`dt^{-1}`) per age/size class. 
+The CSV file has the format than the fishing mortality rates/catches per dt and per size/age class:
+
+.. _table_paros_mnat_rate:
+.. table:: Example of natural mortality rate by time-step and by age.
+
+    .. csv-table::
+        :delim: ;
+        :header-rows: 1
+
+        Time step / Age;0;2;3.5;5;7
+        0;0;0;0.05;0.08;0.08
+        1;0;0;0.05;0.08;0.07
+        2;0;0;0.04;0.07;0.06
+        3;0;0;0.04;0.07;0.07
+
+Osmose scans the first line of the CSV file to define the age classes (expressed in year). In this example 5 classes have been defined :samp:`[0 2years[`, :samp:`[2years 3.5years[`, :samp:`[3.5years 5years[`, :samp:`[5years 7years[` and :samp:`[7years to lifespan[`. For size classes the first line would look like:
+
+.. _table_paros_mnat_size:
+.. table:: Example of natural mortality rate by time-step and by size.
+
+    .. csv-table::
+        :delim: ;
+        :header-rows: 1
+
+        Time step / Length;0;5;10;20;40
+        0;0;0;0.05;0.08;0.08
+        1;0;0;0.05;0.08;0.07
+        2;0;0;0.04;0.07;0.06
+        3;0;0;0.04;0.07;0.07
+
+The five classes for this species are :samp:`[0cm 5cm[`, :samp:`[5cm 10cm[`, :samp:`[10cm 20cm[`, :samp:`[20cm 40cm[` and :samp:`[40cm Linf[`. 
+
+The value of the time step does not matter, Osmose assumes there is one line per time step. 
+The number of time steps in the CSV file must be a multiple of the number of time steps per year. 
+If the time series is shorter than the duration of the simulation, Osmose will loop over it. If the time series is longer than the duration of the simulation, 
+Osmose will ignore the exceeding steps.

@@ -1,0 +1,102 @@
+Format and organization of the input files
+---------------------------------------------
+
+Configuration files
+######################
+
+An Osmose configuration file is a text based file. The name of the file does not matter, but we recommend that you avoid any special characters and space in the name of the file as it might generate IO errors when you'll be running Osmose from the command line or calibrating the model in a UNIX environment.  The extension of the file does not  matter either.
+
+We call the main configuration file the file that is either listed in Osmose filePath.txt or given as a command line argument. The main configuration file can contain comments, blank lines and parameters. Here is how the Osmose configuration manager proceeds when it opens the main configuration file. It scans every line of the file looking for parameters. Some lines are automatically discarded:
+
+- empty lines (regardless of blank or tab characters).
+- lines that start with a punctuation character, one of :samp:`!"#$%&'()*+,-./:;<=>?@[\]^_`{|}~`
+
+For comments, it is recommended to start the line with :samp:`#` or :samp:`//`
+
+A parameter is formed by the juxtaposition of three elements: **key**, **separator** and **value**.
+
+The **key** can be any sequence of characters, without blank or any special characters (dot, hyphen and underscore are accepted). Example of keys:
+
+.. code-block:: bash
+
+    simulation.ncpu
+    predation.ingestion.rate.max.sp6
+
+Osmose makes no difference between upper and lower case: *simulation.ncpu*, *simulation.Ncpu*, *Simulation.nCPU*, *SIMULATION.NCPU* designate the same key.
+
+Keys starting with *osmose.configuration.** (the star * being any sequence of characters that follow the same rules than any other key) 
+has a special meaning to the configuration manager. It means the value of this parameter is the path of an other Osmose configuration 
+file and the parameters in this file are to be loaded in the current configuration. That way, instead of having one big configuration file with all the parameters, it is possible to split the parameters in as many files as the user wishes. This process works recursively: one file contains one or several parameters *osmose.configuration.** that point to configuration files that may contains one or several parameters *osmose.configuration.**, and so on. OSMOSE handles the sub-configuration file exactly the same way as it handles the main 
+configuration file (same convention for comments, special characters and naming of). As mentioned previously, the **main configuration file** designates 
+the file that is listed in *filePath.txt* or given to Osmose as an input argument.
+
+The separator can be any of the following characters:
+
+- equals :samp:`=`
+- semicolon :samp:`;`
+- comma :samp:`,`
+- colon :samp:`:`
+- tab :samp:`\\t`
+
+Parameters in the same configuration file can have different separators (though it is advisable to be consistent and use the same one). The configuration manager finds out what is the separator for each parameter. The value can be any sequence of characters (even empty). The configuration manager does not try to interpret the value when it loads the configuration files, it merely stores it in a String object. A value can be served by the configuration manager as:
+
+- a string
+- an integer
+- a float
+- a double
+- a boolean
+- an array of strings, String[]
+- an array of integers, int[]
+- an array of floats, float[]
+- an array of doubles, double[]
+- a resolved path
+
+An array of values is a sequence of values with a separator in between: *value1 separator value2 separator value3 separator value4*. 
+Accepted separators for an array of values are the same characters listed above. The separator for an array of values 
+can either be the same or distinct from the separator between the key and the value. The following examples are valid entries:
+
+.. code-block:: bash
+
+    movement.map0.season;0;1;2;3;4;5
+    movement.map0.season=0;1;2;3;4;5
+    movement.map0.season = 0, 1, 2, 3, 4, 5
+    movement.map0.season : 0 ; 1 ; 2;3;4;5
+
+and are equivalent for the configuration manager. It can be summarize as:
+
+.. code-block:: bash
+
+    key separator1 value1 separator2 value2 separator2 value3 separator2 value4
+
+with :samp:`separator1` either equal or different from :samp:`separator2`.
+
+CSV input file separator
+##########################
+
+Many Osmose parameters are paths to CSV file, for instance:
+.. code-block:: bash
+
+    movement.map0.file
+    mortality.fishing.rate.byDt.byAge.file.sp#
+    reproduction.season.file.sp#
+
+In Osmose 3 and Osmose 3 Update 1 these CSV input files had to be semicolon separated. Since Osmose 3 Update 2, CSV input file separators can be any of the following characters:
+
+- equals :samp:`=`
+- semicolon :samp:`;`
+- comma :samp:`,`
+- colon :samp:`:`
+- tab :samp:`\\t`
+
+Osmose will detect the separator automatically and independently for every CSV file. It means that one CSV input file may be comma separated and an other one may be tab-separated, this is perfectly fine since Osmose 3 Update 2.
+
+Decimal separator
+##############################
+
+Osmose is quite flexible in terms of separators for the configuration files (automatically detected among = , ; : \t), the CSV output files (user-defined by parameter output.csv.separator) and the CSV input files (automatically detected among = , ; : \t ). On the contrary it restricts the decimal separator to dot, and only dot.
+
+.. code-block:: bash
+
+    Example given: 3.14159265 or 1.618
+
+Any other decimal separator (COMMA for instance as in French locale) will be misunderstood and will unmistakably lead to errors. One must be careful when editing CSV input files (either parameters or time series) with tools such as spreadsheets that may automatically replace decimal separator depending on the locale settings. Future Osmose release might allow the use of specific locale but for now remember that DOT is the only accepted decimal separator.
