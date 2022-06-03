@@ -70,7 +70,7 @@ doc/osmose/mort/_static/size_ratio.pdf
 doc/osmose/process/_static/gom.pdf
 doc/osmose/process/_static/size_ratio.pdf
 doc/osmose/process/_static/vb.pdf
-**/_static/*svg
+doc/**/_static/*svg
 **.log
 **.aux
 
