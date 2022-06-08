@@ -1,10 +1,10 @@
-/* 
- * 
+/*
+ *
  * OSMOSE (Object-oriented Simulator of Marine Ecosystems)
  * http://www.osmose-model.org
- * 
+ *
  * Copyright (C) IRD (Institut de Recherche pour le Développement) 2009-2020
- * 
+ *
  * Osmose is a computer program whose purpose is to simulate fish
  * populations and their interactions with their biotic and abiotic environment.
  * OSMOSE is a spatial, multispecies and individual-based model which assumes
@@ -15,7 +15,7 @@
  * processes of fish life cycle (growth, explicit predation, additional and
  * starvation mortalities, reproduction and migration) and fishing mortalities
  * (Shin and Cury 2001, 2004).
- * 
+ *
  * Contributor(s):
  * Yunne SHIN (yunne.shin@ird.fr),
  * Morgane TRAVERS (morgane.travers@ifremer.fr)
@@ -23,20 +23,20 @@
  * Philippe VERLEY (philippe.verley@ird.fr)
  * Laure VELEZ (laure.velez@ird.fr)
  * Nicolas Barrier (nicolas.barrier@ird.fr)
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation (version 3 of the License). Full description
  * is provided on the LICENSE file.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
- * 
+ *
  */
 
 package fr.ird.osmose;
@@ -98,6 +98,11 @@ public abstract class AbstractSchool extends GridPoint implements IAggregation {
     protected final double[] nDead = new double[MortalityCause.values().length];
 
     /**
+     * Number of dead fish in the current time step, for each mortality cause.
+     */
+    protected final double[] ageDeath = new double[MortalityCause.values().length];
+
+    /**
      * Biomass of prey, in tonne, ingested by the school at current time step.
      */
     protected double preyedBiomass;
@@ -118,11 +123,11 @@ public abstract class AbstractSchool extends GridPoint implements IAggregation {
      * unnecessary recalculation of the instantaneous biomass.
      */
     protected boolean abundanceHasChanged;
-    
+
     protected double[] fishedBiomass;
-    
+
     protected double[] discardedBiomass;
-    
+
     public abstract double getEMaint();
     public abstract double getENet();
     public abstract double getKappa();
@@ -132,10 +137,11 @@ public abstract class AbstractSchool extends GridPoint implements IAggregation {
     public abstract double getAgeMat();
     public abstract boolean isSexuallyMature();
     public abstract double getSizeMat();
-    
+
     @Override
     public void incrementNdead(MortalityCause cause, double nDead) {
         this.nDead[cause.index] += nDead;
+        this.ageDeath[cause.index] += this.getAge();
         abundanceHasChanged = true;
     }
 
@@ -203,17 +209,17 @@ public abstract class AbstractSchool extends GridPoint implements IAggregation {
         // Update school total preyed biomass
         this.preyedBiomass += preyedBiom;
     }
-    
+
     @Override
     public void fishedBy(int fisheryIndex, double fishedBiomass) {
         this.fishedBiomass[fisheryIndex] += fishedBiomass;
     }
-    
+
     @Override
     public void discardedBy(int fisheryIndex, double fishedBiomass) {
         this.discardedBiomass[fisheryIndex] += fishedBiomass;
     }
-    
+
     /**
      * Returns a list of the prey records at current time step.
      *
@@ -222,17 +228,17 @@ public abstract class AbstractSchool extends GridPoint implements IAggregation {
     public Collection<Prey> getPreys() {
         return preys.values();
     }
-    
+
     /**
      * Gets the biomass of the school fished by a given fishery.
-     * 
+     *
      * @param fisheryIndex, the fishery index
      * @return the fished biomass in tons
      */
     public double getFishedBiomass(int fisheryIndex) {
         return fishedBiomass[fisheryIndex];
     }
-    
+
     /**
      * Gets the biomass of the school discarded by a given fishery.
      *
@@ -369,7 +375,7 @@ public abstract class AbstractSchool extends GridPoint implements IAggregation {
      * @param obj, the object with which to compare to this school
      * @return {@code true} is the object is a {@code School} and has the same
      * {@code UUID}
-     */ 
+     */
     @Override
     public boolean equals(Object obj) {
         if (obj == null) {
@@ -381,11 +387,11 @@ public abstract class AbstractSchool extends GridPoint implements IAggregation {
         final AbstractSchool other = (AbstractSchool) obj;
         return this.uuid.equals(other.uuid);
     }
-    
+
     public UUID getID() {
         return uuid;
     }
-        
+
     /**
      * Returns the number of dead fish for a given mortality cause.
      *
@@ -395,6 +401,16 @@ public abstract class AbstractSchool extends GridPoint implements IAggregation {
      */
     public double getNdead(MortalityCause cause) {
         return nDead[cause.index];
+    }
+
+    /**
+     * Returns the age at death.
+     *
+     * @param cause Mortality cause.
+     *
+     */
+    public double getAgeDeath(MortalityCause cause) {
+        return ageDeath[cause.index];
     }
 
 }
