@@ -141,7 +141,7 @@ public abstract class AbstractSchool extends GridPoint implements IAggregation {
     @Override
     public void incrementNdead(MortalityCause cause, double nDead) {
         this.nDead[cause.index] += nDead;
-        this.ageDeath[cause.index] += this.getAge();
+        this.ageDeath[cause.index] += nDead * this.getAge();
         abundanceHasChanged = true;
     }
 
