@@ -1,10 +1,10 @@
-/* 
- * 
+/*
+ *
  * OSMOSE (Object-oriented Simulator of Marine Ecosystems)
  * http://www.osmose-model.org
- * 
+ *
  * Copyright (C) IRD (Institut de Recherche pour le Développement) 2009-2020
- * 
+ *
  * Osmose is a computer program whose purpose is to simulate fish
  * populations and their interactions with their biotic and abiotic environment.
  * OSMOSE is a spatial, multispecies and individual-based model which assumes
@@ -15,7 +15,7 @@
  * processes of fish life cycle (growth, explicit predation, additional and
  * starvation mortalities, reproduction and migration) and fishing mortalities
  * (Shin and Cury 2001, 2004).
- * 
+ *
  * Contributor(s):
  * Yunne SHIN (yunne.shin@ird.fr),
  * Morgane TRAVERS (morgane.travers@ifremer.fr)
@@ -23,20 +23,20 @@
  * Philippe VERLEY (philippe.verley@ird.fr)
  * Laure VELEZ (laure.velez@ird.fr)
  * Nicolas Barrier (nicolas.barrier@ird.fr)
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation (version 3 of the License). Full description
  * is provided on the LICENSE file.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
- * 
+ *
  */
 package fr.ird.osmose.process.mortality;
 
@@ -126,9 +126,11 @@ public class FishingMortality extends AbstractMortality {
         for (int iMPA = 0; iMPA < nMPA; iMPA++) {
             mpas.add(new MPA(getRank(), iMPA));
         }
+
         for (MPA mpa : mpas) {
             mpa.init();
         }
+
         // Initialize MPA correction factor
         mpaFactor = new GridMap(1);
 
@@ -213,24 +215,25 @@ public class FishingMortality extends AbstractMortality {
         }
         if (!isUpToDate) {
             mpaFactor = new GridMap(1);
-            int nCellMPA = 0;
+            float fishableSurface = 0;
             for (MPA mpa : mpas) {
                 if (mpa.isActive(iStep)) {
                     for (Cell cell : mpa.getCells()) {
-                        mpaFactor.setValue(cell, 0.f);
-                        nCellMPA++;
+                        float percentageMPA = mpa.getPercentageMPA(cell);
+                        mpaFactor.setValue(cell, 1 - percentageMPA);
+                        fishableSurface += 1 - percentageMPA;
                     }
                 }
             }
 
-            // barrier.n: this correction seems to mean that if we have MPA, then 
+            // barrier.n: this correction seems to mean that if we have MPA, then
             // we have greater pressure in non MPA cells. If 150 cells and 30 MPA,
             // corr = 1.25 and (nocean - npa) * corr = 150
             int nOceanCell = getGrid().getNOceanCell();
-            float correction = (float) nOceanCell / (nOceanCell - nCellMPA);
+            float correction = (float) nOceanCell / (fishableSurface);
             for (Cell cell : getGrid().getCells()) {
                 if (mpaFactor.getValue(cell) > 0.f) {
-                    mpaFactor.setValue(cell, correction);
+                    mpaFactor.setValue(cell, mpaFactor.getValue(cell) * correction);
                 }
             }
         }
@@ -243,7 +246,7 @@ public class FishingMortality extends AbstractMortality {
 
         // fishable biomass only has to be updated for catches
         Boolean catches[] = new Boolean[this.getNSpecies()];
-        for (int cpt = 0; cpt < this.getNSpecies(); cpt++) { 
+        for (int cpt = 0; cpt < this.getNSpecies(); cpt++) {
             catches[cpt] = (Type.CATCHES == fishingMortality[cpt].getType());
         }
 
@@ -348,9 +351,9 @@ public class FishingMortality extends AbstractMortality {
          */
         CATCHES;
     }
-    
-    public AbstractFishingMortality getFishingMortality(int index) { 
-        return this.fishingMortality[index];   
+
+    public AbstractFishingMortality getFishingMortality(int index) {
+        return this.fishingMortality[index];
     }
-    
+
 }
