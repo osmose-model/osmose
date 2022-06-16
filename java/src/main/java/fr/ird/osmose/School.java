@@ -829,6 +829,11 @@ public class School extends AbstractSchool {
     public boolean existsTrait(String key) throws Exception {
         return this.getGenotype().existsTrait(key);
     }
+    
+    public double getgenet_value(String key) throws Exception {
+        return this.getGenotype().getgenet_value(key);
+    }
+
 
     @Override
     public String getSpeciesName() {

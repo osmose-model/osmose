@@ -196,6 +196,13 @@ public class Genotype extends SimulationLinker {
         return (traits[index] + this.traitsEnvNoise[index]);
 
     }
+    
+        public double getgenet_value(String name) throws Exception {
+
+        int index = this.getTraitIndex(name);
+        return (traits[index]);
+
+    }
 
     /**
      * Get the value of a trait provided a list of locus.
