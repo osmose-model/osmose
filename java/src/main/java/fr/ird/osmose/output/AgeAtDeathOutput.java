@@ -91,7 +91,7 @@ public class AgeAtDeathOutput extends AbstractOutput {
             // Update number of deads
             for (MortalityCause cause : MortalityCause.values()) {
                 double tempNdead = school.getNdead(cause);
-                double tempAgeDeath = school.getNdead(cause);
+                double tempAgeDeath = school.getAgeDeath(cause);
                 nDead[cause.index] += tempNdead;
                 nDeadTot += tempNdead;
                 ageDeath[cause.index] += tempAgeDeath;
@@ -115,7 +115,7 @@ public class AgeAtDeathOutput extends AbstractOutput {
 
     @Override
     String[] getHeaders() {
-        return new String[]{"Mtot", "Mpred", "Mstar", "Mnat", "F", "Z", "Mfor", "Dis", "Age"};
+        return new String[]{"Age Mtot", "Age Mpred", "Age Mstar", "Age Mnat", "Age MF", "Age MZ", "Age Mfor", "Age MDis", "Age MAge"};
     }
 
     @Override
