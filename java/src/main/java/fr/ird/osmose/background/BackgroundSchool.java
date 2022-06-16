@@ -83,6 +83,7 @@ public class BackgroundSchool extends AbstractSchool {
      */
     public void init() {
         this.reset(nDead);
+        this.reset(ageDeath);
         // Reset diet variables
         preys.clear();
         preyedBiomass = 0.d;
