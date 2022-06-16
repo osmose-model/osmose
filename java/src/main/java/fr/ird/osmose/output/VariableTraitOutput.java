@@ -215,7 +215,7 @@ public class VariableTraitOutput extends SimulationLinker implements IOutput {
                 for (int itrait = 0; itrait < this.getNEvolvingTraits(); itrait++) {
                     String traitName = this.getEvolvingTrait(itrait).getName();
                     try {
-                        this.trait_mean[itrait][i] += sch.getTrait(traitName) * sch.getInstantaneousAbundance();
+                        this.trait_mean[itrait][i] += sch.getgenet_value(traitName) * sch.getInstantaneousAbundance();
                     } catch (Exception ex) {
                         Logger.getLogger(VariableTraitOutput.class.getName()).log(Level.SEVERE, null, ex);
                     }
