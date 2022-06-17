@@ -50,7 +50,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
     <packaging>jar</packaging>
     <name>Osmose</name>
     <description></description>
-    
+
     <!-- Project properties -->
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -59,7 +59,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
         <mainClass>fr.ird.osmose.Osmose</mainClass>
         <skipTests>true</skipTests>
     </properties>
-    
+
     <!-- Libraries declarations -->
     <dependencies>
         <!-- OpenCSV -->
@@ -115,14 +115,14 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
             <id>default</id>
             <url>http://repo.maven.apache.org/maven2/</url>
         </repository>
-        
+
         <!-- Local repository -->
         <repository>
             <id>project.local</id>
             <name>project</name>
             <url>file:${project.basedir}/local/</url>
         </repository>
-        
+
         <!-- NetCDF releases repository -->
         <repository>
             <snapshots>
@@ -132,7 +132,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
             <name>libs-release</name>
             <url>https://artifacts.unidata.ucar.edu/repository/unidata-releases/</url>
         </repository>
-        
+
         <!-- NetCDF snapshots repository -->
         <repository>
             <id>amap-maven-snapshots</id>
@@ -140,21 +140,20 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
             <url>https://artifacts.unidata.ucar.edu/repository/unidata-snapshots/</url>
         </repository>
     </repositories>
-    
+
     <build>
         <finalName>${project.artifactId}_${project.version}</finalName>
         <plugins>
-            
+
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven
-                    -surefire-plugin</artifactId>
+                <artifactId>maven-surefire-plugin</artifactId>
                 <version>3.0.0-M6</version>
                 <configuration>
                     <skipTests>${skipTests}</skipTests>
                 </configuration>
             </plugin>
-             
+
             <!-- Execute the jar file on "Run Project" -->
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
@@ -164,7 +163,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
                     <execution>
                         <id>default-cli</id>
                         <goals>
-                            <goal>exec</goal>                            
+                            <goal>exec</goal>
                         </goals>
                         <configuration>
                             <executable>${java.home}/bin/java</executable>
@@ -172,9 +171,9 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
                             <workingDirectory>${exec.workingdir}</workingDirectory>
                         </configuration>
                     </execution>
-                </executions>  
+                </executions>
             </plugin>
-            
+
             <!-- Copy dependencies in lib folder -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -197,7 +196,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
                     </execution>
                 </executions>
             </plugin>
-            
+
             <!-- Link the jar with the dependencies in libs folder -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -214,7 +213,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
                     </archive>
                 </configuration>
             </plugin>
-            
+
             <!-- Create a jar with dependencies inside -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -243,7 +242,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
                     </execution>
                 </executions>
             </plugin>
-            
+
         </plugins>
     </build>
 </project>
