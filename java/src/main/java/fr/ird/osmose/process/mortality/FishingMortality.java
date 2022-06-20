@@ -52,6 +52,7 @@ import fr.ird.osmose.process.mortality.fishing.CatchesByYearBySeasonFishingMorta
 import fr.ird.osmose.process.mortality.fishing.RateByDtByClassFishingMortality;
 import fr.ird.osmose.util.GridMap;
 import fr.ird.osmose.util.MPA;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -64,7 +65,7 @@ public class FishingMortality extends AbstractMortality {
 
     private AbstractFishingMortality[] fishingMortality;
     private List<MPA> mpas;
-    private GridMap mpaFactor;
+    private GridMap[] mpaFactor;
     private GridMap[] spatialFactor;
     private FishingMortality.Type[] fishingType;
     //private List<School>[] arrSpecies;
@@ -131,12 +132,19 @@ public class FishingMortality extends AbstractMortality {
             mpa.init();
         }
 
-        // Initialize MPA correction factor
-        mpaFactor = new GridMap(1);
+        // Initialize MPA correction factor array (one for each species)
+        // initialize with values of ones.
+        mpaFactor = new GridMap[nSpecies];
+        for(int iSpecies=0; iSpecies < nSpecies; iSpecies++) {
+            mpaFactor[iSpecies] = new GridMap(1);
+        }
 
-        // Patch for Virginie to include space variability in fishing mortality
-        // Need to think of a better way to include it to Osmose
+        // Initialize the spatialFactor. Initialize with ones everywhere.
         spatialFactor = new GridMap[nSpecies];
+        for(int iSpecies=0; iSpecies < nSpecies; iSpecies++) {
+            spatialFactor[iSpecies] = new GridMap(1);
+        }
+
         List<String> keys = getConfiguration().findKeys("mortality.fishing.spatial.distrib.file.sp*");
         if (keys != null && !keys.isEmpty()) {
             cpt = 0;
@@ -145,14 +153,22 @@ public class FishingMortality extends AbstractMortality {
                     spatialFactor[cpt] = new GridMap(getConfiguration().getFile("mortality.fishing.spatial.distrib.file.sp" + fileSpeciesIndex));
                     // Make sure the sum of the values in ocean cells is equal to one
                     double sum = 0.d;
+                    int nCells = 0;
                     for (Cell cell : getGrid().getCells()) {
                         if (!cell.isLand()) {
-                            sum += spatialFactor[cpt].getValue(cell);
+                            double value = spatialFactor[cpt].getValue(cell);
+                            sum += value;
+                            if(value > 0) {
+                                nCells++;
+                            }
                         }
                     }
+
+                    sum /= nCells;
+
                     if (Math.abs(sum - 1.d) > 1e-2) {
                         StringBuilder msg = new StringBuilder();
-                        msg.append("The sum of the factors in spatial fishing distribution file ");
+                        msg.append("The means of the factors in spatial fishing distribution file ");
                         msg.append(getConfiguration().getFile("mortality.fishing.spatial.distrib.file.sp" + fileSpeciesIndex));
                         msg.append(" must be equal to one.");
                         error(msg.toString(), null);
@@ -208,32 +224,65 @@ public class FishingMortality extends AbstractMortality {
 
     public void setMPA() {
 
+        int nX = getGrid().get_nx();
+        int nY = getGrid().get_ny();
+            
         boolean isUpToDate = true;
         int iStep = getSimulation().getIndexTimeSimu();
         for (MPA mpa : mpas) {
             isUpToDate &= (mpa.isActive(iStep - 1) == mpa.isActive(iStep));
         }
+
         if (!isUpToDate) {
-            mpaFactor = new GridMap(1);
-            float fishableSurface = 0;
-            for (MPA mpa : mpas) {
-                if (mpa.isActive(iStep)) {
-                    for (Cell cell : mpa.getCells()) {
-                        float percentageMPA = mpa.getPercentageMPA(cell);
-                        mpaFactor.setValue(cell, 1 - percentageMPA);
-                        fishableSurface += 1 - percentageMPA;
+            
+            for (int iSpecies = 0; iSpecies < this.getNSpecies(); iSpecies++) {
+
+                GridMap spatialMap = this.spatialFactor[iSpecies];
+
+                // initialize the MPA correction factor. By default, it is 1 (no MPA).
+                GridMap mpaGridMap = new GridMap(1);
+
+                // Compute the initial MPA correction factor.
+                // % of cell occupied not occupie by MPA (0 if 100% occupied by MPA).
+                for (MPA mpa : mpas) {
+                    if (mpa.isActive(iStep)) {
+                        for (Cell cell : mpa.getCells()) {
+                            float percentageMPA = mpa.getPercentageMPA(cell);
+                            mpaGridMap.setValue(cell, 1 - percentageMPA);
+                        }
                     }
                 }
-            }
 
-            // barrier.n: this correction seems to mean that if we have MPA, then
-            // we have greater pressure in non MPA cells. If 150 cells and 30 MPA,
-            // corr = 1.25 and (nocean - npa) * corr = 150
-            int nOceanCell = getGrid().getNOceanCell();
-            float correction = (float) nOceanCell / (fishableSurface);
-            for (Cell cell : getGrid().getCells()) {
-                if (mpaFactor.getValue(cell) > 0.f) {
-                    mpaFactor.setValue(cell, mpaFactor.getValue(cell) * correction);
+                // Force mpaFactor to 0 when no fishing in the cell
+                for (Cell cell : getGrid().getCells()) {
+                    if (spatialMap.getValue(cell) <= 0) {
+                        mpaGridMap.setValue(cell, 0);
+                    }
+                }
+                
+                // compute the fishing effort by dividing fishing mort
+                // by the total (excluding 0s). 
+                // we also integrate the correction factor
+                float correction = 0;
+                           
+                float totalEffort = spatialMap.count(true);
+                GridMap effort = new GridMap();
+                for (int j = 0; j < nY; j++) {
+                    for (int i = 0; i < nX; i++) {
+                        effort.setValue(i, j, spatialMap.getValue(i, j) / totalEffort);
+                        correction += effort.getValue(i, j) * mpaGridMap.getValue(i, j);
+                        // if effort is 0 in the MPA, no need to redistribute effort.
+                        // factor is 0.
+                    }
+                }
+
+                correction = 1 / correction;
+                
+                // apply the correction to the mpaFactor.
+                for (int j = 0; j < nY; j++) {
+                    for (int i = 0; i < nX; i++) {
+                        mpaFactor[iSpecies].setValue(i, j, correction * mpaGridMap.getValue(i, j));
+                    }
                 }
             }
         }
@@ -273,14 +322,16 @@ public class FishingMortality extends AbstractMortality {
     @Override
     public double getRate(School school) {
         int iSpec = school.getSpeciesIndex();
-        if (null != spatialFactor[iSpec]) {
-            return fishingMortality[iSpec].getRate(school)
-                    * mpaFactor.getValue(school.getCell())
+        return fishingMortality[iSpec].getRate(school)
+                    * mpaFactor[iSpec].getValue(school.getCell())
                     * spatialFactor[iSpec].getValue(school.getCell());
-        } else {
-            return fishingMortality[iSpec].getRate(school)
-                    * mpaFactor.getValue(school.getCell());
-        }
+    }
+    
+    /** Returns the correction factor induced by the inclusion of MPA and
+     * spatial factor. Used only for testing.
+     */
+    public double getFactor(int iSpec, Cell cell) {
+        return mpaFactor[iSpec].getValue(cell) * spatialFactor[iSpec].getValue(cell);
     }
 
     /**
@@ -293,15 +344,9 @@ public class FishingMortality extends AbstractMortality {
      */
     public double getCatches(School school) {
         int iSpec = school.getSpeciesIndex();
-        double catches;
-        if (null != spatialFactor[iSpec]) {
-            catches = fishingMortality[iSpec].getCatches(school)
-                    * mpaFactor.getValue(school.getCell())
+        double catches = fishingMortality[iSpec].getCatches(school)
+                    * mpaFactor[iSpec].getValue(school.getCell())
                     * spatialFactor[iSpec].getValue(school.getCell());
-        } else {
-            catches = fishingMortality[iSpec].getCatches(school)
-                    * mpaFactor.getValue(school.getCell());
-        }
         return Math.min(catches, school.getInstantaneousBiomass());
     }
 
