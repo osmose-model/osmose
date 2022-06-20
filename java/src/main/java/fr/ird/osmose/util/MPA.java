@@ -97,6 +97,7 @@ public class MPA extends OsmoseLinker {
 
         cells = new ArrayList<>();
         if (!getConfiguration().isNull("mpa.file.mpa" + index)) {
+            percentageMPA = new float[getGrid().get_ny()][getGrid().get_nx()];
             loadMPA(getConfiguration().getFile("mpa.file.mpa" + index));
             start = getConfiguration().getInt("mpa.start.year.mpa" + index);
             end = getConfiguration().getInt("mpa.end.year.mpa" + index);
@@ -104,7 +105,6 @@ public class MPA extends OsmoseLinker {
             start = Integer.MAX_VALUE;
         }
 
-        percentageMPA = new float[getGrid().get_ny()][getGrid().get_nx()];
 
     }
 
