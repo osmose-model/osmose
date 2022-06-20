@@ -269,10 +269,13 @@ public class FishingMortality extends AbstractMortality {
                 GridMap effort = new GridMap();
                 for (int j = 0; j < nY; j++) {
                     for (int i = 0; i < nX; i++) {
-                        effort.setValue(i, j, spatialMap.getValue(i, j) / totalEffort);
-                        correction += effort.getValue(i, j) * mpaGridMap.getValue(i, j);
-                        // if effort is 0 in the MPA, no need to redistribute effort.
-                        // factor is 0.
+                        float value = spatialMap.getValue(i, j);
+                        if ((value != 0) & !Float.isNaN(value)) {
+                            effort.setValue(i, j, value / totalEffort);
+                            correction += effort.getValue(i, j) * mpaGridMap.getValue(i, j);
+                            // if effort is 0 in the MPA, no need to redistribute effort.
+                            // factor is 0.
+                        }
                     }
                 }
 
