@@ -102,8 +102,15 @@ def compute_mpa(percentageMPA, rate):
 
     # We make sure that the mean fishing mortality rate is the same than in the original rate: 
 
+    test = mpafactor_bis.copy()
+    test[mask == 0] = -999
+    test = np.ravel(test).astype(str)
+    strout = 'f,'.join(test)
+    strout = '{' + strout + 'f};'
+    print(strout)
+    
     np.mean(rate_bis)
-    return rate_bis
+    return mpafactor_bis
 
 
 # -
@@ -115,8 +122,10 @@ mpamaps[:, 10:] = 0
 mpamaps = np.ma.masked_where(mask == 0, mpamaps)
 cs = plt.pcolormesh(mpamaps)
 plt.colorbar(cs)
+mpamaps[np.ma.getmaskarray(mpamaps)] = -999
 output = pd.DataFrame(mpamaps[::-1])
-output.to_csv('mpa/full_mpa.csv')
+output.to_csv('mpa/full_mpa.csv', header=False, index=False)
+# ?output.to_csv
 
 rate = np.full(mask.shape, 0.07)
 rate[mask == 0] = 0
@@ -135,8 +144,9 @@ mpamaps[:, 5:10] = 0.7
 mpamaps = np.ma.masked_where(mask == 0, mpamaps)
 cs = plt.pcolormesh(mpamaps)
 plt.colorbar(cs)
+mpamaps[np.ma.getmaskarray(mpamaps)] = -999
 output = pd.DataFrame(mpamaps[::-1])
-output.to_csv('mpa/partial_mpa.csv')
+output.to_csv('mpa/partial_mpa.csv', header=False, index=False)
 
 rate = np.full(mask.shape, 0.07)
 rate[mask == 0] = 0
@@ -146,3 +156,5 @@ plt.colorbar(cs)
 new_rate = compute_mpa(mpamaps, rate)
 cs = plt.pcolormesh(new_rate)
 plt.colorbar(cs)
+
+
