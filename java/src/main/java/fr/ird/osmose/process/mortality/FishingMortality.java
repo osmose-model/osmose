@@ -330,7 +330,7 @@ public class FishingMortality extends AbstractMortality {
     /** Returns the correction factor induced by the inclusion of MPA and
      * spatial factor. Used only for testing.
      */
-    public double getFactor(int iSpec, Cell cell) {
+    public float getFactor(int iSpec, Cell cell) {
         return mpaFactor[iSpec].getValue(cell) * spatialFactor[iSpec].getValue(cell);
     }
 
