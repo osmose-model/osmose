@@ -315,11 +315,8 @@ public class Osmose extends OLogger {
             getLogger().setLevel(Level.SEVERE);
         }
 
-        simulation = new Simulation[configuration.getNSimulation()];
-        for (int i = 0; i < configuration.getNSimulation(); i++) {
-            simulation[i] = new Simulation(i);
-        }
-
+        this.initSimulation();
+        
         // Loop over the number of replica
         long begin = System.currentTimeMillis();
         int nProcs = Math.min(configuration.getNCpu(), configuration.getNSimulation());
@@ -369,7 +366,14 @@ public class Osmose extends OLogger {
             info("All simulations completed (time ellapsed:  {0} seconds)", time);
         }
     }
-
+    
+    public void initSimulation() {
+        simulation = new Simulation[configuration.getNSimulation()];
+        for (int i = 0; i < configuration.getNSimulation(); i++) {
+            simulation[i] = new Simulation(i);
+        }
+    }
+    
     /**
      * Inner class that initializes and runs one simulation in a dedicated thread.
      * It informs the {@link java.util.concurrent.CountDownLatch} when the
