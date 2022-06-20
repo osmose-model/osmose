@@ -202,18 +202,19 @@ public class TestMPA {
         
         float[] actual = new float[nY * nX];
         
-        for(int j = 0; j < nY; j++) {
-            for(int i = 0; i < nX; i++) {
+        int cpt = 0;
+        for (int j = 0; j < nY; j++) {
+            for (int i = 0; i < nX; i++) {
                 Cell cell = cfg.getGrid().getCell(i, j);
+                cpt = j * nX + i;
                 if(cell.isLand()) {
-                    actual[j + i * nY] = -999.f;
+                    actual[cpt] = -999.f;
                 } else {
-                    actual[j + i * nY] = mortality.getFactor(0, cell);
+                    actual[cpt] = mortality.getFactor(0, cell);
                 }
-                System.out.println("actual " + actual[j + i * nY] + " expected " + expected[j + i * nY]);
             }   
         }
-        assertEquals(0, 0);
+        assertArrayEquals(expected, actual, 0.01f);
     }
     
 }
