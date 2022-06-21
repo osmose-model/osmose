@@ -37,6 +37,8 @@ def compute_mpa(percentageMPA, rate, display=False):
     import numpy as np
     
     rate = np.ma.masked_where(mask == 0, rate)
+    print('Average over non zero cells ', np.mean(rate[rate != 0]))
+    rate /= np.mean(rate[rate != 0])
     
     print('Mean rate: ', rate.mean())
 
@@ -55,6 +57,7 @@ def compute_mpa(percentageMPA, rate, display=False):
     # the correction factor is forced to 0 
     # where no fishing is possible
     mpafactor[~isfished_cell] = 0
+    mpafactor = np.ma.masked_where(mask == 0, mpafactor)
     
     plt.figure()
     cs = plt.pcolormesh(mpafactor)
@@ -167,12 +170,11 @@ rate = np.ones(mask.shape).astype(np.float32)
 rate[:, 20:30] = 0.5
 rate[:, 30:] = 0.7
 rate = np.ma.masked_where(mask == 0, rate)
-rate /= np.mean(rate)
 
-plt.figure()
-cs = plt.pcolormesh(rate)
-plt.colorbar(cs)
-plt.title('rate')
+# plt.figure()
+# cs = plt.pcolormesh(rate)
+# plt.colorbar(cs)
+# plt.title('rate')
 rate[np.ma.getmaskarray(rate)] = -999
 output = pd.DataFrame(rate[::-1])
 output.to_csv('mpa/rate_map1.csv', header=False, index=False)
@@ -185,7 +187,7 @@ mpamaps[np.ma.getmaskarray(mpamaps)] = -999
 output = pd.DataFrame(mpamaps[::-1])
 output.to_csv('mpa/partial_mpa.csv', header=False, index=False)
 
-new_rate = compute_mpa(mpamaps, rate, display=True)
+new_rate = compute_mpa(mpamaps, rate)
 print(np.unique(new_rate))
 # -
 
@@ -201,7 +203,6 @@ rate = np.ones(mask.shape).astype(np.float32)
 rate[:, 20:30] = 0.
 rate[:, 30:] = 0.7
 rate = np.ma.masked_where(mask == 0, rate)
-rate /= np.mean(rate)
 
 plt.figure()
 cs = plt.pcolormesh(rate)
@@ -211,16 +212,20 @@ rate[np.ma.getmaskarray(rate)] = -999
 output = pd.DataFrame(rate[::-1])
 output.to_csv('mpa/rate_map2.csv', header=False, index=False)
 
-plt.figure()
-cs = plt.pcolormesh(mpamaps)
-plt.colorbar(cs)
-plt.title('mpa')
+# plt.figure()
+# cs = plt.pcolormesh(mpamaps)
+# plt.colorbar(cs)
+# plt.title('mpa')
 mpamaps[np.ma.getmaskarray(mpamaps)] = -999
 output = pd.DataFrame(mpamaps[::-1])
 output.to_csv('mpa/partial_mpa.csv', header=False, index=False)
 
-new_rate = compute_mpa(mpamaps, rate, display=True)
+new_rate = compute_mpa(mpamaps, rate)
 print(np.unique(new_rate))
 # -
+
+
+
+
 
 
