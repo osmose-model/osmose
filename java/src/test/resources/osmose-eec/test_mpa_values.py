@@ -18,6 +18,7 @@ import pandas as pd
 import xarray as xr
 import matplotlib.pyplot as plt
 import numpy as np
+plt.rcParams['text.usetex'] = False
 
 mask = xr.open_dataset('eec_grid-mask.nc')['mask'].values.astype(np.float32)
 cs = plt.pcolormesh(mask)
@@ -46,7 +47,6 @@ def compute_mpa(percentageMPA, rate):
     # the number of cells considered is the number of cells 
     # where the fishing rate is not 0
     isfished_cell = (rate > 0) & (mask > 0)
-    ncells = np.sum(isfished_cell)
     
     # where we have MPA, we change the factor value
     mpafactor[percentageMPA > 0] = 1 - percentageMPA[percentageMPA > 0]
@@ -56,8 +56,18 @@ def compute_mpa(percentageMPA, rate):
     # where no fishing is possible
     mpafactor[~isfished_cell] = 0
     
+    plt.figure()
+    cs = plt.pcolormesh(mpafactor)
+    plt.colorbar(cs)
+    plt.title('mpafactor')
+    
     # Compute effort
     effort = rate / np.sum(rate)
+    
+    plt.figure()
+    cs = plt.pcolormesh(effort)
+    plt.colorbar(cs)
+    plt.title('effort')
 
     print('Sum rate:', np.sum(rate))
     print('Sum effort:', np.sum(effort))
@@ -73,6 +83,11 @@ def compute_mpa(percentageMPA, rate):
     # We now multiply the `mpaFactor` by this correction value:
     mpafactor_bis = mpafactor.copy()
     mpafactor_bis[mpafactor_bis > 0] *=  correction
+    
+    plt.figure()
+    cs = plt.pcolormesh(mpafactor_bis)
+    plt.colorbar(cs)
+    plt.title('mpafactor_bis')
 
     print('Mean factor: ', mpafactor_bis[isfished_cell].mean())
 
@@ -111,27 +126,36 @@ cs = plt.pcolormesh(rate)
 plt.colorbar(cs)
 
 new_rate = compute_mpa(mpamaps, rate)
-cs = plt.pcolormesh(new_rate)
-plt.colorbar(cs)
 
 # ## Partial MPA, constant F
 
 # +
-mpamaps = mask.copy().astype(np.float32)
-mpamaps[:, :5] = 0.3
-mpamaps[:, 5:10] = 0.7
+mpamaps = np.zeros(mask.shape).astype(np.float32)
+mpamaps[:, :5] = 0.7
+mpamaps[:, 5:10] = 0.3
 mpamaps = np.ma.masked_where(mask == 0, mpamaps)
+
+plt.figure()
 cs = plt.pcolormesh(mpamaps)
 plt.colorbar(cs)
 mpamaps[np.ma.getmaskarray(mpamaps)] = -999
 output = pd.DataFrame(mpamaps[::-1])
 output.to_csv('mpa/partial_mpa.csv', header=False, index=False)
 
-rate = np.full(mask.shape, 0.07).astype(np.float32)
+rate = np.full(mask.shape, 1).astype(np.float32)
 rate[mask == 0] = 0
+
+plt.figure()
 cs = plt.pcolormesh(rate)
 plt.colorbar(cs)
 
 new_rate = compute_mpa(mpamaps, rate)
+
+plt.figure()
 cs = plt.pcolormesh(new_rate)
 plt.colorbar(cs)
+# -
+
+
+
+
