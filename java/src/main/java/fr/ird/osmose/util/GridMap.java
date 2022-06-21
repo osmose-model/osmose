@@ -165,7 +165,7 @@ public class GridMap extends OsmoseLinker {
             // exclude only NaN values
             for (int j = 0; j < getGrid().get_ny(); j++) {
                 for (int i = 0; i < getGrid().get_nx(); i++) {
-                    if (!Float.isNaN(matrix[j][i])) {
+                    if (!getGrid().getCell(i, j).isLand()) {
                         output += matrix[j][i];
                     }
                 }
@@ -174,7 +174,7 @@ public class GridMap extends OsmoseLinker {
             // Exclude NaN values and also 0 values
             for (int j = 0; j < getGrid().get_ny(); j++) {
                 for (int i = 0; i < getGrid().get_nx(); i++) {
-                    if ((!Float.isNaN(matrix[j][i])) & (matrix[j][i] != 0)) {
+                    if (!getGrid().getCell(i, j).isLand() & (matrix[j][i] != 0)) {
                         output += matrix[j][i];
                     }
                 }
