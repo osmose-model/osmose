@@ -23,12 +23,12 @@ plt.rcParams['text.usetex'] = False
 mask = xr.open_dataset('eec_grid-mask.nc')['mask'].values.astype(np.float32)
 cs = plt.pcolormesh(mask)
 plt.colorbar(cs)
-print(mask.dtype)
+print(mask.dtype, mask.shape)
 
 
 # -
 
-def compute_mpa(percentageMPA, rate):
+def compute_mpa(percentageMPA, rate, display=False):
     
     strin = '++++++++++++++++++++++++++++++++++++++++++++++++++++++++ '
     
@@ -60,6 +60,8 @@ def compute_mpa(percentageMPA, rate):
     cs = plt.pcolormesh(mpafactor)
     plt.colorbar(cs)
     plt.title('mpafactor')
+    
+    print(np.sum(rate))
     
     # Compute effort
     effort = rate / np.sum(rate)
@@ -97,16 +99,17 @@ def compute_mpa(percentageMPA, rate):
 
     print('Mean rate: ', rate_bis.mean())
 
-    # We make sure that the mean fishing mortality rate is the same than in the original rate: 
-    test = mpafactor_bis.copy()
-    test[mask == 0] = -999
-    test = np.ravel(test).astype(str)
-    strout = 'f,'.join(test)
-    strout = '{' + strout + 'f};'
-    print(strout)
+    # We make sure that the mean fishing mortality rate is the same than in the original rate:
+    if(display):
+        test = rate_bis.copy()
+        test[mask == 0] = -999
+        test = np.ravel(test).astype(str)
+        strout = 'f,'.join(test)
+        strout = '{' + strout + 'f};'
+        print(strout)
     
     np.mean(rate_bis)
-    return mpafactor_bis
+    return rate_bis
 
 
 # ## Full MPA case, constant F
@@ -150,12 +153,74 @@ cs = plt.pcolormesh(rate)
 plt.colorbar(cs)
 
 new_rate = compute_mpa(mpamaps, rate)
-
-plt.figure()
-cs = plt.pcolormesh(new_rate)
-plt.colorbar(cs)
 # -
 
+# ## Partial map with variable fishing effort
 
+# +
+mpamaps = np.zeros(mask.shape).astype(np.float32)
+mpamaps[:, :5] = 0.7
+mpamaps[:, 5:10] = 0.3
+mpamaps = np.ma.masked_where(mask == 0, mpamaps)
+
+rate = np.ones(mask.shape).astype(np.float32)
+rate[:, 20:30] = 0.5
+rate[:, 30:] = 0.7
+rate = np.ma.masked_where(mask == 0, rate)
+rate /= np.mean(rate)
+
+plt.figure()
+cs = plt.pcolormesh(rate)
+plt.colorbar(cs)
+plt.title('rate')
+rate[np.ma.getmaskarray(rate)] = -999
+output = pd.DataFrame(rate[::-1])
+output.to_csv('mpa/rate_map1.csv', header=False, index=False)
+
+plt.figure()
+cs = plt.pcolormesh(mpamaps)
+plt.colorbar(cs)
+plt.title('mpa')
+mpamaps[np.ma.getmaskarray(mpamaps)] = -999
+output = pd.DataFrame(mpamaps[::-1])
+output.to_csv('mpa/partial_mpa.csv', header=False, index=False)
+
+new_rate = compute_mpa(mpamaps, rate, display=True)
+print(np.unique(new_rate))
+# -
+
+# ## Partial MPAs, variable F with 0s.
+
+# +
+mpamaps = np.zeros(mask.shape).astype(np.float32)
+mpamaps[:, :5] = 0.7
+mpamaps[:, 5:10] = 0.3
+mpamaps = np.ma.masked_where(mask == 0, mpamaps)
+
+rate = np.ones(mask.shape).astype(np.float32)
+rate[:, 20:30] = 0.
+rate[:, 30:] = 0.7
+rate = np.ma.masked_where(mask == 0, rate)
+rate /= np.mean(rate)
+
+plt.figure()
+cs = plt.pcolormesh(rate)
+plt.colorbar(cs)
+plt.title('rate')
+rate[np.ma.getmaskarray(rate)] = -999
+output = pd.DataFrame(rate[::-1])
+output.to_csv('mpa/rate_map2.csv', header=False, index=False)
+
+plt.figure()
+cs = plt.pcolormesh(mpamaps)
+plt.colorbar(cs)
+plt.title('mpa')
+mpamaps[np.ma.getmaskarray(mpamaps)] = -999
+output = pd.DataFrame(mpamaps[::-1])
+output.to_csv('mpa/partial_mpa.csv', header=False, index=False)
+
+new_rate = compute_mpa(mpamaps, rate, display=True)
+print(np.unique(new_rate))
+# -
 
 
