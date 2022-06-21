@@ -64,12 +64,12 @@ public class TestMPA {
         cmd.put("mortality.fishing.rate.sp13", "0.07");
 
         // Test the standard configuration
-        //this.mortalityFullMpa = this.createMortality(configurationFile, cmd);
+        this.mortalityFullMpa = this.createMortality(configurationFile, cmd);
 
         // Test with partial MPA
         mpaFileName = mpaPath.resolve("mpa").resolve("partial_mpa.csv").toString();
         cmd.put("mpa.file.mpa0", mpaFileName);
-        //this.mortalityPartialMpa = this.createMortality(configurationFile, cmd);
+        this.mortalityPartialMpa = this.createMortality(configurationFile, cmd);
         
         // Test with Partial MPA and variable Fishing effort.
         Path fishingEffortPath = Paths.get(this.getClass().getClassLoader().getResource("osmose-eec").getPath());
