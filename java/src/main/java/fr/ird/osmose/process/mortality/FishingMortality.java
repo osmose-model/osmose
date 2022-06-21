@@ -152,11 +152,11 @@ public class FishingMortality extends AbstractMortality {
                 if (!getConfiguration().isNull("mortality.fishing.spatial.distrib.file.sp" + fileSpeciesIndex)) {
                     spatialFactor[cpt] = new GridMap(getConfiguration().getFile("mortality.fishing.spatial.distrib.file.sp" + fileSpeciesIndex));
                     // Make sure the sum of the values in ocean cells is equal to one
-                    double sum = 0.d;
+                    float sum = 0.f;
                     int nCells = 0;
                     for (Cell cell : getGrid().getCells()) {
                         if (!cell.isLand()) {
-                            double value = spatialFactor[cpt].getValue(cell);
+                            float value = spatialFactor[cpt].getValue(cell);
                             sum += value;
                             if(value > 0) {
                                 nCells++;
@@ -164,16 +164,22 @@ public class FishingMortality extends AbstractMortality {
                         }
                     }
 
-                    sum /= nCells;
+                    float average = sum / nCells;
 
-                    if (Math.abs(sum - 1.d) > 1e-2) {
+                    if (Math.abs(average - 1.f) > 1e-2) {
                         StringBuilder msg = new StringBuilder();
                         msg.append("The means of the factors in spatial fishing distribution file ");
-                        msg.append(getConfiguration().getFile("mortality.fishing.spatial.distrib.file.sp" + fileSpeciesIndex));
-                        msg.append(" must be equal to one.");
-                        error(msg.toString(), null);
+                        msg.append(getConfiguration()
+                                .getFile("mortality.fishing.spatial.distrib.file.sp" + fileSpeciesIndex));
+                        msg.append(" must be equal to one over fished areas.");
+                        msg.append("Spatial factor will be normalized");
+                        warning(msg.toString());
+                        for (Cell cell : getGrid().getCells()) {
+                            spatialFactor[cpt].setValue(cell, spatialFactor[cpt].getValue(cell) / average);
+                        }
                     }
-                }  // end of existence test
+
+                } // end of existence test
 
                 cpt++;
 
