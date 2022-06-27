@@ -23,6 +23,7 @@ public class TestMPA {
     FishingMortality mortalityPartialMpa;
     FishingMortality mortalityPartialMpaVariableF;
     FishingMortality mortalityPartialMpaVariableFWithZeros;
+    FishingMortality mortalityRicardoTest;
 
     private final int nY = 22;
     private final int nX = 45;
@@ -43,8 +44,8 @@ public class TestMPA {
         // define MPA
         cmd.put("mpa.start.year.mpa0", "0");
         cmd.put("mpa.end.year.mpa0", "1");
-        Path mpaPath = Paths.get(this.getClass().getClassLoader().getResource("osmose-eec").getPath());
-        String mpaFileName = mpaPath.resolve("mpa").resolve("full_mpa.csv").toString();
+        Path inputPath = Paths.get(this.getClass().getClassLoader().getResource("osmose-eec").getPath());
+        String mpaFileName = inputPath.resolve("mpa").resolve("full_mpa.csv").toString();
         cmd.put("mpa.file.mpa0", mpaFileName);
 
         // deactivate new fisheries and use old ones instead
@@ -68,29 +69,34 @@ public class TestMPA {
         this.mortalityFullMpa = this.createMortality(configurationFile, cmd);
 
         // Test with partial MPA
-        mpaFileName = mpaPath.resolve("mpa").resolve("partial_mpa.csv").toString();
+        mpaFileName = inputPath.resolve("mpa").resolve("partial_mpa.csv").toString();
         cmd.put("mpa.file.mpa0", mpaFileName);
         this.mortalityPartialMpa = this.createMortality(configurationFile, cmd);
-        
+
         // Test with Partial MPA and variable Fishing effort.
-        Path fishingEffortPath = Paths.get(this.getClass().getClassLoader().getResource("osmose-eec").getPath());
-        String fishingEffortFileName = fishingEffortPath.resolve("mpa").resolve("rate_map1.csv").toString();
+        String fishingEffortFileName = inputPath.resolve("mpa").resolve("rate_map1.csv").toString();
         cmd.put("mortality.fishing.spatial.distrib.file.sp0", fishingEffortFileName);
         this.mortalityPartialMpaVariableF = this.createMortality(configurationFile, cmd);
-        
+
         // Test with Partial MPA and variable Fishing effort.
-        fishingEffortPath = Paths.get(this.getClass().getClassLoader().getResource("osmose-eec").getPath());
-        fishingEffortFileName = fishingEffortPath.resolve("mpa").resolve("rate_map2.csv").toString();
+        fishingEffortFileName = inputPath.resolve("mpa").resolve("rate_map2.csv").toString();
         cmd.put("mortality.fishing.spatial.distrib.file.sp0", fishingEffortFileName);
         this.mortalityPartialMpaVariableFWithZeros = this.createMortality(configurationFile, cmd);
-    
+
+        // This is Ricardo's test request.
+        fishingEffortFileName = inputPath.resolve("mpa").resolve("rate_map3.csv").toString();
+        cmd.put("mortality.fishing.spatial.distrib.file.sp0", fishingEffortFileName);
+        mpaFileName = inputPath.resolve("mpa").resolve("mpa_map3.csv").toString();
+        cmd.put("mpa.file.mpa0", mpaFileName);
+        this.mortalityRicardoTest = this.createMortality(configurationFile, cmd);
+
     }
-    
+
     public FishingMortality createMortality(String configurationFile, HashMap<String, String> cmd) throws IOException, InvalidRangeException {
 
         Osmose osmose = Osmose.getInstance();
         osmose.getLogger().setLevel(Level.SEVERE);
-        
+
         osmose.readConfiguration(configurationFile, cmd);
         cfg = osmose.getConfiguration();
         cfg.init();
@@ -98,9 +104,9 @@ public class TestMPA {
         FishingMortality mortality = new FishingMortality(0);
         mortality.init();
         mortality.setMPA();
-        
+
         return mortality;
-       
+
     }
 
     @Test
@@ -351,7 +357,7 @@ public class TestMPA {
         assertArrayEquals(expected, actual, PRECISION);
 
     }
-    
+
     @Test
     public void TestPartialMpaVariableF() {
 
@@ -466,12 +472,12 @@ public class TestMPA {
         assertArrayEquals(expected, actual, PRECISION);
 
     }
-    
+
     @Test
     public void TestPartialMpaVariableFWithZeros() {
-        
+
         float[] actual = this.buildActualArray(this.mortalityPartialMpaVariableFWithZeros);
-        
+
         float[] expected = new float[] { -999.0f, -999.0f, -999.0f, -999.0f, -999.0f, -999.0f, -999.0f, -999.0f,
                 -999.0f, -999.0f, -999.0f, -999.0f, -999.0f, -999.0f, -999.0f, -999.0f, -999.0f, -999.0f, -999.0f,
                 -999.0f, -999.0f, -999.0f, -999.0f, -999.0f, -999.0f, -999.0f, -999.0f, -999.0f, -999.0f, -999.0f,
@@ -572,11 +578,122 @@ public class TestMPA {
                 -999.0f, -999.0f, -999.0f, -999.0f, -999.0f, -999.0f, -999.0f, -999.0f, -999.0f, 0.93280494f,
                 0.93280494f, 0.93280494f, 0.93280494f, 0.93280494f, 0.93280494f, 0.93280494f, 0.93280494f, 0.93280494f,
                 0.93280494f, 0.93280494f };
-                
+
         assertArrayEquals(expected, actual, PRECISION);
 
     }
-    
+
+    @Test
+    public void TestRicardoMPA() {
+
+        float[] actual = this.buildActualArray(this.mortalityRicardoTest);
+
+        float[] expected = new float[] { -999.0f, -999.0f, -999.0f, -999.0f, -999.0f, -999.0f, -999.0f, -999.0f,
+                -999.0f, -999.0f, -999.0f, -999.0f, -999.0f, -999.0f, -999.0f, -999.0f, -999.0f, -999.0f, -999.0f,
+                -999.0f, -999.0f, -999.0f, -999.0f, -999.0f, -999.0f, -999.0f, -999.0f, -999.0f, -999.0f, -999.0f,
+                -999.0f, -999.0f, -999.0f, -999.0f, -999.0f, -999.0f, -999.0f, -999.0f, -999.0f, -999.0f, -999.0f,
+                -999.0f, -999.0f, -999.0f, -999.0f, 0.0f, 0.0f, 0.0f, 0.0f, -999.0f, -999.0f, -999.0f, -999.0f, -999.0f,
+                -999.0f, -999.0f, -999.0f, -999.0f, -999.0f, -999.0f, -999.0f, -999.0f, -999.0f, -999.0f, -999.0f,
+                -999.0f, -999.0f, -999.0f, -999.0f, -999.0f, -999.0f, -999.0f, -999.0f, -999.0f, -999.0f, -999.0f,
+                -999.0f, -999.0f, -999.0f, -999.0f, -999.0f, -999.0f, -999.0f, -999.0f, -999.0f, -999.0f, -999.0f,
+                -999.0f, -999.0f, -999.0f, 0.0f, 0.0f, 0.0f, 0.0f, -999.0f, -999.0f, -999.0f, -999.0f, -999.0f, -999.0f,
+                -999.0f, -999.0f, -999.0f, -999.0f, -999.0f, -999.0f, -999.0f, -999.0f, -999.0f, -999.0f, -999.0f,
+                -999.0f, -999.0f, -999.0f, -999.0f, -999.0f, -999.0f, -999.0f, -999.0f, -999.0f, -999.0f, -999.0f,
+                -999.0f, -999.0f, -999.0f, -999.0f, -999.0f, -999.0f, -999.0f, -999.0f, -999.0f, -999.0f, -999.0f,
+                -999.0f, -999.0f, 0.0f, 0.0f, 0.0f, -999.0f, -999.0f, -999.0f, -999.0f, -999.0f, -999.0f, -999.0f,
+                -999.0f, -999.0f, 0.6967058f, 0.6967058f, 0.6967058f, 0.8708823f, 0.8708823f, 0.8708823f, 0.8708823f,
+                0.8708823f, -999.0f, -999.0f, -999.0f, -999.0f, -999.0f, -999.0f, -999.0f, -999.0f, -999.0f, -999.0f,
+                -999.0f, -999.0f, -999.0f, -999.0f, -999.0f, -999.0f, -999.0f, -999.0f, -999.0f, -999.0f, -999.0f,
+                -999.0f, -999.0f, -999.0f, -999.0f, 0.0f, 0.0f, -999.0f, -999.0f, -999.0f, -999.0f, -999.0f, -999.0f,
+                2.6126468f, 2.6126468f, 0.6967058f, 0.6967058f, 0.6967058f, 0.6967058f, 0.6967058f, 0.8708823f,
+                0.8708823f, 0.8708823f, 0.8708823f, 0.8708823f, 1.7417645f, 1.7417645f, -999.0f, -999.0f, -999.0f,
+                -999.0f, -999.0f, -999.0f, -999.0f, -999.0f, -999.0f, -999.0f, -999.0f, -999.0f, -999.0f, -999.0f,
+                -999.0f, -999.0f, -999.0f, -999.0f, -999.0f, -999.0f, -999.0f, -999.0f, -999.0f, 0.0f, -999.0f, -999.0f,
+                -999.0f, -999.0f, -999.0f, -999.0f, 2.6126468f, 2.6126468f, 2.6126468f, 0.6967058f, 0.6967058f,
+                0.6967058f, 0.6967058f, 0.6967058f, 0.8708823f, 0.8708823f, 0.8708823f, 0.8708823f, 0.8708823f,
+                1.7417645f, -999.0f, -999.0f, -999.0f, -999.0f, -999.0f, -999.0f, -999.0f, -999.0f, -999.0f, -999.0f,
+                -999.0f, -999.0f, -999.0f, -999.0f, -999.0f, -999.0f, -999.0f, -999.0f, -999.0f, -999.0f, -999.0f,
+                -999.0f, -999.0f, -999.0f, 0.0f, -999.0f, -999.0f, -999.0f, -999.0f, -999.0f, -999.0f, 2.6126468f,
+                2.6126468f, 2.6126468f, 0.6967058f, 0.6967058f, 0.6967058f, 0.6967058f, 0.6967058f, 0.8708823f,
+                0.8708823f, 0.8708823f, 0.8708823f, 0.8708823f, 1.7417645f, 1.7417645f, -999.0f, -999.0f, -999.0f,
+                -999.0f, -999.0f, -999.0f, -999.0f, -999.0f, -999.0f, -999.0f, -999.0f, -999.0f, -999.0f, -999.0f,
+                -999.0f, -999.0f, -999.0f, -999.0f, -999.0f, -999.0f, -999.0f, -999.0f, -999.0f, 0.0f, 0.0f, 0.0f, 0.0f,
+                0.0f, 2.6126468f, 2.6126468f, 2.6126468f, 2.6126468f, 2.6126468f, 0.6967058f, 0.6967058f, 0.6967058f,
+                0.6967058f, 0.6967058f, 0.8708823f, 0.8708823f, 0.8708823f, 0.8708823f, 0.8708823f, 1.7417645f,
+                1.7417645f, 1.7417645f, -999.0f, -999.0f, -999.0f, -999.0f, -999.0f, -999.0f, -999.0f, -999.0f, -999.0f,
+                -999.0f, -999.0f, -999.0f, -999.0f, -999.0f, -999.0f, -999.0f, -999.0f, -999.0f, -999.0f, -999.0f,
+                -999.0f, -999.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 2.6126468f, 2.6126468f, 2.6126468f, 2.6126468f,
+                2.6126468f, 0.6967058f, 0.6967058f, 0.6967058f, 0.6967058f, 0.6967058f, 0.8708823f, 0.8708823f,
+                0.8708823f, 0.8708823f, 0.8708823f, 1.7417645f, 1.7417645f, 1.7417645f, 1.7417645f, 1.7417645f,
+                1.7417645f, -999.0f, -999.0f, -999.0f, -999.0f, -999.0f, -999.0f, -999.0f, -999.0f, -999.0f, -999.0f,
+                -999.0f, -999.0f, -999.0f, -999.0f, -999.0f, -999.0f, -999.0f, -999.0f, -999.0f, 0.0f, 0.0f, 0.0f, 0.0f,
+                0.0f, 2.6126468f, 2.6126468f, 2.6126468f, 2.6126468f, 2.6126468f, 0.6967058f, 0.6967058f, 0.6967058f,
+                0.6967058f, 0.6967058f, 0.8708823f, 0.8708823f, 0.8708823f, 0.8708823f, 0.8708823f, 1.7417645f,
+                1.7417645f, 1.7417645f, 1.7417645f, 1.7417645f, 1.7417645f, 1.7417645f, 1.7417645f, 1.7417645f,
+                1.7417645f, 0.08708823f, -999.0f, -999.0f, -999.0f, -999.0f, -999.0f, -999.0f, -999.0f, -999.0f,
+                -999.0f, -999.0f, -999.0f, -999.0f, -999.0f, -999.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 2.6126468f,
+                2.6126468f, 2.6126468f, 2.6126468f, 2.6126468f, 0.6967058f, 0.6967058f, 0.6967058f, 0.6967058f,
+                0.6967058f, 0.8708823f, 0.8708823f, 0.8708823f, 0.8708823f, 0.8708823f, 1.7417645f, 1.7417645f,
+                1.7417645f, 1.7417645f, 1.7417645f, 1.7417645f, 1.7417645f, 1.7417645f, 1.7417645f, 1.7417645f,
+                0.08708823f, 0.08708823f, 0.08708823f, -999.0f, -999.0f, -999.0f, -999.0f, -999.0f, -999.0f, -999.0f,
+                -999.0f, -999.0f, -999.0f, -999.0f, -999.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 2.6126468f, 2.6126468f,
+                2.6126468f, 2.6126468f, 2.6126468f, 0.6967058f, 0.6967058f, 0.6967058f, 0.6967058f, 0.6967058f,
+                0.8708823f, 0.8708823f, 0.8708823f, 0.8708823f, 0.8708823f, 1.7417645f, 1.7417645f, 1.7417645f,
+                1.7417645f, 1.7417645f, 1.7417645f, 1.7417645f, 1.7417645f, 1.7417645f, 1.7417645f, 0.08708823f,
+                0.08708823f, 0.08708823f, 0.08708823f, 0.08708823f, -999.0f, -999.0f, -999.0f, -999.0f, -999.0f,
+                -999.0f, -999.0f, -999.0f, -999.0f, -999.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 2.6126468f, 2.6126468f,
+                2.6126468f, 2.6126468f, 2.6126468f, 0.6967058f, 0.6967058f, 0.6967058f, 0.6967058f, 0.6967058f,
+                0.8708823f, 0.8708823f, 0.8708823f, 0.8708823f, 0.8708823f, 1.7417645f, 1.7417645f, 1.7417645f,
+                1.7417645f, 1.7417645f, 1.7417645f, 1.7417645f, 1.7417645f, 1.7417645f, 1.7417645f, 0.08708823f,
+                0.08708823f, 0.08708823f, 0.08708823f, 0.08708823f, 0.08708823f, -999.0f, -999.0f, -999.0f, -999.0f,
+                -999.0f, -999.0f, -999.0f, -999.0f, -999.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 2.6126468f, 2.6126468f,
+                2.6126468f, 2.6126468f, 2.6126468f, 0.6967058f, 0.6967058f, 0.6967058f, 0.6967058f, 0.6967058f,
+                0.8708823f, 0.8708823f, 0.8708823f, 0.8708823f, 0.8708823f, 1.7417645f, 1.7417645f, 1.7417645f,
+                1.7417645f, 1.7417645f, 1.7417645f, 1.7417645f, 1.7417645f, 1.7417645f, 1.7417645f, 0.08708823f,
+                0.08708823f, 0.08708823f, 0.08708823f, 0.08708823f, 0.08708823f, -999.0f, -999.0f, -999.0f, -999.0f,
+                -999.0f, -999.0f, -999.0f, -999.0f, -999.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 2.6126468f, 2.6126468f,
+                2.6126468f, 2.6126468f, 2.6126468f, 0.6967058f, 0.6967058f, 0.6967058f, 0.6967058f, 0.6967058f,
+                0.8708823f, 0.8708823f, 0.8708823f, 0.8708823f, 0.8708823f, 1.7417645f, 1.7417645f, 1.7417645f,
+                1.7417645f, 1.7417645f, 1.7417645f, 1.7417645f, 1.7417645f, 1.7417645f, 1.7417645f, 0.08708823f,
+                0.08708823f, 0.08708823f, 0.08708823f, 0.08708823f, 0.08708823f, -999.0f, -999.0f, -999.0f, -999.0f,
+                -999.0f, -999.0f, -999.0f, -999.0f, -999.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 2.6126468f, 2.6126468f,
+                2.6126468f, 2.6126468f, 2.6126468f, 0.6967058f, 0.6967058f, 0.6967058f, 0.6967058f, 0.6967058f,
+                0.8708823f, 0.8708823f, 0.8708823f, 0.8708823f, 0.8708823f, 1.7417645f, 1.7417645f, 1.7417645f,
+                1.7417645f, 1.7417645f, 1.7417645f, 1.7417645f, 1.7417645f, 1.7417645f, 1.7417645f, 0.08708823f,
+                0.08708823f, 0.08708823f, 0.08708823f, 0.08708823f, 0.08708823f, -999.0f, -999.0f, -999.0f, -999.0f,
+                -999.0f, -999.0f, -999.0f, -999.0f, -999.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 2.6126468f, -999.0f, -999.0f,
+                -999.0f, 2.6126468f, 0.6967058f, 0.6967058f, 0.6967058f, 0.6967058f, 0.6967058f, 0.8708823f, 0.8708823f,
+                0.8708823f, 0.8708823f, 0.8708823f, 1.7417645f, 1.7417645f, 1.7417645f, 1.7417645f, 1.7417645f,
+                1.7417645f, 1.7417645f, 1.7417645f, 1.7417645f, 1.7417645f, 0.08708823f, 0.08708823f, 0.08708823f,
+                0.08708823f, 0.08708823f, 0.08708823f, -999.0f, -999.0f, -999.0f, -999.0f, -999.0f, -999.0f, -999.0f,
+                -999.0f, -999.0f, -999.0f, -999.0f, -999.0f, -999.0f, -999.0f, -999.0f, -999.0f, 2.6126468f, 2.6126468f,
+                2.6126468f, 0.6967058f, -999.0f, -999.0f, 0.6967058f, 0.6967058f, 0.8708823f, 0.8708823f, 0.8708823f,
+                0.8708823f, 0.8708823f, 1.7417645f, 1.7417645f, -999.0f, 1.7417645f, 1.7417645f, 1.7417645f, 1.7417645f,
+                1.7417645f, 1.7417645f, 1.7417645f, 0.08708823f, 0.08708823f, 0.08708823f, 0.08708823f, 0.08708823f,
+                0.08708823f, -999.0f, -999.0f, -999.0f, -999.0f, -999.0f, -999.0f, -999.0f, -999.0f, -999.0f, -999.0f,
+                -999.0f, -999.0f, -999.0f, -999.0f, -999.0f, -999.0f, -999.0f, -999.0f, -999.0f, -999.0f, -999.0f,
+                -999.0f, -999.0f, -999.0f, -999.0f, -999.0f, -999.0f, -999.0f, -999.0f, -999.0f, -999.0f, -999.0f,
+                -999.0f, -999.0f, -999.0f, 1.7417645f, 1.7417645f, 1.7417645f, 1.7417645f, 0.08708823f, 0.08708823f,
+                0.08708823f, 0.08708823f, 0.08708823f, 0.08708823f, -999.0f, -999.0f, -999.0f, -999.0f, -999.0f,
+                -999.0f, -999.0f, -999.0f, -999.0f, -999.0f, -999.0f, -999.0f, -999.0f, -999.0f, -999.0f, -999.0f,
+                -999.0f, -999.0f, -999.0f, -999.0f, -999.0f, -999.0f, -999.0f, -999.0f, -999.0f, -999.0f, -999.0f,
+                -999.0f, -999.0f, -999.0f, -999.0f, -999.0f, -999.0f, -999.0f, -999.0f, -999.0f, -999.0f, -999.0f,
+                -999.0f, 0.08708823f, 0.08708823f, 0.08708823f, 0.08708823f, 0.08708823f, 0.08708823f, 0.08708823f,
+                0.08708823f, -999.0f, -999.0f, -999.0f, -999.0f, -999.0f, -999.0f, -999.0f, -999.0f, -999.0f, -999.0f,
+                -999.0f, -999.0f, -999.0f, -999.0f, -999.0f, -999.0f, -999.0f, -999.0f, -999.0f, -999.0f, -999.0f,
+                -999.0f, -999.0f, -999.0f, -999.0f, -999.0f, -999.0f, -999.0f, -999.0f, -999.0f, -999.0f, -999.0f,
+                -999.0f, -999.0f, -999.0f, -999.0f, -999.0f, 0.08708823f, 0.08708823f, 0.08708823f, 0.08708823f,
+                0.08708823f, 0.08708823f, 0.08708823f, 0.08708823f, 0.08708823f, 0.08708823f, 0.08708823f, 0.08708823f,
+                0.08708823f, 0.08708823f, -999.0f, -999.0f, -999.0f, -999.0f, -999.0f, -999.0f, -999.0f, -999.0f,
+                -999.0f, -999.0f, -999.0f, -999.0f, -999.0f, -999.0f, -999.0f, -999.0f, -999.0f, -999.0f, -999.0f,
+                -999.0f, -999.0f, -999.0f, -999.0f, -999.0f, -999.0f, -999.0f, -999.0f, -999.0f, -999.0f, -999.0f,
+                -999.0f, -999.0f, -999.0f, -999.0f, -999.0f, 0.08708823f, 0.08708823f, 0.08708823f, 0.08708823f,
+                0.08708823f, 0.08708823f, 0.08708823f, 0.08708823f, 0.08708823f, 0.08708823f, 0.08708823f };
+
+                assertArrayEquals(expected, actual, PRECISION);
+
+    }
+
 
     /** Build the actual 1D array based on the fishing mortality object. */
     private float[] buildActualArray(FishingMortality mortality) {

@@ -6,7 +6,7 @@
 #       extension: .py
 #       format_name: light
 #       format_version: '1.5'
-#       jupytext_version: 1.13.7
+#       jupytext_version: 1.10.3
 #   kernelspec:
 #     display_name: Python 3 (ipykernel)
 #     language: python
@@ -223,9 +223,40 @@ output.to_csv('mpa/partial_mpa.csv', header=False, index=False)
 new_rate = compute_mpa(mpamaps, rate)
 print(np.unique(new_rate))
 # -
+# ## New Ricardo's test
 
+# +
+mpamaps = np.zeros(mask.shape).astype(np.float32)
+mpamaps[:, :5] = 1
+mpamaps[:, 5:10] = 0.8
+mpamaps[:, 10:15] = 0.2
+mpamaps = np.ma.masked_where(mask == 0, mpamaps)
 
+rate = np.ones(mask.shape).astype(np.float32)
+rate[:, :10] = 1.5
+rate[:, 10:20] = 0.1
+rate[:, 20:30] = 0.2
+rate[:, 30:] = 0.01
+rate = np.ma.masked_where(mask == 0, rate)
 
+plt.figure()
+cs = plt.pcolormesh(rate)
+plt.colorbar(cs)
+plt.title('rate')
+rate[np.ma.getmaskarray(rate)] = -999
+output = pd.DataFrame(rate[::-1])
+output.to_csv('mpa/rate_map3.csv', header=False, index=False)
 
+plt.figure()
+cs = plt.pcolormesh(mpamaps)
+plt.colorbar(cs)
+plt.title('mpa')
+mpamaps[np.ma.getmaskarray(mpamaps)] = -999
+output = pd.DataFrame(mpamaps[::-1])
+output.to_csv('mpa/mpa_map3.csv', header=False, index=False)
+
+new_rate = compute_mpa(mpamaps, rate, display=True)
+print(np.unique(new_rate))
+# -
 
 
