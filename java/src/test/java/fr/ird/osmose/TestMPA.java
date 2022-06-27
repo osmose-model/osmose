@@ -27,7 +27,7 @@ public class TestMPA {
 
     private final int nY = 22;
     private final int nX = 45;
-    private final float PRECISION = 0.001f;
+    private final float PRECISION = 0.00001f;
 
     /** Prepare the input data for the test. */
     @BeforeAll
