@@ -105,6 +105,13 @@ public class MPA extends OsmoseLinker {
             start = Integer.MAX_VALUE;
         }
 
+        if(end < start) {
+            String message = String.format("End (%d) and start (%d) dates have been swapped for MPA index %d", end, start, index);
+            warning(message);
+            int temp = end;
+            end = start;
+            start = temp;
+        }
 
     }
 
