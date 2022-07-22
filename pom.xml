@@ -120,7 +120,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
         <repository>
             <id>project.local</id>
             <name>project</name>
-            <url>file:${project.basedir}/local/</url>
+            <url>file:${project.basedir}/java/local/</url>
         </repository>
 
         <!-- NetCDF releases repository -->
