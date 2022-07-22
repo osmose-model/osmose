@@ -1,10 +1,10 @@
-/* 
- * 
+/*
+ *
  * OSMOSE (Object-oriented Simulator of Marine Ecosystems)
  * http://www.osmose-model.org
- * 
+ *
  * Copyright (C) IRD (Institut de Recherche pour le Développement) 2009-2020
- * 
+ *
  * Osmose is a computer program whose purpose is to simulate fish
  * populations and their interactions with their biotic and abiotic environment.
  * OSMOSE is a spatial, multispecies and individual-based model which assumes
@@ -15,7 +15,7 @@
  * processes of fish life cycle (growth, explicit predation, additional and
  * starvation mortalities, reproduction and migration) and fishing mortalities
  * (Shin and Cury 2001, 2004).
- * 
+ *
  * Contributor(s):
  * Yunne SHIN (yunne.shin@ird.fr),
  * Morgane TRAVERS (morgane.travers@ifremer.fr)
@@ -23,20 +23,20 @@
  * Philippe VERLEY (philippe.verley@ird.fr)
  * Laure VELEZ (laure.velez@ird.fr)
  * Nicolas Barrier (nicolas.barrier@ird.fr)
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation (version 3 of the License). Full description
  * is provided on the LICENSE file.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
- * 
+ *
  */
 package fr.ird.osmose;
 
@@ -155,7 +155,7 @@ public class School extends AbstractSchool {
     private double e_net;      // net energy (gross - maintenance)
     private double ingestion;   // total ingestion
     private double kappa;    // kappa value
-    double ingestionTot = 0; // sum of all the food ingested during life of the 
+    double ingestionTot = 0; // sum of all the food ingested during life of the
     // school
 
     /**
@@ -269,6 +269,7 @@ public class School extends AbstractSchool {
         biomass = abundance * (weight);
         // Rest number of dead fish
         reset(nDead);
+        reset(ageDeath);
         // Reset diet variables
         preys.clear();
         preyedBiomass = 0.d;
@@ -362,6 +363,7 @@ public class School extends AbstractSchool {
      */
     public void setNdead(MortalityCause cause, double nDead) {
         this.nDead[cause.index] = nDead;
+        this.ageDeath[cause.index] += nDead * this.getAge();
 
         double factor = 1;
         if (this.getInstantaneousAbundance() != 0) {
@@ -378,6 +380,7 @@ public class School extends AbstractSchool {
     public void incrementNdead(MortalityCause cause, double nDead) {
 
         this.nDead[cause.index] += nDead;
+        this.ageDeath[cause.index] += nDead * this.getAge();
         double factor = 1;
 
         if (this.getInstantaneousAbundance() != 0) {
@@ -461,7 +464,7 @@ public class School extends AbstractSchool {
     public boolean diesAging() {
         return (ageDt > species.getLifespanDt() - 2);
     }
-    
+
     /**
      * Returns a string representation of the school (species, cohort and
      * location).
@@ -585,7 +588,7 @@ public class School extends AbstractSchool {
         return this.ingestion;
     }
 
-    // Calculate the total ingestion of food during life of the school 
+    // Calculate the total ingestion of food during life of the school
     public double getIngestionTot() {
         return this.ingestionTot;
     }
@@ -826,6 +829,11 @@ public class School extends AbstractSchool {
     public boolean existsTrait(String key) throws Exception {
         return this.getGenotype().existsTrait(key);
     }
+    
+    public double getgenet_value(String key) throws Exception {
+        return this.getGenotype().getgenet_value(key);
+    }
+
 
     @Override
     public String getSpeciesName() {
@@ -841,7 +849,7 @@ public class School extends AbstractSchool {
     public boolean isEgg() {
         return (this.getAgeDt() < this.getSpecies().getFirstFeedingAgeDt());
     }
-    
+
     /** Starvation enabled if species is older than first feeding age. */
     public boolean isStarvationEnabled() {
         return (this.getAgeDt() > this.getSpecies().getFirstFeedingAgeDt());
