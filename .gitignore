@@ -42,6 +42,8 @@ inst/doc
 /vignettes/create_run_read_cache
 
 java/target
+target
+
 **sh
 **.html
 build
