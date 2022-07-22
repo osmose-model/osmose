@@ -294,7 +294,7 @@ public class School extends AbstractSchool {
     }
 
     /** Get the number of eggs */
-    public double getNeggs() {
+    public double getNEggs() {
         return this.nEggs;
     }
 
