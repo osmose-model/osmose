@@ -143,6 +143,18 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
     <build>
         <finalName>${project.artifactId}_${project.version}</finalName>
+        <sourceDirectory>java/src/main/java/</sourceDirectory>
+        <testSourceDirectory>java/src/test/java/</testSourceDirectory>
+        <resources>
+            <resource>
+              <directory>java/src/main/resources</directory>
+            </resource>
+        </resources>
+        <testResources>
+            <testResource>
+              <directory>java/src/test/resources</directory>
+            </testResource>
+        </testResources>
         <plugins>
 
             <plugin>
@@ -226,7 +238,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
                             <goal>single</goal>
                         </goals>
                         <configuration>
-			                <outputDirectory>${project.basedir}/../inst/java/</outputDirectory>
+			                <outputDirectory>${project.basedir}/inst/java/</outputDirectory>
                             <archive>
                                 <manifest>
                                     <addClasspath>true</addClasspath>
