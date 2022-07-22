@@ -289,12 +289,12 @@ public class School extends AbstractSchool {
     }
 
     /** Increment the number of eggs */
-    private void incrementNeggs(double nEgg) {
+    public void incrementNeggs(double nEgg) {
         this.nEggs += nEgg;
     }
 
     /** Get the number of eggs */
-    private double getNeggs() {
+    public double getNeggs() {
         return this.nEggs;
     }
 
