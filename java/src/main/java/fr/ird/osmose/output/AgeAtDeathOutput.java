@@ -59,7 +59,7 @@ public class AgeAtDeathOutput extends AbstractOutput {
 
     double nDeadTot;
     double ageDeathTot;
-
+    
     public AgeAtDeathOutput(int rank, Species species) {
         super(rank, "Mortality", "ageAtDeath" + "-" + species.getName());
         this.species = species;
@@ -82,10 +82,14 @@ public class AgeAtDeathOutput extends AbstractOutput {
 
     @Override
     public void update() {
-
+        float thres = getConfiguration().getFloat("output.age.death.cutoff.dt");
         // Loop on all the schools to be sure we don't discard dead schools
         for (School school : getSchoolSet().getSchools()) {
             if (school.getFileSpeciesIndex() != species.getFileSpeciesIndex()) {
+                continue;
+            }
+         
+            if (school.getAgeDt() <= thres) {
                 continue;
             }
             // Update number of deads
