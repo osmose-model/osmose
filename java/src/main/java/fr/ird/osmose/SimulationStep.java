@@ -209,6 +209,9 @@ public class SimulationStep extends SimulationLinker {
 
         // Remove all dead schools
         getSchoolSet().removeDeadSchools();
+
+        // merge schools obtained by reproduction into the classic pool.
+        getSchoolSet().mergeSchoolSets();
     }
 
     /**
