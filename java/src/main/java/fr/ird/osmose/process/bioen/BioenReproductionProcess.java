@@ -192,7 +192,7 @@ public class BioenReproductionProcess extends ReproductionProcess {
             } else {
                 school0.getGenotype().init_genotype();
             }
-            getSchoolSet().add(school0);
+            getSchoolSet().addReproductionSchool(school0);
         } else if (nEgg >= nSchool) {
 
             for (int s = 0; s < nSchool; s++) {
@@ -206,7 +206,7 @@ public class BioenReproductionProcess extends ReproductionProcess {
 
                     school0.getGenotype().init_genotype();
                 }
-                getSchoolSet().add(school0);
+                getSchoolSet().addReproductionSchool(school0);
             }
 
         } // end of test on nEgg
