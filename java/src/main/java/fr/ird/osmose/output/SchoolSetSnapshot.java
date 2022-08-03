@@ -1,10 +1,10 @@
-/* 
- * 
+/*
+ *
  * OSMOSE (Object-oriented Simulator of Marine Ecosystems)
  * http://www.osmose-model.org
- * 
+ *
  * Copyright (C) IRD (Institut de Recherche pour le Développement) 2009-2020
- * 
+ *
  * Osmose is a computer program whose purpose is to simulate fish
  * populations and their interactions with their biotic and abiotic environment.
  * OSMOSE is a spatial, multispecies and individual-based model which assumes
@@ -15,7 +15,7 @@
  * processes of fish life cycle (growth, explicit predation, additional and
  * starvation mortalities, reproduction and migration) and fishing mortalities
  * (Shin and Cury 2001, 2004).
- * 
+ *
  * Contributor(s):
  * Yunne SHIN (yunne.shin@ird.fr),
  * Morgane TRAVERS (morgane.travers@ifremer.fr)
@@ -23,20 +23,20 @@
  * Philippe VERLEY (philippe.verley@ird.fr)
  * Laure VELEZ (laure.velez@ird.fr)
  * Nicolas Barrier (nicolas.barrier@ird.fr)
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation (version 3 of the License). Full description
  * is provided on the LICENSE file.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
- * 
+ *
  */
 
 package fr.ird.osmose.output;
@@ -64,18 +64,20 @@ import ucar.nc2.Variable;
  * @author pverley
  */
 public class SchoolSetSnapshot extends SimulationLinker {
-    
+
     private Variable xVar, yVar, abVar, ageVar, lengthVar, weightVar, tlVar, specVar;
-    private Variable genetVar, traitVar;
+    private Variable genetVar, traitVar, gonadWeightVar;
     private int nTrait=0;
     private int nMaxLoci;
-    
+
     public SchoolSetSnapshot(int rank) {
         super(rank);
     }
 
     public void makeSnapshot(int iStepSimu) {
         boolean useGenet = this.getConfiguration().isGeneticEnabled();
+        boolean useBioen = this.getConfiguration().isBioenEnabled();
+        ArrayFloat.D1 gonadicWeight = null;
         ArrayFloat.D4 genotype = null;
         ArrayFloat.D2 traitnoise = null;
         NetcdfFileWriter nc = createNCFile(iStepSimu);
@@ -88,13 +90,16 @@ public class SchoolSetSnapshot extends SimulationLinker {
         ArrayFloat.D1 length = new ArrayFloat.D1(nSchool);
         ArrayFloat.D1 weight = new ArrayFloat.D1(nSchool);
         ArrayFloat.D1 trophiclevel = new ArrayFloat.D1(nSchool);
-        
+        if (useBioen) {
+            gonadicWeight = new ArrayFloat.D1(nSchool);
+        }
+
         // if use genetic, initialize the output of the genotype (nschool x ntrait x nloci x 2)
         if (useGenet) {
             genotype = new ArrayFloat.D4(nSchool, this.nTrait, this.nMaxLoci, 2);
             traitnoise = new ArrayFloat.D2(nSchool, this.nTrait);
         }
-        
+
         int s = 0;
         // fill up the arrays
         for (School school : getSchoolSet().getSchools()) {
@@ -106,7 +111,8 @@ public class SchoolSetSnapshot extends SimulationLinker {
             length.set(s, school.getLength());
             weight.set(s, school.getWeight() * 1e6f);
             trophiclevel.set(s, school.getTrophicLevel());
-            
+            gonadicWeight.set(s, school.getGonadWeight() * 1e6f);
+
             if(useGenet) {
                 // If use genetic module, save the list of loci pairs for each trait.
                 Genotype gen = school.getGenotype();
@@ -114,8 +120,8 @@ public class SchoolSetSnapshot extends SimulationLinker {
                     traitnoise.set(s, iTrait, (float) gen.getEnvNoise(iTrait));
                     int nLoci = gen.getNLocus(iTrait);
                     for(int iLoci = 0; iLoci < nLoci; iLoci++) {
-                       genotype.set(s, iTrait, iLoci, 0, (float) gen.getLocus(iTrait, iLoci).getValue(0)); 
-                       genotype.set(s, iTrait, iLoci, 1, (float) gen.getLocus(iTrait, iLoci).getValue(1)); 
+                       genotype.set(s, iTrait, iLoci, 0, (float) gen.getLocus(iTrait, iLoci).getValue(0));
+                       genotype.set(s, iTrait, iLoci, 1, (float) gen.getLocus(iTrait, iLoci).getValue(1));
                     }
                 }
             }
@@ -132,9 +138,12 @@ public class SchoolSetSnapshot extends SimulationLinker {
             nc.write(this.lengthVar, length);
             nc.write(this.weightVar, weight);
             nc.write(this.tlVar, trophiclevel);
-            if(useGenet) { 
+            if(useGenet) {
                 nc.write(this.genetVar, genotype);
                 nc.write(this.traitVar, traitnoise);
+            }
+            if(useBioen) {
+                nc.write(this.gonadWeightVar, gonadicWeight);
             }
             nc.close();
             //close(nc);
@@ -149,7 +158,7 @@ public class SchoolSetSnapshot extends SimulationLinker {
 
         NetcdfFileWriter nc = null;
         File file = null;
-        
+
         /*
          * Create NetCDF file
          */
@@ -198,7 +207,7 @@ public class SchoolSetSnapshot extends SimulationLinker {
         tlVar = nc.addVariable(null, "trophiclevel", DataType.FLOAT, "nschool");
         tlVar.addAttribute(new Attribute("units", "scalar"));
         tlVar.addAttribute(new Attribute("description", "trophiclevel of the fish in the school"));
-        
+
         if(this.getConfiguration().isGeneticEnabled()) {
             // Determines the maximum number of Loci that codes a trait
             nTrait = this.getSimulation().getNEvolvingTraits();
@@ -206,19 +215,19 @@ public class SchoolSetSnapshot extends SimulationLinker {
                 Trait trait = this.getEvolvingTrait(iTrait);
                 for (int iSpec = 0; iSpec < this.getConfiguration().getNSpecies(); iSpec++) {
                     nMaxLoci = Math.max(trait.getNLocus(iSpec), nMaxLoci);
-                }   
+                }
             }
-            
+
            //Dimension[] dimOut = new Dimension[3] {
            Dimension traitDim = nc.addDimension(null, "trait", nTrait);
-           Dimension lociDim = nc.addDimension(null, "loci", nMaxLoci);        
+           Dimension lociDim = nc.addDimension(null, "loci", nMaxLoci);
            Dimension locValDim = nc.addDimension(null, "loci_val",  2);
-           
+
            this.genetVar = nc.addVariable(null, "genotype", DataType.FLOAT, new ArrayList<>(Arrays.asList(schoolDim, traitDim, lociDim, locValDim)));
            this.traitVar = nc.addVariable(null, "trait_variance", DataType.FLOAT, new ArrayList<>(Arrays.asList(schoolDim, traitDim)));
-           
+
         }
-        
+
         /*
          * Add global attributes
          */
@@ -230,9 +239,9 @@ public class SchoolSetSnapshot extends SimulationLinker {
             str.append(getSpecies(i).getName());
             str.append(" ");
         }
-        
+
         nc.addGroupAttribute(null, new Attribute("species", str.toString()));
-        
+
         try {
             /*
              * Validates the structure of the NetCDF file.
