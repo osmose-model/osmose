@@ -264,4 +264,10 @@ public class BackgroundSchool extends AbstractSchool {
         return 0;
     }
 
+    @Override
+    public double getNEggs() {
+        // TODO Auto-generated method stub
+        return 0;
+    }
+
 }

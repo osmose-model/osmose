@@ -22,7 +22,7 @@ jobs:
         uses: actions/setup-java@v1
         with:
           java-version: 1.8
-      
+
       - name: Cache Maven dependencies
         id: maven-dep
         uses: actions/cache@v2
@@ -31,13 +31,12 @@ jobs:
         with:
             path: ~/.m2/repository
             key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/*.jar') }}
-            restore-keys: | 
+            restore-keys: |
                 ${{ runner.os }}-build-${{ env.cache-name }}-
                 ${{ runner.os }}-build-
                 ${{ runner.os }}-
 
       - name: Compile Java code
-        run:  | 
-            cd java 
+        run:  |
             mvn build-helper:remove-project-artifact
             mvn -B package -Dmaven.test.skip=true

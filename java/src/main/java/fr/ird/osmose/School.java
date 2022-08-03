@@ -171,6 +171,7 @@ public class School extends AbstractSchool {
     private boolean isMature = false;
 
     private double e_net_faced; // mean net energy faced during life
+    private double nEggs;  // number of eggs that is released by the school
 
 ///////////////
 // Constructors
@@ -284,6 +285,17 @@ public class School extends AbstractSchool {
         // reset fished biomass
         reset(fishedBiomass);
         reset(this.discardedBiomass);
+        nEggs = 0;
+    }
+
+    /** Increment the number of eggs */
+    public void incrementNeggs(double nEgg) {
+        this.nEggs += nEgg;
+    }
+
+    /** Get the number of eggs */
+    public double getNEggs() {
+        return this.nEggs;
     }
 
     /**
@@ -829,7 +841,7 @@ public class School extends AbstractSchool {
     public boolean existsTrait(String key) throws Exception {
         return this.getGenotype().existsTrait(key);
     }
-    
+
     public double getgenet_value(String key) throws Exception {
         return this.getGenotype().getgenet_value(key);
     }
