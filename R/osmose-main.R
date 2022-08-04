@@ -360,7 +360,7 @@ osmose_demo = function(path = NULL, config = c("gog", "eec_4.3.0")){
 
   extra_args = switch(config,
                       gog = "",
-                      eec_4.3.0 = "-force -Psimulation.nfisheries=14 -Pspecies.biomass.nsteps.year=24",
+                      eec_4.3.0 = "",
                       stop(paste("There is not reference for", config))
   )
 
