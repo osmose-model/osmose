@@ -7,9 +7,10 @@ library(osmose)
 demo = osmose_demo(path = "./", config="eec_4.3.0")
 
 print(demo$config_file)
+print(demo$extra_args)
 
 # run the osmose java core
-run_osmose(demo$config_file, parameters="-force")
+run_osmose(demo$config_file, parameters=demo$extra_args)
 
 # read the osmose outputs
 data = read_osmose(demo$output_dir)
