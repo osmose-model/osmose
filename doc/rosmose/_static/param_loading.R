@@ -7,7 +7,7 @@ exampleFolder <- tempdir()
 demoPaths <- osmose_demo(path = exampleFolder, config = "eec_4.3.0")
 
 # load the Osmose configuration file
-osmConf = read_osmose(input=demoPaths$config_file)
+osmConf = readOsmoseConfiguration(demoPaths$config_file)
 
 # Summarize the configuration
 summary(osmConf)
@@ -24,9 +24,8 @@ plot(osmConf, what="species", species=0)
 
 # Plotting reproduction seasonality
 png(filename = file.path(output.dir, 'reproduction.png'))
-plot(osmConf, what="reproduction", species=1) 
+plot(osmConf, what="reproduction", species=1)
 
 # Plotting size range for predation
 png(filename = file.path(output.dir, 'predation.png'))
 plot(osmConf, what="predation", species=2)
-
