@@ -44,7 +44,7 @@ inst/doc
 java/target
 target
 
-**sh
+check.sh
 **.html
 build
 dist
@@ -79,5 +79,3 @@ doc/**/_static/*svg
 **/verif_fisheries*.png
 doc/rosmose/_static/*png
 **/_static/**/*.png
-
-
