@@ -154,7 +154,28 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
               <directory>java/src/test/resources</directory>
             </testResource>
         </testResources>
+
         <plugins>
+
+        <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-javadoc-plugin</artifactId>
+            <version>3.4.0</version>
+            <configuration>
+                <outputDirectory>doc/_static/javadoc</outputDirectory>
+                <reportOutputDirectory>doc/_static/javadoc</reportOutputDirectory>
+                <failOnError>false</failOnError>
+            </configuration>
+            <executions>
+                <execution>
+                    <goals>
+                        <goal>javadoc</goal>
+                    </goals>
+                    <id>execution1</id>
+                    <phase>package</phase>
+                </execution>
+            </executions>
+        </plugin>
 
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
