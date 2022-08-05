@@ -6,7 +6,7 @@ Fishing mortality rates
 
 In the Osmose versions >= 4.3, changes in the parameterization of fisheries have been implemented, although the spirit remains close to the one in versions 4.
 
-Fisheries mortality time-series for each gear are now the product of three components: 
+Fisheries mortality time-series for each gear are now the product of three components:
 
 - A vector of fishing mortality rates associated with fishing periods, :math:`F_{period}`
 
@@ -16,7 +16,7 @@ Fisheries mortality time-series for each gear are now the product of three compo
 
 Therefore, for a given time-step :math:`t`, the value of the fishing mortality for a given fleet would be:
 
-.. math:: 
+.. math::
 
     F(t) = F_{period}(t) \times F_{season}(t) \times F_{base}(t)
 
@@ -57,12 +57,12 @@ There is now the possibility to define a fishing period, i.e. a period when the 
 
     .. csv-table::
         :delim: ;
-       
+
         fisheries.period.number.fsh# ; Number of fishing periods within one year (:math:`N_{per}`)
         fisheries.period.start.fsh# ; Start of the active fishing period (fraction of year, default = 0, :math:`Y_{start}`)
         fisheries.rate.byperiod.fsh# ; Fishing mortality rate. Must me in :math:`year^{-1}`
 
-Note that the number of values expected in the :samp:`fisheries.rate.byperiod.fsh#` parameter depends on :math:`Y_{start}`. 
+Note that the number of values expected in the :samp:`fisheries.rate.byperiod.fsh#` parameter depends on :math:`Y_{start}`.
 
 If :math:`Y_{start} = 0`, then :math:`N_{per} \times N_{year}` values are expected (one value for each fishing and non-fishing season).
 
@@ -75,9 +75,7 @@ If :math:`Y_{start} \neq 0`, then :math:`N_{per} \times N_{year} + 1` values are
     import subprocess
     cwd = os.getcwd()
     fpath = "osmose/mort/_static/plot_fish_period.py"
-    with open(fpath) as f:
-        with open(os.devnull, "w") as DEVNULL:
-            subprocess.call(["python", fpath])
+    subprocess.call(["python", fpath], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
 
 .. _fig-fperiod:
 
@@ -107,7 +105,7 @@ then the seasonality provided should contain 12 values, which would apply for th
 
 In the latter case, it is up to the user to generate the proper time series and to store it in a file.
 
-.. danger:: 
+.. danger::
 
     The sum of fishing seasonalities must equal one over the fishing seasons! **No automatic normalisation is performed by Osmose!**
 
@@ -126,9 +124,9 @@ Case studies
 .. figure:: _static/verif_fisheries0.png
     :scale: 70%
     :align: center
-    
 
-.. code-block:: 
+
+.. code-block::
 
     fisheries.rate.base.fsh0;1
     fisheries.season.number.fsh0;2
@@ -141,7 +139,7 @@ Case studies
     :align: center
 
 
-.. code-block:: 
+.. code-block::
 
     fisheries.rate.base.fsh0;1
     fisheries.season.number.fsh0;2
@@ -181,21 +179,21 @@ Case studies
 
 Size selectivities
 ++++++++++++++++++++++++++++++++++++++
-        
-.. index:: 
-    single: fisheries.selectivity.tiny.fsh# 
-    single: fisheries.selectivity.type.file.fsh# 
-    single: fisheries.selectivity.type.shift.fsh# 
-    single: fisheries.selectivity.type.fsh# 
-    single: fisheries.selectivity.a50.file.fsh# 
-    single: fisheries.selectivity.a50.shift.fsh# 
-    single: fisheries.selectivity.a50.fsh# 
-    single: fisheries.selectivity.l50.file.fsh# 
-    single: fisheries.selectivity.l50.shift.fsh# 
-    single: fisheries.selectivity.l50.fsh# 
-    single: fisheries.selectivity.l75.file.fsh# 
-    single: fisheries.selectivity.l75.shift.fsh# 
-    single: fisheries.selectivity.l75.fsh# 
+
+.. index::
+    single: fisheries.selectivity.tiny.fsh#
+    single: fisheries.selectivity.type.file.fsh#
+    single: fisheries.selectivity.type.shift.fsh#
+    single: fisheries.selectivity.type.fsh#
+    single: fisheries.selectivity.a50.file.fsh#
+    single: fisheries.selectivity.a50.shift.fsh#
+    single: fisheries.selectivity.a50.fsh#
+    single: fisheries.selectivity.l50.file.fsh#
+    single: fisheries.selectivity.l50.shift.fsh#
+    single: fisheries.selectivity.l50.fsh#
+    single: fisheries.selectivity.l75.file.fsh#
+    single: fisheries.selectivity.l75.shift.fsh#
+    single: fisheries.selectivity.l75.fsh#
 
 .. table:: Fishing size-selectivity parameters
     :align: center
@@ -204,7 +202,7 @@ Size selectivities
         :delim: ;
 
         fisheries.selectivity.tiny.fsh# ; Selectivities values below which selectivity if forced to 0 (:math:`\epsilon`)
-        
+
         fisheries.selectivity.type.file.fsh# ; File containing the selectivity types
         fisheries.selectivity.type.shift.fsh# ; Array containing the selectivity periods
         fisheries.selectivity.type.fsh# ; Selectivity types (one value per shift period). Must be 0, 1 or 2
@@ -212,11 +210,11 @@ Size selectivities
         fisheries.selectivity.a50.file.fsh# ; File containing the age selectivities.
         fisheries.selectivity.a50.shift.fsh# ; Array containing the :math:`A_{50}` shift periods
         fisheries.selectivity.a50.fsh# ; Age selectity (one value per shift period). If set, assumes that fishery selectivity is age-based
- 
+
         fisheries.selectivity.l50.file.fsh# ; File containing the :math:`L_{50}`.
         fisheries.selectivity.l50.shift.fsh# ; Array containing the :math:`L_{50}` shift periods
         fisheries.selectivity.l50.fsh# ; :math:`L_{50}` (one value per shift period).
-        
+
         fisheries.selectivity.l75.file.fsh# ; File containing the :math:`L_{75}`
         fisheries.selectivity.l75.shift.fsh# ; Array containing the :math:`L_{75}` shift periods
         fisheries.selectivity.l75.fsh# ; :math:`L_{75}` (one value per shift period).
@@ -230,11 +228,11 @@ The selectivity type must contain 0 (knife-edge), 1 (sigmoid), 2 (Gaussian) or 3
 
 If one of the :samp:`a50` parameter, it is assumed that age selectivity is used.
 
-.. warning:: 
+.. warning::
 
     Only knife-edge selectivity can be used with age.
 
-.. note:: 
+.. note::
 
     If only knife-edge selectivity is used, then
     the :samp:`l75` parameters are not used.
@@ -244,17 +242,17 @@ Knife-edge selectivity
 
 Knife-edge selectivity is computed as follows:
 
-.. math:: 
+.. math::
 
     S(L) = 1\ if\ L \ge L_{50}
 
-    
+
 Sigmoid selectivity
 ########################
 
 Sigmoid selectivity is computed as follows:
 
-.. math:: 
+.. math::
 
     S(L) = \frac{1} {1 + exp^{S_1 - S_2 L}}
 
@@ -279,7 +277,7 @@ Gaussian selectivity is computed as follows:
 
 with :math:`q_{75}` is the inverse cumulative standard normal distribution for the 75th percentile.
 
-    
+
 Catchability
 ++++++++++++++++++++++++++
 
@@ -307,7 +305,7 @@ the first parameter (:samp:`fisheries.catchability.file`) is found, then this ca
 If this parameter is not found, Osmose will assume that catchability matrixes may vary over time. It will therefore look for all the `fisheries.catchability.file.cat#` parameters. Each catchability matrix
 should be associated with time-indications, which specifies on which year (interannual variability) and which time-steps (seasonal variabillity) this catchability matrix should be used.
 
-.. warning:: 
+.. warning::
 
     Note that the :samp:`#` here is not related to the one of fisheries.
 
@@ -332,4 +330,4 @@ There is also the possibility to define fisheries discards. It is defined in the
         fisheries.discards.years.dis# ; List of years when the catchability should be used.
         fisheries.discards.steps.dis# ; List of steps within a year when the catchability should be used.
 
-Fishery discards should be provided as a CSV file, with fisheries as column (predators) and species (background and focal) as rows (preys). 
+Fishery discards should be provided as a CSV file, with fisheries as column (predators) and species (background and focal) as rows (preys).

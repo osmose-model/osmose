@@ -20,10 +20,10 @@ Size-predation matrix is controlled by two parameters. The predator school :math
 
 with :math:`R_{min}` and :math:`R_{max}` the maximum and minimum predator/prey size ratios. Therefore, the minimum and maximum sizes of a prey that a predator can eat is given by:
 
-.. math:: 
+.. math::
 
     L_{max} = \frac{L_{pred}}{R_{max}}
-    
+
     L_{min} = \frac{L_{pred}}{R_{min}}
 
 .. index:: predation.predPrey.stage.structure, predation.predPrey.stage.threshold.sp#, predation.predPrey.sizeRatio.max.sp#, predation.predPrey.sizeRatio.min.sp#
@@ -39,13 +39,13 @@ with :math:`R_{min}` and :math:`R_{max}` the maximum and minimum predator/prey s
         predation.predPrey.sizeRatio.min.sp# ; Array of :math:`R_{min}` values
 
 
-.. danger:: 
+.. danger::
 
     :math:`R_{min} > R_{max}`
 
 Since resource groups are defined by a range of sizes, and not by a single sizes, the predator will feed on a given percentage of the resource:
 
-.. math:: 
+.. math::
 
     R_{rsc} = \frac{min(L_{max_{rsc}}, L_{max}) - max(L_{min_{rsc}}, L_{min})} {L_{max_{rsc}} - L_{min_{rsc}}}
 
@@ -58,9 +58,7 @@ which is the overlapping range of the predator accessible range and of the resou
     import subprocess
     cwd = os.getcwd()
     fpath = "osmose/mort/_static/plot_size_ratios.py"
-    with open(fpath) as f:
-        with open(os.devnull, "w") as DEVNULL:
-            subprocess.call(["python", fpath])
+    subprocess.call(["python", fpath], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
 
 .. figure::  _static/size_ratio.*
     :align: center
@@ -90,8 +88,8 @@ young lesserSpottedDogfish (5%) and old redMullet (5%).
 
 .. table:: Parameters for accessibility
 
-    .. csv-table:: 
-        :delim: ;    
+    .. csv-table::
+        :delim: ;
 
         predation.accessibility.stage.structure ; Threshold type. Must be :samp:`age` or :samp:`size`.
         predation.accessibility.stage.threshold.sp# ; Array containing the stage thresholds for a given species.
@@ -124,7 +122,7 @@ Finally, since version 4.3.0, accessibility matrix can vary over time with the f
         predation.accessibility.steps.acc# ; List of time steps when to use the map
 
 
-.. danger:: 
+.. danger::
 
     If the :samp:`predation.accessibility.file` (with no :samp:`.acc` suffix) is found, Osmose will assume constant
     predation accessibility matrix.
@@ -135,7 +133,7 @@ Predation rate
 Finally, the predation rate is computed as follows. First, the total accessible biomass for the predator school is computed:
 
 .. math::
-    
+
     P_{tot} = \sum_{p=preys} A(pred, prey) \times B_{prey}
 
 The total biomass that a predator can eat is also computed as follow:
@@ -144,18 +142,18 @@ The total biomass that a predator can eat is also computed as follow:
 
     P_{eatable} = \frac{B_{pred} \times I_{max}}{N_{mort}}
 
-with :samp:`N_{mort}` the number of sub-step of mortality processes,  :math:`B_{pred}` the total biomass of predator and :math:`I_{max}` the maximum ingestion rate for each species, expressed in grams of food per gram of fish 
-and per year. It is assumed that predator eat as much as they can. 
+with :samp:`N_{mort}` the number of sub-step of mortality processes,  :math:`B_{pred}` the total biomass of predator and :math:`I_{max}` the maximum ingestion rate for each species, expressed in grams of food per gram of fish
+and per year. It is assumed that predator eat as much as they can.
 
 The effective biomass that will be eaten by the predator is
 
-.. math:: 
+.. math::
 
     P_{eaten} = min(P_{tot}, P_{eatable})
 
 Finally, for each prey, the biomass eaten by the predator is given by:
 
-.. math:: 
+.. math::
 
     P_{lost} = P_{eaten} \times \frac{A(pred, prey) \times B_{prey}}{P_{tot}}
 

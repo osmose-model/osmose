@@ -1,12 +1,12 @@
 Growth
 ----------------------------------------
 
-Individuals of a given school are assumed to grow in size and weight at a given time only when the amount of food they ingested fulfill maintenance requirements, i.e., only when their predation efficiency at that time is greater than the predation efficiency ensuring body maintenance of school. 
+Individuals of a given school are assumed to grow in size and weight at a given time only when the amount of food they ingested fulfill maintenance requirements, i.e., only when their predation efficiency at that time is greater than the predation efficiency ensuring body maintenance of school.
 
-.. math:: 
+.. math::
 
     G(s, a) = M_{\Delta}(s, a) \times \frac{S_R(s, a) - C_{S_R}(s)} {1 - C_{S_R}(s)}\ if\ S_R(s, a) \ge C_{S_R}
-    
+
     G(s, a) = 0\ if\ S_R(s, a) < C_{S_R}
 
 
@@ -21,13 +21,13 @@ with :math:`C_{S_R}` is the critical predation efficiency and :math:`S_R` the pr
 .. table:: Growth parameters
     :align: center
 
-    .. csv-table:: 
+    .. csv-table::
         :delim: ;
 
         growth.java.classname.sp# ; Class name of the age to length conversion
         predation.efficiency.critical.sp# ; Critical predation success (:math:`C_{S_R}`)
         species.delta.lmax.factor.sp# ; :math:`\lambda` (default = 2)
-    
+
 .. ipython:: python
     :suppress:
 
@@ -35,13 +35,11 @@ with :math:`C_{S_R}` is the critical predation efficiency and :math:`S_R` the pr
     import subprocess
     cwd = os.getcwd()
     fpath = "osmose/process/_static/plot_growth.py"
-    with open(fpath) as f:
-        with open(os.devnull, "w") as DEVNULL:
-            subprocess.call(["python", fpath])
+    subprocess.call(["python", fpath], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
 
 
 
-Von Bertalanffy growth 
+Von Bertalanffy growth
 @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
 When the :samp:`growth.java.classname.sp#` is equal to :samp:`fr.ird.osmose.process.growth.VonBertalanffyGrowth.java`, a von Bertalanffy growth function is used. **It is the defaut one.**
@@ -49,18 +47,18 @@ When the :samp:`growth.java.classname.sp#` is equal to :samp:`fr.ird.osmose.proc
 .. math::
 
     L(a) = L_{egg}\ if\ a=0
-    
+
     L(a) = L_{egg} + (L_{thres} - L_{egg}) \times \left(\frac{a}{a_{thres}}\right)\ if\ a>0\ \&\ a<a_{thres}
 
     L(a) = L_{\infty} \times \left(1 - \exp^{-K\left(age - t_0\right)} \right)\ else
 
-with 
+with
 
-.. math:: 
-    
+.. math::
+
     L_{thres} = min\left[L_{egg}, L_{\infty} \times \left(1 - \exp^{-K\left(a_{thres} - t_0\right)}\right) \right]
 
-A Von Bertalanffy model is used to calculate mean length increase above a threshold age :math:`a_{thres}` determined for each HTL group from the literature. Below :math:`a_{thres}`, a simple linear model is used. The rationale behind this is that Von Bertalanffy parameters are usually estimated from data excluding youngs of the year or including only very few of them. Assuming a linear growth between age 0 and :math:`a_{thres}` ensures a more realistic calculation of mean length increases for early ages of HTL groups (:cite:`Travers2009`). 
+A Von Bertalanffy model is used to calculate mean length increase above a threshold age :math:`a_{thres}` determined for each HTL group from the literature. Below :math:`a_{thres}`, a simple linear model is used. The rationale behind this is that Von Bertalanffy parameters are usually estimated from data excluding youngs of the year or including only very few of them. Assuming a linear growth between age 0 and :math:`a_{thres}` ensures a more realistic calculation of mean length increases for early ages of HTL groups (:cite:`Travers2009`).
 
 .. figure::  _static/vb.*
     :align: center
@@ -72,7 +70,7 @@ A Von Bertalanffy model is used to calculate mean length increase above a thresh
 .. table:: Von Bertalanffy parameters
     :align: center
 
-    .. csv-table:: 
+    .. csv-table::
         :delim: ;
 
         species.linf.sp# ; :math:`L_{inf}` (cm)
@@ -84,29 +82,29 @@ A Von Bertalanffy model is used to calculate mean length increase above a thresh
 .. The weight of school i at time t is evaluated from the allometric relationship:
 
 .. .. math::
-.. 
+..
 ..     W = C \times L^b
-.. 
+..
 .. where :math:`b` and :math:`C` are allometric parameters for the HTL group to which school i belongs.
 
-Gompertz growth 
+Gompertz growth
 @@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
 When the :samp:`growth.java.classname.sp#` is equal to :samp:`fr.ird.osmose.process.growth.GompertzGrowth.java`, a Gompertz growth function is used.
 
-.. math:: 
+.. math::
 
     L(a) = L_{egg}\ if\ a=0
 
-    L(a) = L_{start} \times exp^{K_e \times a}\ if\ a>0\ \& a<a_{exp} 
+    L(a) = L_{start} \times exp^{K_e \times a}\ if\ a>0\ \& a<a_{exp}
 
-    L(a) = L_{exp} + (L_{gom} - L_{exp}) \frac{a - a_{exp}}{a_{gom} - a_{exp}}\  if\ a>a_{exp}\ \&\ a<a_{gom} 
+    L(a) = L_{exp} + (L_{gom} - L_{exp}) \frac{a - a_{exp}}{a_{gom} - a_{exp}}\  if\ a>a_{exp}\ \&\ a<a_{gom}
 
     L(a) = L_{inf} \times exp^{-exp^{-K_g (a - t_g)}}\ else
 
-with 
+with
 
-.. math:: 
+.. math::
 
     L_{exp} = L_{start} \times exp^{K_e \times a_{exp}}
 
@@ -117,7 +115,7 @@ with
 
     Gompertz growth curve
 
-.. index:: 
+.. index::
     single: growth.exponential.lstart.sp#
     single: growth.exponential.ke.sp#
     single: growth.gompertz.linf.sp#
@@ -129,9 +127,9 @@ with
 .. table:: Gompertz parameters
     :align: center
 
-    .. csv-table:: 
+    .. csv-table::
         :delim: =
-    
+
         growth.exponential.lstart.sp# = :math:`L_{start}` (cm)
         growth.exponential.ke.sp# = :math:`K_e`
         growth.gompertz.linf.sp# = :math:`L_{inf}` (cm)
@@ -139,5 +137,3 @@ with
         growth.gompertz.tg.sp# = :math:`t_g` (years)
         growth.exponential.thr.age.sp# = :math:`a_{exp}` (years)
         growth.gompertz.thr.age.sp# =  :math:`a_{gom}` (years)
-
-
