@@ -44,6 +44,8 @@ inst/doc
 java/target
 target
 
+doc/_static/javadoc
+
 check.sh
 **.html
 build
