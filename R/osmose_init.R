@@ -32,7 +32,7 @@ initialize_osmose = function(input, file, type="internannual", parameters = NULL
   file  = suppressWarnings(normalizePath(file))
   
   if(identical(input, file)) {
-    bck = paste(input, ".bkg", format(Sys.time(), format="%y%m%d%H%M%S"), sep="")
+    bck = paste(input, ".backup", format(Sys.time(), format="%y%m%d%H%M%S"), sep="")
     file.copy(from=input, to=bck)
   }
   
