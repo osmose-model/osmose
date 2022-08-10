@@ -279,11 +279,14 @@ public class FishingGear extends AbstractMortality {
     }
 
     final String getFilename() {
-        StringBuilder filename = new StringBuilder();
+      
+        File path = new File(getConfiguration().getOutputPathname());
+        StringBuilder filename = new StringBuilder(path.getAbsolutePath());
+        filename.append(File.separatorChar);
         String subfolder = "fisheries_checks";
         filename.append(subfolder).append(File.separatorChar);
         filename.append(getConfiguration().getString("output.file.prefix"));
-        filename.append("_").append(name).append("_Simu");
+        filename.append("_").append(name).append("_simu");
         filename.append(getRank());
         filename.append(".csv");
         return filename.toString();
