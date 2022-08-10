@@ -251,14 +251,13 @@ init_sofia = function(input, file=NULL, test=FALSE, ...) {
   on.exit(options(ow))
   
   conf = .readConfiguration(input)
-  # conf = .setupInitialization(conf)
   
   nsp = .getPar(conf, "simulation.nspecies")
   
   spind = .getPar(conf, "species.type") == "focal"
   spind = gsub(names(spind)[which(spind)], pattern="species.type.sp", replacement = "") 
   spnames = .getPar(conf, "species.name")[sprintf("species.name.sp%s", spind)]
-  spind = as.numeric(spind)
+  spind = sort(as.numeric(spind))
   
   out = vector("list", nsp)
   names(out) = spnames
@@ -283,20 +282,21 @@ init_sofia = function(input, file=NULL, test=FALSE, ...) {
     this = .getPar(conf, sp=sp)
     
     sim = .simF_ini(conf, sp, test=test)
+    sim$nschool = .getPar(this, "simulation.nschool")
+    if(is.null(sim$nschool))
+      stop(sprintf("Parameter 'simulation.nschool.sp%d' not found.", sp))
     sim$osmose = .initial_length_dist(sim, sp)
     pars[[iSpName]] = as.matrix(sim$osmose)
     out[[iSpName]] = sim
     
   }
   
-  pars = as.data.frame(pars)
-  colnames(pars) = NULL
-  pars = pars[order(rownames(pars)), ]
+  # pars = as.data.frame(pars)
+  # colnames(pars) = NULL
+  # pars = pars[order(rownames(pars)), ]
   
   xoutput = list(par=pars, init=out)
   class(xoutput) = "osmose.initialization"
-  
-  # if(!is.null(file)) osmose::write_osmose(pars, file=file, sep=" = ")
   
   return(invisible(xoutput))
   
@@ -570,15 +570,26 @@ llw = function(cv) 1/(2*cv^2)
 .initial_length_dist = function(sim, sp) {
   
   dist = sim$distB
+  dist[dist==0] = 1e-3 # 1kg instead of nothing
   bio_ini = sum(dist)
   bio_rel = if(bio_ini==0) dist else dist/bio_ini
-  bins = sim$bins$size
   tl_sp = rep(2, length(dist))
+  xage  = sim$age
+ 
+  # begin test 
+  
+  # end test
+   
+  rel_dist = sim$dist/max(sim$dist, na.rm=TRUE)
+  
+  nschool = pmax(ceiling(sim$nschool*rel_dist), 1)
   
   out = c(round(bio_ini, 1), 
           paste(format(bio_rel, scientific = FALSE), collapse=", "), 
-          paste(round(head(bins, -1), 2), collapse=","),
+          paste(round(sim$bins$size,3), collapse=","),
+          paste(xage, collapse=","),
           paste(round(tl_sp, 2), collapse=", "),
+          paste(nschool, collapse = ", "),
           round(sim$larvalM, 3))
   dim(out) = c(length(out), 1)
   
@@ -586,7 +597,9 @@ llw = function(cv) 1/(2*cv^2)
   rownames(out) = sprintf(c("population.initialization.biomass.sp%d",
                             "population.initialization.relativebiomass.sp%d",
                             "population.initialization.size.sp%d",
+                            "population.initialization.age.sp%d",
                             "population.initialization.tl.sp%d",
+                            "population.initialization.nschool.sp%d",
                             "mortality.additional.larva.rate.sp%d"), sp)
   colnames(out) = NULL
   
