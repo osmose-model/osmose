@@ -165,7 +165,7 @@
     return(separator)
   }
   
-  file = file.path(attr(file, "path"), file)
+  file = if(!is.null(attr(file, "path"))) file.path(attr(file, "path"), file) else file
   
   config = readLines(file) # read lines
   sep = names(which.max(table(sapply(config, .guessSeparator))))
