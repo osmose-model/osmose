@@ -1,10 +1,10 @@
-/* 
- * 
+/*
+ *
  * OSMOSE (Object-oriented Simulator of Marine Ecosystems)
  * http://www.osmose-model.org
- * 
+ *
  * Copyright (C) IRD (Institut de Recherche pour le Développement) 2009-2020
- * 
+ *
  * Osmose is a computer program whose purpose is to simulate fish
  * populations and their interactions with their biotic and abiotic environment.
  * OSMOSE is a spatial, multispecies and individual-based model which assumes
@@ -15,7 +15,7 @@
  * processes of fish life cycle (growth, explicit predation, additional and
  * starvation mortalities, reproduction and migration) and fishing mortalities
  * (Shin and Cury 2001, 2004).
- * 
+ *
  * Contributor(s):
  * Yunne SHIN (yunne.shin@ird.fr),
  * Morgane TRAVERS (morgane.travers@ifremer.fr)
@@ -23,20 +23,20 @@
  * Philippe VERLEY (philippe.verley@ird.fr)
  * Laure VELEZ (laure.velez@ird.fr)
  * Nicolas Barrier (nicolas.barrier@ird.fr)
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation (version 3 of the License). Full description
  * is provided on the LICENSE file.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
- * 
+ *
  */
 
 package fr.ird.osmose.util;
@@ -95,7 +95,7 @@ public class MapSet extends OsmoseLinker {
     protected final String prefix;
 
     protected boolean checkMaps;
-    
+
     /**
      * Sufix of the maps. Can be "sp" or "bkg".
      */
@@ -106,20 +106,20 @@ public class MapSet extends OsmoseLinker {
      */
     protected final int iSpecies;
     protected final int iSpeciesFile;
-    
+
     /**
      * Array of map indexes for every age class and simulation time step.
      * int[lifeSpan][N_STEP_SIMU]
      */
     protected int[][] indexMaps;
-    
+
     /**
      * List of the maps.
      */
     protected GridMap[] maps;
-    
+
     private final boolean removeDuplicate;
-    
+
     /**
      * List of the pathnames of the CSV files.
      */
@@ -132,7 +132,7 @@ public class MapSet extends OsmoseLinker {
     public MapSet(int iSpeciesFile, int iSpecies, String prefix, String suffix) {
         this(iSpeciesFile, iSpecies, prefix, suffix, true);
     }
-    
+
     public MapSet(int iSpeciesFile, int iSpecies, String prefix, String suffix, boolean removeDuplicate) {
         this.iSpeciesFile = iSpeciesFile;
         this.iSpecies = iSpecies;
@@ -184,7 +184,7 @@ public class MapSet extends OsmoseLinker {
     public void loadMaps() throws IOException, InvalidRangeException {
 
         this.checkMaps = getConfiguration().getBoolean("movement.checks.enabled");
-        
+
         // Initialisation of the indexMaps array (valid for both NetCDF and CSV maps
         int nSteps = Math.max(getConfiguration().getNStep(), getConfiguration().getNStepYear());
         int lifespan = getSpecies(iSpecies).getLifespanDt();
@@ -205,8 +205,8 @@ public class MapSet extends OsmoseLinker {
             if (!checkMapIndexation()) {
                 error("Missing map indexation for species " + getSpecies(iSpecies).getName() + " in map series '" + prefix + ".map*'. Please refer to prior warning messages for details.", null);
             }
-            
-            if(this.removeDuplicate) { 
+
+            if(this.removeDuplicate) {
                 eliminateTwinMapNC();
             }
 
@@ -218,7 +218,7 @@ public class MapSet extends OsmoseLinker {
             }
 
             // Get rid of redundant map definitions
-            if(this.removeDuplicate) { 
+            if(this.removeDuplicate) {
                 eliminateTwinMap();
             }
         }
@@ -249,10 +249,10 @@ public class MapSet extends OsmoseLinker {
 
         HashMap<Integer, GridMap> tempMaps = new HashMap<>();
         mapFile = new String[mapNumber.size()];
-        
+
         List<String> mapFileList = new ArrayList<>();
         List<Integer> mapIndexList = new ArrayList<>();
-        
+
         // Load the maps
         for (int n = 0; n < mapNumber.size(); n++) {
             imap = mapNumber.get(n);
@@ -263,19 +263,19 @@ public class MapSet extends OsmoseLinker {
             int ageMin = (int) Math.round(getConfiguration().getFloat(prefix + ".initialAge" + ".map" + imap) * getConfiguration().getNStepYear());
             int ageMax = (int) Math.round(getConfiguration().getFloat(prefix + ".lastAge" + ".map" + imap) * getConfiguration().getNStepYear());
             ageMax = Math.min(ageMax, getSpecies(iSpecies).getLifespanDt() - 1);
-                        
+
             /*
              * read the time steps over the year concerned by this map
              */
             StepParameters seasonParam = new StepParameters(prefix, "map" + imap);
             int[] mapSeason = seasonParam.getSeasons();
-            
+
             /*
              * Read year min and max concerned by this map
              */
-            YearParameters yearParam = new YearParameters(prefix, "map" + imap);            
+            YearParameters yearParam = new YearParameters(prefix, "map" + imap);
             int[] mapYears = yearParam.getYears();
-                                    
+
             /*
              * Assign number of maps to numMap array
              */
@@ -286,7 +286,7 @@ public class MapSet extends OsmoseLinker {
                         int iStep = iYear * nStepYear + iSeason;
                         if (iStep < indexMaps[iAge].length) {
                             indexMaps[iAge][iStep] = n;
-                        } 
+                        }
                     }
                 }
             }
@@ -305,23 +305,23 @@ public class MapSet extends OsmoseLinker {
                 tempMaps.put(n, null);
                 mapFileList.add("null");
             }
-            
+
             mapIndexList.add(null);
-                
+
         }
-        
+
         int nMaps = mapIndexList.size();
         maps = new GridMap[nMaps];
         for (int i = 0; i <nMaps; i++) {
-            maps[i] = tempMaps.get(i);   
+            maps[i] = tempMaps.get(i);
         }
-        
-        if(this.checkMaps) { 
-            this.writeMovementsChecks(mapFileList, mapIndexList);    
+
+        if(this.checkMaps) {
+            this.writeMovementsChecks(mapFileList, mapIndexList);
         }
-        
+
         tempMaps.clear();
-        
+
     }
 
     private boolean checkMapIndexation() {
@@ -372,7 +372,7 @@ public class MapSet extends OsmoseLinker {
             }
         }
     }
-    
+
     /**
      * This function eliminates twins in the list of maps
      */
@@ -411,7 +411,7 @@ public class MapSet extends OsmoseLinker {
      * @throws ucar.ma2.InvalidRangeException
      */
     public void loadMapsNcMaps() throws IOException, InvalidRangeException {
-        
+
         // Load config + nstepyear + nsteps
         Configuration cfg = getConfiguration();
         int dt = cfg.getNStepYear();
@@ -421,9 +421,9 @@ public class MapSet extends OsmoseLinker {
         List<Integer> mapNumber = new ArrayList<>();
         List<String> mapNcFiles = new ArrayList<>();
         List<Integer> mapNcSteps = new ArrayList<>();
-        
+
         int imap = 0;
-        
+
         // Retrieve the index of the maps for this species
         // There might be several maps for one species, based on size.
         for (int n = 0; n < nmapmax; n++) {
@@ -439,11 +439,11 @@ public class MapSet extends OsmoseLinker {
             }
             imap++;
         }
-        
+
         // One map per timestep and per age number
         HashMap<Integer, GridMap> tempMaps = new HashMap<>(); // dimension = [nMaps][ntime]
         int iii = 0;
-                
+
         for (Integer im : mapNumber) {
 
             // Loop over the map indexes for the species.
@@ -452,62 +452,62 @@ public class MapSet extends OsmoseLinker {
             String varName = cfg.getString(prefix + ".variable." + suffix + im);
             // Recovery of the number of time steps per year in the file
             int ncPerYear = getConfiguration().getInt(prefix + ".nsteps.year." + suffix + im);
-    
+
             int ageMin = (int) Math.round(getConfiguration().getDouble(prefix + ".initialAge." + suffix + im) * dt);
             int ageMax = (int) Math.round(getConfiguration().getDouble(prefix + ".lastAge." + suffix + im) * dt);
             ageMax = Math.min(ageMax, getSpecies(iSpecies).getLifespanDt() - 1);
-            
+
             ForcingFile forcingFile = new ForcingFile(varName, ncFilePattern, ncPerYear, 0, 1, ForcingFileCaching.ALL);
             forcingFile.init();
-            
+
             // Reading fish movements for the given file.
             // the dimensions are nTimeNc.
             HashMap<Integer, double[][][]> values = forcingFile.getCachedVariable();
-            
+
             // Loop over all the values of fish movements (keys = ncStep in file)
-            for(int iStepNc : values.keySet()) { 
-                
+            for(int iStepNc : values.keySet()) {
+
                 // We add the map that corresponds to iStepNc file
                 // if GridMap is only 0s, then assume null
                 GridMap gridMap = new GridMap(values.get(iStepNc)[0]);
-                if(gridMap.count() == 0) { 
-                    gridMap = null;   
+                if(gridMap.count() == 0) {
+                    gridMap = null;
                 }
-                
+
                 tempMaps.put(iii, gridMap);
-                
-                // now we create the indexMaps by looping over all age classes and 
+
+                // now we create the indexMaps by looping over all age classes and
                 // all time-steps.
-                // If nStepNc match the one for the current map, 
+                // If nStepNc match the one for the current map,
                 for (int iAge = ageMin; iAge <= ageMax; iAge++) {
                     for (int iStep = 0; iStep < getConfiguration().getNStep(); iStep++) {
-                        int fileNcStep = forcingFile.getNcStep(iStep); 
-                        if(fileNcStep == iStepNc) { 
-                            indexMaps[iAge][iStep] = iii;   
+                        int fileNcStep = forcingFile.getNcStep(iStep);
+                        if(fileNcStep == iStepNc) {
+                            indexMaps[iAge][iStep] = iii;
                         }
                     }
                 }
-                
+
                 iii++;
-                
+
             }
         } // end of loop on map number
-        
+
         int nMaps = tempMaps.size();
         maps = new GridMap[nMaps];
-        for(int i = 0; i < nMaps; i++) { 
-            maps[i] = tempMaps.get(i);   
+        for(int i = 0; i < nMaps; i++) {
+            maps[i] = tempMaps.get(i);
         }
-        
+
         tempMaps.clear();
-        
+
         if(this.checkMaps) {
-            this.writeMovementsChecks(mapNcFiles, mapNcSteps);   
+            this.writeMovementsChecks(mapNcFiles, mapNcSteps);
         }
-        
+
     }  // end of method
-    
-    
+
+
     /**
      * Method that allows to write in an ASCII file the association between the
      * time-step, the species age, the file that is being used and the time-step of
@@ -516,7 +516,7 @@ public class MapSet extends OsmoseLinker {
     public void writeMovementsChecks(List<String>mapNcFiles, List<Integer>mapNcSteps) throws FileNotFoundException {
 
         PrintWriter prw;
-    
+
         // Create parent directory
         File file = new File(getFilename());
         file.getParentFile().mkdirs();
@@ -527,27 +527,27 @@ public class MapSet extends OsmoseLinker {
             error("Failed to create output file " + file.getAbsolutePath(), ex);
             throw (ex);
         }
-    
+
         String separator = getConfiguration().getOutputSeparator();
         String[] headers = {"Age (dt)", "Time Step", "File", "Netcdf Index"};
-    
+
         // Write headers
         for (int i = 0; i < headers.length - 1; i++) {
             prw.print(headers[i]);
             prw.print(separator);
         }
-    
+
         prw.print(headers[headers.length - 1]);
         prw.println();
-    
+
         for (int a = 0; a < this.getSpecies(this.iSpecies).getLifespanDt(); a++) {
 
             for (int i = 0; i < this.getConfiguration().getNStep(); i++) {
-                
+
                 int index = indexMaps[a][i];
                 String fileName = mapNcFiles.get(index);
                 Integer ncStep = mapNcSteps.get(index);
-                
+
                 prw.print(a);
                 prw.print(separator);
 
@@ -563,13 +563,15 @@ public class MapSet extends OsmoseLinker {
                 prw.println();
             }
         }
-    
+
         prw.close();
-    
+
     }
-    
+
     final String getFilename() {
-        StringBuilder filename = new StringBuilder();
+        File path = new File(getConfiguration().getOutputPathname());
+        StringBuilder filename = new StringBuilder(path.getAbsolutePath());
+        filename.append(File.separatorChar);
         String subfolder = "movement_checks";
         String speciesName = getSpecies(this.iSpecies).getName();
         filename.append(subfolder).append(File.separatorChar);
@@ -578,13 +580,13 @@ public class MapSet extends OsmoseLinker {
         filename.append(".csv");
         return filename.toString();
     }
-    
+
     public String[] getFileNames() {
-        return this.mapFile;   
+        return this.mapFile;
     }
-    
+
     public int[][] getIndexMap() {
-        return this.indexMaps;   
+        return this.indexMaps;
     }
-    
+
 }
