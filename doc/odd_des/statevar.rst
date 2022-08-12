@@ -1,9 +1,18 @@
-State variables and scales
------------------------------
+Entities, state variables, and scales
+---------------------------------------------------
+
+Entities
+++++++++++++++++++
+
+State variables
+++++++++++++++++++
+
+Scales
+++++++++++++++++++
 
 The basic units of OSMOSE are fish schools, which are composed of individuals that belong to the same species, and that have the same age, size (length, weight), food requirements and, at a given time step, the same geographical coordinates. From the school states (hereafter called individual states), biomass and abundance can be tracked at the population or community levels along with the size, age, and spatial dimensions (:numref:`table_stvar`).
 
-Other variables can be reported such as the trophic level, the diets, the different sources of mortality, the catches from fishing operations. Because each school simulated in OSMOSE is represented from the egg stage to the terminal age, which necessitates high calculation and memory capacities, and because comprehensive information on entire life cycles needs to be parameterized, the selection of focus species is made parsimoniously, and usually between 10 and 20 high-trophic level species or functional groups are explicitly considered in OSMOSE applications. 
+Other variables can be reported such as the trophic level, the diets, the different sources of mortality, the catches from fishing operations. Because each school simulated in OSMOSE is represented from the egg stage to the terminal age, which necessitates high calculation and memory capacities, and because comprehensive information on entire life cycles needs to be parameterized, the selection of focus species is made parsimoniously, and usually between 10 and 20 high-trophic level species or functional groups are explicitly considered in OSMOSE applications.
 
 The model operates on a weekly to monthly time step, and runs up to 100 years or more depending on applications and simulations.
 
@@ -19,7 +28,7 @@ where the :math:`c` parameter is a 'condition.factor', and :math:`b` the 'allome
 
 Biomass to abundance conversion for a school is made by using the mean weight of the school:
 
-.. math:: 
+.. math::
 
     B = N \times W
 
@@ -27,7 +36,7 @@ Biomass to abundance conversion for a school is made by using the mean weight of
 
 .. table:: Allometric parameters
 
-    .. csv-table:: 
+    .. csv-table::
         :delim: ;
 
         species.length2weight.condition.factor.sp# ; Allometric factor (:math:`c`)
@@ -58,7 +67,7 @@ Biomass to abundance conversion for a school is made by using the mean weight of
     |                           |                                | mean size of fish, large                                                                |
     |                           |                                | fish indicator                                                                          |
     +---------------------------+--------------------------------+-----------------------------------------------------------------------------------------+
-    | weight                    | Weight of the fish (g)	 |                                                                                         |    
+    | weight                    | Weight of the fish (g)	 |                                                                                         |
     +---------------------------+--------------------------------+-----------------------------------------------------------------------------------------+
     | trophicLevel              | Trophic level (TL) of the fish |  fish N or B per TL (trophic                                                            |
     |                           |                                |  spectrum), TL of species,                                                              |
