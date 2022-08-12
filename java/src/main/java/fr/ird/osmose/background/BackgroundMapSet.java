@@ -437,7 +437,7 @@ public class BackgroundMapSet extends OsmoseLinker {
             String key = prefix + ".species" + ".map" + imap;
             BackgroundSpecies species = getBkgSpecies(getConfiguration().getString(key));
             if (null != species) {
-                if (species.getSpeciesIndex() == iSpecies) {
+                if (species.getFileSpeciesIndex() == iSpeciesFile) {
                     mapNumber.add(imap);
                 }
             }
