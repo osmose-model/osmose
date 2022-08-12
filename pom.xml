@@ -75,6 +75,12 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
             <version>4.6.6</version>
         </dependency>
 
+        <dependency>
+            <groupId>de.elnarion.util</groupId>
+            <artifactId>plantuml-generator-util</artifactId>
+            <version>1.1.2</version>
+        </dependency>
+
         <!-- Commons-Math3 -->
         <dependency>
             <groupId>org.apache.commons</groupId>
@@ -279,6 +285,33 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
                             <descriptorRefs>
                                 <descriptorRef>jar-with-dependencies</descriptorRef>
                             </descriptorRefs>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <!-- create UML diagram -->
+            <plugin>
+                <artifactId>plantuml-generator-maven-plugin</artifactId>
+                <groupId>de.elnarion.maven</groupId>
+                <version>1.1.2</version>
+                <executions>
+                    <execution>
+                        <phase>generate-test-sources</phase>
+                        <?m2e execute onConfiguration,onIncremental?>
+                        <goals>
+                            <goal>generate</goal>
+                        </goals>
+                        <configuration>
+                            <outputFilename>osmose-uml.puml</outputFilename>
+                            <outputDirectory>doc/_static/</outputDirectory>
+                            <scanPackages>
+                                <scanPackage>
+                                    fr.ird.osmose
+                                </scanPackage>
+                            </scanPackages>
+                            <blacklistRegexp>.*Test.*</blacklistRegexp>
+                            <enableAsciidocWrapper>true</enableAsciidocWrapper>
                         </configuration>
                     </execution>
                 </executions>
