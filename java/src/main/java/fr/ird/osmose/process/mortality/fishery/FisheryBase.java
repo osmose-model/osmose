@@ -99,10 +99,10 @@ public class FisheryBase extends OsmoseLinker {
         fisheryBase = ts.getValues();
         if (useLog) {
             for (int i = 0; i < fisheryBase.length; i++) {
-                if (fisheryBase[i] > 0) {
-                    String message = String.format("Fishing base mortality rate exponent for fishery %d is positive", this.fisheryIndex);
-                    error(message, new IllegalArgumentException());
-                }
+                //if (fisheryBase[i] > 0) {
+                //    String message = String.format("Fishing base mortality rate exponent for fishery %d is positive", this.fisheryIndex);
+                //    error(message, new IllegalArgumentException());
+                //}
                 fisheryBase[i] = Math.exp(fisheryBase[i]);
             }
         }

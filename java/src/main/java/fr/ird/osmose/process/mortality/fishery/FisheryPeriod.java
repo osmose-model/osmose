@@ -130,10 +130,10 @@ public class FisheryPeriod extends OsmoseLinker {
         
         if(useLog) { 
             for (int i = 0; i < fishingSeason.length; i++) {
-                if(fishingSeason[i] > 0) {
-                    String message = String.format("Fishing period mortality rate exponent for fishery %d is positive", this.fileFisheryIndex);
-                    error(message, new IllegalArgumentException());
-                }
+                //if(fishingSeason[i] > 0) {
+                //    String message = String.format("Fishing period mortality rate exponent for fishery %d is positive", this.fileFisheryIndex);
+                //    error(message, new IllegalArgumentException());
+                //}
                 fishingSeason[i] = Math.exp(fishingSeason[i]);
             }
         }
