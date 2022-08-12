@@ -41,7 +41,7 @@ extensions = ['sphinx.ext.todo',
     'IPython.sphinxext.ipython_directive',
     'IPython.sphinxext.ipython_console_highlighting',
     'matplotlib.sphinxext.plot_directive',
-
+    'sphinxcontrib.plantuml'
 ]
 
 bibtex_bibfiles = ['_static/biblio.bib']
