@@ -9,7 +9,6 @@ In this section, a detailed description of the Osmose model is provided.
    :caption: Contents:
 
    osmose/format.rst
-   osmose/statevar.rst
    osmose/grid.rst
    osmose/ltl.rst
    osmose/bkg.rst

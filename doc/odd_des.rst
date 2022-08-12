@@ -9,6 +9,7 @@ ODD description
 
    odd_des/intro.rst
    odd_des/purpose.rst
+   odd_des/statevar.rst
    odd_des/input.rst
    odd_des/proc_sche.rst
    odd_des/design_concepts.rst
