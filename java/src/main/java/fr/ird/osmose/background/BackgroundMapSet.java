@@ -457,7 +457,7 @@ public class BackgroundMapSet extends OsmoseLinker {
             // Recovery of the number of time steps per year in the file
             int ncPerYear = getConfiguration().getInt(prefix + ".nsteps.year." + suffix + im);
 
-            int iClass = (int) Math.round(getConfiguration().getDouble(prefix + ".class." + suffix + im) * dt);
+            int iClass = getConfiguration().getInt(prefix + ".class." + suffix + im);
 
             ForcingFile forcingFile = new ForcingFile(varName, ncFilePattern, ncPerYear, 0, 1, ForcingFileCaching.ALL);
             forcingFile.init();
