@@ -23,7 +23,7 @@ The :samp:`species` argument allows to specify the indexes of the species to dis
     cwd = os.getcwd()
 
     fpath = "rosmose/_static/plot_osmose_outputs.R"
-    subprocess.call(["Rscript", fpath], stdout=DEVNULL, stderr=DEVNULL)
+    subprocess.call(["Rscript", fpath], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
 
 
 .. figure:: _static/biomass.png
