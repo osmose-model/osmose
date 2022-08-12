@@ -3,7 +3,7 @@
 .Rapp.history
 .RData
 
-*.puml
+# doc/**/*.puml
 
 **/**ipynb**
 **/*~lock*
