@@ -207,7 +207,7 @@ public class BackgroundMapSet extends OsmoseLinker {
             this.loadMapsNcMaps();
             // Check the map indexation
             if (!checkMapIndexation()) {
-                error("Missing map indexation for species " + getSpecies(iSpecies).getName() + " in map series '" + prefix + ".map*'. Please refer to prior warning messages for details.", null);
+                error("Missing map indexation for species " + getBkgSpecies(iSpecies).getName() + " in map series '" + prefix + ".map*'. Please refer to prior warning messages for details.", null);
             }
 
             if(this.removeDuplicate) {
@@ -218,7 +218,7 @@ public class BackgroundMapSet extends OsmoseLinker {
             loadMapsCsv();
             // Check the map indexation
             if (!checkMapIndexation()) {
-                error("Missing map indexation for species " + getSpecies(iSpecies).getName() + " in map series '" + prefix + ".map*'. Please refer to prior warning messages for details.", null);
+                error("Missing map indexation for species " + getBkgSpecies(iSpecies).getName() + " in map series '" + prefix + ".map*'. Please refer to prior warning messages for details.", null);
             }
 
             // Get rid of redundant map definitions
