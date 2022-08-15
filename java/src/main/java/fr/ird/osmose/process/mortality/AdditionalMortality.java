@@ -22,7 +22,7 @@
  * Ricardo OLIVEROS RAMOS (ricardo.oliveros@gmail.com)
  * Philippe VERLEY (philippe.verley@ird.fr)
  * Laure VELEZ (laure.velez@ird.fr)
- * Nicolas Barrier (nicolas.barrier@ird.fr)
+ * Nicolas BARRIER (nicolas.barrier@ird.fr)
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -89,6 +89,9 @@ public class AdditionalMortality extends AbstractMortality {
                 case CONSTANT:
                     larvaAdditionalMortality[cpt] = new AnnualLarvaMortality(rank, species);
                     break;
+                case LCONSTANT:
+                    larvaAdditionalMortality[cpt] = new AnnualLarvaMortality(rank, species);
+                    break;
                 case BY_DT:
                     larvaAdditionalMortality[cpt] = new ByDtLarvaMortality(rank, species);
                     break;
@@ -101,6 +104,9 @@ public class AdditionalMortality extends AbstractMortality {
             debug("Additional Mortality scenario for " + species.getName() + " set to " + scenario.toString());
             switch (scenario) {
                 case ANNUAL:
+                    additionalMortality[cpt] = new AnnualAdditionalMortality(rank, species);
+                    break;
+                case LANNUAL:
                     additionalMortality[cpt] = new AnnualAdditionalMortality(rank, species);
                     break;
                 case BY_DT:
@@ -248,6 +254,7 @@ public class AdditionalMortality extends AbstractMortality {
     public enum Scenario {
 
         ANNUAL("mortality.additional.rate.sp"),
+        LANNUAL("mortality.additional.rate.log.sp"),
         BY_DT("mortality.additional.rate.bytDt.file.sp"),
         BY_DT_BY_AGE("mortality.additional.rate.byDt.byAge.file.sp"),
         BY_DT_BY_SIZE("mortality.additional.rate.byDt.bySize.file.sp");
@@ -270,6 +277,7 @@ public class AdditionalMortality extends AbstractMortality {
     public enum ScenarioLarva {
 
         CONSTANT("mortality.additional.larva.rate.sp"),
+        LCONSTANT("mortality.additional.larva.rate.log.sp"),
         BY_DT("mortality.additional.larva.rate.bytDt.file.sp");
 
         private final String key;

@@ -22,7 +22,7 @@
  * Ricardo OLIVEROS RAMOS (ricardo.oliveros@gmail.com)
  * Philippe VERLEY (philippe.verley@ird.fr)
  * Laure VELEZ (laure.velez@ird.fr)
- * Nicolas Barrier (nicolas.barrier@ird.fr)
+ * Nicolas BARRIER (nicolas.barrier@ird.fr)
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -67,9 +67,34 @@ public class AnnualLarvaMortality extends AbstractMortalitySpecies {
         // reading base mortality rate
         String keyShift = String.format("mortality.additional.larva.rate.shift.sp%d", getFileSpeciesIndex());
         String keyVal = String.format("mortality.additional.larva.rate.sp%d", getFileSpeciesIndex());
-        ByRegimeTimeSeries mortRateSeries = new ByRegimeTimeSeries(keyShift, keyVal);
+        String keyValLog = String.format("mortality.additional.larva.rate.log.sp%d", getFileSpeciesIndex());
+
+        // test if only one of the two values exists
+        if (getConfiguration().isNull(keyValLog) == getConfiguration().isNull(keyVal)) {
+            String message = String.format("Both %s and %s parameters are defined. Choose only one.\n", keyValLog, keyVal);
+            error(message, new Exception());
+        }
+
+        boolean useLog;
+        ByRegimeTimeSeries mortRateSeries;
+        if(getConfiguration().isNull(keyValLog)) {
+            // If the key for log values is Null, assume fishing mort in standard mode
+            mortRateSeries = new ByRegimeTimeSeries(keyShift, keyVal);
+            useLog = false;
+        } else {
+            // If the key for log values is not null, assume fishing mort in log
+            mortRateSeries = new ByRegimeTimeSeries(keyShift, keyValLog);
+            useLog = true;
+        }
+        
         mortRateSeries.init();
         double[] mortRateBase = mortRateSeries.getValues();
+        
+        if (useLog) {
+            for (int i = 0; i < mortRateBase.length; i++) {
+                mortRateBase[i] = Math.exp(mortRateBase[i]);
+            }
+        }
         
         // reading multiplier
         double multiplier;
