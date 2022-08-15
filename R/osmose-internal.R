@@ -20,7 +20,7 @@
 # Ricardo OLIVEROS RAMOS (ricardo.oliveros@gmail.com)
 # Philippe VERLEY (philippe.verley@ird.fr)
 # Laure VELEZ (laure.velez@ird.fr)
-# Nicolas Barrier (nicolas.barrier@ird.fr)
+# Nicolas BARRIER (nicolas.barrier@ird.fr)
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -96,20 +96,19 @@
 }
 
 # get a parameter from a name chain
-.getPar = function(x, ..., keep.att=FALSE) {
-
-  chain = unlist(list(...))
-  if(is.list(x))
-    x = do.call(.getPar, list(x = x[[chain[1]]], chain[-1]))
-
-  return(.guessType(x, keep.att = keep.att))
-}
+# .getPar = function(x, ..., keep.att=FALSE) {
+# 
+#   chain = unlist(list(...))
+#   if(is.list(x))
+#     x = do.call(.getPar, list(x = x[[chain[1]]], chain[-1]))
+# 
+#   return(.guessType(x, keep.att = keep.att))
+# }
 
 # Get species names. It matches the spX regular expression.
 .getSpecies = function(x)  {
   x = names(x)
   x = grep(pattern = "^sp[0-9]*$", x = x, value = TRUE)
-
   return(x)
 }
 
@@ -816,7 +815,6 @@ osmose2R.v3r0 = function(path=NULL, species.names=NULL, ...) {
 #' @param config Configuration object to which file parameters are appended
 #' @param absolute Whether the path is absolute (TRUE) or relative (FALSE)
 #' @return A list tree.
-#' @export
 readOsmoseConfiguration = function(file, config=NULL, absolute=TRUE) {
 
   L0 = .readOsmoseConfiguration(input=file, absolute=absolute)
@@ -901,3 +899,4 @@ configureCalibration = function(L1) {
 
   return(out)
 }
+

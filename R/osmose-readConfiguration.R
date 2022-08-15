@@ -113,15 +113,63 @@
 
 # Internal ----------------------------------------------------------------
 
-#' @export
-.getPar = function(conf, par, sp=NULL, invert=FALSE) {
+
+.getPar = function(conf, par, sp=NULL, invert=FALSE, as.is=FALSE) {
   if(!is.null(sp)) par = sprintf(".sp%d$", sp)
   par = tolower(par)
   out = conf[grep(names(conf), pattern=par, invert=invert)]
+  if(length(out)==0) return(NULL)
+  if(isTRUE(as.is)) {
+    class(out) = "osmose.configuration"
+    return(out)
+  }
   if(length(out)==1) out = out[[1]]
-  if(length(out)==0) out = NULL
   return(out)
 }
+
+
+#' Get a parameter from a configuration file.
+#'
+#' @param x The osmose.configuration object.
+#' @param par The name of the parameter, partial matching is allowed.
+#' @param sp The number of the species (starting at 0).
+#' @param invert Revert the selection (all but 'par')
+#' @param as.is Should the results be returned as an osmose.configuration object? 
+#' The default is FALSE, but only when one exact match is found.
+#'
+#' @return
+#' @export
+get_par = function(x, par, sp=NULL, invert=FALSE, as.is=FALSE) {
+  .getPar(conf=x, par=par, sp=sp, invert=invert, as.is=as.is)
+}
+
+#' @param type type of species to get the names for.
+#' @param code Boolean, return the numerical code of the species or fishery?
+#' @rdname get_par
+#' @export
+get_species = function(x, type="focal", code=FALSE) {
+  nm = unlist(get_par(x, "species.name"))
+  xtype = unlist(get_par(x, "species.type"))
+  this = nm[xtype==type]
+  xcode = gsub(names(this), pattern="species.name.sp", replacement = "")
+  names(this) = NULL
+  if(isTRUE(code)) return(xcode)
+  return(this)
+}
+
+#' @rdname get_par
+#' @export
+get_fisheries = function(x, code=FALSE) {
+  this = unlist(get_par(x, "fisheries.name"))
+  xcode = gsub(names(this), pattern="fisheries.name.fsh", replacement = "")
+  names(this) = NULL
+  if(isTRUE(code)) return(xcode)
+  return(this)
+}
+
+
+  
+
 
 .time.conv = function(ndt_in, ndt, Tref, T) {
   caltime = seq(from=0, by=1/ndt_in, length.out=Tref+1)
