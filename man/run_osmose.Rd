@@ -44,10 +44,10 @@ run_osmose(
 \item{version}{OSMOSE version. Integer (2, 3, etc.) or releases ('v3r2') are
 accepted.}
 
-\item{osmose}{Path to a OSMOSE .jar executable. By default (NULL), uses the stable 
+\item{osmose}{Path to a OSMOSE .jar executable. By default (NULL), uses the stable
 jar for the current version.}
 
-\item{java}{Path to the java executable. The default assumes 'java' is 
+\item{java}{Path to the java executable. The default assumes 'java' is
 on the search path.}
 
 \item{options}{Java options (e.g. -Xmx2048m to increase memory limit).}

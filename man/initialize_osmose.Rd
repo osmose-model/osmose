@@ -56,9 +56,6 @@ initialize_osmose(
 
 \item{...}{}
 }
-\value{
-
-}
 \description{
 Create initialization file for an OSMOSE configuration
 }

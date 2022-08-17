@@ -11,9 +11,6 @@ osmose_grid(conf, center = TRUE, ...)
 
 \item{...}{}
 }
-\value{
-
-}
 \description{
 create OSMOSE ncdf grid (in development)
 }
