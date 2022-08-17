@@ -22,7 +22,7 @@
  * Ricardo OLIVEROS RAMOS (ricardo.oliveros@gmail.com)
  * Philippe VERLEY (philippe.verley@ird.fr)
  * Laure VELEZ (laure.velez@ird.fr)
- * Nicolas Barrier (nicolas.barrier@ird.fr)
+ * Nicolas BARRIER (nicolas.barrier@ird.fr)
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -106,14 +106,23 @@ public class FisherySeasonality extends OsmoseLinker {
             }
             
             // Fills the final seasonality array
-            for (int i = 0; i < ioff; i++) {
-                this.fisherySeasonality[i] = 0;
-            }
+            //for (int i = 0; i < ioff; i++) {
+            //    this.fisherySeasonality[i] = 0;
+            //}
 
             // Fills the final seasonality array
-            for (int i = ioff; i < nStep; i++) {
+            //for (int i = ioff; i < nStep; i++) {
+            //    int k = (i - ioff) % seasonDuration;
+            //    k = (k < 0) ? -k : k;
+            //    this.fisherySeasonality[i] = seasonTmp[k];
+            //}
+            
+            // Fills the final seasonality array, including offset steps
+            // there is still fishing in the first offset, rate is provided.
+            for (int i = 0; i < nStep; i++) {
                 int k = (i - ioff) % seasonDuration;
-                k = (k < 0) ? -k : k;
+                // if negative, we are counting 'backwards'
+                k = (k < 0) ? k + seasonDuration : k;
                 this.fisherySeasonality[i] = seasonTmp[k];
             }
 
@@ -122,7 +131,7 @@ public class FisherySeasonality extends OsmoseLinker {
             String filename = getConfiguration().getFile(keyfile);
             // Seasonality must be at least one year, and at max the length of the simulation
             sts.read(filename);
-            fisherySeasonality = sts.getValues();
+            this.fisherySeasonality = sts.getValues();
         }
 
         // Normalizes between 0 and ioff (corresponding to F0)
