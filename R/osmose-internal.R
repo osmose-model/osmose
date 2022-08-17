@@ -383,11 +383,14 @@
       dnames = dimnames(y)[1:3]
       dim(y) = dim(y)[-length(dim(y))]
       dimnames(y) = dnames
-      output[[i]] = drop(y)
+      output[[i]] = y #drop(y) no drop!
     }
 
+    output = lapply(output, FUN = .trim_matrix)
+    
     names(output) = slices
 
+    
   } else {
     output = NULL
   }
@@ -530,6 +533,19 @@
   return(out)
 }
 
+
+.trim_matrix = function(x) {
+  ind = apply(x, 2, FUN=function(x) !all(is.na(x)))
+  if(all(ind)) return(x)       # all TRUE
+  if(all(!ind)) return(NULL)   # all FALSE
+  if(tail(ind, 1)) return(x)   # ends in TRUE
+  xind = rle(ind)
+  xind$values[-length(xind$values)] = TRUE
+  ind = inverse.rle(xind)
+  x = x[,ind,, drop=FALSE]
+  return(x)
+}
+
 # read_osmose old ---------------------------------------------------------
 
 # Read Osmose (version 4 release 0) outputs
@@ -632,6 +648,13 @@ osmose2R.v4r0 = function (path=NULL, species.names=NULL, conf=NULL, ...) {
   outputData = .add_surveys(x=outputData$surveyYield, out=outputData, type="yield")
   outputData = .add_surveys(x=outputData$yieldByFishery, out=outputData, type="yield")
 
+  outputData = .calculate_residuals_byage(outputData, conf)
+ 
+  outputData = .aggregate_catch_byclass(outputData, conf, "size", "abundance")
+  outputData = .aggregate_catch_byclass(outputData, conf, "size", "biomass")
+  outputData = .aggregate_catch_byclass(outputData, conf, "age", "abundance")
+  outputData = .aggregate_catch_byclass(outputData, conf, "age", "biomass")
+  
   model = list(version = "4",
                model = .getModelName(path = path),
                simus = dim(outputData$biomass)[3],
