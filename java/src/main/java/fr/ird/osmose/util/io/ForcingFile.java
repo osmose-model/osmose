@@ -164,7 +164,7 @@ public class ForcingFile extends OsmoseLinker {
         
         if (this.nFiles == 0) {
             StringBuilder msg = new StringBuilder();
-            msg.append("No file has been found to match the patter " + this.filePattern + "\n");
+            msg.append("No file has been found to match the pattern " + this.filePattern + "\n");
             msg.append("The program will stop");
             error("Error reading resource file", new IOException(msg.toString()));
         }

@@ -22,7 +22,7 @@
  * Ricardo OLIVEROS RAMOS (ricardo.oliveros@gmail.com)
  * Philippe VERLEY (philippe.verley@ird.fr)
  * Laure VELEZ (laure.velez@ird.fr)
- * Nicolas Barrier (nicolas.barrier@ird.fr)
+ * Nicolas BARRIER (nicolas.barrier@ird.fr)
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -45,6 +45,7 @@ import fr.ird.osmose.Osmose;
 import fr.ird.osmose.util.OsmoseLinker;
 import fr.ird.osmose.util.timeseries.ByClassTimeSeries;
 import fr.ird.osmose.util.timeseries.ByRegimeTimeSeries;
+import fr.ird.osmose.util.timeseries.ForcingTimeSeries;
 
 import java.io.IOException;
 import ucar.ma2.InvalidRangeException;
@@ -67,7 +68,8 @@ public class BackgroundSpecies extends OsmoseLinker implements ISpecies {
 
     private final Proportion proportion;
 
-
+    private double multiplier;
+    
     /**
      * Index of the species. [0 : number of background - 1]
      */
@@ -110,8 +112,7 @@ public class BackgroundSpecies extends OsmoseLinker implements ISpecies {
     private double betaBioen;
 
     private double[][] biomass;
-
-
+    
     /**
      * Constructor of background species.
      *
@@ -216,11 +217,37 @@ public class BackgroundSpecies extends OsmoseLinker implements ISpecies {
             error(message, new IOException());
         }
 
+        String keyMul = String.format("species.multiplier.sp%s", fileindex);
+        String keyMulLog = String.format("species.multiplier.log.sp%s", fileindex);
+
+        // test if only one of the two values exists
+        if (!getConfiguration().isNull(keyMulLog) && !getConfiguration().isNull(keyMul)) {
+            String message2 = String.format("Both %s and %s parameters are defined. Choose only one.\n", keyMulLog, keyMul);
+            error(message2, new Exception());
+        }
+        
+        multiplier = 1.d;
+        
+        if (!getConfiguration().isNull(keyMulLog)) {
+          multiplier = Math.exp(getConfiguration().getFloat("species.multiplier.log.sp" + fileindex));
+            warning("Biomass for background group " + fileindex + " will be multiplied by " + multiplier
+                    + " accordingly to parameter "
+                    + getConfiguration().printParameter("species.multiplier.log.sp" + fileindex));
+        }
+        
+        if (!getConfiguration().isNull(keyMul)) {
+          multiplier = getConfiguration().getFloat("species.multiplier.sp" + fileindex);
+            warning("Biomass for background group " + fileindex + " will be multiplied by " + multiplier
+                    + " accordingly to parameter "
+                    + getConfiguration().printParameter("species.multiplier.sp" + fileindex));
+        }
+  
         // Reading the biomass time-series. So far, it is a yearly time-series
         // to see if we update that to any kind of time-series
         String keyVal = "species.biomass.sp" + fileindex;
-        String keyShift = "species.biomass.shift.sp" + fileindex;
-        ByRegimeTimeSeries biomassSeries = new ByRegimeTimeSeries(keyShift, keyVal);
+        String keyShift = "species.biomass.nsteps.year.sp" + fileindex;
+        //ByRegimeTimeSeries biomassSeries = new ByRegimeTimeSeries(keyShift, keyVal);
+        ForcingTimeSeries biomassSeries = new ForcingTimeSeries(keyShift, keyVal);
         biomassSeries.init();
 
         // Combine yearly time-series and size-proportion to reconstruct
@@ -229,7 +256,7 @@ public class BackgroundSpecies extends OsmoseLinker implements ISpecies {
         biomass = new double[biomassVect.length][nClass];
         for (int t = 0; t < biomassVect.length; t++) {
             for (int s = 0; s < nClass; s++) {
-                biomass[t][s] = biomassVect[t] * proportion.getProportion(s, t);
+                biomass[t][s] = multiplier * biomassVect[t] * proportion.getProportion(s, t);
             }
         }
     }

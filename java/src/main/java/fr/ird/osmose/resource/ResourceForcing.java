@@ -117,7 +117,7 @@ public class ResourceForcing extends OsmoseLinker {
         // biomass multiplier
         if (!getConfiguration().isNull("species.multiplier.sp" + fileindex)) {
             multiplier = getConfiguration().getFloat("species.multiplier.sp" + fileindex);
-            warning("Resource biomass for resource group " + fileindex + " will be multiplied by " + multiplier
+            warning("Biomass for resource group " + fileindex + " will be multiplied by " + multiplier
                     + " accordingly to parameter "
                     + getConfiguration().printParameter("species.multiplier.sp" + fileindex));
         } else {
@@ -127,7 +127,7 @@ public class ResourceForcing extends OsmoseLinker {
         // biomass multiplier
         if (!getConfiguration().isNull("species.offset.sp" + fileindex)) {
             offset = getConfiguration().getFloat("species.offset.sp" + fileindex);
-            warning("Resource biomass for resource group " + fileindex + " will be offseted by " + offset
+            warning("Biomass for resource group " + fileindex + " will be offseted by " + offset
                     + " accordingly to parameter "
                     + getConfiguration().printParameter("species.offset.sp" + fileindex));
         } else {
