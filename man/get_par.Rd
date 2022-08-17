@@ -8,9 +8,9 @@
 \usage{
 get_par(x, par, sp = NULL, invert = FALSE, as.is = FALSE)
 
-get_species(x, type = "focal", code = FALSE)
+get_species(x, type = "focal", code = FALSE, sp = NULL)
 
-get_fisheries(x, code = FALSE)
+get_fisheries(x, code = FALSE, fsh = NULL)
 }
 \arguments{
 \item{x}{The osmose.configuration object.}

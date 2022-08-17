@@ -147,7 +147,17 @@ get_par = function(x, par, sp=NULL, invert=FALSE, as.is=FALSE) {
 #' @param code Boolean, return the numerical code of the species or fishery?
 #' @rdname get_par
 #' @export
-get_species = function(x, type="focal", code=FALSE) {
+get_species = function(x, type="focal", code=FALSE, sp=NULL) {
+  
+  if(!is.null(sp)) {
+    isp = as.numeric(get_species(x, code = TRUE)[match(x=sp, get_species(x))])
+    if(any(is.na(isp))) {
+      xsp = paste(sp[is.na(isp)], collapse=", ")
+      stop(sprintf("These are not species in the model: %s.", xsp))
+    }
+    return(isp)
+  }
+  
   nm = unlist(get_par(x, "species.name"))
   xtype = unlist(get_par(x, "species.type"))
   this = nm[xtype==type]
@@ -159,7 +169,17 @@ get_species = function(x, type="focal", code=FALSE) {
 
 #' @rdname get_par
 #' @export
-get_fisheries = function(x, code=FALSE) {
+get_fisheries = function(x, code=FALSE, fsh=NULL) {
+  
+  if(!is.null(fsh)) {
+    isp = as.numeric(get_fisheries(x, code=TRUE)[match(x=fsh, get_fisheries(x))])
+    if(any(is.na(isp))) {
+      xsp = paste(fsh[is.na(isp)], collapse=", ")
+      stop(sprintf("These are not fisheries in the model: %s.", xsp))
+    }
+    return(isp)
+  }
+  
   this = unlist(get_par(x, "fisheries.name"))
   xcode = gsub(names(this), pattern="fisheries.name.fsh", replacement = "")
   names(this) = NULL

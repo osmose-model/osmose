@@ -22,6 +22,6 @@ get_var(object, what, how, ...)
 An array or a list containing the extracted data.
 }
 \description{
-Function to get a variable from an object of \code{osmose} class. 
+Function to get a variable from an object of \code{osmose} class.
 This function uses the get_var method (see the \code{\link{get_var.osmose}}).
 }
