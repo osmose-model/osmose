@@ -111,7 +111,7 @@ public class GrowthProcess extends AbstractProcess {
 
                 // barrier.n: patch for Fabien to limit the maximum grow rate
                 //maxDelta[i][ageDt] = deltaMeanLength[i][ageDt] + deltaMeanLength[i][ageDt];
-                minDelta[cpt][ageDt] = 0 //deltaMeanLength[cpt][ageDt] - deltaMeanLength[cpt][ageDt];
+                minDelta[cpt][ageDt] = 0; //deltaMeanLength[cpt][ageDt] - deltaMeanLength[cpt][ageDt];
                 maxDelta[cpt][ageDt] = delta_lmax_factor * deltaMeanLength[cpt][ageDt];
             }
             // Read maximal length
