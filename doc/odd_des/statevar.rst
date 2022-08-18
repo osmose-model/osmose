@@ -8,18 +8,37 @@ In the current section, the different types of entities of the Osmose model are 
 
 - The ``Species`` entity represents the species to which belong each
   individual in the system. This entity contains **fixed** parameters.
-- The ``GridPoint`` entity describes the 2D space (longitude, latitude,
-  land-sea mask).
--
+- The ``Cell`` entity describes the individual cells of the Osmose computation 2D grid (longitude, latitude,
+  cell index, etc.)
+- The ``School`` entity describes a group of individuals, whose life cycle is fully considered and which all share the
+  same characteristics (age, weight, species, location, etc, trophic level).
 
 
 State variables
 ++++++++++++++++++
 
+Cell
+###################
+
+The ``Cell`` entity contains the following state variables:
+
+.. uml::  _static/grid.puml
+    :align: center
+
 Species
 ###########################
 
+The ``Species`` entity contains the following state variables:
+
 .. uml::  _static/species.puml
+    :align: center
+
+School
+###########################
+
+The ``School`` entity contains the following state variables:
+
+.. uml::  _static/school.puml
     :align: center
 
 

@@ -7,7 +7,7 @@ class Species {
   ..
   {field} <b>lifespan</b>: species life span (time-steps)
   {field} <b>c</b>: allometric factor
-  {field} <b>bPower</b>:
+  {field} <b>bPower</b>: allometric power
   {field} <b>sizeMaturity</b>:
   {field} <b>ageMaturity</b>:
   {field} <b>eggSize</b>:

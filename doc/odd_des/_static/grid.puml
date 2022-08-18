@@ -1,0 +1,15 @@
+@startuml
+
+class Cell {
+	{field} {static} <b>LAND_VALUE</b> : Value of land-sea points
+	' {field} <b>index</b> : index =
+	{field} <b>i</b> : i-index of the current cell on the 2D grid
+	{field} <b>j</b> : j-index of the current cell on the 2D grid
+	{field} <b>land</b> : true if the cell is on land
+	{field} <b>lat</b> : latitude (degrees north)
+	{field} <b>lon</b> : longitude (degrees east)
+	{field} <b>surf</b> : surface (m2)
+}
+
+
+@enduml
