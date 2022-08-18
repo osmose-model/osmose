@@ -11,8 +11,8 @@ class Species {
   {field} <b>ageMaturity</b>: Age at maturity (year).
   {field} <b>eggSize</b>: Size of eggs (cm)
   {field} <b>eggWeight</b>: Weight of eggs (g).
-  {field} <b>firstFeedingAgeDt</b>:
-  {field} <b>larvaeToAdultsAgeDt</b>:
+  {field} <b>firstFeedingAgeDt</b>: First feeding age (time-step)
+  {field} <b>larvaeToAdultsAgeDt</b>: Age at which the school is considered as adult.
   {static} <b>TL_EGG = 3.0</b>: egg trophic level
 }
 

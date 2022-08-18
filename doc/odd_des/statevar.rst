@@ -30,7 +30,7 @@ The ``Cell`` entity contains the following state variables:
 Species
 ###########################
 
-The ``Species`` entity contains the following state variables:
+The ``Species`` and ``BackgroundSpecies`` entities contain the following state variables:
 
 .. uml::  _static/species.puml
     :align: center
