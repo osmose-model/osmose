@@ -49,6 +49,7 @@ target
 doc/_static/javadoc
 doc/_static/osmose-uml*
 doc/_static/osmose-school*
+doc/_static/osmose-species*
 
 check.sh
 **.html

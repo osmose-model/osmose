@@ -317,7 +317,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
                     </execution>
 
                     <execution>
-                        <id>mort-diagram</id>
+                        <id>osm-school</id>
                         <phase>generate-test-sources</phase>
                         <?m2e execute onConfiguration,onIncremental?>
                         <goals>
@@ -338,6 +338,33 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
                                 </scanPackage>
                             </scanPackages>
                             <whitelistRegexp>.*\School|.*Resource</whitelistRegexp>
+                            <hideMethods>true</hideMethods>
+                            <enableAsciidocWrapper>true</enableAsciidocWrapper>
+                        </configuration>
+                    </execution>
+
+                    <execution>
+                        <id>osm-species</id>
+                        <phase>generate-test-sources</phase>
+                        <?m2e execute onConfiguration,onIncremental?>
+                        <goals>
+                            <goal>generate</goal>
+                        </goals>
+                        <configuration>
+                            <outputFilename>osmose-species.puml</outputFilename>
+                            <outputDirectory>doc/_static/</outputDirectory>
+                            <scanPackages>
+                                <scanPackage>
+                                    fr.ird.osmose
+                                </scanPackage>
+                                <scanPackage>
+                                    fr.ird.osmose.background
+                                </scanPackage>
+                                <scanPackage>
+                                    fr.ird.osmose.resource
+                                </scanPackage>
+                            </scanPackages>
+                            <whitelistRegexp>.*\.ResourceSpecies|.*\.BackgroundSpecies|.*\.Species|.*\.ISpecies</whitelistRegexp>
                             <hideMethods>true</hideMethods>
                             <enableAsciidocWrapper>true</enableAsciidocWrapper>
                         </configuration>
