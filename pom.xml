@@ -337,7 +337,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
                                     fr.ird.osmose.resource
                                 </scanPackage>
                             </scanPackages>
-                            <whitelistRegexp>.*\School</whitelistRegexp>
+                            <whitelistRegexp>.*\School|.*Resource</whitelistRegexp>
                             <hideMethods>true</hideMethods>
                             <enableAsciidocWrapper>true</enableAsciidocWrapper>
                         </configuration>
