@@ -50,6 +50,13 @@ The ``Species`` and ``BackgroundSpecies`` entities contain the following state v
    :widths: 20, 60, 20
    :class: tight-table
 
+.. csv-table:: ``ResourceSpecies`` state variables
+   :file: _static/rscspecies.csv
+   :delim: ;
+   :header-rows: 1
+   :widths: 20, 60, 20
+   :class: tight-table
+
 School
 ###########################
 
