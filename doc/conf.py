@@ -44,6 +44,8 @@ extensions = ['sphinx.ext.todo',
     'sphinxcontrib.plantuml'
 ]
 
+plantuml = 'plantuml'
+
 bibtex_bibfiles = ['_static/biblio.bib']
 
 # Add any paths that contain templates here, relative to this directory.
