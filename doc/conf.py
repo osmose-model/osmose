@@ -142,6 +142,8 @@ html_static_path = ['_static']
 #            ],
 #        }
 
+def setup(app):
+   app.add_css_file('theme_overrides.css')
 
 # -- Options for HTMLHelp output ------------------------------------------
 
