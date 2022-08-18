@@ -64,6 +64,7 @@ public class AnnualLarvaMortality extends AbstractMortalitySpecies {
     @Override
     public void init() {
         
+        int nStepYear = getConfiguration().getNStepYear();
         // reading base mortality rate
         String keyShift = String.format("mortality.additional.larva.rate.shift.sp%d", getFileSpeciesIndex());
         String keyVal = String.format("mortality.additional.larva.rate.sp%d", getFileSpeciesIndex());
@@ -113,7 +114,7 @@ public class AnnualLarvaMortality extends AbstractMortalitySpecies {
         // computing final mortality rate
         mortRate = new double[getConfiguration().getNStep()];
         for(int i = 0; i < getConfiguration().getNStep(); i++) {
-            mortRate[i] = multiplier * mortRateBase[i] * seasonValues[i];   
+            mortRate[i] = multiplier * mortRateBase[i] * seasonValues[i] / nStepYear;   
         }
     }
 
