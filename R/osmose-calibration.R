@@ -128,6 +128,43 @@ rowsum.array = function(x, group, reorder=TRUE, na.rm=FALSE, ...) {
   
 }
 
+.calculate_mort_residuals_byage = function(x, conf, tiny=1e-4) {
+  
+  L = x$meanSizeByAge
+  M = x$mortalityByAge
+  
+  if(is.null(L)|is.null(M)) return(x)
+  spp = names(L)
+  ndt = get_par(conf, "simulation.time.ndtPerYear")/get_par(conf, "output.recordfrequency.ndt$")
+  
+  out = list()
+  
+  for(i in seq_along(spp)) {
+    
+    isp = spp[i]
+    
+    xx = M[[isp]]
+    y  = L[[isp]]
+    
+    mnat = xx$Mpred + xx$Mstar + xx$Mnat
+    mnat = mnat[,seq_len(ncol(y)),, drop=FALSE]
+    
+    mp = calculateMortality(conf, sp=get_species(conf, sp=isp))
+    mproxy = array(mp$M[cut(as.numeric(y), breaks=mp$size, labels=FALSE)],
+                   dim=dim(y))/ndt
+    mdeviate = log((mnat + tiny)/(mproxy + tiny))
+    out[[i]] = mdeviate[,-1, , drop=FALSE]
+    
+  }
+  
+  names(out) = spp
+  class(out) = c("osmose.residualMortalityByAge", "list")
+  x$residualMortalityByAge = out
+  
+  return(x)
+  
+}
+
 .aggregate_catch_byclass = function(x, conf, class, type) {
   
   class = tolower(class)
@@ -213,3 +250,18 @@ rowsum.array = function(x, group, reorder=TRUE, na.rm=FALSE, ...) {
   return(x)
   
 }  
+
+
+.add_to_configuration = function(conf) {
+  
+  # add total fecudity by time step for mortality calculation
+  spp = get_species(conf, type="focal", code=TRUE)
+  fec = lapply(as.numeric(spp), FUN=function(sp, conf) read.fecundity(conf, sp), conf=conf)
+  names(fec) = sprintf("reproduction.fecundity.sp%s", spp)
+  conf = c(conf, fec)
+  
+  return(conf)
+  
+}
+
+

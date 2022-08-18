@@ -649,11 +649,13 @@ osmose2R.v4r0 = function (path=NULL, species.names=NULL, conf=NULL, ...) {
   outputData = .add_surveys(x=outputData$yieldByFishery, out=outputData, type="yield")
 
   outputData = .calculate_residuals_byage(outputData, conf)
+  outputData = .calculate_mort_residuals_byage(outputData, conf)
  
   outputData = .aggregate_catch_byclass(outputData, conf, "size", "abundance")
   outputData = .aggregate_catch_byclass(outputData, conf, "size", "biomass")
   outputData = .aggregate_catch_byclass(outputData, conf, "age", "abundance")
   outputData = .aggregate_catch_byclass(outputData, conf, "age", "biomass")
+  
   
   model = list(version = "4",
                model = .getModelName(path = path),

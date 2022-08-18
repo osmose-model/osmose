@@ -148,8 +148,11 @@ run_osmose = function(input, parameters = NULL, output = NULL, log = "osmose.log
 
   prefix = .getPar(conf, "output.file.prefix")
   if(is.null(prefix)) prefix = "osmose"
-  write_osmose.osmose.configuration(conf, file = file.path(output, sprintf("%s-configuration.osm", prefix)))
-
+  
+  conf = .add_to_configuration(conf)
+  class(conf) = "osmose.configuration"
+  write_osmose(conf, file = file.path(output, sprintf("%s-configuration.osm", prefix)))
+  
   return(invisible(command))
 }
 
