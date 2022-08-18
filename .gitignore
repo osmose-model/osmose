@@ -47,6 +47,7 @@ java/target
 target
 
 doc/_static/javadoc
+doc/_static/osmose-uml.puml
 
 check.sh
 **.html
