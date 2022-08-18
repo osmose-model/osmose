@@ -1,4 +1,18 @@
 @startuml
-class Species
-
+class Species {
+  name
+  index
+  fileIndex
+  ..
+  lifespan
+  c
+  bPower
+  sizeMaturity
+  ageMaturity
+  eggSize
+  eggWeight
+  firstFeedingAgeDt
+  larvaeToAdultsAgeDt
+  {static} TL_EGG = 3f
+}
 @enduml
