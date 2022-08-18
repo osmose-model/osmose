@@ -297,6 +297,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
                 <version>1.1.2</version>
                 <executions>
                     <execution>
+                        <id>full-diagram</id>
                         <phase>generate-test-sources</phase>
                         <?m2e execute onConfiguration,onIncremental?>
                         <goals>
@@ -314,6 +315,35 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
                             <enableAsciidocWrapper>true</enableAsciidocWrapper>
                         </configuration>
                     </execution>
+
+                    <execution>
+                        <id>mort-diagram</id>
+                        <phase>generate-test-sources</phase>
+                        <?m2e execute onConfiguration,onIncremental?>
+                        <goals>
+                            <goal>generate</goal>
+                        </goals>
+                        <configuration>
+                            <outputFilename>osmose-school.puml</outputFilename>
+                            <outputDirectory>doc/_static/</outputDirectory>
+                            <scanPackages>
+                                <scanPackage>
+                                    fr.ird.osmose
+                                </scanPackage>
+                                <scanPackage>
+                                    fr.ird.osmose.background
+                                </scanPackage>
+                                <scanPackage>
+                                    fr.ird.osmose.resource
+                                </scanPackage>
+                            </scanPackages>
+                            <whitelistRegexp>.*\School</whitelistRegexp>
+                            <hideMethods>true</hideMethods>
+                            <enableAsciidocWrapper>true</enableAsciidocWrapper>
+                        </configuration>
+                    </execution>
+
+
                 </executions>
             </plugin>
 
