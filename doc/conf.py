@@ -45,6 +45,8 @@ extensions = ['sphinx.ext.todo',
 ]
 
 plantuml = 'plantuml'
+plantuml_output_format = 'svg_img'
+plantuml_latex_output_format = 'pdf'
 
 bibtex_bibfiles = ['_static/biblio.bib']
 
