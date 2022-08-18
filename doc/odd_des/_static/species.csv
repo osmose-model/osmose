@@ -1,14 +1,14 @@
-Variable :  Description : Units
-name: name of the species :
-index: index of the species :
-fileIndex: index of the species in the :
-lifespan: species life span (time-steps) :
-c: allometric factor :
-bPower: allometric power :
-sizeMaturity: Size at maturity : cm
-ageMaturity: Age at maturity : year
-eggSize: Size of eggs :  cm
-eggWeight: Weight of eggs : g
-firstFeedingAgeDt: First feeding age  : time-step
-larvaeToAdultsAgeDt: Age at which the school is considered as adult : time-step
-TL_EGG = 3.0: egg trophic level :
+Variable  ;  Description  ; Units
+name ; name of the species  ;
+index ; index of the species  ;
+fileIndex ; index of the species in the  ;
+lifespan ; species life span (time-steps)  ;
+c ; allometric factor  ;
+bPower ; allometric power  ;
+sizeMaturity ; Size at maturity  ; cm
+ageMaturity ; Age at maturity  ; year
+eggSize ; Size of eggs  ;  cm
+eggWeight ; Weight of eggs  ; g
+firstFeedingAgeDt ; First feeding age   ; time-step
+larvaeToAdultsAgeDt ; Age at which the school is considered as adult  ; time-step
+TL_EGG = 3.0 ; egg trophic level  ;

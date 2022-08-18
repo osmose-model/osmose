@@ -1,26 +1,26 @@
-Variable :  Description : Units
-abundance : Number of fish in the school at the beginning of the time-step :
-biomass : Biomass of the school at the beginning of the school : Tons
-discardedBiomass : Biomass of the school that has been discarded by each fishing gear  : Tons
-fishedBiomass : Biomass of the school that has been landed by each fishing gear : Tons
-nDead : Number of dead fish in the current time \nstep for each mortality cause (predation, fishing, natural mortality, starvation) :
-predSuccessRate : Predation success rate : %
-preyedBiomass : Biomass of prey ingested by the school at current time step  : Tons
-preys : List of preys eaten by the school :
-uuid : Unique identifier of the individual :
-lat : Latitude of the individual :
-lon : Longitude of the individual :
-x : i-index of the individual in the 2D grid :
-y : j-index of the individual in the 2D grid :
-age : Age of the school : Years
-eggRetained : Buffer variable that will temporarily retain some eggs inside a time step :
-length : Length of the individuals in the school  : Cm
-lengthi : Length of the individuals in the school at the beginning of the time-step  : cm
-out : True if the school is out of the computation domain. :
-starvationRate : Starvation rate of the school :
-trophicLevel : Trophic level of the school :
-weight : Weight of the school : tons
-species : School species :
-abundanceHasChanged : :
-accessibility : :
-ageDeath : :
+Variable ;  Description ; Units
+abundance ; Number of fish in the school at the beginning of the time-step ;
+biomass ; Biomass of the school at the beginning of the school ; Tons
+discardedBiomass ; Biomass of the school that has been discarded by each fishing gear  ; Tons
+fishedBiomass ; Biomass of the school that has been landed by each fishing gear ; Tons
+nDead ; Number of dead fish in the current time \nstep for each mortality cause (predation, fishing, natural mortality, starvation) ;
+predSuccessRate ; Predation success rate ; %
+preyedBiomass ; Biomass of prey ingested by the school at current time step  ; Tons
+preys ; List of preys eaten by the school ;
+uuid ; Unique identifier of the individual ;
+lat ; Latitude of the individual ;
+lon ; Longitude of the individual ;
+x ; i-index of the individual in the 2D grid ;
+y ; j-index of the individual in the 2D grid ;
+age ; Age of the school ; Years
+eggRetained ; Buffer variable that will temporarily retain some eggs inside a time step ;
+length ; Length of the individuals in the school  ; Cm
+lengthi ; Length of the individuals in the school at the beginning of the time-step  ; cm
+out ; True if the school is out of the computation domain. ;
+starvationRate ; Starvation rate of the school ;
+trophicLevel ; Trophic level of the school ;
+weight ; Weight of the school ; tons
+species ; School species ;
+abundanceHasChanged ; ;
+accessibility ; ;
+ageDeath ; ;
