@@ -251,6 +251,39 @@ rowsum.array = function(x, group, reorder=TRUE, na.rm=FALSE, ...) {
   
 }  
 
+.aggregate_catch_bytime = function(x, conf, type) {
+  
+  ndt = get_par(conf, "output.recordfrequency")
+  
+  y = get_var.osmose(x, type)
+  spp = colnames(y)
+  xx = list()
+  for(i in seq_len(ncol(y))) {
+    xi = y[, i, , drop=FALSE]
+    this = get_par(conf, sp=get_species(conf, sp=spp[i]))
+    xndt = get_par(this, "fisheries.recordfrequency.ndt")
+    
+    if(!is.null(xndt)) {
+      indt = xndt/ndt
+      rowok = (nrow(xi)%/%indt)*indt
+      if(nrow(xi)!=rowok) xi = xi[seq_len(rowok), , ,drop=FALSE]
+      ntime = as.numeric(rownames(xi))[c(rep(FALSE, indt-1), TRUE)]
+      xi = rowsum(xi, group=rep(seq_len(rowok/indt), each=indt), na.rm=TRUE)
+      rownames(xi) = ntime
+    }
+    
+    xx[[i]] = xi
+    
+  }
+  
+  names(xx) = spp
+  class(xx) = "osmose.yieldBySpecies"
+  x[["yieldBySpecies"]] = xx
+  
+  return(x)
+  
+}
+
 
 .add_to_configuration = function(conf) {
   
