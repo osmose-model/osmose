@@ -6,11 +6,11 @@ Entities
 
 In the current section, the different types of entities of the Osmose model are described.
 
-- The ``Species`` entity represents the species to which belong each
-  individual in the system. This entity contains **fixed** parameters.
 - The ``Cell`` entity describes the individual cells of the Osmose computation 2D grid (longitude, latitude,
   cell index, etc.)
-- The ``School`` entity describes a group of individuals, whose life cycle is fully considered and which all share the
+- The ``Species`` and ``BackgroundSpecies`` entities represent the species to which belong each
+  individual in the system. These entities contain **fixed** parameters, which are not modified during the simulation.
+- The ``School`` and ``BackgroundSchool`` entities describe a group of individuals, whose life cycle is fully considered and which all share the
   same characteristics (age, weight, species, location, etc, trophic level).
 
 
