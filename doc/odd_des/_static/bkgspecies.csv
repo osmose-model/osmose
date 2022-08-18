@@ -1,0 +1,13 @@
+Variable :  Description : Units
+name : Species name :
+index : Species index. :
+fileindex : index of the species in the :
+age : Age array : years
+ageDt : Age array : time-step
+c: allometric factor :
+bPower: allometric power :
+classProportion : Proportion of biomass attributed to each size-class :
+length : Length array : cm
+nClass : Number of size-classes :
+trophicLevel : Array of trophic level :
+timeSeries : Time series of proportion of biomass attributed to each size-class :

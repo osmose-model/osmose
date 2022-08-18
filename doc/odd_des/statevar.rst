@@ -24,24 +24,50 @@ Cell
 
 The ``Cell`` entity contains the following state variables:
 
-.. uml::  _static/grid.puml
-    :align: center
+.. csv-table:: ``Cell`` state variables
+   :file: _static/grid.csv
+   :delim: :
+   :header-rows: 1
+   :widths: 20, 70, 10
+   :class: tight-table
 
 Species
 ###########################
 
 The ``Species`` and ``BackgroundSpecies`` entities contain the following state variables:
 
-.. uml::  _static/species.puml
-    :align: center
+.. csv-table:: ``Species`` state variables
+   :file: _static/species.csv
+   :delim: :
+   :header-rows: 1
+   :widths: 20, 70, 10
+   :class: tight-table
+
+.. csv-table:: ``BackgroundSpecies`` state variables
+   :file: _static/bkgspecies.csv
+   :delim: :
+   :header-rows: 1
+   :widths: 20, 70, 10
+   :class: tight-table
 
 School
 ###########################
 
 The ``School`` entity contains the following state variables:
 
-.. uml::  _static/school.puml
-    :align: center
+.. csv-table:: ``School`` state variables
+   :file: _static/school.csv
+   :delim: :
+   :header-rows: 1
+   :widths: 20, 70, 10
+   :class: tight-table
+
+.. csv-table:: ``BackgroundSchool`` state variables
+   :file: _static/bkgschool.csv
+   :delim: :
+   :header-rows: 1
+   :widths: 20, 70, 10
+   :class: tight-table
 
 
 Scales

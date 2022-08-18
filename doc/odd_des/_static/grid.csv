@@ -1,0 +1,8 @@
+Variable : Description : Units
+LAND_VALUE : Value of land-sea points :
+i : i-index of the current cell on the 2D grid :
+j : j-index of the current cell on the 2D grid :
+land : true if the cell is on land :
+lat : latitude : Degrees North
+lon : longitude Degrees East :
+surf : surface : :math:`m^2`
