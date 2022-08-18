@@ -1,55 +1,37 @@
 @startuml
 
 Class AbstractSchool {
-	{field} <b>abundance</b> : double
-	{field} <b>abundanceHasChanged</b> : boolean
-	{field} <b>accessibility</b> : [D
-	{field} <b>ageDeath</b> : [D
-	{field} <b>biomass</b> : double
-	{field} <b>discardedBiomass</b> : [D
-	{field} <b>fishedBiomass</b> : [D
-	{field} <b>instantaneousAbundance</b> : double
-	{field} <b>instantaneousBiomass</b> : double
-	{field} <b>nDead</b> : Number of dead individuals for each mortality
-    type.
-	{field} <b>predSuccessRate</b> : float
-	{field} <b>preyedBiomass</b> : double
+	{field} <b>abundance</b> : Number of fish in the school at the beginning of the time-step
+	{field} <b>biomass</b> : Biomass of the school at the beginning of the school (tons)
+	{field} <b>discardedBiomass</b> : Biomass of the school that has been discarded by each fishing gear (tons)
+	{field} <b>fishedBiomass</b> : Biomass of the school that has been landed by each fishing gear (tons)
+	{field} <b>nDead</b> : Number of dead fish in the current time \nstep for each mortality cause (predation, fishing, natural mortality, starvation)
+	{field} <b>predSuccessRate</b> : Predation success rate (%)
+	{field} <b>preyedBiomass</b> : Biomass of prey ingested by the school at current time step (tons)
 	{field} <b>preys</b> : List of preys eaten by the school
-	{field} <b>uuid</b> : Unique identifier of the individuals
+	{field} <b>uuid</b> : Unique identifier of the individual
 	{field} <b>lat</b> : Latitude of the individual
     {field} <b>lon</b> : Longitude of the individual
 	{field} <b>x</b> : i-index of the individual in the 2D grid
 	{field} <b>y</b> : j-index of the individual in the 2D grid
+	' {field} <b>abundanceHasChanged</b> : boolean
+	' {field} <b>accessibility</b> : [D
+	' {field} <b>ageDeath</b> : [D
 }
 
 class School {
-	{field} <b>age</b> : float
-	{field} <b>ageDt</b> : int
-	{field} <b>ageMature</b> : double
-	{field} <b>e_gross</b> : double
-	{field} <b>e_maint</b> : double
-	{field} <b>e_net</b> : double
-	{field} <b>e_net_faced</b> : double
+	{field} <b>age</b> : Age of the school (years)
 	{field} <b>eggRetained</b> : double
-	{field} <b>gonadWeight</b> : float
-	{field} <b>ingestion</b> : double
-	{field} <b>ingestionTot</b> : double
-	{field} <b>isMature</b> : boolean
-	{field} <b>kappa</b> : double
-	{field} <b>length</b> : float
-	{field} <b>lengthi</b> : float
-	{field} <b>mort_oxy_rate</b> : double
-	{field} <b>mort_starv_rate</b> : double
-	{field} <b>nEggs</b> : double
-	{field} <b>out</b> : boolean
-	{field} <b>sizeMature</b> : double
-	{field} <b>starvationRate</b> : double
-	{field} <b>trophicLevel</b> : float
-	{field} <b>weight</b> : float
+	{field} <b>length</b> : Length of the individuals in the school (cm)
+	{field} <b>lengthi</b> : Length of the individuals in the \nschool at the beginning of the time-step (cm)
+	{field} <b>out</b> : True if the school is out of the computation domain.
+	{field} <b>starvationRate</b> : Starvation rate of the school
+	{field} <b>trophicLevel</b> : Trophic level of the school
+	{field} <b>weight</b> : Weight of the school (tons)
 }
 
 class BackgroundSchool {
-	{field} <b>classIndex</b> : Class index.
+	{field} <b>classIndex</b> : Class index to which belongs the school
 }
 
 School --|> AbstractSchool
