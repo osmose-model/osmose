@@ -4,16 +4,31 @@ class Species {
   {field} <b>index</b>: index of the species
   {field} <b>fileIndex</b>: index of the species in the
   {field} configuration file
-  ..
   {field} <b>lifespan</b>: species life span (time-steps)
   {field} <b>c</b>: allometric factor
   {field} <b>bPower</b>: allometric power
-  {field} <b>sizeMaturity</b>:
-  {field} <b>ageMaturity</b>:
-  {field} <b>eggSize</b>:
-  {field} <b>eggWeight</b>:
+  {field} <b>sizeMaturity</b>: Size at maturity (cm)
+  {field} <b>ageMaturity</b>: Age at maturity (year).
+  {field} <b>eggSize</b>: Size of eggs (cm)
+  {field} <b>eggWeight</b>: Weight of eggs (g).
   {field} <b>firstFeedingAgeDt</b>:
   {field} <b>larvaeToAdultsAgeDt</b>:
-  {static} <b>TL_EGG = 3f</b>: egg trophic level
+  {static} <b>TL_EGG = 3.0</b>: egg trophic level
 }
+
+class BackgroundSpecies {
+	{field} <b>name</b> : Species name
+	{field} <b>index</b> : Species index.
+	{field} <b>fileindex</b> : index of the species in the
+	{field} <b>age</b> : Age array (years)
+	{field} <b>ageDt</b> : Age array (time-step)
+  {field} <b>c</b>: allometric factor
+  {field} <b>bPower</b>: allometric power
+	{field} <b>classProportion</b> : Proportion of biomass attributed to each size-class
+	{field} <b>length</b> : Length array (cm)
+	{field} <b>nClass</b> : Number of size-classes
+	{field} <b>trophicLevel</b> : Array of trophic level
+  {field} <b>timeSeries</b> : Time series of proportion of biomass attributed to each size-class
+}
+
 @enduml
