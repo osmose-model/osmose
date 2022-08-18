@@ -22,7 +22,7 @@
  * Ricardo OLIVEROS RAMOS (ricardo.oliveros@gmail.com)
  * Philippe VERLEY (philippe.verley@ird.fr)
  * Laure VELEZ (laure.velez@ird.fr)
- * Nicolas Barrier (nicolas.barrier@ird.fr)
+ * Nicolas BARRIER (nicolas.barrier@ird.fr)
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -240,8 +240,11 @@ public class FishingGear extends AbstractMortality {
         }
 
         String separator = getConfiguration().getOutputSeparator();
-        String[] headers = {"Time", "Fbase", "Fperiod", "Fseasonality", "Ftot"};
+        String[] headers = {"time", "Fbase", "Fperiod", "Fseasonality", "F(time)"};
 
+        prw.print("Input Fishing mortality by time-component ('base', 'period' and 'seasonal' for every simulation time step.");
+        prw.println();
+        
         // Write headers
         for (int i = 0; i < headers.length - 1; i++) {
             prw.print(headers[i]);
@@ -283,12 +286,11 @@ public class FishingGear extends AbstractMortality {
         File path = new File(getConfiguration().getOutputPathname());
         StringBuilder filename = new StringBuilder(path.getAbsolutePath());
         filename.append(File.separatorChar);
-        String subfolder = "fisheries_checks";
+        String subfolder = "fishing_mortality";
         filename.append(subfolder).append(File.separatorChar);
         filename.append(getConfiguration().getString("output.file.prefix"));
-        filename.append("_").append(name).append("_simu");
-        filename.append(getRank());
-        filename.append(".csv");
+        filename.append("_").append("inputFishingMortality").append("-").append(name);
+        filename.append("_simu").append(getRank()).append(".csv");
         return filename.toString();
 
     }
