@@ -150,7 +150,7 @@ get_par = function(x, par, sp=NULL, invert=FALSE, as.is=FALSE) {
 get_species = function(x, type="focal", code=FALSE, sp=NULL) {
   
   if(!is.null(sp)) {
-    isp = as.numeric(get_species(x, code = TRUE)[match(x=sp, get_species(x))])
+    isp = as.numeric(get_species(x, type=type, code = TRUE)[match(x=sp, get_species(x, type=type))])
     if(any(is.na(isp))) {
       xsp = paste(sp[is.na(isp)], collapse=", ")
       stop(sprintf("These are not species in the model: %s.", xsp))
@@ -478,6 +478,8 @@ read.yield = function(conf, sp) {
 read.fecundity = function(conf, sp) {
   
   this = .getPar(conf, sp=sp)
+  opar = .getPar(this, "reproduction.fecundity.sp")
+  if(!is.null(opar)) return(opar)
   repfile = .getPar(this, "reproduction.season.file")
   fecundity = as.numeric(unlist(.readCSV(repfile, row.names = 1)))
   sfec = sum(fecundity) 
@@ -489,5 +491,6 @@ read.fecundity = function(conf, sp) {
   return(fecundity)
   
 }
+
 
 
