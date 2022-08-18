@@ -10,7 +10,9 @@ In the current section, the different types of entities of the Osmose model are 
   cell index, etc.)
 - The ``Species`` and ``BackgroundSpecies`` entities represent the species to which belong each
   individual in the system. These entities contain **fixed** parameters, which are not modified during the simulation.
-- The ``School`` and ``BackgroundSchool`` entities describe a group of individuals, whose life cycle is fully considered and which all share the
+- The ``School`` entity describes a group of individuals, whose life cycle is fully considered and which all share the
+  same characteristics (age, weight, species, location, etc, trophic level). The ``BackgroundSchool`` entity
+  describes a group of individuals, whose biomass is provided as input and whose life-cycle is not simulated and which all share the
   same characteristics (age, weight, species, location, etc, trophic level).
 
 

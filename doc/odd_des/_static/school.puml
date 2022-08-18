@@ -21,7 +21,7 @@ Class AbstractSchool {
 
 class School {
 	{field} <b>age</b> : Age of the school (years)
-	{field} <b>eggRetained</b> : double
+	{field} <b>eggRetained</b> : Buffer variable that will temporarily retain some eggs inside a time step
 	{field} <b>length</b> : Length of the individuals in the school (cm)
 	{field} <b>lengthi</b> : Length of the individuals in the \nschool at the beginning of the time-step (cm)
 	{field} <b>out</b> : True if the school is out of the computation domain.
