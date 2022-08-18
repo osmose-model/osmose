@@ -1,18 +1,19 @@
 @startuml
 class Species {
-  name
-  index
-  fileIndex
+  {field} <b>name</b>: name of the species
+  {field} <b>index</b>: index of the species
+  {field} <b>fileIndex</b>: index of the species in the
+  {field} configuration file
   ..
-  lifespan
-  c
-  bPower
-  sizeMaturity
-  ageMaturity
-  eggSize
-  eggWeight
-  firstFeedingAgeDt
-  larvaeToAdultsAgeDt
-  {static} TL_EGG = 3f
+  {field} <b>lifespan</b>: species life span (time-steps)
+  {field} <b>c</b>: allometric factor
+  {field} <b>bPower</b>:
+  {field} <b>sizeMaturity</b>:
+  {field} <b>ageMaturity</b>:
+  {field} <b>eggSize</b>:
+  {field} <b>eggWeight</b>:
+  {field} <b>firstFeedingAgeDt</b>:
+  {field} <b>larvaeToAdultsAgeDt</b>:
+  {static} <b>TL_EGG = 3f</b>: egg trophic level
 }
 @enduml

@@ -4,8 +4,24 @@ Entities, state variables, and scales
 Entities
 ++++++++++++++++++
 
+In the current section, the different types of entities of the Osmose model are described.
+
+- The ``Species`` entity represents the species to which belong each
+  individual in the system. This entity contains **fixed** parameters.
+- The ``GridPoint`` entity describes the 2D space (longitude, latitude,
+  land-sea mask).
+-
+
+
 State variables
 ++++++++++++++++++
+
+Species
+###########################
+
+.. uml::  _static/species.puml
+    :align: center
+
 
 Scales
 ++++++++++++++++++
