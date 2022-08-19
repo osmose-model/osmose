@@ -1,97 +1,4 @@
 
-#' Set values for a parameter list
-#'
-#' @param x The osmose.configuration list.
-#' @param value The parameter value to replace.
-#' @param ... Additional arguments
-#'
-#' @return The configuration list with parameter values changed.
-#' @export
-#'
-set_par = function(x, value, ...) {
-  x = as.relistable(x)
-  val = unlist(x)
-  val[] = value
-  val = relist(val)
-  class(val) = "osmose.configuration"
-  return(val)
-}
-
-#' @exportS3Method relist osmose.configuration
-relist.osmose.configuration = function(flesh, skeleton = attr(flesh, "skeleton")) {
-  ind <- 1L
-  result <- skeleton
-  for (i in seq_along(skeleton)) {
-    size <- length(unlist(result[[i]]))
-    result[[i]] <- relist(flesh[seq.int(ind, length.out = size)], 
-                          result[[i]])
-    ind <- ind + size
-  }
-  result
-}
-
-mcat = function(..., file = "", sep = " ", fill = FALSE, labels = NULL,
-                append = FALSE) {
-  for(ifile in file) {
-    cat(... , file = ifile, sep = sep, fill = fill, labels = labels,
-        append = append)
-  }
-  return(invisible(NULL))
-}
-
-logit = function(x) log(x/(1-x))
-ilogit = function(x) 1/(1 + exp(-x))
-
-#' Give Row or Colums Sums of a Matrix or Array, Based on a Grouping Variable 
-#' @param group a vector or factor giving the grouping, with one element per column of x. Missing values will be treated as another group and a warning will be given.
-#' @inheritParams base::rowsum
-#' @export
-colsum = function (x, group, reorder = TRUE, ...) {
-  UseMethod("colsum")
-} 
-
-
-#' @rdname colsum
-#' @export
-colsum.default = function(x, group, reorder=TRUE, na.rm=FALSE, ...) {
-  x = t(rowsum(t(x), group=group, reorder=reorder, na.rm=na.rm, ...))
-  return(x)
-}
-
-#' @rdname colsum
-#' @export
-colsum.matrix = colsum.default
-
-#' @rdname colsum
-#' @export
-colsum.array = function(x, group, reorder=TRUE, na.rm=FALSE, ...) {
-  perm = seq_along(dim(x))
-  perm[1:2] = 2:1
-  x = rowsum(aperm(x, perm=perm), group=group, reorder=reorder, na.rm=na.rm, ...)
-  x = aperm(x, perm=perm)
-  return(x)
-}
-
-
-#' @export
-rowsum.matrix = rowsum.default
-
-#' @export
-rowsum.array = function(x, group, reorder=TRUE, na.rm=FALSE, ...) {
-  if(!is.numeric(x)) 
-    stop("'x' must be numeric")
-  if(length(group) != NROW(x)) 
-    stop("incorrect length for 'group'")
-  if(anyNA(group)) 
-    warning("missing values for 'group'")
-  ugroup = unique(group)
-  xo = apply(x, seq_along(dim(x))[-c(1:2)], FUN=rowsum.default, group=group, reorder=reorder, na.rm=na.rm, ...)
-  dim(xo) = c(length(ugroup), dim(x)[-1])
-  dimnames(xo) = c(list(ugroup), dimnames(x)[-1])
-  return(xo)
-}
-
-
 # Internal ----------------------------------------------------------------
 
 .calculate_residuals_byage = function(x, conf, tiny=1e-4) {
@@ -284,6 +191,154 @@ rowsum.array = function(x, group, reorder=TRUE, na.rm=FALSE, ...) {
   
 }
 
+.write_yield_files = function(x, conf, path) {
+  
+  model = get_par(conf, "output.file.prefix")
+  start = get_par(conf, "simulation.time.start")
+  if(is.null(start)) {
+    warning("Parameter 'simulation.time.start' is missing. Osmose will assume is 1900.")
+    start = 1900
+  }
+  
+  tsize = sapply(x$yieldBySpecies, nrow)
+  tt = table(tsize)
+  it = as.numeric(names(tt))
+  j = 1
+  
+  files = character(length(tsize))
+  names(files) = names(tsize)
+  
+  for(i in seq_along(it)) {
+    
+    spnames = names(tsize)[tsize==it[i]]
+    year = start + .getYear(x$yieldBySpecies[[spnames[1]]])
+    period = .getTimeIndex(x$yieldBySpecies[[spnames[1]]])
+    
+    freq = it[i]/length(unique(year))
+    pnames = c(year=1, semester=2, quarter=4, month=12)
+    pname = names(pnames[pnames==freq])
+    
+    if(length(pname)==0) {
+      pname = sprintf("period%02d", j)
+      j = j + 1
+    }
+    
+    dfnames = unique(c("year", pname, spnames))
+    
+    out = matrix(NA, nrow=it[i], ncol=length(dfnames))
+    out = as.data.frame(out)
+    names(out) = dfnames
+    
+    out[, 1] = year
+    if(pname!="year") out[, 2] = period
+    
+    fname = sprintf("%s_yield_%s.csv", model, pname)  
+    files[spnames] = fname
+    
+    write_osmose(out, file=file.path(path, fname), row.names = FALSE, col.names = TRUE)
+    
+  }
+  
+  names(files) = paste("yield", names(files), sep=".")
+  
+  return(invisible(files))
+  
+}
+
+
+.write_biomass_files = function(x, conf, path) {
+  
+  model = get_par(conf, "output.file.prefix")
+  start = get_par(conf, "simulation.time.start")
+  if(is.null(start)) {
+    warning("Parameter 'simulation.time.start' is missing. Osmose will assume is 1900.")
+    start = 1900
+  }
+  
+  bio = get_var(x, "biomass", expected=TRUE)
+  
+  files = character(ncol(bio))
+  names(files) = paste("biomass", colnames(bio), sep=".")
+  
+  year = start + .getYear(bio)
+  period = .getTimeIndex(bio)
+  freq = nrow(bio)/length(unique(year))
+  
+  pnames = c(year=1, semester=2, quarter=4, month=12)
+  pname = names(pnames[pnames==freq])
+  
+  if(length(pname)==0) pname = "period"
+  
+  dfnames = unique(c("year", pname))
+  
+  out = cbind(year)
+  if(pname!="year") out = cbind(out, period)
+  colnames(out) = dfnames
+  
+  out = cbind(out, NA*bio)
+  
+  fname = sprintf("%s_biomass-index_%s.csv", model, pname)  
+  
+  files[] = fname
+  
+  write_osmose(out, file=file.path(path, fname), row.names = FALSE, col.names = TRUE)
+ 
+  return(invisible(files))
+  
+}
+
+.write_cal_files = function(x, conf, path) {
+  
+  model = get_par(conf, "output.file.prefix")
+  start = get_par(conf, "simulation.time.start")
+  if(is.null(start)) {
+    warning("Parameter 'simulation.time.start' is missing. Osmose will assume is 1900.")
+    start = 1900
+  }
+  
+  cal = get_var(x, "yieldNBySize", expected=TRUE)
+  files = character(length(cal))
+  names(files) = names(cal)
+
+  for(i in seq_along(cal)) {
+    
+    
+    bio = cal[[i]]
+    year = start + .getYear(bio)
+    period = .getTimeIndex(bio)
+    freq = nrow(bio)/length(unique(year))
+    
+    marks = as.numeric(colnames(bio))
+    dl = diff(marks)/2
+    colnames(bio) = round(marks + dl[1], 3)
+    
+    pnames = c(year=1, semester=2, quarter=4, month=12)
+    pname = names(pnames[pnames==freq])
+    
+    if(length(pname)==0) pname = "period"
+    
+    dfnames = unique(c("year", pname))
+    
+    out = cbind(year)
+    if(pname!="year") out = cbind(out, period)
+    colnames(out) = dfnames
+    
+    out = cbind(out, NA*bio)
+    
+    fname = sprintf("%s_catchatlength-%s_%s.csv", model, names(cal)[i], pname)  
+    files[names(cal)[i]] = fname
+    
+    write_osmose(out, file=file.path(path, fname), row.names = FALSE, col.names = TRUE)
+    
+  }
+
+  names(files) = paste("catchatlength", names(files), sep=".")
+  
+  return(invisible(files))
+  
+}
+
+
 
 .add_to_configuration = function(conf) {
   
@@ -295,6 +350,62 @@ rowsum.array = function(x, group, reorder=TRUE, na.rm=FALSE, ...) {
   
   return(conf)
   
+}
+
+
+.create_calibration_settings = function(output, files) {
+  
+  cal_type = c(biomass="lnorm3", yield="lnorm2", catchatlength="multinom", 
+               mortality="normp", growth="normp")
+  
+  cal_cv = c(biomass=0.25, yield=0.05, catchatlength=1, 
+             mortality=1, growth=1)
+  
+  cal_useData = c(biomass=TRUE, yield=TRUE, catchatlength=TRUE, 
+                  mortality=FALSE, growth=FALSE)
+  
+  cal_novarid = c("catchatlength", "growth", "mortality")
+  
+  cal_settings = data.frame(variable=names(output))
+  cal_settings$itype = sapply(strsplit(names(output), split = "\\."), FUN="[", i=1)
+  cal_settings$spp   = sapply(strsplit(names(output), split = "\\."), FUN="[", i=2)
+  cal_settings$type  = cal_type[cal_settings$itype]
+  cal_settings$calibrate = TRUE
+  cal_settings$weight = 1/(2*cal_cv[cal_settings$itype]^2)
+  cal_settings$use_data = cal_useData[cal_settings$itype]
+  cal_settings$file = files[cal_settings$variable]
+  cal_settings$varid = cal_settings$spp
+  cal_settings$varid[cal_settings$itype %in% cal_novarid] = NA
+  
+  cal_settings$itype = NULL
+  cal_settings$spp = NULL
+  
+  return(cal_settings)
+  
+}
+
+
+
+.getTimeIndex = function(x) {
+  y = as.numeric(rownames(x)) 
+  y = y %% 1
+  y[y==0] = 1
+  y = y/y[1]
+  y = round(y, 0)
+  return(y)
+}
+
+.getYear = function(x) {
+  y = as.numeric(rownames(x))
+  y = y - y[1]
+  y = as.integer(y)
+  return(y)
+}
+
+.dim_or_length = function(x) {
+  xdim = dim(x)
+  if(!is.null(xdim)) return(xdim)
+  return(length(x))
 }
 
 
