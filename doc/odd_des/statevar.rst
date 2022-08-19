@@ -33,7 +33,6 @@ The ``Cell`` entity contains the following state variables:
    :file: _static/grid.csv
    :delim: ;
    :header-rows: 1
-   :widths: 20, 60, 20
    :class: tight-table
 
 Species
@@ -45,7 +44,6 @@ The ``Species`` entities contain the following state variables:
    :file: _static/species.csv
    :delim: ;
    :header-rows: 1
-   :widths: 20, 60, 20
    :class: tight-table
 
 The ``BackgroundSpecies`` entities contain the following state variables:
@@ -54,14 +52,12 @@ The ``BackgroundSpecies`` entities contain the following state variables:
    :file: _static/bkgspecies.csv
    :delim: ;
    :header-rows: 1
-   :widths: 20, 60, 20
    :class: tight-table
 
 .. csv-table:: ``ResourceSpecies`` state variables
    :file: _static/rscspecies.csv
    :delim: ;
    :header-rows: 1
-   :widths: 20, 60, 20
    :class: tight-table
 
 School

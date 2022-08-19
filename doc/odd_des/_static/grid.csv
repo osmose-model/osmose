@@ -1,8 +1,8 @@
-Variable ; Description ; Units
-LAND_VALUE ; Value of land-sea points ;
-i ; i-index of the current cell on the 2D grid ;
-j ; j-index of the current cell on the 2D grid ;
-land ; true if the cell is on land ;
-lat ; latitude ; Degrees North
-lon ; longitude ; Degrees East
-surf ; surface ; :math:`m^2`
+Variable ; Description ; Type ; Units
+LAND_VALUE ; Value of land-sea points ; float ;
+i ; i-index of the current cell on the 2D grid ; int, :math:`\in [0, N_x - 1]` ;
+j ; j-index of the current cell on the 2D grid ; int, :math:`\in [0, N_y - 1]` ;
+land ; true if the cell is on land ; boolean ;
+lat ; latitude ; float ; Degrees North
+lon ; longitude ; float ; Degrees East
+surf ; surface ; float, > 0 ; :math:`m^2`

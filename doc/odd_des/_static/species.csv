@@ -1,14 +1,14 @@
-Variable  ;  Description  ; Units
-name ; name of the species  ;
-index ; index of the species  ;
-fileIndex ; index of the species in the  ;
-lifespan ; species life span (time-steps)  ;
-c ; allometric factor  ;
-bPower ; allometric power  ;
-sizeMaturity ; Size at maturity  ; cm
-ageMaturity ; Age at maturity  ; year
-eggSize ; Size of eggs  ;  cm
-eggWeight ; Weight of eggs  ; g
-firstFeedingAgeDt ; First feeding age   ; time-step
-larvaeToAdultsAgeDt ; Age at which the school is considered as adult  ; time-step
-TL_EGG = 3.0 ; egg trophic level  ;
+Variable  ;  Description  ; Type ; Units
+name ; name of the species  ; string ;
+index ; index of the species  ; int, :math:`\in[0, N_{species} - 1]`;
+fileIndex ; index of the species in the configuration file  ; int, :math:`>0`;
+lifespan ; species life span  ; int, :math:`>0` ; time-steps
+c ; allometric factor ; float ;
+bPower ; allometric power ; float ;
+sizeMaturity ; Size at maturity ; float ; cm
+ageMaturity ; Age at maturity ; float ; year
+eggSize ; Size of eggs ; float ;  cm
+eggWeight ; Weight of eggs ; float ; g
+firstFeedingAgeDt ; First feeding age ; int ; time-step
+larvaeToAdultsAgeDt ; Age at which the school is considered as adult ; int ; time-step
+TL_EGG ; egg trophic level ; float, :math:`= 3.0`  ;
