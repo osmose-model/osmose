@@ -65,9 +65,6 @@ plot.osmose = function(x, what = "biomass", ...) {
   return(invisible())
 }
 
-#' get_var method for osmose outputs objects
-#' @description Get a variable from an \code{osmose} object. 
-#'
 #' @param object Object of \code{osmose} class (see the \code{\link{read_osmose}} 
 #' function).
 #' @param what Name of variable to extract. See Details.
@@ -75,13 +72,9 @@ plot.osmose = function(x, what = "biomass", ...) {
 #' @param expected A logical parameter. If \code{TRUE}, the average over the 
 #' last dimensions will be performed (only if the output is an array).
 #' @param ... Additional arguments of the function.
-#' 
-#' @details \code{what} can be any available variable contained on \code{object}
-#' (e.g. biomass, abundance, yield, yieldN, etc).
-#'
-#' @return An matrix or a list containing the data.
-#' @export
+#' @rdname get_var
 #' @method get_var osmose
+#' @export
 get_var.osmose = function(object, what, how = c("matrix", "list"), 
                           expected = FALSE, ...){
   
@@ -100,17 +93,30 @@ get_var.osmose = function(object, what, how = c("matrix", "list"),
     stop(message) 
   }
   
-  if(inherits(out, "array") & isTRUE(expected)){
-    out = apply(out, c(1, 2), mean, na.rm = TRUE)
+  .expected = function(x) {
+    out = drop(apply(x, c(1, 2), mean, na.rm = TRUE))
+    if(is.null(dim(out))) names(out) = NULL
+    return(out)
+  }
+    
+  if(is.array(out) & isTRUE(expected)){
+    out = .expected(out)
   }
   
-  if(how == "matrix") return(out)
+  if(is.list(out) & isTRUE(expected)){
+    out = lapply(out, FUN=.expected)
+  }
+  
+  if(how == "matrix" | is.list(out)) return(out)
   
   if(how == "list") return(as.list(as.data.frame(out, check.names = FALSE)))
   
   return(out)
 }
 
+#' @rdname get_var
+#' @export
+get_var.list = get_var.osmose
 
 #' Print information for an \code{osmose} object
 #'
@@ -132,9 +138,12 @@ print.osmose = function(x, ...) {
   # Check which levels are empty (dim or length equal to zero)
   infoLevels = sapply(infoLevels, function(x) isTRUE(all.equal(x, 0)))
   
-  # Add a mark (*) for those empty level's' names
-  infoLevels = paste0(names(infoLevels), ifelse(infoLevels, " (*)", ""))
+  # remove empty fields
+  infoLevels = infoLevels[!infoLevels]
   
+  # # Add a mark (*) for those empty level's' names
+  infoLevels = paste0(names(infoLevels), ifelse(infoLevels, " (*)", ""))
+  infoLevels = setdiff(infoLevels, c("model", "species", "config"))
   # If length of level (of names) vector is odd, add an empty value
   infoLevels = c(infoLevels, 
                  if(length(infoLevels) %% 2 != 0) "---------" else NULL)
@@ -144,9 +153,9 @@ print.osmose = function(x, ...) {
   dimnames(infoLevels) = list(rep("", nrow(infoLevels)), rep("", ncol(infoLevels)))
   
   # Show available variables
-  cat("\nAvailable fields:\n")
+  cat("\nAvailable outputs:\n")
   print(infoLevels)
-  cat("\n(*) Empty fields.\n")
+  # cat("\n(*) Empty fields.\n")
 }
 
 #' @title \code{osmose} object summaries
