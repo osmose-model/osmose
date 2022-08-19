@@ -6,27 +6,32 @@
 \alias{get_fisheries}
 \title{Get a parameter from a configuration file.}
 \usage{
-get_par(x, par, sp = NULL, invert = FALSE, as.is = FALSE)
+get_par(conf, par, sp = NULL, fsh = NULL, invert = FALSE, as.is = FALSE)
 
-get_species(x, type = "focal", code = FALSE, sp = NULL)
+get_species(x, type = NULL, code = FALSE, sp = NULL)
 
 get_fisheries(x, code = FALSE, fsh = NULL)
 }
 \arguments{
-\item{x}{The osmose.configuration object.}
-
 \item{par}{The name of the parameter, partial matching is allowed.}
 
 \item{sp}{The number of the species (starting at 0).}
+
+\item{fsh}{The number of the fishery (starting at 0).}
 
 \item{invert}{Revert the selection (all but 'par')}
 
 \item{as.is}{Should the results be returned as an osmose.configuration object? 
 The default is FALSE, but only when one exact match is found.}
 
+\item{x}{The osmose.configuration object.}
+
 \item{type}{type of species to get the names for.}
 
 \item{code}{Boolean, return the numerical code of the species or fishery?}
+}
+\value{
+A list with all the matched parameters.
 }
 \description{
 Get a parameter from a configuration file.

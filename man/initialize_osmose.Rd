@@ -24,37 +24,43 @@ initialize_osmose(
 )
 }
 \arguments{
-\item{input}{Filename of the main OSMOSE configuration file}
+\item{input}{Filename of the main configuration file}
 
 \item{file}{File to write the initialization configuration}
 
-\item{type}{}
+\item{type}{Initialization type: currently 'interannual', 'climatological' and 'ncdf'}
 
-\item{parameters}{}
+\item{parameters}{Parameters to be passed to osmose (version 4 or higher).}
 
-\item{output}{}
+\item{output}{Output directory. If NULL, the value set in the configuration file is used.}
 
-\item{log}{}
+\item{log}{File to save OSMOSE execution messages.}
 
-\item{version}{}
+\item{version}{OSMOSE version. Integer (2, 3, etc.) or releases ('v3r2') are
+accepted.}
 
-\item{osmose}{}
+\item{osmose}{Path to a OSMOSE .jar executable. By default (NULL), uses the stable
+jar for the current version.}
 
-\item{java}{}
+\item{java}{Path to the java executable. The default assumes 'java' is
+on the search path.}
 
-\item{options}{}
+\item{options}{Java options (e.g. -Xmx2048m to increase memory limit).}
 
-\item{verbose}{}
+\item{verbose}{Show messages? (output in the log file if FALSE).}
 
-\item{clean}{}
+\item{clean}{TRUE if the output directory should be cleaned before running OSMOSE.}
 
-\item{force}{}
+\item{force}{TRUE if an outdated configuration can be run without being updated.}
 
-\item{run}{}
+\item{run}{Do we have to run the model to produce the outputs or are already there?}
 
-\item{append}{}
+\item{append}{To append or not the results to \code{file}}
 
-\item{...}{}
+\item{...}{Additional arguments, currently unused.}
+}
+\value{
+The side effect is to create a configuration file with the initialization parameters.
 }
 \description{
 Create initialization file for an OSMOSE configuration
