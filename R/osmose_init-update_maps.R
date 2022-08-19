@@ -7,10 +7,9 @@
 #' @param sep Separator used in the csv maps, default to comma.
 #' @param na.strings Value used for 'land' in the maps, default to -99.
 #'
-#' @return
+#' @return The side effect is to create ncdf files with the maps.
 #' @export
 #'
-#' @examples
 update_maps = function(input, output, conf, sep = ",", na.strings = -99, test=FALSE) {
 
   xconf = .readConfiguration(input)

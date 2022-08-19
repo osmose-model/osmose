@@ -1,27 +1,16 @@
 
 #' Create initialization file for an OSMOSE configuration
 #'
-#' @param input Filename of the main OSMOSE configuration file
 #' @param file File to write the initialization configuration
-#' @param type 
-#' @param parameters 
-#' @param output 
-#' @param log 
-#' @param version 
-#' @param osmose 
-#' @param java 
-#' @param options 
-#' @param verbose 
-#' @param clean 
-#' @param force 
-#' @param run 
-#' @param append 
-#' @param ... 
+#' @param type Initialization type: currently 'interannual', 'climatological' and 'ncdf'
+#' @param run Do we have to run the model to produce the outputs or are already there?
+#' @param append To append or not the results to \code{file}
+#' @param ... Additional arguments, currently unused.
+#' @inheritParams run_osmose
 #'
-#' @return
+#' @return The side effect is to create a configuration file with the initialization parameters. 
 #' @export
 #'
-#' @examples
 initialize_osmose = function(input, file, type="internannual", parameters = NULL, output = NULL, 
                              log = "osmose.log", version = NULL, osmose = NULL, 
                              java = "java", options = NULL, verbose = TRUE, 

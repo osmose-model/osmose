@@ -113,9 +113,22 @@
 
 # Internal ----------------------------------------------------------------
 
-
-.getPar = function(conf, par, sp=NULL, invert=FALSE, as.is=FALSE) {
+#' Get a parameter from a configuration file.
+#'
+#' @param x The osmose.configuration object.
+#' @param par The name of the parameter, partial matching is allowed.
+#' @param sp The number of the species (starting at 0).
+#' @param fsh The number of the fishery (starting at 0).
+#' @param invert Revert the selection (all but 'par')
+#' @param as.is Should the results be returned as an osmose.configuration object? 
+#' The default is FALSE, but only when one exact match is found.
+#'
+#' @return A list with all the matched parameters.
+#' @export
+get_par = function(conf, par, sp=NULL, fsh=NULL, invert=FALSE, as.is=FALSE) {
+  if(!is.null(sp) & !is.null(fsh)) return(NULL)
   if(!is.null(sp)) par = sprintf(".sp%d$", sp)
+  if(!is.null(fsh)) par = sprintf(".fsh%d$", fsh)
   par = tolower(par)
   out = conf[grep(names(conf), pattern=par, invert=invert)]
   if(length(out)==0) return(NULL)
@@ -127,40 +140,30 @@
   return(out)
 }
 
-
-#' Get a parameter from a configuration file.
-#'
-#' @param x The osmose.configuration object.
-#' @param par The name of the parameter, partial matching is allowed.
-#' @param sp The number of the species (starting at 0).
-#' @param invert Revert the selection (all but 'par')
-#' @param as.is Should the results be returned as an osmose.configuration object? 
-#' The default is FALSE, but only when one exact match is found.
-#'
-#' @return
-#' @export
-get_par = function(x, par, sp=NULL, invert=FALSE, as.is=FALSE) {
-  .getPar(conf=x, par=par, sp=sp, invert=invert, as.is=as.is)
-}
+# to_do: find all instances of .getPar and replace by get_par
+.getPar = get_par
 
 #' @param type type of species to get the names for.
 #' @param code Boolean, return the numerical code of the species or fishery?
 #' @rdname get_par
 #' @export
-get_species = function(x, type="focal", code=FALSE, sp=NULL) {
+get_species = function(x, type=NULL, code=FALSE, sp=NULL) {
+  
+  type = match.arg(type, choices = c("all", "focal", "background", "resources"))
   
   if(!is.null(sp)) {
     isp = as.numeric(get_species(x, type=type, code = TRUE)[match(x=sp, get_species(x, type=type))])
     if(any(is.na(isp))) {
       xsp = paste(sp[is.na(isp)], collapse=", ")
-      stop(sprintf("These are not species in the model: %s.", xsp))
+      if(type=="all") stop(sprintf("These are not species in the model: %s.", xsp))
+      stop(sprintf("These are not %s species in the model: %s.", type, xsp))
     }
     return(isp)
   }
   
   nm = unlist(get_par(x, "species.name"))
   xtype = unlist(get_par(x, "species.type"))
-  this = nm[xtype==type]
+  this = if(type=="all") nm else nm[xtype==type]  
   xcode = gsub(names(this), pattern="species.name.sp", replacement = "")
   names(this) = NULL
   if(isTRUE(code)) return(xcode)

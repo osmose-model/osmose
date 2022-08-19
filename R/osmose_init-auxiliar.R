@@ -4,7 +4,7 @@
 #' @param conf OSMOSE configuration
 #' @param ... 
 #'
-#' @return
+#' @return An OSMOSE grid.
 #' @export
 #'
 osmose_grid = function(conf, center=TRUE, ...) {
