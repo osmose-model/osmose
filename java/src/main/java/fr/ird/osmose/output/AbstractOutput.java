@@ -57,8 +57,6 @@ abstract public class AbstractOutput extends SimulationLinker implements IOutput
 ///////////////////////////////
 // Declaration of the variables
 ///////////////////////////////
-    private boolean cutoffEnabled;
-    private int recordFrequency;
 
     /**
      * List of files where the given variable will be stored. prw[0] =
@@ -67,21 +65,6 @@ abstract public class AbstractOutput extends SimulationLinker implements IOutput
      */
     private PrintWriter[] prw;
 
-    /**
-     * Threshold age (year) for age class zero. This parameter allows to discard
-     * schools younger that this threshold in the calculation of the indicators
-     * when parameter <i>output.cutoff.enabled</i> is set to {@code true}.
-     * Parameter <i>output.cutoff.age.sp#</i>
-     */
-    private float[] cutoffAge;
-
-    /**
-     * Threshold size (cm) for age class zero. This parameter allows to discard
-     * schools smaller that this threshold in the calculation of the indicators when
-     * parameter <i>output.cutoff.enabled</i> is set to {@code true}. Parameter
-     * <i>output.cutoff.age.sp#</i>
-     */
-    private float[] cutoffSize;
 
 
     /**
@@ -154,29 +137,6 @@ abstract public class AbstractOutput extends SimulationLinker implements IOutput
     @Override
     public void init() {
 
-        // Cutoff
-        cutoffEnabled = getConfiguration().getBoolean("output.cutoff.enabled");
-        cutoffAge = new float[getNSpecies()];
-        if (cutoffEnabled) {
-            int cpt = 0;
-            for (int iSpec : getFocalIndex()) {
-                // If cutoff enabled, look for cutoff age
-                if(!getConfiguration().isNull("output.cutoff.age.sp" + iSpec)) {
-                    cutoffAge[cpt] = getConfiguration().getFloat("output.cutoff.age.sp" + iSpec);
-                } else {
-                    cutoffAge[cpt] = Float.NEGATIVE_INFINITY;
-                }
-
-                // If cutoff enabled, look for cutoff size
-                if(!getConfiguration().isNull("output.cutoff.size.sp" + iSpec)) {
-                    cutoffSize[cpt] = getConfiguration().getFloat("output.cutoff.size.sp" + iSpec);
-                } else {
-                    cutoffSize[cpt] = Float.NEGATIVE_INFINITY;
-                }
-                cpt++;
-            }
-        }
-        recordFrequency = getConfiguration().getInt("output.recordfrequency.ndt");
 
         // Create parent directory
         File path = new File(getConfiguration().getOutputPathname());
@@ -214,7 +174,7 @@ abstract public class AbstractOutput extends SimulationLinker implements IOutput
     }
 
     boolean include(School school) {
-        return ((!cutoffEnabled) || (school.getAge() >= cutoffAge[school.getSpeciesIndex()]) & ((school.getLength() >= cutoffSize[school.getSpeciesIndex()])));
+        return ((!getConfiguration().isCutoffEnabled()) || (school.getAge() >= getConfiguration().getCutoffAge()[school.getSpeciesIndex()]) & ((school.getLength() >= getConfiguration().getCutoffLength()[school.getSpeciesIndex()])));
     }
 
     @Override
@@ -269,12 +229,12 @@ abstract public class AbstractOutput extends SimulationLinker implements IOutput
      * @return the recordFrequency
      */
     public int getRecordFrequency() {
-        return recordFrequency;
+        return getConfiguration().getRecordFrequency();
     }
 
     @Override
     public boolean isTimeToWrite(int iStepSimu) {
-        return (((iStepSimu + 1) % recordFrequency) == 0);
+        return (((iStepSimu + 1) % getRecordFrequency()) == 0);
     }
 
     public String quote(String str) {

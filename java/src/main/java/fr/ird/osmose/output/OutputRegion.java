@@ -52,9 +52,6 @@ import fr.ird.osmose.process.mortality.fishery.FisheryMapSet;
 public class OutputRegion extends AbstractOutputRegion {
 
     private FisheryMapSet mapSet;
-    private boolean cutoffEnabled;
-    private float[] cutoffAge;
-    private float[] cutoffSize;
 
     public OutputRegion(int index) {
         super(index);
@@ -71,29 +68,6 @@ public class OutputRegion extends AbstractOutputRegion {
 
         mapSet = new FisheryMapSet(this.getName(), "output.regions.movement", "region");
         mapSet.init();
-
-        // Cutoff
-        cutoffEnabled = getConfiguration().getBoolean("output.cutoff.enabled");
-        cutoffAge = new float[getNSpecies()];
-        if (cutoffEnabled) {
-            int cpt = 0;
-            for (int iSpec : getFocalIndex()) {
-                // If cutoff enabled, look for cutoff age
-                if (!getConfiguration().isNull("output.cutoff.age.sp" + iSpec)) {
-                    cutoffAge[cpt] = getConfiguration().getFloat("output.cutoff.age.sp" + iSpec);
-                } else {
-                    cutoffAge[cpt] = Float.NEGATIVE_INFINITY;
-                }
-
-                // If cutoff enabled, look for cutoff size
-                if (!getConfiguration().isNull("output.cutoff.size.sp" + iSpec)) {
-                    cutoffSize[cpt] = getConfiguration().getFloat("output.cutoff.size.sp" + iSpec);
-                } else {
-                    cutoffSize[cpt] = Float.NEGATIVE_INFINITY;
-                }
-                cpt++;
-            }
-        }
 
         /*
         if (!getConfiguration().isNull("output.region.file.rg" + index)) {
@@ -180,7 +154,7 @@ public class OutputRegion extends AbstractOutputRegion {
     }
 
     boolean include(AbstractSchool school) {
-        return ((!cutoffEnabled) || ((school.getAge() >= cutoffAge[school.getSpeciesIndex()]) & (school.getLength() >= cutoffSize[school.getSpeciesIndex()])));
+        return ((!getConfiguration().isCutoffEnabled()) || ((school.getAge() >= getConfiguration().getCutoffAge()[school.getSpeciesIndex()]) & (school.getLength() >= getConfiguration().getCutoffLength()[school.getSpeciesIndex()])));
     }
 
 }
