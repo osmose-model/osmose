@@ -197,6 +197,15 @@ read_osmose = function(path = NULL, input = NULL, version = "4.3.2",
   # If both path and input are NULL, then show an error message
   if(is.null(path) & is.null(input)) stop("No output or configuration path has been provided.")
 
+  # use first argument as path and input if not specified.
+  if(!is.null(path) & is.null(input)) {
+    if(!file.exists(path)) stop(sprintf("Path '%s' not found here (%s)", path, getwd()))
+    if(!file.info(path)$isdir) {
+      input = path
+      path = NULL
+    } 
+  }
+  
   # If config is not NULL, then read it
   recursive = TRUE
   if(is.null(input)) {
@@ -252,11 +261,8 @@ report = function(x, format, output, ...) {
 #' @title Get variable from an \code{osmose}-like object.
 #' @description Function to get a variable from an object of \code{osmose} class.
 #' This function uses the get_var method (see the \code{\link{get_var.osmose}}).
-#'
-#' @param object Object of \code{osmose} class (see the \code{\link{read_osmose}} function).
-#' @param what Variable to extract
-#' @param how Output format
-#' @param ... Additional arguments of the function.
+#' @details \code{what} can be any available variable contained on \code{object}
+#' (e.g. biomass, abundance, yield, yieldN, etc).
 #'
 #' @return An array or a list containing the extracted data.
 #' @export
