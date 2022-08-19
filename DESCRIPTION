@@ -31,9 +31,6 @@ Authors@R:
       person(given = "Criscely",
              family = "Lujan",
              role = "ctb"),
-      person(given = "Michael",
-             family = "Hurtado",
-             role = "ctb"),
       person(given = "Wencheng",
              family = "Lau-Medrano",
              role = "ctb"))

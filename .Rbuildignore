@@ -31,3 +31,7 @@ cran-comments.md
 ^RELEASE.md$
 ^.vscode$
 ^.*ipynb.*$
+here
+data-raw
+target
+inst/java
