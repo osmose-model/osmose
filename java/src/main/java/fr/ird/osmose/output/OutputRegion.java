@@ -52,9 +52,6 @@ import fr.ird.osmose.process.mortality.fishery.FisheryMapSet;
 public class OutputRegion extends AbstractOutputRegion {
 
     private FisheryMapSet mapSet;
-    private boolean cutoffEnabled;
-    private float[] cutoffAge;
-    private float[] cutoffSize;
 
     public OutputRegion(int index) {
         super(index);
