@@ -656,6 +656,7 @@ osmose2R.v4r0 = function (path=NULL, species.names=NULL, conf=NULL, ...) {
   outputData = .aggregate_catch_byclass(outputData, conf, "age", "abundance")
   outputData = .aggregate_catch_byclass(outputData, conf, "age", "biomass")
   
+  outputData = .aggregate_catch_bytime(outputData, conf, type="yield")
   
   model = list(version = "4",
                model = .getModelName(path = path),
