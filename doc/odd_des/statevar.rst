@@ -8,12 +8,17 @@ In the current section, the different types of entities of the Osmose model are 
 
 - The ``Cell`` entity describes the individual cells of the Osmose computation 2D grid (longitude, latitude,
   cell index, etc.)
-- The ``Species`` and ``BackgroundSpecies`` entities represent the species to which belong each
-  individual in the system. These entities contain **fixed** parameters, which are not modified during the simulation.
-- The ``School`` entity describes a group of individuals, whose life cycle is fully considered and which all share the
-  same characteristics (age, weight, species, location, etc, trophic level). The ``BackgroundSchool`` entity
-  describes a group of individuals, whose biomass is provided as input and whose life-cycle is not simulated and which all share the
+- The ``Species`` entity represents the species whose life-cycle is fully represented.
+  This entity contain **fixed** parameters, which are not modified during the simulation.
+- The ``BackgroundSpecies`` entity represents the species whose life-cycle is not represented. These species can feed on and be eaten by ``Species``, and can be fished.
+  This entity contain **fixed** parameters, which are not modified during the simulation.
+- The ``ResourceSpecies`` entity represents the low-trophic level species. These species cannot predatate ``Species`` or ``BackgroundSpecies`` but can be eaten by them.
+  This entity contain **fixed** parameters, which are not modified during the simulation.
+- The ``School`` entity describes a group of ``Species`` individuals, whose life cycle is fully considered and which all share the
   same characteristics (age, weight, species, location, etc, trophic level).
+- The ``BackgroundSchool`` entity describes a group of ``BackgroundSpecies`` individuals, whose biomass is provided as input and whose life-cycle is not simulated and which all share the
+  same characteristics (age, weight, species, location, etc, trophic level).
+- The ``Resource`` entity describes a swarm of ``ResourceSpecies``, whose biomass is provided as input.
 
 
 State variables
@@ -34,7 +39,7 @@ The ``Cell`` entity contains the following state variables:
 Species
 ###########################
 
-The ``Species`` and ``BackgroundSpecies`` entities contain the following state variables:
+The ``Species`` entities contain the following state variables:
 
 .. csv-table:: ``Species`` state variables
    :file: _static/species.csv
@@ -42,6 +47,8 @@ The ``Species`` and ``BackgroundSpecies`` entities contain the following state v
    :header-rows: 1
    :widths: 20, 60, 20
    :class: tight-table
+
+The ``BackgroundSpecies`` entities contain the following state variables:
 
 .. csv-table:: ``BackgroundSpecies`` state variables
    :file: _static/bkgspecies.csv
