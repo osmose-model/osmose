@@ -26,7 +26,7 @@
 - Normalisation of season spawning to 1.
 - Trimming of parameter name in the `Release.findLine` method.
 - Reduction of computation time for new fisheries implementation
-- Adding the possibility to use a size threshold (
+- Adding the possibility to use a size threshold (``output.cutoff.size.sp#`` parameter
 
 
 ### Bug fixes
