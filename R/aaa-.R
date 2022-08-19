@@ -62,5 +62,5 @@ NULL
 NULL
 #' @importFrom fields image.plot tim.colors
 NULL
-#' @importFrom calibrar calibrate
+#' @importFrom calibrar calibrate calibration_setup calibration_data calibration_objFn spline_par
 NULL
