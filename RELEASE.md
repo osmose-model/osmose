@@ -7,7 +7,7 @@
 - Adding a weight distribution for the outputs (abundance by weight class)
 - Adding outputs for the economic module (accessible and harvested biomass distribution).
 - Adding the possibility to save CSV files that allow to verify the proper definition of fish movements.
-- Now the parameters `lastYear` and `lastAge` are inclusive. For instance, if `Yinit=2` and `Ylast=5`, the years are `[2, 3, 4, 5]` instead of `[2, 3, 4]` in the previous version. 
+- Now the parameters `lastYear` and `lastAge` are inclusive. For instance, if `Yinit=2` and `Ylast=5`, the years are `[2, 3, 4, 5]` instead of `[2, 3, 4]` in the previous version.
 - Possibility to use NetCDF parameterization for the definition of fish movements.
 - Improvement in the management of physical and LTL forcing file (new generic class, `ForcingFile.java`)
 - Possibility to deactivate computation of $\F_{O2}$ in the bioen module (`simulation.bioen.fo2.enabled` parameter)
@@ -26,15 +26,17 @@
 - Normalisation of season spawning to 1.
 - Trimming of parameter name in the `Release.findLine` method.
 - Reduction of computation time for new fisheries implementation
+- Adding the possibility to use a size threshold (``output.cutoff.size.sp#`` parameter
 
 
 ### Bug fixes
 
 - Correction of a bug in the `lengthToAge` method of the `VonBertalanffyGrowth.java` class. Age for `L > Linf` was returned in dt instead of years.
-- Correction of a bug in the map movements. At the first time-step within a year, the map was compared with the one of index `nstepyear - 1`. At step=48, map was compared with map 23 instead of map 47. 
+- Correction of a bug in the map movements. At the first time-step within a year, the map was compared with the one of index `nstepyear - 1`. At step=48, map was compared with map 23 instead of map 47.
 - Correction of `CatchesByDtByClassFishingMortality` (`fishableBiomass` was not initialized, hence causing malloc errors)
-- Correction of the starvation mortality in bioen mode. Starvation applied only if species is older than first feeding age. 
+- Correction of the starvation mortality in bioen mode. Starvation applied only if species is older than first feeding age.
 - NetCDF output format forced to NetCDF3 instead of NetCDF4 when running in multithread mode (NetCDF4 causes an error and it does not seem possible to do that)
+- Correction of a bug in the use of cutoff ages. Cutoff were not properly working with `OutputWholeRegion.java` class.
 
 ## Osmose 4.3.2
 
@@ -44,11 +46,11 @@
 - Use of life-integrated Enet in the computation of reproduction instead of instantaneous Enet, in order to prevent irrealistic growth.
 - Automatic testing of R package (build and check) and Java code (Maven build) using GitHub actions
 - Adding the possibility to use plankton variables of dims (time, lat, lon) to init mask variable. Masked if variable is NaN or <= 0
-- Adding the possibility to use `ByClassTimeSeries` for proportion in background species. 
+- Adding the possibility to use `ByClassTimeSeries` for proportion in background species.
 - Adding an `osmose_calib_demo` function in the R package`
 - Adding options to force the model to run an outdated configuration. It avoids running creating a new configuration version for minor releases
 - **Remove the use of `grid.java.classname` and force the use of `NcGrid.java` class**
-- Adding a species interface (`ISpecies`) to recover some variables that are shared among species (name for instance). 
+- Adding a species interface (`ISpecies`) to recover some variables that are shared among species (name for instance).
 - Adding of all species (preys + background + focal) in the `DietDistribOutput` file.
 - Adding of background species in the `DietOutput` and `PredatorPressure` file.
 - Adding of lognormal distribution for fishery selectivity (Ricardo)
@@ -368,9 +370,9 @@ Osmose outputs are provided in CSV files and can have the following formats:
 Time serie for all species.
 For instance:
 
-output.biomass.enabled 
-output.yield.abundance.enabled 
-output.size.enabled 
+output.biomass.enabled
+output.yield.abundance.enabled
+output.size.enabled
 Time series by age, size or trophic level classes, for all species.
 For instance:
 
