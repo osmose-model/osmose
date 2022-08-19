@@ -290,7 +290,7 @@ public class Configuration extends OLogger {
      * parameter <i>output.cutoff.enabled</i> is set to {@code true}. Parameter
      * <i>output.cutoff.age.sp#</i>
      */
-    private float[] cutoffSize;
+    private float[] cutoffLength;
 
     ///////////////
     // Constructors
@@ -1271,7 +1271,7 @@ public class Configuration extends OLogger {
         recordFrequency = getInt("output.recordfrequency.ndt");
 
         cutoffAge = new float[nSpecies];
-        cutoffSize = new float[nSpecies];
+        cutoffLength = new float[nSpecies];
 
         cutoffEnabled = getBoolean("output.cutoff.enabled");
         if (cutoffEnabled) {
@@ -1284,7 +1284,7 @@ public class Configuration extends OLogger {
 
                 // If cutoff enabled, look for cutoff size
                 if(!isNull("output.cutoff.size.sp" + iSpec)) {
-                    cutoffSize[cpt] = getFloat("output.cutoff.size.sp" + iSpec);
+                    cutoffLength[cpt] = getFloat("output.cutoff.size.sp" + iSpec);
                 }
                 cpt++;
             }
@@ -1341,8 +1341,8 @@ public class Configuration extends OLogger {
         return this.incomingFluxEnabled;
     }
 
-    public float[] getCutoffSize() {
-        return this.cutoffSize;
+    public float[] getCutoffLength() {
+        return this.cutoffLength;
     }
 
     public float[] getCutoffAge() {

@@ -245,7 +245,7 @@ public class SpatialOutput extends SimulationLinker implements IOutput {
                 int j = cell.get_jgrid();
                 if (null != getSchoolSet().getSchools(cell)) {
                     for (School school : getSchoolSet().getSchools(cell)) {
-                        if (getConfiguration().isCutoffEnabled() && ((school.getAge() < getConfiguration().getCutoffAge()[school.getSpeciesIndex()]) || school.getLength() < getConfiguration().getCutoffSize()[school.getSpeciesIndex()])) {
+                        if (getConfiguration().isCutoffEnabled() && ((school.getAge() < getConfiguration().getCutoffAge()[school.getSpeciesIndex()]) || school.getLength() < getConfiguration().getCutoffLength()[school.getSpeciesIndex()])) {
                             continue;
                         }
                         if (!school.isUnlocated()) {

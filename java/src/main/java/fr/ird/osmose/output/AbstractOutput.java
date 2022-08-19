@@ -174,7 +174,7 @@ abstract public class AbstractOutput extends SimulationLinker implements IOutput
     }
 
     boolean include(School school) {
-        return ((!getConfiguration().isCutoffEnabled()) || (school.getAge() >= getConfiguration().getCutoffAge()[school.getSpeciesIndex()]) & ((school.getLength() >= getConfiguration().getCutoffSize()[school.getSpeciesIndex()])));
+        return ((!getConfiguration().isCutoffEnabled()) || (school.getAge() >= getConfiguration().getCutoffAge()[school.getSpeciesIndex()]) & ((school.getLength() >= getConfiguration().getCutoffLength()[school.getSpeciesIndex()])));
     }
 
     @Override

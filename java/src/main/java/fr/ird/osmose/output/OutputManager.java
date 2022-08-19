@@ -421,7 +421,7 @@ public class OutputManager extends SimulationLinker {
                             + (getConfiguration().isCutoffEnabled() ? "excluding" : "including")
                             + " first ages specified in input",
                     school -> (school.getAge() >= getConfiguration().getCutoffAge()[school.getSpeciesIndex()])
-                            & (school.getLength() >= getConfiguration().getCutoffSize()[school.getSpeciesIndex()]),
+                            & (school.getLength() >= getConfiguration().getCutoffLength()[school.getSpeciesIndex()]),
                     school -> school.getLength(), school -> school.getInstantaneousAbundance()));
         }
 
@@ -430,7 +430,7 @@ public class OutputManager extends SimulationLinker {
             outputs.add(new WeightedSpeciesOutput(rank, "SizeIndicators", "meanWeight",
                     "Mean weight of fish species in kilogram, weighted by fish numbers, and "
                             + (getConfiguration().isCutoffEnabled() ? "excluding" : "including") + " first ages specified in input",
-                    school -> (school.getAge() >= getConfiguration().getCutoffAge()[school.getSpeciesIndex()]) & (school.getLength() >= getConfiguration().getCutoffSize()[school.getSpeciesIndex()]),
+                    school -> (school.getAge() >= getConfiguration().getCutoffAge()[school.getSpeciesIndex()]) & (school.getLength() >= getConfiguration().getCutoffLength()[school.getSpeciesIndex()]),
                     school -> 1E3 * school.getWeight(), school -> school.getInstantaneousAbundance()));
         }
 
@@ -488,7 +488,7 @@ public class OutputManager extends SimulationLinker {
             outputs.add(new WeightedSpeciesOutput(rank, "Trophic", "meanTL",
                     "Mean Trophic Level of fish species, weighted by fish biomass, and "
                             + (getConfiguration().isCutoffEnabled() ? "excluding" : "including") + " first ages specified in input",
-                    school -> (school.getAge() >= getConfiguration().getCutoffAge()[school.getSpeciesIndex()]) & (school.getLength() >= getConfiguration().getCutoffSize()[school.getSpeciesIndex()]),
+                    school -> (school.getAge() >= getConfiguration().getCutoffAge()[school.getSpeciesIndex()]) & (school.getLength() >= getConfiguration().getCutoffLength()[school.getSpeciesIndex()]),
                     school -> school.getTrophicLevel(), school -> school.getInstantaneousBiomass()));
         }
 
