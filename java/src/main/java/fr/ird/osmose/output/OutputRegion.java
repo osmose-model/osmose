@@ -1,10 +1,10 @@
-/* 
- * 
+/*
+ *
  * OSMOSE (Object-oriented Simulator of Marine Ecosystems)
  * http://www.osmose-model.org
- * 
+ *
  * Copyright (C) IRD (Institut de Recherche pour le Développement) 2009-2020
- * 
+ *
  * Osmose is a computer program whose purpose is to simulate fish
  * populations and their interactions with their biotic and abiotic environment.
  * OSMOSE is a spatial, multispecies and individual-based model which assumes
@@ -15,7 +15,7 @@
  * processes of fish life cycle (growth, explicit predation, additional and
  * starvation mortalities, reproduction and migration) and fishing mortalities
  * (Shin and Cury 2001, 2004).
- * 
+ *
  * Contributor(s):
  * Yunne SHIN (yunne.shin@ird.fr),
  * Morgane TRAVERS (morgane.travers@ifremer.fr)
@@ -23,20 +23,20 @@
  * Philippe VERLEY (philippe.verley@ird.fr)
  * Laure VELEZ (laure.velez@ird.fr)
  * Nicolas Barrier (nicolas.barrier@ird.fr)
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation (version 3 of the License). Full description
  * is provided on the LICENSE file.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
- * 
+ *
  */
 
 package fr.ird.osmose.output;
@@ -54,6 +54,7 @@ public class OutputRegion extends AbstractOutputRegion {
     private FisheryMapSet mapSet;
     private boolean cutoffEnabled;
     private float[] cutoffAge;
+    private float[] cutoffSize;
 
     public OutputRegion(int index) {
         super(index);
@@ -77,7 +78,20 @@ public class OutputRegion extends AbstractOutputRegion {
         if (cutoffEnabled) {
             int cpt = 0;
             for (int iSpec : getFocalIndex()) {
-                cutoffAge[cpt++] = getConfiguration().getFloat("output.cutoff.age.sp" + iSpec);
+                // If cutoff enabled, look for cutoff age
+                if (!getConfiguration().isNull("output.cutoff.age.sp" + iSpec)) {
+                    cutoffAge[cpt] = getConfiguration().getFloat("output.cutoff.age.sp" + iSpec);
+                } else {
+                    cutoffAge[cpt] = Float.NEGATIVE_INFINITY;
+                }
+
+                // If cutoff enabled, look for cutoff size
+                if (!getConfiguration().isNull("output.cutoff.size.sp" + iSpec)) {
+                    cutoffSize[cpt] = getConfiguration().getFloat("output.cutoff.size.sp" + iSpec);
+                } else {
+                    cutoffSize[cpt] = Float.NEGATIVE_INFINITY;
+                }
+                cpt++;
             }
         }
 
@@ -124,8 +138,8 @@ public class OutputRegion extends AbstractOutputRegion {
             double dxji = substract(lon[j], lon[i]);
             if ((((dxi0 >= 0) && (dxj0 < 0)) || ((dxj0 >= 0) && (dxi0 < 0)))
                     && (lat0 < ((lat[j] - lat[i]) * dxi0 / dxji + lat[i]))) {
-                inside = !inside;   
-            }   
+                inside = !inside;
+            }
         }
         return inside;
     }
@@ -166,7 +180,7 @@ public class OutputRegion extends AbstractOutputRegion {
     }
 
     boolean include(AbstractSchool school) {
-        return ((!cutoffEnabled) || (school.getAge() >= cutoffAge[school.getSpeciesIndex()]));
+        return ((!cutoffEnabled) || ((school.getAge() >= cutoffAge[school.getSpeciesIndex()]) & (school.getLength() >= cutoffSize[school.getSpeciesIndex()])));
     }
 
 }
