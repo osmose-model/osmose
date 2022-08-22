@@ -39,4 +39,4 @@ jobs:
       - name: Compile Java code
         run:  |
             mvn build-helper:remove-project-artifact
-            mvn -B package -Dmaven.test.skip=false
+            mvn -B package -DskipTests=false
