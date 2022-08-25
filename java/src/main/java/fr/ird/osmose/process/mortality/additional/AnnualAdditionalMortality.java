@@ -71,7 +71,7 @@ public class AnnualAdditionalMortality extends AbstractMortalitySpecies {
         String keyValLog = String.format("mortality.additional.rate.log.sp%d", getFileSpeciesIndex());
 
         // test if only one of the two values exists
-        if (getConfiguration().isNull(keyValLog) == getConfiguration().isNull(keyVal)) {
+        if (!getConfiguration().isNull(keyValLog) && !getConfiguration().isNull(keyVal)) {
             String message = String.format("Both %s and %s parameters are defined. Choose only one.\n", keyValLog, keyVal);
             error(message, new Exception());
         }

@@ -136,8 +136,8 @@ public class ResourceSpecies implements ISpecies {
         String keyValLog = String.format("species.accessibility2fish.logit.sp%d", fileindex);
 
         // test if only one of the two values exists
-        if (cfg.isNull(keyValLog) && cfg.isNull(keyVal)) {
-            //String message = String.format("Both %s and %s parameters are defined. Choose only one.\n", keyValLog, keyVal);
+        if (!cfg.isNull(keyValLog) && !cfg.isNull(keyVal)) {
+            String message = String.format("Both %s and %s parameters are defined. Choose only one.\n", keyValLog, keyVal);
             //error(message, new Exception());
         }
         
