@@ -14,8 +14,14 @@
 #' the path to the calibration directory.
 #' @export
 #' @inheritParams run_osmose
-osmose_calibration_setup = function(input, osmose, type="simple", bioen=FALSE, test=FALSE, 
+osmose_calibration_setup = function(input, osmose, name=NULL, data_path=NULL, type="simple", bioen=FALSE,  
                                     control=list(), version="4.3.3", ...) {
+  
+  if(is.null(data_path)) {
+    message("\nNo observed data has been provided, this setup will create templates for you to fill.\n")
+  } else {
+    message(sprintf("\nObserved data has been provided in %s, the calibration setup will use it.\n", data_path))
+  }
   
   wd = getwd()
   on.exit(setwd(wd))
@@ -25,10 +31,23 @@ osmose_calibration_setup = function(input, osmose, type="simple", bioen=FALSE, t
   control$method = type
   conf = read_osmose(input=input)
   
+  if(!file.exists(osmose)) stop(sprintf("Could not find your 'osmose' executable (%s)", osmose))
+  if(!is.null(name)) {
+    if(basename(name)!=name) stop(sprintf("Argument 'name' (%s) cannot be a directory.", name))
+  }
+  
+  run = if(is.null(name)) ".run" else sprintf(".run_%s", name)
+  dir = if(is.null(name)) "calibration" else sprintf("calibration_%s", name)
+  if(!dir.exists(dir)) dir.create(dir)
+  # make a local copy of osmose into the calibration directory
+  nosmose = ".osmose.jar"
+  file.copy(from=osmose, to=file.path(dir, nosmose))
+  osmose = file.path("..", nosmose)
+  
   # Create dir and file names -----------------------------------------------
   
-  if(is.null(control$dir)) control$dir = "calibration"
-  if(is.null(control$run)) control$run = "run"
+  control$dir = dir
+  control$run = run
   
   irun = basename(control$run)
   idir = basename(control$dir)
@@ -47,24 +66,8 @@ osmose_calibration_setup = function(input, osmose, type="simple", bioen=FALSE, t
   dir_data   = file.path(control$dir, "data_templates")
   
   if(!dir.exists(dir_master)) dir.create(dir_master, recursive=TRUE)
-  if(!dir.exists(control$run)) dir.create(control$run, recursive=TRUE)
-  if(!dir.exists(dir_data)) dir.create(dir_data, recursive=TRUE)
-  
-  bsn = sprintf("osmose-%s", get_par(conf, "output.file.prefix"))
-  guess_file = file.path(control$dir, paste(bsn, "-parguess.osm", sep=""))
-  min_file   = file.path(control$dir, paste(bsn, "-parmin.osm", sep=""))
-  max_file   = file.path(control$dir, paste(bsn, "-parmax.osm", sep=""))
-  phase_file = file.path(control$dir, paste(bsn, "-parphase.osm", sep=""))
-  control_file = file.path(control$dir, paste(bsn, "-calibration_settings.csv", sep=""))
-  
-  allfiles = c(guess_file, min_file, max_file, phase_file)
-  
-  # Get general parameters from configuration -------------------------------
-  
-  nspp = get_par(conf, par="simulation.nspecies")
-  nyear = get_par(conf, "simulation.time.nyear")
-  
-  # Create new main configuration file --------------------------------------
+
+  # Create new main OSMOSE configuration file -------------------------------
   
   calib = list()
   calib$osmose.configuration.calibration.parameters = "calibration_parameters.osm"
@@ -73,219 +76,149 @@ osmose_calibration_setup = function(input, osmose, type="simple", bioen=FALSE, t
   class(calib) = "osmose.configuration"
   write_osmose(calib, file=file.path(dir_master, "osmose-calibration.osm"))
   
-  # Create guess, min, max and phase files. ---------------------------------
+  # Get general parameters from configuration -------------------------------
   
-  mcat("\n#------- Parameters to be calibrated -------\n", file=allfiles)
+  # nspp = get_par(conf, par="simulation.nspecies")
+  # nyear = get_par(conf, "simulation.time.nyear")
   
+  bsn = sprintf("osmose-%s", get_par(conf, "output.file.prefix"))
+  guess_file = file.path(control$dir, paste(bsn, "-parguess.osm", sep=""))
+  min_file   = file.path(control$dir, paste(bsn, "-parmin.osm", sep=""))
+  max_file   = file.path(control$dir, paste(bsn, "-parmax.osm", sep=""))
+  phase_file = file.path(control$dir, paste(bsn, "-parphase.osm", sep=""))
+  settings_file = file.path(control$dir, paste(bsn, "-calibration_settings.csv", sep=""))
   
-  # Resource parameters -----------------------------------------------------
+  allfiles = c(guess=guess_file, min=min_file, max=max_file, phase=phase_file)
   
-  
-  mcat("\n#---- Resources species\n", file=allfiles, append=TRUE)
-  
-  pars = get_par(conf, "species.accessibility2fish", as.is=TRUE)
-  write_osmose(pars, file=guess_file, append = TRUE)
-  write_osmose(set_par(pars, -20), file=min_file, append = TRUE)
-  write_osmose(set_par(pars, +20), file=max_file, append = TRUE)
-  write_osmose(set_par(pars, 1), file=phase_file, append = TRUE)
-  
-  nbkg = get_par(conf, "nbackground")
-  if(!is.null(nbkg)) {
-    mcat("\n#---- Background species\n", file=allfiles, append=TRUE)
-    pars = get_par(conf, "species.multiplier.log.sp", as.is=TRUE)
-    write_osmose(pars, file=guess_file, append = TRUE)
-    write_osmose(set_par(pars, 0), file=min_file, append = TRUE)
-    write_osmose(set_par(pars, 15), file=max_file, append = TRUE)
-    write_osmose(set_par(pars, 1), file=phase_file, append = TRUE)
+  if(!all(file.exists(allfiles))) {
+
+    # Create guess, min, max and phase files. ---------------------------------
+    
+    mcat("\n#------- Parameters to be calibrated -------\n", file=allfiles)
+    
+    .set_param_resources(allfiles, conf)
+    
+    .set_param_background(allfiles, conf)
+    
+    .set_param_focal(allfiles, conf)
+    
+    .set_param_growth(allfiles, conf, bioen)
+    
+    # here to add case for Bioen-OSMOSE  
+    if(isTRUE(bioen)) .set_param_bioen(allfiles, conf)
+    
+    .set_param_fisheries(allfiles, conf)
+    
+  } else {
+    
+    message("Previous guess, min, max and phase files found. Conserving them.\n")
+    
   }
-  
-  
-  # Focal species parameters ------------------------------------------------
-  
-  mcat("\n#---- Focal species\n", file=allfiles, append=TRUE)
-  
-  pars = get_par(conf, "mortality.additional.rate.log", as.is=TRUE)
-  write_osmose(pars, file=guess_file, append = TRUE)
-  write_osmose(set_par(pars, -9), file=min_file, append = TRUE)
-  write_osmose(set_par(pars, +5), file=max_file, append = TRUE)
-  write_osmose(set_par(pars, 1), file=phase_file, append = TRUE)
-  
-  pars = get_par(conf, "mortality.additional.larva.rate.log", as.is=TRUE)
-  pars = get_par(pars, par="seasonality", invert = TRUE, as.is=TRUE)
-  write_osmose(pars, file=guess_file, append = TRUE)
-  write_osmose(set_par(pars, -9), file=min_file, append = TRUE)
-  write_osmose(set_par(pars, +9), file=max_file, append = TRUE)
-  write_osmose(set_par(pars, 1), file=phase_file, append = TRUE)
-  
-  knots = get_par(conf, "mortality.additional.larva.knots")
-  
-  pars = list()
-  for(isp in get_species(conf, code=TRUE)) {
-    iknots = get_par(knots, sp=as.numeric(isp), as.is=TRUE)
-    if(is.null(iknots)) iknots = nyear + 1
-    nn = sprintf("osmose.user.larval.deviate.log.sp%s", isp)
-    pars[[nn]] = rep(0, iknots)
-  }
-  class(pars) = "osmose.configuration"
-  
-  write_osmose(pars, file=guess_file, append = TRUE)
-  write_osmose(set_par(pars, -4), file=min_file, append = TRUE)
-  write_osmose(set_par(pars, +4), file=max_file, append = TRUE)
-  write_osmose(set_par(pars, 3), file=phase_file, append = TRUE)
-  
-  
-  # Growth parameters -------------------------------------------------------
-  
-  pars = list()
-  for(isp in get_species(conf, code=TRUE)) {
-    nn = sprintf("species.delta.lmax.factor.sp%s", isp)
-    pars[[nn]] = 2
-  }
-  class(pars) = "osmose.configuration"
-  
-  write_osmose(pars, file=guess_file, append = TRUE)
-  write_osmose(set_par(pars, 1), file=min_file, append = TRUE)
-  write_osmose(set_par(pars, 5), file=max_file, append = TRUE)
-  write_osmose(set_par(pars, 2), file=phase_file, append = TRUE)
-  
-  # here to add case for Bioen-OSMOSE  
-  
-  # Fisheries parameters ----------------------------------------------------
-  
-  mcat("\n#---- Fisheries\n", file=allfiles, append=TRUE)
-  
-  nmf = get_fisheries(conf)
-  nmc = get_fisheries(conf, code=TRUE)
-  
-  for(i in seq_along(nmc)) {
-    
-    ifsh = nmc[i]
-    msg = sprintf("\n-- Fishery %s: %s\n", nmc[i], nmf[i])
-    mcat(msg, file=allfiles, append=TRUE)
-    this = get_par(conf, sprintf("fsh%s", ifsh))
-    pars = get_par(get_par(this, "fisheries.rate.base", as.is=TRUE), "shift", invert=TRUE, as.is=TRUE)
-    write_osmose(pars, file=guess_file, append=TRUE)
-    write_osmose(set_par(pars, -9), file=min_file, append = TRUE)
-    write_osmose(set_par(pars, +3), file=max_file, append = TRUE)
-    write_osmose(set_par(pars, 1), file=phase_file, append = TRUE)
-    
-    pars = get_par(this, "fisheries.rate.byperiod", as.is=TRUE)
-    write_osmose(pars, file=guess_file, append=TRUE)
-    write_osmose(set_par(pars, -4), file=min_file, append = TRUE)
-    write_osmose(set_par(pars, +4), file=max_file, append = TRUE)
-    write_osmose(set_par(pars, 3), file=phase_file, append = TRUE)
-    
-    # make difference for each one: l50, l75
-    pars = get_par(this, "fisheries.selectivity.l50", as.is=TRUE)
-    L50 = as.numeric(unlist(pars))
-    write_osmose(pars, file=guess_file, append=TRUE)
-    write_osmose(set_par(pars, 0), file=min_file, append = TRUE)
-    write_osmose(set_par(pars, 200), file=max_file, append = TRUE)
-    write_osmose(set_par(pars, 3), file=phase_file, append = TRUE)
-    
-    pars75 = get_par(this, "fisheries.selectivity.l75", as.is=TRUE)
-    
-    if(!is.null(pars75)) {
-      
-      L75 = as.numeric(unlist(pars75))
-      pars = list()
-      nn = sprintf("osmose.user.selectivity.delta75.fsh%s", ifsh)
-      pars[[nn]] = L75 - L50
-      
-      class(pars) = "osmose.configuration"
-      
-      write_osmose(pars, file=guess_file, append = TRUE)
-      write_osmose(set_par(pars, 0), file=min_file, append = TRUE)
-      write_osmose(set_par(pars, ceiling(0.3*L50)), file=max_file, append = TRUE)
-      write_osmose(set_par(pars, 3), file=phase_file, append = TRUE)
-      
-    }
-    
-  } # end of fisheries parameters
-  
   
   # Template files ----------------------------------------------------------
   
-  # RStudio project
-  rstudioproj = system.file("calibration/master.Rproj", package="osmose")
-  file.copy(from=rstudioproj, to=dir_master, overwrite = TRUE)
-  # launch_calibration
-  launcher = system.file("calibration/launch_calibration.R", package="osmose")
-  file.copy(from=launcher, to=control$dir, overwrite = TRUE)
-  # runModel
-  runtmp = sprintf("calibration/runModel_%s.R", control$method)
-  runmodeltmp = system.file(runtmp, package="osmose")
-  file.copy(from=runmodeltmp, to=file.path(control$dir, "runModel.R"), overwrite = TRUE)
-  # output configuration file
+  # copy this files as they are
+  files = c("calibration_MPI.pbs", "calibration_OMP.pbs", "calibration_sequentiel.pbs")
+  for(ifile in files) {
+    ofile = system.file(file.path("calibration", ifile), package="osmose")
+    file.copy(from=ofile, to=control$dir, overwrite = TRUE)
+  }
+  
+  # copy this files as hidden
+  files = c("calibration.R", "calibrartest", "calibrarconfig")
+  for(ifile in files) {
+    ofile = system.file(file.path("calibration", ifile), package="osmose")
+    file.copy(from=ofile, to=file.path(control$dir, sprintf(".%s", ifile)), overwrite = TRUE)
+  }
+  
+  # copy files according to calibration type
+  # run_model:
+  if(!file.exists(file.path(control$dir, "run_model.R"))) {
+    runmodeltmp = system.file(sprintf("calibration/run_model_%s.R", control$method), package="osmose")
+    file.copy(from=runmodeltmp, to=file.path(control$dir, "run_model.R"), overwrite = TRUE)
+  } else {
+    message("A 'run_model.R' script was found, conserving it.\n")
+  }
+  
+  # output configuration file:
   outtmp = sprintf("calibration/output-configuration_%s.osm", control$method)
   outputtmp = system.file(outtmp, package="osmose")
   file.copy(from=outputtmp, to=file.path(dir_master, "output-configuration.osm"), overwrite = TRUE)  
   
-  source(file.path(control$dir, "runModel.R"))
+  source(file.path(control$dir, "run_model.R"), local=TRUE)
   
-  par_guess   = read_osmose(input=guess_file)
+  par_guess = read_osmose(input=guess_file)
   par_min   = read_osmose(input=min_file)
   par_max   = read_osmose(input=max_file)
   par_phase = read_osmose(input=phase_file)
   
   message("Testing is we can run OSMOSE...\n")
-  message("Running OSMOSE with ", osmose)
+  # message("Running OSMOSE with ", osmose, "\n")
   setwd(dir_master)
-  simulated = runModel(par=par_guess, conf=conf, osmose=osmose, is_a_test=FALSE, version=version)
+  simulated = try(run_model(par=par_guess, conf=conf, osmose=osmose, is_a_test=FALSE, version=version))
   setwd(wd)
+  
+  if(!inherits(simulated, "try-error")) {
+    message("Pre-calibration test: PASSED. We can run the model (via the run_model function).\n")
+    saveRDS(simulated, file=file.path(control$dir, ".simulated.rds"))
+  } else {
+    message("Pre-calibration test: FAILED. We CANNOT run the model (via the run_model function).\n")
+    stop("Test failed.")
+  }
   
   if(file.exists(file.path(dir_master, "osmose.log")))
     file.remove(file.path(dir_master, "osmose.log"))
   
-  message("Pre-calibration test passed: we can run the model (via the runModel function).\n")
-  saveRDS(simulated, file=file.path(control$dir, "simulated.rds"))
-  
   # Create data templates ---------------------------------------------------
   
-  output = read_osmose(path = file.path(dir_master, "output"), version='4.3.3')
-  
-  biomass_file = .write_biomass_files(output, conf, path=dir_data)
-  yield_files  = .write_yield_files(output, conf, path=dir_data)
-  cal_files    = .write_cal_files(output, conf, path=dir_data)
-  
-  observed_files = c(biomass_file, yield_files, cal_files)
-  
-  cal_settings = .create_calibration_settings(output=simulated, files=observed_files)
-  write_osmose(cal_settings, file=control_file, row.names = FALSE, col.names = TRUE)
-  
-  setup = calibration_setup(file=control_file)
-  observed = suppressMessages(calibration_data(setup, path=dir_data))
-  saveRDS(observed, file=file.path(control$dir, "observed.rds"))
+  output = read_osmose(path = file.path(dir_master, "output"), version=version)
+  if(is.null(data_path)) {
+    # if not data_path provided, create templates.
+    if(!dir.exists(dir_data)) dir.create(dir_data, recursive=TRUE)
+    biomass_file = .write_biomass_files(output, conf, path=dir_data)
+    yield_files  = .write_yield_files(output, conf, path=dir_data)
+    cal_files    = .write_cal_files(output, conf, path=dir_data)
+
+    observed_files = c(biomass_file, yield_files, cal_files)
+    # create calibration settings
+    cal_settings = .create_calibration_settings(output=simulated, files=observed_files)
+    if(file.exists(settings_file)) {
+      message(sprintf("Settings file (%s) found. Conserving it.", settings_file))      
+    } else {
+      write_osmose(cal_settings, file=settings_file, row.names = FALSE, col.names = TRUE)
+    }
+  } else {
+    dir_data = data_path
+    if(!file.exists(settings_file)) 
+      stop(sprintf("Settings file for the calibration (%s) not found.", settings_file))
+    message(sprintf("Settings file (%s) found. Conserving it.", settings_file))
+  }
+
+  setup = calibration_setup(file=settings_file)
+  observed = calibration_data(setup, path=dir_data) # it will read from data_path if provided
+  saveRDS(observed, file=file.path(control$dir, "observed.rds")) # saving the new object
   
   # Calibration test --------------------------------------------------------
   
-  obs_check = lapply(observed, FUN=.dim_or_length)
-  sim_check = lapply(simulated, FUN=.dim_or_length)
-  sim_check[!setup$use_data] = 1L
-  test1 = identical(obs_check, sim_check)
-  test2 = identical(names(obs_check), names(sim_check))
+  .calibration_test_1(simulated, observed, setup)
   
-  if(test1 & test2) {
-    message("Pre-calibration test passed: simulated and observed data are compatible.\n")
-  }
-  
-  fn = calibration_objFn(model=runModel, setup=setup, observed=observed, 
+  fn = calibration_objFn(model=run_model, setup=setup, observed=observed, 
                          conf=conf, osmose=osmose, is_a_test=TRUE)
   setwd(dir_master)
   value = try(fn(par_guess))
   setwd(wd)
   test3 = !inherits(value, "try-error")
   if(test3) {
-    message("Pre-calibration test passed: Objective function is properly created.\n")
+    message("Pre-calibration test: PASSED. Objective function is properly created.\n")
   } else {
-    stop("Pre-calibration test failed: your model function (i.e. runModel) is not working properly.")
+    message("Pre-calibration test: FAILED. Your model function (i.e. run_model) is not working properly.")
+    stop("Test failed.")
   }
   
   message(sprintf("The data templates provided in '%s' need to be filled with your data.", dir_data))
   
   setwd(wd)
-  if(isTRUE(test)) osmose_calibration_test(control$dir)
-  
+
   return(invisible(control$dir))
   
 }
@@ -299,12 +232,33 @@ osmose_calibration_setup = function(input, osmose, type="simple", bioen=FALSE, t
 #' @return TRUE is the test is completed.
 #' @export
 #'
-osmose_calibration_test = function(path, script="launch_calibration.R") {
+osmose_calibration_test = function(path, script=NULL, options=NULL, setup=NULL) {
   
   wd = getwd()
   on.exit(setwd(wd))
   
+  msg = sprintf("We couldn't find your calibration directory ('%s') in the current working directory ('%s').",
+                path, wd)
+  
+  if(!dir.exists(path)) stop(msg)
   setwd(path)
+  
+  if(is.null(script))  script  = ".calibration.R"
+  if(is.null(options)) options = ".calibrartest"
+  
+  if(!file.exists(script)) stop(sprintf("Calibration script file '%s' does not exist in '%s'.", script, path))
+  
+  if(is.null(setup)) {
+    setup = dir(pattern="calibration_settings.csv")
+    if(length(setup)!=1) stop("Must indicated the calibration settings file ('setup' argument)")
+  }
+
+  settings = calibration_setup(file=setup)
+  # HERE: fix .getDataFolder
+  dir_data = .getDataFolder(options)
+  observed = suppressMessages(calibration_data(settings, path=dir_data))
+  simulated = readRDS(".simulated.rds")
+
   message("Running a calibration test...")
   Sys.sleep(2)
   message("It may take a few minutes.\n")
@@ -312,17 +266,37 @@ osmose_calibration_test = function(path, script="launch_calibration.R") {
   message("If there are no errors, you will be ready to launch your calibration.\n")
   Sys.sleep(5)
   message("This automatic setup provides generic templates, you MUST check and modify all the configuration parameters before running a calibration.\n")
+
+  arg0 = sprintf("--calibration.control=%s", options)
   
-  if(!file.exists(script)) stop(sprintf("Calibration script file '%s' does not exist in '%s'.", script, path))
+  message("CALIBRATION TEST 1: Is your observed data compatible with the simulation outputs?.\n\n")
+  # calibration test 1: compatibility of data
+  .calibration_test_1(simulated, observed, setup=settings)
+  message("CALIBRATION TEST 1: PASSED! \n  Observed data is compatible.\n\n")
   
-  source(script)
+  # calibration test 2: sequential  
   
-  message("CALIBRATION TEST PASSED! Everything seems to be in order.\n\n")
+  message("CALIBRATION TEST 2: Can we run a calibration in sequential mode (single-thread)?.\n\n")
+  .args = c(arg0, "--test", "--ncores=1")
+  source(script, local=TRUE)
+  message("CALIBRATION TEST 2: PASSED! \n  Calibration is running in sequential mode.\n\n")
+  message("This means all the files and inputs are in the right place.")
+  
+  # calibration test 3: parallel
+  
+  message("CALIBRATION TEST 2: Can we run a calibration in parallel mode (multi-thread)?.\n\n")
+  .args = c(arg0, "--test", "--ncores=2")
+  message("source(script, local=TRUE)")
+  source(script, local=TRUE)
+  message("CALIBRATION TEST 3: PASSED! \n  Calibration is running in parallel.\n\n")
+  message("This means all the files and inputs are being properly exported to the virtual cluster.")
+  
+  Sys.sleep(5)
+  message("ALL CALIBRATION TESTS PASSED! You can go grab SOMBEERS.\n\n")
   
   return(invisible(TRUE))
   
 }
-
 
 
 
