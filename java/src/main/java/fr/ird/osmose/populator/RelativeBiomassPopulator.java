@@ -22,7 +22,7 @@
  * Ricardo OLIVEROS RAMOS (ricardo.oliveros@gmail.com)
  * Philippe VERLEY (philippe.verley@ird.fr)
  * Laure VELEZ (laure.velez@ird.fr)
- * Nicolas Barrier (nicolas.barrier@ird.fr)
+ * Nicolas BARRIER (nicolas.barrier@ird.fr)
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -123,8 +123,23 @@ public class RelativeBiomassPopulator extends AbstractPopulator {
         seedingBiomass = new double[nSpecies];
         cpt = 0;
         for (int i : this.getFocalIndex()) {
-            seedingBiomass[cpt] = cfg.getDouble("population.initialization.biomass.sp" + i);
-            cpt++;
+          
+        String keyVal = String.format("population.initialization.biomass.sp%d", i);
+        String keyValLog = String.format("population.initialization.biomass.log.sp%d", i);
+
+        // test if only one of the two values exists
+        if (!getConfiguration().isNull(keyValLog) && !getConfiguration().isNull(keyVal)) {
+            String message = String.format("Both %s and %s parameters are defined. Choose only one.\n", keyValLog, keyVal);
+            error(message, new Exception());
+        }
+        
+        if (!getConfiguration().isNull(keyValLog)) {
+            seedingBiomass[cpt] = Math.exp(cfg.getDouble("population.initialization.biomass.log.sp" + i));  
+        } else {
+            seedingBiomass[cpt] = cfg.getDouble("population.initialization.biomass.sp" + i); 
+        }
+        cpt++;
+            
         }
 
         // Init the sizes (in cm) for each species and each size class
