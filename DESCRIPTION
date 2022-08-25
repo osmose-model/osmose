@@ -1,7 +1,7 @@
 Package: osmose
 Type: Package
 Title: Object Oriented Simulator of Marine Ecosystems
-Version: 4.3.3
+Version: 4.3.3.0004
 #Date: 2020-06-17
 Authors@R: 
     c(person(given = "Yunne-Jai",
@@ -53,19 +53,19 @@ Encoding: UTF-8
 Depends: 
   R (>= 3.5.0)
 Imports: 
+  calibrar (>= 0.3),
+  fields,
   graphics,
   grDevices,
-  rlist,
-  stats,
   knitr,
-  rmarkdown,
-  stringr, 
-  utils,
-  ncdf4,
   mgcv,
-  fields,
-  calibrar,
-  R.utils
+  ncdf4,
+  R.utils,
+  rlist,
+  rmarkdown,
+  stats,
+  stringr, 
+  utils
 URL: http://www.osmose-model.org/ 
 LazyData: FALSE
 BugReports: https://github.com/osmose-model/osmose/issues
