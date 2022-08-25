@@ -648,24 +648,44 @@ osmose2R.v4r0 = function (path=NULL, species.names=NULL, conf=NULL, ...) {
   outputData = .add_surveys(x=outputData$surveyYield, out=outputData, type="yield")
   outputData = .add_surveys(x=outputData$yieldByFishery, out=outputData, type="yield")
 
-  outputData = .calculate_residuals_byage(outputData, conf)
-  outputData = .calculate_mort_residuals_byage(outputData, conf)
- 
-  outputData = .aggregate_catch_byclass(outputData, conf, "size", "abundance")
-  outputData = .aggregate_catch_byclass(outputData, conf, "size", "biomass")
-  outputData = .aggregate_catch_byclass(outputData, conf, "age", "abundance")
-  outputData = .aggregate_catch_byclass(outputData, conf, "age", "biomass")
+  if(!is.null(conf)) {
+    
+    outputData = .calculate_size_residuals_byage(outputData, conf)
+    outputData = .calculate_mort_residuals_byage(outputData, conf)
+    
+    outputData = .aggregate_catch_byclass(outputData, conf, "size", "abundance")
+    outputData = .aggregate_catch_byclass(outputData, conf, "size", "biomass")
+    outputData = .aggregate_catch_byclass(outputData, conf, "age", "abundance")
+    outputData = .aggregate_catch_byclass(outputData, conf, "age", "biomass")
+    
+    outputData = .aggregate_catch_bytime(outputData, conf, type="yield")
+    
+    start = get_par(conf, "simulation.time.start")
+    if(is.null(start)) start = 0
+    ndt   = get_par(conf, "simulation.time.ndtPerYear")/get_par(conf, "output.recordfrequency.ndt")
+    nyear = get_par(conf, "simulation.time.nyear") - get_par(conf, "output.start.year")
+    step0 = get_par(conf, "output.step0.include")
+    times = start + seq(from=1-step0, to=nyear*ndt)/ndt
+    
+    spp = c(get_species(conf, type="focal"), get_species(conf, type="background"))
+    
+    model = get_par(conf, "output.file.prefix")
+    simus = get_par(conf, "simulation.nsimulation")
+    nsp = length(spp)
+    T = nyear*ndt
+    
+  } else {
+    model = NULL
+    simus = NULL
+    times = NULL
+    T     = NULL
+    start = NULL
+    spp   = NULL
+    nsp   = NULL
+  }
   
-  outputData = .aggregate_catch_bytime(outputData, conf, type="yield")
-  
-  model = list(version = "4",
-               model = .getModelName(path = path),
-               simus = dim(outputData$biomass)[3],
-               times = as.numeric(row.names(outputData$biomass)),
-               T = nrow(outputData$biomass),
-               start = as.numeric(row.names(outputData$biomass))[1],
-               nsp = ncol(outputData$biomass),
-               lspecies = if (!is.null(species.names)) species.names else colnames(outputData$biomass))
+  model = list(version = "4", model = model, simus = simus, times = times,
+               T = T, start = start, nsp = nsp, lspecies = spp)
 
   output = c(model = list(model), species = list(colnames(outputData$biomass)),
              outputData)
