@@ -1,0 +1,177 @@
+
+.set_param_resources = function(allfiles, conf) {
+  guess_file = allfiles["guess"] 
+  min_file = allfiles["min"]
+  max_file = allfiles["max"]
+  phase_file = allfiles["phase"]
+  
+  mcat("\n#---- Resources species\n", file=allfiles, append = TRUE)
+  
+  pars = get_par(conf, "species.accessibility2fish.logit", as.is=TRUE)
+  write_osmose(pars, file=guess_file, append = TRUE)
+  write_osmose(set_par(pars, -20), file=min_file, append = TRUE)
+  write_osmose(set_par(pars, +20), file=max_file, append = TRUE)
+  write_osmose(set_par(pars, 1), file=phase_file, append = TRUE)
+  return(invisible(NULL))
+}
+
+
+.set_param_background = function(allfiles, conf) {
+  guess_file = allfiles["guess"] 
+  min_file = allfiles["min"]
+  max_file = allfiles["max"]
+  phase_file = allfiles["phase"]
+  nbkg = get_par(conf, "nbackground")
+  if(!is.null(nbkg)) {
+    mcat("\n#---- Background species\n", file=allfiles, append = TRUE)
+    pars = get_par(conf, "species.multiplier.log.sp", as.is=TRUE)
+    write_osmose(pars, file=guess_file, append = TRUE)
+    write_osmose(set_par(pars, 0), file=min_file, append = TRUE)
+    write_osmose(set_par(pars, 15), file=max_file, append = TRUE)
+    write_osmose(set_par(pars, 1), file=phase_file, append = TRUE)
+  }
+  return(invisible(NULL))
+}
+
+
+.set_param_focal = function(allfiles, conf) {
+  
+  guess_file = allfiles["guess"] 
+  min_file = allfiles["min"]
+  max_file = allfiles["max"]
+  phase_file = allfiles["phase"]
+  
+  nbkg = get_par(conf, "nbackground")
+  
+  nyear = get_par(conf, "simulation.time.nyear")
+  
+  mcat("\n#---- Focal species\n", file=allfiles, append = TRUE)
+  
+  pars = get_par(conf, "population.initialization.biomass.log", as.is=TRUE)
+  write_osmose(pars, file=guess_file, append = TRUE)
+  write_osmose(set_par(pars, 0), file=min_file, append = TRUE)
+  write_osmose(set_par(pars, 15), file=max_file, append = TRUE)
+  write_osmose(set_par(pars, 1), file=phase_file, append = TRUE)
+  
+  pars = get_par(conf, "mortality.additional.rate.log", as.is=TRUE)
+  write_osmose(pars, file=guess_file, append = TRUE)
+  write_osmose(set_par(pars, -9), file=min_file, append = TRUE)
+  write_osmose(set_par(pars, +5), file=max_file, append = TRUE)
+  write_osmose(set_par(pars, 1), file=phase_file, append = TRUE)
+  
+  pars = get_par(conf, "mortality.additional.larva.rate.log", as.is=TRUE)
+  pars = get_par(pars, par="seasonality", invert = TRUE, as.is=TRUE)
+  write_osmose(pars, file=guess_file, append = TRUE)
+  write_osmose(set_par(pars, -9), file=min_file, append = TRUE)
+  write_osmose(set_par(pars, +9), file=max_file, append = TRUE)
+  write_osmose(set_par(pars, 1), file=phase_file, append = TRUE)
+  
+  knots = get_par(conf, "mortality.additional.larva.knots")
+  
+  pars = list()
+  for(isp in get_species(conf, code=TRUE)) {
+    iknots = get_par(knots, sp=as.numeric(isp), as.is=TRUE)
+    if(is.null(iknots)) iknots = nyear + 1
+    nn = sprintf("osmose.user.larval.deviate.log.sp%s", isp)
+    pars[[nn]] = rep(0, iknots)
+  }
+  class(pars) = "osmose.configuration"
+  
+  write_osmose(pars, file=guess_file, append = TRUE)
+  write_osmose(set_par(pars, -4), file=min_file, append = TRUE)
+  write_osmose(set_par(pars, +4), file=max_file, append = TRUE)
+  write_osmose(set_par(pars, 3), file=phase_file, append = TRUE)
+  return(invisible(TRUE))
+}
+
+.set_param_growth = function(allfiles, conf, bioen) {
+  guess_file = allfiles["guess"] 
+  min_file = allfiles["min"]
+  max_file = allfiles["max"]
+  phase_file = allfiles["phase"]
+  
+  if(!isTRUE(bioen)) {
+    # estimating delta.lmax for classical OSMOSE growth
+    pars = list()
+    for(isp in get_species(conf, code=TRUE)) {
+      nn = sprintf("species.delta.lmax.factor.sp%s", isp)
+      pars[[nn]] = 2
+    }
+    class(pars) = "osmose.configuration"
+    
+    write_osmose(pars, file=guess_file, append = TRUE)
+    write_osmose(set_par(pars, 1), file=min_file, append = TRUE)
+    write_osmose(set_par(pars, 3), file=max_file, append = TRUE)
+    write_osmose(set_par(pars, 2), file=phase_file, append = TRUE)
+    
+  } else {
+    # bioen parameters
+  }
+  return(invisible(NULL))
+}
+
+.set_param_bioen = function(allfiles, conf) {
+  return(invisible(NULL))
+}
+
+
+.set_param_fisheries = function(allfiles, conf) {
+  
+  guess_file = allfiles["guess"] 
+  min_file = allfiles["min"]
+  max_file = allfiles["max"]
+  phase_file = allfiles["phase"]
+  
+  mcat("\n#---- Fisheries\n", file=allfiles, append = TRUE)
+  
+  nmf = get_fisheries(conf)
+  nmc = get_fisheries(conf, code=TRUE)
+  
+  for(i in seq_along(nmc)) {
+    
+    ifsh = nmc[i]
+    msg = sprintf("\n-- Fishery %s: %s\n", nmc[i], nmf[i])
+    mcat(msg, file=allfiles, append = TRUE)
+    this = get_par(conf, sprintf("fsh%s", ifsh))
+    pars = get_par(get_par(this, "fisheries.rate.base", as.is=TRUE), "shift", invert=TRUE, as.is=TRUE)
+    write_osmose(pars, file=guess_file, append = TRUE)
+    write_osmose(set_par(pars, -9), file=min_file, append = TRUE)
+    write_osmose(set_par(pars, +3), file=max_file, append = TRUE)
+    write_osmose(set_par(pars, 1), file=phase_file, append = TRUE)
+    
+    pars = get_par(this, "fisheries.rate.byperiod", as.is=TRUE)
+    write_osmose(pars, file=guess_file, append = TRUE)
+    write_osmose(set_par(pars, -4), file=min_file, append = TRUE)
+    write_osmose(set_par(pars, +4), file=max_file, append = TRUE)
+    write_osmose(set_par(pars, 3), file=phase_file, append = TRUE)
+    
+    # make difference for each one: l50, l75
+    pars = get_par(this, "fisheries.selectivity.l50", as.is=TRUE)
+    L50 = as.numeric(unlist(pars))
+    write_osmose(pars, file=guess_file, append = TRUE)
+    write_osmose(set_par(pars, floor(0.5*L50)), file=min_file, append = TRUE)
+    write_osmose(set_par(pars, ceiling(2*L50)), file=max_file, append = TRUE)
+    write_osmose(set_par(pars, 3), file=phase_file, append = TRUE)
+    
+    pars75 = get_par(this, "fisheries.selectivity.l75", as.is=TRUE)
+    
+    if(!is.null(pars75)) {
+      
+      L75 = as.numeric(unlist(pars75))
+      pars = list()
+      nn = sprintf("osmose.user.selectivity.delta75.fsh%s", ifsh)
+      pars[[nn]] = L75 - L50
+      
+      class(pars) = "osmose.configuration"
+      
+      write_osmose(pars, file=guess_file, append = TRUE)
+      write_osmose(set_par(pars, 0), file=min_file, append = TRUE)
+      write_osmose(set_par(pars, ceiling(0.3*L50)), file=max_file, append = TRUE)
+      write_osmose(set_par(pars, 3), file=phase_file, append = TRUE)
+      
+    }
+    
+  } # end of fisheries parameters
+}
+
+
