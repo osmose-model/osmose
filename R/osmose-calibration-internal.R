@@ -1,7 +1,7 @@
 
 # Internal ----------------------------------------------------------------
 
-.calculate_residuals_byage = function(x, conf, tiny=1e-4) {
+.calculate_size_residuals_byage = function(x, conf, tiny=1e-4) {
   
   xx = x$meanSizeByAge
   if(is.null(xx)) return(x)
@@ -162,7 +162,8 @@
   
   ndt = get_par(conf, "output.recordfrequency")
   
-  y = get_var.osmose(x, type)
+  y = get_var.osmose(x, type, no.error=TRUE)
+  if(is.null(y)) return(x)
   spp = colnames(y)
   xx = list()
   for(i in seq_len(ncol(y))) {
@@ -300,6 +301,9 @@
   files = character(length(cal))
   names(files) = names(cal)
 
+  if(!dir.exists(file.path(path, "catch_at_length")))
+    dir.create(file.path(path, "catch_at_length"), recursive=TRUE)
+            
   for(i in seq_along(cal)) {
     
     
@@ -328,12 +332,14 @@
     fname = sprintf("%s_catchatlength-%s_%s.csv", model, names(cal)[i], pname)  
     files[names(cal)[i]] = fname
     
-    write_osmose(out, file=file.path(path, fname), row.names = FALSE, col.names = TRUE)
+    write_osmose(out, file=file.path(path, "catch_at_length", fname), row.names = FALSE, col.names = TRUE)
     
   }
 
-  names(files) = paste("catchatlength", names(files), sep=".")
-  
+  nm = paste("catchatlength", names(files), sep=".")
+  files = file.path("catch_at_length", files)
+  names(files) = nm
+  print(files)
   return(invisible(files))
   
 }
@@ -377,6 +383,8 @@
   cal_settings$varid = cal_settings$spp
   cal_settings$varid[cal_settings$itype %in% cal_novarid] = NA
   
+  cal_settings$nrows = NA
+    
   cal_settings$itype = NULL
   cal_settings$spp = NULL
   
@@ -408,4 +416,56 @@
   return(length(x))
 }
 
+.getDataFolder = function(script, data_folder="data_path") {
+  txt = readLines(script)
+  ind = grep(txt, pattern=data_folder)[1]
+  if(is.na(ind)) stop("Could not find the 'data_path'.")
+  path = read.table(file=script, sep="=", skip=ind-1, nrows=1, row.names=1)
+  path = str_trim(as.character(path))
+}
 
+
+
+# TESTS -------------------------------------------------------------------
+
+
+.calibration_test_1 = function(simulated, observed, setup) {
+
+  test1 = identical(sort(names(observed)), sort(names(simulated)))
+  
+  if(!test1) {
+    message("Pre-calibration test: FAILED. Simulated and observed have not the same variable names. Check your calibration settings.\n")
+  }
+  
+  obs_check = lapply(observed, FUN=.dim_or_length)
+  sim_check = lapply(simulated, FUN=.dim_or_length)
+  sim_check[!setup$use_data] = 1L
+
+  nm = sort(names(observed))
+  obs_check = obs_check[nm]
+  sim_check = sim_check[nm]
+  
+  test2 = identical(obs_check, sim_check)
+  
+  msg = "Error in variable '%s': observed [%s] and simulated [%s] dimensions do not match."
+  msg2 = "Check your data and configuration."
+  
+  if(!test2) {
+    for(i in seq_along(obs_check)) {
+      .test2 = identical(obs_check[[i]], sim_check[[i]])
+      if(.test2) next
+      dim1 = paste(obs_check[[i]], collapse=",")
+      dim2 = paste(sim_check[[i]], collapse=",")
+      message(sprintf(msg, nm[i], dim1, dim2))
+    }
+    message("Pre-calibration test: FAILED. Simulated and observed data have not the same dimensions. Check your data and configuration.\n")
+  }
+  
+  if(test1 & test2) {
+    message("Pre-calibration test: PASSED. Simulated and observed data are compatible.\n")
+  } else {
+    message("Pre-calibration test: FAILED. Simulated and observed data are NOT compatible.\n")
+    stop("Test failed.")
+  }
+  return(invisible(NULL))
+}
