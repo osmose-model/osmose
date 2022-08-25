@@ -192,10 +192,10 @@ run_osmose = function(input, parameters = NULL, output = NULL, log = "osmose.log
 #'
 #' @aliases osmose2R
 read_osmose = function(path = NULL, input = NULL, version = "4.3.2",
-                       species.names = NULL, absolute = TRUE, ...){
+                       species.names = NULL, ...){
 
   # If both path and input are NULL, then show an error message
-  if(is.null(path) & is.null(input)) stop("No output or configuration path has been provided.")
+  if(is.null(path) & is.null(input)) stop("No output folder or configuration file has been provided.")
 
   # use first argument as path and input if not specified.
   if(!is.null(path) & is.null(input)) {
