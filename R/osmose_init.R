@@ -18,6 +18,8 @@ initialize_osmose = function(input, file, type="internannual", parameters = NULL
                              ...) {
 
   input = suppressWarnings(normalizePath(input, mustWork=TRUE))
+  
+  if(!is.null(attr(file, "path"))) file = file.path(attr(file, "path"), file)
   file  = suppressWarnings(normalizePath(file))
   
   if(identical(input, file)) {

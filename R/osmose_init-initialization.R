@@ -253,6 +253,7 @@ init_sofia = function(input, file=NULL, test=FALSE, ...) {
   conf = .readConfiguration(input)
   
   nsp = .getPar(conf, "simulation.nspecies")
+  ndt = .getPar(conf, "simulation.time.ndtPerYear")
   
   spind = .getPar(conf, "species.type") == "focal"
   spind = gsub(names(spind)[which(spind)], pattern="species.type.sp", replacement = "") 
@@ -285,15 +286,12 @@ init_sofia = function(input, file=NULL, test=FALSE, ...) {
     sim$nschool = .getPar(this, "simulation.nschool")
     if(is.null(sim$nschool))
       stop(sprintf("Parameter 'simulation.nschool.sp%d' not found.", sp))
-    sim$osmose = .initial_length_dist(sim, sp)
+    sim$larvalM = ndt*sim$larvalM # transform to annual rate, asummed 'by time-step'
+    sim$osmose  = .initial_length_dist(sim, sp)
     pars[[iSpName]] = as.matrix(sim$osmose)
     out[[iSpName]] = sim
     
   }
-  
-  # pars = as.data.frame(pars)
-  # colnames(pars) = NULL
-  # pars = pars[order(rownames(pars)), ]
   
   xoutput = list(par=pars, init=out)
   class(xoutput) = "osmose.initialization"
@@ -584,23 +582,23 @@ llw = function(cv) 1/(2*cv^2)
   
   nschool = pmax(ceiling(sim$nschool*rel_dist), 1)
   
-  out = c(round(bio_ini, 1), 
+  out = c(round(log(bio_ini), 3), 
           paste(format(bio_rel, scientific = FALSE), collapse=", "), 
           paste(round(sim$bins$size,3), collapse=","),
           paste(xage, collapse=","),
           paste(round(tl_sp, 2), collapse=", "),
           paste(nschool, collapse = ", "),
-          round(sim$larvalM, 3))
+          round(log(sim$larvalM), 3))
   dim(out) = c(length(out), 1)
   
   out = as.data.frame(out)
-  rownames(out) = sprintf(c("population.initialization.biomass.sp%d",
+  rownames(out) = sprintf(c("population.initialization.biomass.log.sp%d",
                             "population.initialization.relativebiomass.sp%d",
                             "population.initialization.size.sp%d",
                             "population.initialization.age.sp%d",
                             "population.initialization.tl.sp%d",
                             "population.initialization.nschool.sp%d",
-                            "mortality.additional.larva.rate.sp%d"), sp)
+                            "mortality.additional.larva.rate.log.sp%d"), sp)
   colnames(out) = NULL
   
   return(out)
