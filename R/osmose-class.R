@@ -58,9 +58,13 @@
 #' @export
 #' @method plot osmose
 plot.osmose = function(x, what = "biomass", ...) {
+
+  other_arguments = list(...)  
+  other_arguments$initialYear = get_par(x$config, "simulation.time.start")
+  other_arguments$freq = get_par(x$config, "simulation.time.ndtPerYear")/get_par(x$config, "output.recordfrequency.ndt")
   
   x = get_var(x, what = what, expected = FALSE)
-  plot(x, ...)
+  do.call(plot, c(list(x=x), other_arguments))
   
   return(invisible())
 }
@@ -71,12 +75,13 @@ plot.osmose = function(x, what = "biomass", ...) {
 #' @param how How to return the object. Current options are "matrix" and "list".
 #' @param expected A logical parameter. If \code{TRUE}, the average over the 
 #' last dimensions will be performed (only if the output is an array).
+#' @param no.error Return NULL instead of and error if variable not found.
 #' @param ... Additional arguments of the function.
 #' @rdname get_var
 #' @method get_var osmose
 #' @export
 get_var.osmose = function(object, what, how = c("matrix", "list"), 
-                          expected = FALSE, ...){
+                          expected = FALSE, no.error=FALSE, ...){
   
   # Argument verification of 'how' using partial matching
   how = match.arg(how)
@@ -89,8 +94,9 @@ get_var.osmose = function(object, what, how = c("matrix", "list"),
   
   # If it's NULL, then show an error message
   if(is.null(out)) {
-    message = paste("The", sQuote(what), "variable is NULL.", sep="")
-    stop(message) 
+    msg = "The variable '%s' was not found in OSMOSE outputs."
+    if(isTRUE(no.error)) return(NULL)
+    stop(sprintf(msg, what)) 
   }
   
   .expected = function(x) {
