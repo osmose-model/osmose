@@ -4,7 +4,7 @@
 \alias{osmose_calibration_test}
 \title{Run an OSMOSE calibration test.}
 \usage{
-osmose_calibration_test(path, script = "launch_calibration.R")
+osmose_calibration_test(path, script = NULL, options = NULL, setup = NULL)
 }
 \arguments{
 \item{path}{Path to the main calibration directory.}

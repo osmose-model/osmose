@@ -6,9 +6,23 @@
 \alias{get_var}
 \title{Get variable from an \code{osmose}-like object.}
 \usage{
-\method{get_var}{osmose}(object, what, how = c("matrix", "list"), expected = FALSE, ...)
+\method{get_var}{osmose}(
+  object,
+  what,
+  how = c("matrix", "list"),
+  expected = FALSE,
+  no.error = FALSE,
+  ...
+)
 
-\method{get_var}{list}(object, what, how = c("matrix", "list"), expected = FALSE, ...)
+\method{get_var}{list}(
+  object,
+  what,
+  how = c("matrix", "list"),
+  expected = FALSE,
+  no.error = FALSE,
+  ...
+)
 
 get_var(object, what, how, ...)
 }
@@ -22,6 +36,8 @@ function).}
 
 \item{expected}{A logical parameter. If \code{TRUE}, the average over the 
 last dimensions will be performed (only if the output is an array).}
+
+\item{no.error}{Return NULL instead of and error if variable not found.}
 
 \item{...}{Additional arguments of the function.}
 }

@@ -12,7 +12,6 @@ read_osmose(
   input = NULL,
   version = "4.3.2",
   species.names = NULL,
-  absolute = TRUE,
   ...
 )
 }
