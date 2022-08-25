@@ -214,7 +214,8 @@ public class BackgroundSpecies extends OsmoseLinker implements ISpecies {
         }
 
         if (!isOk) {
-            error(message, new IOException());
+          // This is only throwing the last message!
+          error(message, new IOException());
         }
 
         String keyMul = String.format("species.multiplier.sp%s", fileindex);
@@ -222,21 +223,19 @@ public class BackgroundSpecies extends OsmoseLinker implements ISpecies {
 
         // test if only one of the two values exists
         if (!getConfiguration().isNull(keyMulLog) && !getConfiguration().isNull(keyMul)) {
-            String message2 = String.format("Both %s and %s parameters are defined. Choose only one.\n", keyMulLog, keyMul);
-            error(message2, new Exception());
+            message = String.format("Both %s and %s parameters are defined. Choose only one.\n", keyMulLog, keyMul);
+            error(message, new Exception());
         }
         
         multiplier = 1.d;
         
         if (!getConfiguration().isNull(keyMulLog)) {
-          multiplier = Math.exp(getConfiguration().getFloat("species.multiplier.log.sp" + fileindex));
+            multiplier = Math.exp(getConfiguration().getFloat("species.multiplier.log.sp" + fileindex));
             warning("Biomass for background group " + fileindex + " will be multiplied by " + multiplier
                     + " accordingly to parameter "
                     + getConfiguration().printParameter("species.multiplier.log.sp" + fileindex));
-        }
-        
-        if (!getConfiguration().isNull(keyMul)) {
-          multiplier = getConfiguration().getFloat("species.multiplier.sp" + fileindex);
+        } else {
+            multiplier = getConfiguration().getFloat("species.multiplier.sp" + fileindex);
             warning("Biomass for background group " + fileindex + " will be multiplied by " + multiplier
                     + " accordingly to parameter "
                     + getConfiguration().printParameter("species.multiplier.sp" + fileindex));
