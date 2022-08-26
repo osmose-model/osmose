@@ -181,7 +181,6 @@ public class OutputManager extends SimulationLinker {
         }
 
         if (getConfiguration().getBoolean("output.diet.composition.netcdf.enabled")) {
-            getSimulation().requestPreyRecord();
             outputs.add(new DietOutput_Netcdf(rank));
         }
 
@@ -192,14 +191,12 @@ public class OutputManager extends SimulationLinker {
         }
 
         if (getConfiguration().getBoolean("output.diet.composition.byage.netcdf.enabled")) {
-            getSimulation().requestPreyRecord();
             for (int i = 0; i < getNSpecies(); i++) {
                 outputs.add(new DietDistribOutput_Netcdf(rank, getSpecies(i), ageDistrib));
             }
         }
 
         if (getConfiguration().getBoolean("output.diet.composition.bysize.netcdf.enabled")) {
-            getSimulation().requestPreyRecord();
             for (int i = 0; i < getNSpecies(); i++) {
                 outputs.add(new DietDistribOutput_Netcdf(rank, getSpecies(i), sizeDistrib));
             }
@@ -226,7 +223,6 @@ public class OutputManager extends SimulationLinker {
         }
 
         if (getConfiguration().getBoolean("output.diet.pressure.netcdf.enabled")) {
-            getSimulation().requestPreyRecord();
             outputs.add(new PredatorPressureOutput_Netcdf(rank));
         }
 
@@ -503,7 +499,6 @@ public class OutputManager extends SimulationLinker {
 
         // TL
         if (getConfiguration().getBoolean("output.tl.enabled")) {
-            getSimulation().requestPreyRecord();
             outputs.add(new WeightedSpeciesOutput(rank, "Trophic", "meanTL",
                     "Mean Trophic Level of fish species, weighted by fish biomass, and "
                             + (cutoff ? "excluding" : "including") + " first ages specified in input",
@@ -512,7 +507,6 @@ public class OutputManager extends SimulationLinker {
         }
 
         if (getConfiguration().getBoolean("output.tl.catch.enabled")) {
-            getSimulation().requestPreyRecord();
             outputs.add(new WeightedSpeciesOutput(rank, "Trophic", "meanTLCatch",
                     "Mean Trophic Level of fish species, weighted by fish catch, and including first ages specified in input",
                     school -> school.getTrophicLevel(),
@@ -525,39 +519,33 @@ public class OutputManager extends SimulationLinker {
         }
 
         if (getConfiguration().getBoolean("output.meanTL.bySize.enabled")) {
-            getSimulation().requestPreyRecord();
             outputs.add(new WeightedDistribOutput(rank, "Trophic", "meanTL", "Mean trophic level of fish species",
                     school -> school.getTrophicLevel(), school -> school.getInstantaneousBiomass(), sizeDistrib));
         }
 
         if (getConfiguration().getBoolean("output.meanTL.byAge.enabled")) {
-            getSimulation().requestPreyRecord();
             outputs.add(new WeightedDistribOutput(rank, "Trophic", "meanTL", "Mean trophic level of fish species",
                     school -> school.getTrophicLevel(), school -> school.getInstantaneousBiomass(), ageDistrib));
         }
 
         // Predation
         if (getConfiguration().getBoolean("output.diet.composition.enabled")) {
-            getSimulation().requestPreyRecord();
             outputs.add(new DietOutput(rank));
         }
 
         if (getConfiguration().getBoolean("output.diet.composition.byage.enabled")) {
-            getSimulation().requestPreyRecord();
             for (int i = 0; i < getNSpecies(); i++) {
                 outputs.add(new DietDistribOutput(rank, getSpecies(i), ageDistrib));
             }
         }
 
         if (getConfiguration().getBoolean("output.diet.composition.bysize.enabled")) {
-            getSimulation().requestPreyRecord();
             for (int i = 0; i < getNSpecies(); i++) {
                 outputs.add(new DietDistribOutput(rank, getSpecies(i), sizeDistrib));
             }
         }
 
         if (getConfiguration().getBoolean("output.diet.pressure.enabled")) {
-            getSimulation().requestPreyRecord();
             outputs.add(new PredatorPressureOutput(rank));
         }
 
@@ -566,14 +554,12 @@ public class OutputManager extends SimulationLinker {
         }
 
         if (getConfiguration().getBoolean("output.diet.pressure.byage.enabled")) {
-            getSimulation().requestPreyRecord();
             for (int i = 0; i < getNSpecies(); i++) {
                 outputs.add(new PredatorPressureDistribOutput(rank, getSpecies(i), ageDistrib));
             }
         }
 
         if (getConfiguration().getBoolean("output.diet.pressure.bysize.enabled")) {
-            getSimulation().requestPreyRecord();
             for (int i = 0; i < getNSpecies(); i++) {
                 outputs.add(new PredatorPressureDistribOutput(rank, getSpecies(i), sizeDistrib));
             }
@@ -597,7 +583,6 @@ public class OutputManager extends SimulationLinker {
         }
 
         if (getConfiguration().getBoolean("output.spatial.ltl.enabled")) {
-            getSimulation().requestPreyRecord();
             outputs.add(new ResourceOutput(rank));
         }
 
