@@ -49,6 +49,9 @@ plantuml = 'plantuml'
 plantuml_output_format = 'svg_img'
 plantuml_latex_output_format = 'pdf'
 
+mermaid_pdfcrop = 'pdfcrop'
+#mermaid_output_format = 'png'
+
 bibtex_bibfiles = ['_static/biblio.bib']
 
 # Add any paths that contain templates here, relative to this directory.
