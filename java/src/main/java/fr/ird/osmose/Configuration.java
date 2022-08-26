@@ -283,6 +283,19 @@ public class Configuration extends OLogger {
      */
     private boolean writeRestart;
 
+    /**
+     * Record frequency for writing restart files, in number of time step.
+     */
+    private int restartFrequency;
+    /**
+     * Indicates whether the simulation starts from a restart file.
+     */
+    private boolean restart;
+    /**
+     * Number of years before writing restart files.
+     */
+    private int spinupRestart;
+
     ///////////////
     // Constructors
     ///////////////
@@ -372,6 +385,20 @@ public class Configuration extends OLogger {
             writeRestart = this.getBoolean("output.restart.enabled");
         } else {
             warning("Could not find parameter 'output.restart.enabled'. Osmose assumes it is true and a NetCDF restart file will be created at the end of the simulation (or more, depending on parameters 'simulation.restart.recordfrequency.ndt' and 'simulation.restart.spinup').");
+        }
+
+        restart = false;
+        if (!this.isNull("simulation.restart.file")) {
+            restart = true;
+        }
+
+        restartFrequency = Integer.MAX_VALUE;
+        if (!this.isNull("output.restart.recordfrequency.ndt")) {
+            restartFrequency = this.getInt("output.restart.recordfrequency.ndt");
+        }
+        spinupRestart = 0;
+        if (!this.isNull("output.restart.spinup")) {
+            spinupRestart = this.getInt("output.restart.spinup") - 1;
         }
 
         // Show the output folder
@@ -627,6 +654,23 @@ public class Configuration extends OLogger {
         // Year to start writing the outputs
         yearOutput = this.getInt("output.start.year");
 
+    }
+
+    public int getRestartFrequency() {
+        return this.restartFrequency;
+    }
+
+    public int getSpinupRestart() {
+        return this.spinupRestart;
+    }
+
+    /**
+     * Checks whether the simulation started from a restart file.
+     *
+     * @return {@code true} if the simulation started from a restart file
+     */
+    public boolean isRestart() {
+        return restart;
     }
 
     public boolean isWriteRestartEnabled() {

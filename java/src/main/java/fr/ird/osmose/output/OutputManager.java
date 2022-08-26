@@ -116,7 +116,7 @@ public class OutputManager extends SimulationLinker {
         /*
          * Delete existing outputs from previous simulation
          */
-        if (!getSimulation().isRestart()) {
+        if (!getConfiguration().isRestart()) {
             // Delete previous simulation of the same name
             String pattern = getConfiguration().getString("output.file.prefix") + "*_Simu" + rank + "*";
             IOTools.deleteRecursively(getConfiguration().getOutputPathname(), pattern);

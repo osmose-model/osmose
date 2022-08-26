@@ -122,18 +122,6 @@ public class Simulation extends OsmoseLinker {
      * a NetCDF file. Osmose will be able to restart on such a file.
      */
     private SchoolSetSnapshot snapshot;
-    /**
-     * Record frequency for writing restart files, in number of time step.
-     */
-    private int restartFrequency;
-    /**
-     * Indicates whether the simulation starts from a restart file.
-     */
-    private boolean restart;
-    /**
-     * Number of years before writing restart files.
-     */
-    private int spinupRestart;
 
     /**
      * Whether to keep track of prey records during the simulation
@@ -197,9 +185,8 @@ public class Simulation extends OsmoseLinker {
         i_step_year = 0;
         i_step_simu = 0;
 
-        // Look for restart file
-        restart = false;
-        if (!getConfiguration().isNull("simulation.restart.file")) {
+        // Look for restart file if restart is enabled
+        if(getConfiguration().isRestart()) {
             String ncfile = getConfiguration().getFile("simulation.restart.file") + "." + rank;
             i_step_simu = 0;
             try {
@@ -212,7 +199,6 @@ public class Simulation extends OsmoseLinker {
                 year = i_step_simu / nStepYear;
                 i_step_year = i_step_simu % nStepYear;
                 info("Restarting simulation from year {0} step {1}", new Object[] { year, i_step_year });
-                restart = true;
             } catch (IOException ex) {
                 error("Failed to open restart file " + ncfile, ex);
             }
@@ -276,14 +262,6 @@ public class Simulation extends OsmoseLinker {
 
         // Initialize the restart maker
         snapshot = new SchoolSetSnapshot(rank);
-        restartFrequency = Integer.MAX_VALUE;
-        if (!getConfiguration().isNull("output.restart.recordfrequency.ndt")) {
-            restartFrequency = getConfiguration().getInt("output.restart.recordfrequency.ndt");
-        }
-        spinupRestart = 0;
-        if (!getConfiguration().isNull("output.restart.spinup")) {
-            spinupRestart = getConfiguration().getInt("output.restart.spinup") - 1;
-        }
     }
 
     /**
@@ -324,15 +302,6 @@ public class Simulation extends OsmoseLinker {
     }
 
     /**
-     * Checks whether the simulation started from a restart file.
-     *
-     * @return {@code true} if the simulation started from a restart file
-     */
-    public boolean isRestart() {
-        return restart;
-    }
-
-    /**
      * Runs the simulation. It controls the loop over time.
      */
     public void run() {
@@ -351,7 +320,8 @@ public class Simulation extends OsmoseLinker {
             // fr.ird.osmose.util.SimulationUI.step(year, i_step_year);
 
             // Create a restart file
-            if (getConfiguration().isWriteRestartEnabled() && (year >= spinupRestart) && ((i_step_simu + 1) % restartFrequency == 0)) {
+            if (getConfiguration().isWriteRestartEnabled() && (year >= getConfiguration().getSpinupRestart())
+                    && ((i_step_simu + 1) % getConfiguration().getRestartFrequency() == 0)) {
                 snapshot.makeSnapshot(i_step_simu);
             }
 
