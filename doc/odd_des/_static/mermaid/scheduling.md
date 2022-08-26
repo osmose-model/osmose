@@ -9,5 +9,5 @@ graph TD;
     id7 --> id8(Removing of dead schools)
     id8 -->id1
 
-    classDef className fill:steelblue,stroke:black,stroke-width:3px,color:white
+    classDef className fill:lightblue,stroke:black,stroke-width:3px,color:black
     class id1,id2,id3,id4,id5,id6,id7,id8 className;
