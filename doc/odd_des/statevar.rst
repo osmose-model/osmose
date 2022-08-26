@@ -83,14 +83,12 @@ The ``School`` entity contains the following state variables:
    :file: _static/school.csv
    :delim: ;
    :header-rows: 1
-   :widths: 20, 60, 20
    :class: tight-table
 
 .. csv-table:: ``BackgroundSchool`` state variables
    :file: _static/bkgschool.csv
    :delim: ;
    :header-rows: 1
-   :widths: 20, 60, 20
    :class: tight-table
 
 

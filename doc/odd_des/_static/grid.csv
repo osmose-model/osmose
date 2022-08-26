@@ -1,5 +1,4 @@
 Variable ; Description ; Type ; Units
-LAND_VALUE ; Value of land-sea points ; float ;
 i ; i-index of the current cell on the 2D grid ; int, :math:`\in [0, N_x - 1]` ;
 j ; j-index of the current cell on the 2D grid ; int, :math:`\in [0, N_y - 1]` ;
 land ; true if the cell is on land ; boolean ;
