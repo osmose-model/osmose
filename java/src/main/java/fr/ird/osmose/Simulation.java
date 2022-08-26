@@ -98,14 +98,6 @@ public class Simulation extends OsmoseLinker {
     private ResourceForcing[] resourceForcing;
 
     /**
-     * Current year of the simulation.
-     */
-    private int year;
-    /**
-     * Time step in the current year. {@code i_step_year = i_step_simu / nyear}
-     */
-    private int i_step_year;
-    /**
      * Time step of the simulation.
      */
     private int i_step_simu;
@@ -170,8 +162,6 @@ public class Simulation extends OsmoseLinker {
         this.backSchoolSet = new BackgroundSchoolSet();
         this.backSchoolSet.init();
 
-        year = 0;
-        i_step_year = 0;
         i_step_simu = 0;
 
         // Look for restart file if restart is enabled
@@ -181,10 +171,7 @@ public class Simulation extends OsmoseLinker {
             try {
                 NetcdfFile nc = NetcdfFile.open(ncfile);
                 i_step_simu = Integer.valueOf(nc.findGlobalAttribute("step").getStringValue()) + 1;
-                int nStepYear = getConfiguration().getNStepYear();
-                year = i_step_simu / nStepYear;
-                i_step_year = i_step_simu % nStepYear;
-                info("Restarting simulation from year {0} step {1}", new Object[] { year, i_step_year });
+                info("Restarting simulation from year {0} step {1}", new Object[] { this.getYear(),  this.getIndexTimeYear()});
             } catch (IOException ex) {
                 error("Failed to open restart file " + ncfile, ex);
             }
@@ -293,17 +280,16 @@ public class Simulation extends OsmoseLinker {
     public void run() {
 
         while (i_step_simu < getConfiguration().getNStep()) {
-            year = i_step_simu / getConfiguration().getNStepYear();
-            i_step_year = i_step_simu % getConfiguration().getNStepYear();
+
+            int year = getYear();
 
             // Print progress in console at the beginning of the year
-            if (i_step_simu % getConfiguration().getNStepYear() == 0) {
+            if (getIndexTimeYear() == 0) {
                 info("year {0}", year);
             }
 
             // Run a new step
             step.step(i_step_simu);
-            // fr.ird.osmose.util.SimulationUI.step(year, i_step_year);
 
             // Create a restart file
             if (getConfiguration().isWriteRestartEnabled() && (year >= getConfiguration().getSpinupRestart())
@@ -337,16 +323,15 @@ public class Simulation extends OsmoseLinker {
      * @return the current year of the simulation
      */
     public int getYear() {
-        return year;
+        return i_step_simu / getConfiguration().getNStepYear();
     }
-
     /**
      * Returns the time step in the current year.
      *
      * @return the time step in the current year
      */
     public int getIndexTimeYear() {
-        return i_step_year;
+        return i_step_simu % getConfiguration().getNStepYear();
     }
 
     /**
@@ -367,7 +352,7 @@ public class Simulation extends OsmoseLinker {
      * @return true if prey records should be activated
      */
     public boolean isPreyRecord() {
-        return preyRecord && (year >= (getConfiguration().getYearOutput() - 1));
+        return preyRecord && (this.getYear() >= (getConfiguration().getYearOutput() - 1));
     }
 
     public void requestPreyRecord() {
