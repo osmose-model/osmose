@@ -278,6 +278,11 @@ public class Configuration extends OLogger {
      */
     private int yearOutput;
 
+    /**
+     * Whether the restart files should be written or not
+     */
+    private boolean writeRestart;
+
     ///////////////
     // Constructors
     ///////////////
@@ -361,6 +366,13 @@ public class Configuration extends OLogger {
         outputPathname = getFile("output.dir.path");
 
         this.flushEnabled = getBoolean("output.flush.enabled");
+
+        writeRestart = true;
+        if (!this.isNull("output.restart.enabled")) {
+            writeRestart = this.getBoolean("output.restart.enabled");
+        } else {
+            warning("Could not find parameter 'output.restart.enabled'. Osmose assumes it is true and a NetCDF restart file will be created at the end of the simulation (or more, depending on parameters 'simulation.restart.recordfrequency.ndt' and 'simulation.restart.spinup').");
+        }
 
         // Show the output folder
         info("Output folder set to " + outputPathname);
@@ -615,6 +627,10 @@ public class Configuration extends OLogger {
         // Year to start writing the outputs
         yearOutput = this.getInt("output.start.year");
 
+    }
+
+    public boolean isWriteRestartEnabled() {
+        return this.writeRestart;
     }
 
     public int getYearOutput() {

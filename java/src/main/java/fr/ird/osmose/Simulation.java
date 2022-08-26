@@ -134,10 +134,7 @@ public class Simulation extends OsmoseLinker {
      * Number of years before writing restart files.
      */
     private int spinupRestart;
-    /**
-     * Whether the restart files should be written or not
-     */
-    private boolean writeRestart;
+
     /**
      * Whether to keep track of prey records during the simulation
      */
@@ -287,12 +284,6 @@ public class Simulation extends OsmoseLinker {
         if (!getConfiguration().isNull("output.restart.spinup")) {
             spinupRestart = getConfiguration().getInt("output.restart.spinup") - 1;
         }
-        writeRestart = true;
-        if (!getConfiguration().isNull("output.restart.enabled")) {
-            writeRestart = getConfiguration().getBoolean("output.restart.enabled");
-        } else {
-            warning("Could not find parameter 'output.restart.enabled'. Osmose assumes it is true and a NetCDF restart file will be created at the end of the simulation (or more, depending on parameters 'simulation.restart.recordfrequency.ndt' and 'simulation.restart.spinup').");
-        }
     }
 
     /**
@@ -360,7 +351,7 @@ public class Simulation extends OsmoseLinker {
             // fr.ird.osmose.util.SimulationUI.step(year, i_step_year);
 
             // Create a restart file
-            if (writeRestart && (year >= spinupRestart) && ((i_step_simu + 1) % restartFrequency == 0)) {
+            if (getConfiguration().isWriteRestartEnabled() && (year >= spinupRestart) && ((i_step_simu + 1) % restartFrequency == 0)) {
                 snapshot.makeSnapshot(i_step_simu);
             }
 
@@ -370,7 +361,7 @@ public class Simulation extends OsmoseLinker {
         step.end();
 
         // Create systematically a restart file at the end of the simulation
-        if (writeRestart) {
+        if (getConfiguration().isWriteRestartEnabled()) {
             snapshot.makeSnapshot(i_step_simu - 1);
         }
     }
