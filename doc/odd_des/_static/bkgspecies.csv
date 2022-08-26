@@ -10,4 +10,4 @@ classProportion ; Proportion of biomass attributed to each size-class ; float[] 
 length ; Length array ; float[] ; cm
 nClass ; Number of size-classes ; int, :math:`>1`;
 trophicLevel ; Array of trophic level ; float[] ;
-timeSeries ; Time series of proportion of biomass attributed to each size-class ; `` ;
+timeSeries ; Time series of proportion of biomass attributed to each size-class ;  ;
