@@ -1,4 +1,4 @@
-Variable  ;  Description  ; Type ; Units
+Variable ; Description  ; Type ; Units
 name ; name of the species  ; string ;
 index ; index of the species  ; int, :math:`\in[0, N_{species} - 1]`;
 fileIndex ; index of the species in the configuration file  ; int, :math:`>0`;

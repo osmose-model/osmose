@@ -1,9 +1,5 @@
-Variable ;  Description ; Units
-i_step_simu : int
-i_step_year : int
-n_steps_simu : int
-preyRecord : boolean
-rank : int
-schoolSet : fr.ird.osmose.SchoolSet
-backSchoolSet : fr.ird.osmose.background.BackgroundSchoolSet
-year : int
+Variable ;  Description ; Type ; Units
+i_step_simu ; Times step of the simulation; int, :math:`\in [0, N_{year} \times N_{step\_year}]` ;
+rank ;Index of the simulation;  int ;
+schoolSet ;; ``SchoolSet`` ;
+backSchoolSet ;;  ``BackgroundSchoolSet`` ;

@@ -31,6 +31,13 @@ Simulation
 
 The ``Simulation`` entity contains the following state variables:
 
+.. csv-table:: ``Simulation`` state variables
+   :file: _static/simu.csv
+   :delim: ;
+   :header-rows: 1
+   :class: tight-table
+
+
 Cell
 ###################
 
