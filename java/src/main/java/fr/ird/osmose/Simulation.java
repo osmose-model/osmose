@@ -113,11 +113,6 @@ public class Simulation extends OsmoseLinker {
     private SchoolSetSnapshot snapshot;
 
     /**
-     * Whether to keep track of prey records during the simulation
-     */
-    private boolean preyRecord;
-
-    /**
      * List of evolving trait.
      */
     private List<Trait> evolvingTrait;
@@ -220,7 +215,7 @@ public class Simulation extends OsmoseLinker {
          *          will in turn call outputManager.init() which may request prey
          *          record.
          */
-        preyRecord = false;
+        // preyRecord = false;
 
         // Instantiate the Step
         step = new SimulationStep(rank);
@@ -352,12 +347,12 @@ public class Simulation extends OsmoseLinker {
      * @return true if prey records should be activated
      */
     public boolean isPreyRecord() {
-        return preyRecord && (this.getYear() >= (getConfiguration().getYearOutput() - 1));
+        return getConfiguration().isPreyRecordEnabled() && (this.getYear() >= (getConfiguration().getYearOutput() - 1));
     }
 
-    public void requestPreyRecord() {
-        preyRecord = true;
-    }
+    // public void requestPreyRecord() {
+    //     preyRecord = true;
+    // }
 
     /**
      * Returns the {@code ResourceForcing} instance for specified resource.

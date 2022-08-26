@@ -296,6 +296,11 @@ public class Configuration extends OLogger {
      */
     private int spinupRestart;
 
+    /**
+     * Whether to keep track of prey records during the simulation
+     */
+    private boolean preyRecord;
+
     ///////////////
     // Constructors
     ///////////////
@@ -351,6 +356,25 @@ public class Configuration extends OLogger {
         return VersionManager.getInstance().isConfigurationUpToDate();
     }
 
+    public boolean isPreyRecordEnabled() {
+        return this.preyRecord;
+    }
+
+    private void checkPreyRecord() {
+
+        preyRecord = false;
+        List<String> outputList = this.findKeys("output.diet*enabled*");
+        for(String param : outputList) {
+            preyRecord = preyRecord || getBoolean(param);
+        }
+
+        outputList = this.findKeys("output.*tl*enabled");
+        for(String param : outputList) {
+            preyRecord = preyRecord || getBoolean(param);
+        }
+
+    }
+
     /**
      * Initialises the current configuration. Sets the values of the main variables
      * and creates the grid.
@@ -365,6 +389,8 @@ public class Configuration extends OLogger {
         // String keybioen = "simulation.use.bioen";
         String keybioen = "simulation.bioen.enabled";
         this.bioenEnabled = this.getBoolean(keybioen);
+
+        this.checkPreyRecord();
 
         this.geneticEnabled = false;
         if (this.bioenEnabled) {
