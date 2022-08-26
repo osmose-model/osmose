@@ -1,10 +1,10 @@
-/* 
- * 
+/*
+ *
  * OSMOSE (Object-oriented Simulator of Marine Ecosystems)
  * http://www.osmose-model.org
- * 
+ *
  * Copyright (C) IRD (Institut de Recherche pour le Développement) 2009-2020
- * 
+ *
  * Osmose is a computer program whose purpose is to simulate fish
  * populations and their interactions with their biotic and abiotic environment.
  * OSMOSE is a spatial, multispecies and individual-based model which assumes
@@ -15,7 +15,7 @@
  * processes of fish life cycle (growth, explicit predation, additional and
  * starvation mortalities, reproduction and migration) and fishing mortalities
  * (Shin and Cury 2001, 2004).
- * 
+ *
  * Contributor(s):
  * Yunne SHIN (yunne.shin@ird.fr),
  * Morgane TRAVERS (morgane.travers@ifremer.fr)
@@ -23,20 +23,20 @@
  * Philippe VERLEY (philippe.verley@ird.fr)
  * Laure VELEZ (laure.velez@ird.fr)
  * Nicolas Barrier (nicolas.barrier@ird.fr)
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation (version 3 of the License). Full description
  * is provided on the LICENSE file.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
- * 
+ *
  */
 
 package fr.ird.osmose;
@@ -173,10 +173,10 @@ public class Configuration extends OLogger {
      * @see fr.ird.osmose.util.Separator
      */
     private String outputSeparator;
-    
+
     /** True if output files should be flushed any time they are written. */
     private boolean flushEnabled;
-    
+
     /**
      * Number of CPUs allocated to {@code Osmose} for running the simulations
      * concurrently. Parameter <i>simulation.ncpu</i>
@@ -265,13 +265,18 @@ public class Configuration extends OLogger {
      * Species index for focal, background and resource indexes.
      */
     private int[] focalIndex, bkgIndex, rscIndex;
-    
+
     private boolean isEconomyEnabled;
 
     private NetcdfFileWriter.Version ncOutVersion;
-    
+
     /** True if fishing Mortality (v3 or v4) is on. */
     private boolean fishingMortalityEnabled = true;
+
+    /**
+     * Year to start writing the outputs
+     */
+    private int yearOutput;
 
     ///////////////
     // Constructors
@@ -356,7 +361,7 @@ public class Configuration extends OLogger {
         outputPathname = getFile("output.dir.path");
 
         this.flushEnabled = getBoolean("output.flush.enabled");
-        
+
         // Show the output folder
         info("Output folder set to " + outputPathname);
 
@@ -382,9 +387,9 @@ public class Configuration extends OLogger {
         } else {
             nCpu = 1;
         }
-        
+
         // Set the output NetCdf format for
-        this.setOutputNcFormat();    
+        this.setOutputNcFormat();
 
         // barrier.n: new way to count the number of species, resource and background
         // based on types.
@@ -523,18 +528,18 @@ public class Configuration extends OLogger {
         if (!isNull("simulation.fishing.mortality.enabled")) {
             fishingMortalityEnabled = getBoolean("simulation.fishing.mortality.enabled");
         }
-        
+
         // Init of fisheries at 0.
         nFishery = 0;
-        
+
         if (fishingMortalityEnabled && fisheryEnabled) {
-            
+
             // if fishery is on: read nfisheries
             nFishery = getInt("simulation.nfisheries");
-            
+
             // compare with the number of fisheries names
             int nFisheryTest = findKeys("fisheries.name.fsh*").size();
-    
+
             // Display warning message if new fishery enabled but no fishers
             if (nFishery != nFisheryTest) {
                 warning("***************************************************");
@@ -545,7 +550,7 @@ public class Configuration extends OLogger {
                 System.exit(1);
             }
         }
-        
+
         // Output regions
         outputRegions = new ArrayList<>();
         // special case region0, the whole domain
@@ -607,6 +612,13 @@ public class Configuration extends OLogger {
             region.init();
         });
 
+        // Year to start writing the outputs
+        yearOutput = this.getInt("output.start.year");
+
+    }
+
+    public int getYearOutput() {
+        return this.yearOutput;
     }
 
     public List<AbstractOutputRegion> getOutputRegions() {
@@ -620,9 +632,9 @@ public class Configuration extends OLogger {
     public boolean isFisheryEnabled() {
         return nFishery > 0;
     }
-    
-    public boolean isFishingMortalityEnabled() { 
-        return this.fishingMortalityEnabled;   
+
+    public boolean isFishingMortalityEnabled() {
+        return this.fishingMortalityEnabled;
     }
 
     public boolean isEconomyEnabled() {
@@ -657,7 +669,7 @@ public class Configuration extends OLogger {
     public Species getSpecies(int index) {
         return species[index];
     }
-    
+
     /**
      * Get a species
      *
@@ -1473,7 +1485,7 @@ public class Configuration extends OLogger {
     }
 
     public boolean isFlushEnabled() {
-        return this.flushEnabled;   
+        return this.flushEnabled;
     }
 
     /**
@@ -1500,7 +1512,7 @@ public class Configuration extends OLogger {
      * Recovers the indexes of the species that can be fished.
      *
      * Returns the concatenated array of focal and background species indexes.
-     * 
+     *
      * @return
      */
     public int[] getPredatorIndex() {
@@ -1514,19 +1526,19 @@ public class Configuration extends OLogger {
     public int[] getAllIndex() {
         return (ArrayUtils.addAll(ArrayUtils.addAll(this.focalIndex, this.bkgIndex), this.rscIndex));
     }
-    
+
     /** Recover the output NetCDF version */
-    public NetcdfFileWriter.Version getNcOutVersion() { 
-        return ncOutVersion;   
+    public NetcdfFileWriter.Version getNcOutVersion() {
+        return ncOutVersion;
     }
-    
-    public int getNYears() { 
-        return this.getNStep() / this.getNStepYear();   
-    }    
-    
+
+    public int getNYears() {
+        return this.getNStep() / this.getNStepYear();
+    }
+
 
     private void setOutputNcFormat() {
-        
+
         // Control of the NetCdf output version from a configuration file.
         // If not provided, NetCdf4 is used.
         ncOutVersion = NetcdfFileWriter.Version.netcdf3;
@@ -1563,5 +1575,5 @@ public class Configuration extends OLogger {
             }
         }
     }
-    
+
 }
