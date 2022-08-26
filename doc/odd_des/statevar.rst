@@ -6,6 +6,8 @@ Entities
 
 In the current section, the different types of entities of the Osmose model are described.
 
+- The ``Configuration`` entity describes the parameters and entities that will be shared among the different simulations.
+- The ``Simulation`` entity describes a given simulation. Simulations differ from each other if stochasticity is enabled.
 - The ``Cell`` entity describes the individual cells of the Osmose computation 2D grid (longitude, latitude,
   cell index, etc.)
 - The ``Species`` entity represents the species whose life-cycle is fully represented.
@@ -23,6 +25,11 @@ In the current section, the different types of entities of the Osmose model are 
 
 State variables
 ++++++++++++++++++
+
+Simulation
+###################
+
+The ``Simulation`` entity contains the following state variables:
 
 Cell
 ###################

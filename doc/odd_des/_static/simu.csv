@@ -1,0 +1,9 @@
+Variable ;  Description ; Units
+i_step_simu : int
+i_step_year : int
+n_steps_simu : int
+preyRecord : boolean
+rank : int
+schoolSet : fr.ird.osmose.SchoolSet
+backSchoolSet : fr.ird.osmose.background.BackgroundSchoolSet
+year : int
