@@ -109,10 +109,7 @@ public class Simulation extends OsmoseLinker {
      * Time step of the simulation.
      */
     private int i_step_simu;
-    /**
-     * Total number of time steps of the simulation.
-     */
-    private int n_steps_simu;
+
     /**
      * The object that controls what should be done during one time step.
      */
@@ -173,14 +170,6 @@ public class Simulation extends OsmoseLinker {
         this.backSchoolSet = new BackgroundSchoolSet();
         this.backSchoolSet.init();
 
-        // Option for running only one time step and stops
-        boolean oneStep = false;
-        if (getConfiguration().canFind("simulation.onestep")) {
-            oneStep = getConfiguration().getBoolean("simulation.onestep");
-        }
-
-        // Initialize time variables
-        n_steps_simu = oneStep ? 1 : getConfiguration().getNStep();
         year = 0;
         i_step_year = 0;
         i_step_simu = 0;
@@ -192,9 +181,6 @@ public class Simulation extends OsmoseLinker {
             try {
                 NetcdfFile nc = NetcdfFile.open(ncfile);
                 i_step_simu = Integer.valueOf(nc.findGlobalAttribute("step").getStringValue()) + 1;
-                if (oneStep) {
-                    n_steps_simu = i_step_simu + 1;
-                }
                 int nStepYear = getConfiguration().getNStepYear();
                 year = i_step_simu / nStepYear;
                 i_step_year = i_step_simu % nStepYear;
@@ -306,7 +292,7 @@ public class Simulation extends OsmoseLinker {
      */
     public void run() {
 
-        while (i_step_simu < n_steps_simu) {
+        while (i_step_simu < getConfiguration().getNStep()) {
             year = i_step_simu / getConfiguration().getNStepYear();
             i_step_year = i_step_simu % getConfiguration().getNStepYear();
 
