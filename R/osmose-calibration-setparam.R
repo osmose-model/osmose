@@ -56,20 +56,20 @@
   pars = get_par(conf, "mortality.additional.rate.log", as.is=TRUE)
   write_osmose(pars, file=guess_file, append = TRUE)
   write_osmose(set_par(pars, -9), file=min_file, append = TRUE)
-  write_osmose(set_par(pars, +5), file=max_file, append = TRUE)
+  write_osmose(set_par(pars, +2), file=max_file, append = TRUE)
   write_osmose(set_par(pars, 1), file=phase_file, append = TRUE)
   
   pars = get_par(conf, "mortality.additional.larva.rate.log", as.is=TRUE)
   pars = get_par(pars, par="seasonality", invert = TRUE, as.is=TRUE)
   write_osmose(pars, file=guess_file, append = TRUE)
-  write_osmose(set_par(pars, -9), file=min_file, append = TRUE)
-  write_osmose(set_par(pars, +9), file=max_file, append = TRUE)
+  write_osmose(set_par(pars, -1), file=min_file, append = TRUE)
+  write_osmose(set_par(pars, +7), file=max_file, append = TRUE)
   write_osmose(set_par(pars, 1), file=phase_file, append = TRUE)
   
   knots = get_par(conf, "mortality.additional.larva.knots")
   
   pars = list()
-  for(isp in get_species(conf, code=TRUE)) {
+  for(isp in get_species(conf, type="focal", code=TRUE)) {
     iknots = get_par(knots, sp=as.numeric(isp), as.is=TRUE)
     if(is.null(iknots)) iknots = nyear + 1
     nn = sprintf("osmose.user.larval.deviate.log.sp%s", isp)
@@ -93,7 +93,7 @@
   if(!isTRUE(bioen)) {
     # estimating delta.lmax for classical OSMOSE growth
     pars = list()
-    for(isp in get_species(conf, code=TRUE)) {
+    for(isp in get_species(conf, type="focal", code=TRUE)) {
       nn = sprintf("species.delta.lmax.factor.sp%s", isp)
       pars[[nn]] = 2
     }
@@ -136,14 +136,14 @@
     pars = get_par(get_par(this, "fisheries.rate.base", as.is=TRUE), "shift", invert=TRUE, as.is=TRUE)
     write_osmose(pars, file=guess_file, append = TRUE)
     write_osmose(set_par(pars, -9), file=min_file, append = TRUE)
-    write_osmose(set_par(pars, +3), file=max_file, append = TRUE)
-    write_osmose(set_par(pars, 1), file=phase_file, append = TRUE)
+    write_osmose(set_par(pars, +2), file=max_file, append = TRUE)
+    write_osmose(set_par(pars, 2), file=phase_file, append = TRUE)
     
     pars = get_par(this, "fisheries.rate.byperiod", as.is=TRUE)
     write_osmose(pars, file=guess_file, append = TRUE)
-    write_osmose(set_par(pars, -4), file=min_file, append = TRUE)
-    write_osmose(set_par(pars, +4), file=max_file, append = TRUE)
-    write_osmose(set_par(pars, 3), file=phase_file, append = TRUE)
+    write_osmose(set_par(pars, -3), file=min_file, append = TRUE)
+    write_osmose(set_par(pars, +3), file=max_file, append = TRUE)
+    write_osmose(set_par(pars, 4), file=phase_file, append = TRUE)
     
     # make difference for each one: l50, l75
     pars = get_par(this, "fisheries.selectivity.l50", as.is=TRUE)
@@ -151,7 +151,7 @@
     write_osmose(pars, file=guess_file, append = TRUE)
     write_osmose(set_par(pars, floor(0.5*L50)), file=min_file, append = TRUE)
     write_osmose(set_par(pars, ceiling(2*L50)), file=max_file, append = TRUE)
-    write_osmose(set_par(pars, 3), file=phase_file, append = TRUE)
+    write_osmose(set_par(pars, 4), file=phase_file, append = TRUE)
     
     pars75 = get_par(this, "fisheries.selectivity.l75", as.is=TRUE)
     
@@ -167,7 +167,7 @@
       write_osmose(pars, file=guess_file, append = TRUE)
       write_osmose(set_par(pars, 0), file=min_file, append = TRUE)
       write_osmose(set_par(pars, ceiling(0.3*L50)), file=max_file, append = TRUE)
-      write_osmose(set_par(pars, 3), file=phase_file, append = TRUE)
+      write_osmose(set_par(pars, 4), file=phase_file, append = TRUE)
       
     }
     
