@@ -362,15 +362,15 @@
 .create_calibration_settings = function(output, files) {
   
   cal_type = c(biomass="lnorm3", yield="lnorm2", catchatlength="multinom", 
-               mortality="normp", growth="normp")
+               mortality="normp", growth="normp", penalty="normp")
   
   cal_cv = c(biomass=0.25, yield=0.05, catchatlength=1, 
-             mortality=1, growth=1)
+             mortality=1, growth=1, penalty=1)
   
   cal_useData = c(biomass=TRUE, yield=TRUE, catchatlength=TRUE, 
-                  mortality=FALSE, growth=FALSE)
+                  mortality=FALSE, growth=FALSE, penalty=FALSE)
   
-  cal_novarid = c("catchatlength", "growth", "mortality")
+  cal_novarid = c("catchatlength", "growth", "mortality", "penalty")
   
   cal_settings = data.frame(variable=names(output))
   cal_settings$itype = sapply(strsplit(names(output), split = "\\."), FUN="[", i=1)
