@@ -18,7 +18,7 @@ method      = AHR-ES
 
 maxgen      = 200, 500, 1000 # maximum number of generations (for the ES, one value per phase)
 REPORT      = 1 # level of report for the calibration (i.e. after how many iterations).
-trace       = 2 # level of report (3 if you're gossip)
+trace       = 3 # level of report (4 if you're gossip)
 
 # WARNING: setting trace=3 or higher for AHR-ES will slow down your calibration.
 # The slow-down will be proportional to a factor of (REPORT + 1)/REPORT
