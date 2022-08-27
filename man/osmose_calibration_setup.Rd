@@ -7,9 +7,10 @@
 osmose_calibration_setup(
   input,
   osmose,
+  name = NULL,
+  data_path = NULL,
   type = "simple",
   bioen = FALSE,
-  test = FALSE,
   control = list(),
   version = "4.3.3",
   ...
@@ -25,9 +26,6 @@ jar for the current version.}
 
 \item{bioen}{Are we calibrating a Bioen-OSMOSE model?}
 
-\item{test}{Boolean, test the calibration? FALSE by default. You can run the same test later using
-the function \code{\link{osmose_calibration_test}}.}
-
 \item{control}{A list with additional control arguments. Notably, control$dir to
 choose the name of the calibration folder and control$run for the scratch folder 
 (to 'run' OSMOSE during the calibration. Full paths are ignored, only basename is kept).}
@@ -36,6 +34,9 @@ choose the name of the calibration folder and control$run for the scratch folder
 accepted.}
 
 \item{...}{Additional arguments of current no use.}
+
+\item{test}{Boolean, test the calibration? FALSE by default. You can run the same test later using
+the function \code{\link{osmose_calibration_test}}.}
 }
 \value{
 Side effects: Create all the files you need for your calibration. Returns, invisibily,

@@ -14,7 +14,7 @@ if(!exists(".args", mode = "character")) .args = commandArgs(trailingOnly=TRUE)
 library("osmose")
 library("calibrar")
 
-control_file   = .get_command_argument(.args, "calibration.control", default=".calibrarconfig")
+control_file   = .get_command_argument(.args, "calibration.control", default=".calibrarrc")
 if(is.null(control_file)) stop("A control file must be specified ('--calibration.control=file')")
 is_a_test      = .get_command_argument(.args, "test")
 run_model_file = .get_command_argument(.args, "run_model", default="run_model.R")
@@ -24,7 +24,7 @@ replicates     = .get_command_argument(.args, "replicates", default=1)
 
 control = .read_configuration(control_file)
 osmose = ".osmose.jar"
-obs_file = ".observed.rds"
+obs_file = "observed.rds"
 
 # check for mandatory arguments
 msg = "You must provide a '%s' argument in '%s'"
@@ -44,7 +44,6 @@ model = get_par(conf, "output.file.prefix")
 
 # explicit some variables
 verbose   = control$verbose
-osmose    = file.path("..", osmose) # it is a constant now.
 parallel  = control$parallel
 method    = control$method
 
