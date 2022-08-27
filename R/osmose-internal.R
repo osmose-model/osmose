@@ -149,10 +149,12 @@
 .bySpecies = function(files, sep=c("_", "-")) {
   out = NULL
   if(length(files)>0) {
-    sp  = sapply(sapply(files, FUN=.strsplit2v, sep[1],
-                        USE.NAMES=FALSE)[2,], FUN=.strsplit2v, sep[2],
-                 USE.NAMES=FALSE)[2,]
-    out = as.list(tapply(files, INDEX=sp, FUN=identity))
+    sp  = lapply(sapply(files, FUN=.strsplit2v, sep[1],
+                        USE.NAMES=FALSE)[2,], FUN=.strsplit2v, sep[2])
+    ind = sapply(sp, length)!=2 
+    sp[ind] = NULL
+    sp = do.call(cbind, sp)[2,]
+    out = as.list(tapply(files[!ind], INDEX=sp, FUN=identity))
   }
   # change names for all species
   return(out)
