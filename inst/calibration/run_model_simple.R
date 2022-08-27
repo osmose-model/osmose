@@ -7,7 +7,8 @@ run_model = function(par, conf, osmose, is_a_test=FALSE, version="4.3.3", ...) {
   nyear      = get_par(conf, 'simulation.time.nyear')
   ndt = nyear*ndtperyear
   
-  larval_deviates = get_par(par, 'osmose.user.larval.deviate')
+  larval_deviates  = get_par(par, 'osmose.user.larval.deviate')
+  fishing_deviates = get_par(par, 'fisheries.rate.byperiod.log')
   
   for(isp in nspp) {
     nn = sprintf('mortality.additional.larva.rate.seasonality.sp%s', isp)
@@ -29,10 +30,11 @@ run_model = function(par, conf, osmose, is_a_test=FALSE, version="4.3.3", ...) {
   }  
   
   # remove all osmose.user parameters and clean-up
-  ind = grep(names(par), pattern="^osmose.user")
-  par[ind] = NULL
-  par = par[sort(names(par))]
-  class(par) = "osmose.configuration"
+  par = get_par(par, "osmose.user", invert = TRUE, as.is=TRUE)
+  # ind = grep(names(par), pattern="^osmose.user")
+  # par[ind] = NULL
+  # par = par[sort(names(par))]
+  # class(par) = "osmose.configuration"
   # write parameters for osmose to understand
   write_osmose(par, file='calibration_parameters.osm')
   # run osmose!
@@ -41,6 +43,9 @@ run_model = function(par, conf, osmose, is_a_test=FALSE, version="4.3.3", ...) {
   }
   
   output = read_osmose(path='output', version=version)
+  
+  penalty = list(larval  = 10*sapply(larval_deviates, FUN=sum),
+                 fishing = 10*sapply(larval_deviates, FUN=sum))
   
   cal_output = c(biomass = get_var(output, "biomass", how="list", no.error = TRUE),
                  yield   = get_var(output, "yieldBySpecies", how="list", no.error = TRUE),
@@ -70,8 +75,13 @@ run_model = function(par, conf, osmose, is_a_test=FALSE, version="4.3.3", ...) {
   }
   
   # if is still NULL, we will let calibrar to deal with it.
-  if(is.null(cal_output)) cal_output = NULL
+  if(is.null(cal_output)) {
+    cal_output = NULL
+    message("Something wrong happened while running 'run_model'. Returning NULL.")
+  }
 
+  cal_output = c(cal_output, penalty=penalty)
+  
   return(invisible(cal_output))
   
 }
