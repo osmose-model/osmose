@@ -125,7 +125,7 @@ osmose_calibration_setup = function(input, osmose, name=NULL, data_path=NULL, ty
   }
   
   # copy this files as hidden
-  files = c("calibration.R", "calibrartest", "calibrarconfig")
+  files = c("calibration.R", "calibrartest", "calibrarrc")
   for(ifile in files) {
     ofile = system.file(file.path("calibration", ifile), package="osmose")
     file.copy(from=ofile, to=file.path(control$dir, sprintf(".%s", ifile)), overwrite = TRUE)
@@ -215,7 +215,8 @@ osmose_calibration_setup = function(input, osmose, name=NULL, data_path=NULL, ty
     stop("Test failed.")
   }
   
-  message(sprintf("The data templates provided in '%s' need to be filled with your data.", dir_data))
+  if(is.null(data_path))
+    message(sprintf("The data templates provided in '%s' need to be filled with your data.", dir_data))
   
   setwd(wd)
 
@@ -232,7 +233,7 @@ osmose_calibration_setup = function(input, osmose, name=NULL, data_path=NULL, ty
 #' @return TRUE is the test is completed.
 #' @export
 #'
-osmose_calibration_test = function(path, script=NULL, options=NULL, setup=NULL) {
+osmose_calibration_test = function(path, setup=NULL) {
   
   wd = getwd()
   on.exit(setwd(wd))
@@ -243,8 +244,8 @@ osmose_calibration_test = function(path, script=NULL, options=NULL, setup=NULL) 
   if(!dir.exists(path)) stop(msg)
   setwd(path)
   
-  if(is.null(script))  script  = ".calibration.R"
-  if(is.null(options)) options = ".calibrartest"
+  script  = ".calibration.R"
+  options = ".calibrartest"
   
   if(!file.exists(script)) stop(sprintf("Calibration script file '%s' does not exist in '%s'.", script, path))
   
@@ -254,9 +255,9 @@ osmose_calibration_test = function(path, script=NULL, options=NULL, setup=NULL) 
   }
 
   settings = calibration_setup(file=setup)
-  # HERE: fix .getDataFolder
-  dir_data = .getDataFolder(options)
-  observed = suppressMessages(calibration_data(settings, path=dir_data))
+  # dir_data = .getDataFolder(options)
+  # observed = suppressMessages(calibration_data(settings, path=dir_data))
+  observed  = readRDS("observed.rds")
   simulated = readRDS(".simulated.rds")
 
   message("Running a calibration test...")
@@ -286,7 +287,6 @@ osmose_calibration_test = function(path, script=NULL, options=NULL, setup=NULL) 
   
   message("CALIBRATION TEST 2: Can we run a calibration in parallel mode (multi-thread)?.\n\n")
   .args = c(arg0, "--test", "--ncores=2")
-  message("source(script, local=TRUE)")
   source(script, local=TRUE)
   message("CALIBRATION TEST 3: PASSED! \n  Calibration is running in parallel.\n\n")
   message("This means all the files and inputs are being properly exported to the virtual cluster.")
