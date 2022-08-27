@@ -11,17 +11,19 @@
 
 #' Get a parameter from a configuration file.
 #'
-#' @param x The osmose.configuration object.
+#' @param conf The 'osmose.configuration' object.
 #' @param par The name of the parameter, partial matching is allowed.
 #' @param sp The number of the species (starting at 0).
 #' @param fsh The number of the fishery (starting at 0).
 #' @param invert Revert the selection (all but 'par')
-#' @param as.is Should the results be returned as an osmose.configuration object? 
+#' @param as.is Boolean, TRUE if the results be returned as an osmose.configuration object, FALSE for a list or vector. 
 #' The default is FALSE, but only when one exact match is found.
+#' @param unlist Boolean, TRUE if you want the result to be returned as a vector instead of as a list.
+#' @param linear Boolean, TRUE to transform 'log' and 'logit' parameters into linear scale. 
 #'
 #' @return A list with all the matched parameters.
 #' @export
-get_par = function(conf, par, sp=NULL, fsh=NULL, invert=FALSE, as.is=FALSE) {
+get_par = function(conf, par, sp=NULL, fsh=NULL, invert=FALSE, as.is=FALSE, unlist=FALSE, linear=FALSE) {
   if(!is.null(sp) & !is.null(fsh)) return(NULL)
   if(!is.null(sp)) par = sprintf(".sp%d$", sp)
   if(!is.null(fsh)) par = sprintf(".fsh%d$", fsh)
@@ -32,7 +34,20 @@ get_par = function(conf, par, sp=NULL, fsh=NULL, invert=FALSE, as.is=FALSE) {
     class(out) = "osmose.configuration"
     return(out)
   }
+  
+  if(isTRUE(linear)) {
+    # log to linear
+    ind = grep(x=names(out), pattern="\\.log\\.")
+    out[ind] = lapply(out[ind], FUN=exp)
+    names(out)[ind] = gsub(x=names(out)[ind], pattern="\\.log\\.", replacement = ".")
+    # logit to linear
+    ind = grep(x=names(out), pattern="\\.logit\\.")
+    out[ind] = lapply(out[ind], FUN=ilogit)
+    names(out)[ind] = gsub(x=names(out)[ind], pattern="\\.logit\\.", replacement = ".")
+  }
+  
   if(length(out)==1) out = out[[1]]
+  if(isTRUE(unlist)) return(unlist(out))
   return(out)
 }
 
