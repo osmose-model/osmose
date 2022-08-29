@@ -19,13 +19,17 @@ From the local interactions, population and community dynamics emerge. In partic
 Adaptation
 --------------------------
 
-
+Adaptation is not implemented in Osmose.
 
 Objectives
 -------------------------
 
+Objectives are not implemented in Osmose.
+
 Learning
 ------------------------
+
+Learning is not implemented in Osmose.
 
 Prediction
 --------------------------
