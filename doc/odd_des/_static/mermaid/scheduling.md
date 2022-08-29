@@ -1,4 +1,3 @@
-``` mermaid
 graph TD;
 
     id0(Simu. initialisation) --> id1
@@ -18,5 +17,3 @@ graph TD;
 
     classDef className2 fill:firebrick,stroke:black,stroke-width:3px,color:white
     class id5 className2;
-
-```
