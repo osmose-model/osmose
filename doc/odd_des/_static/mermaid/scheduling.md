@@ -1,3 +1,4 @@
+%%{init: {'theme': 'dark', 'themeVariables': { 'fontSize': '13px'}}}%%
 graph TD;
 
     id0(Simu. initialisation) --> id1
