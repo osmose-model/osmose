@@ -7,6 +7,7 @@ Submodels
 
    submodel/influx.rst
    submodel/school-init.rst
+   submodel/ltl-update.rst
    submodel/movement.rst
    submodel/mort.rst
    submodel/growth.rst
