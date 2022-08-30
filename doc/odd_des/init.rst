@@ -72,7 +72,16 @@ Using all these parameters, schools for a given species are initialized as follo
 - Loop over the number of schools to create
 - Randomly select a length between the lower and upper size-bonds of the given class. If age is 0, force length to be equal to species ``eggSize``.
 - Using length, computes the weight using allometric relationship. If age is 0, force weight to be equal to species ``eggWeight``.
-- Compute the number of individuals to put in school :math:`i`: :math:`A_{s, k, i} = \dfrac{B_{s, k} \times 10^6}{N_{s, k} \times W_{s, k, i}`
+- Compute the number of individuals to put in school :math:`i`:  :math:`A_{s, k, i} = \dfrac{B_{s, k} \times 10^6}{N_{s, k} \times W_{s, k, i}}`
+
+
+The steps are summarized in :numref:`init_biomass`
+
+.. _init_biomass:
+
+.. mermaid:: _static/mermaid/init_biomass.md
+    :align: center
+    :caption: Initialization steps using the relative biomass method.
 
 .. index::
     single: population.initialization.relativebiomass.enabled
