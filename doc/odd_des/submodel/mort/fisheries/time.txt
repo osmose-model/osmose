@@ -8,13 +8,13 @@ The method is set through the :samp:`fisheries.rate.method.fisX` parameter, whic
 Constant
 @@@@@@@@@@@@@@@@@@@@
 
-If :samp:`fisheries.rate.method.fisX = constant`, a constant fishing rate (:samp:`fisheries.rate.const.rate.fisX` parameter) is applied during the simulation. The model assumes that this fishing rate is a yearly rate and 
+If :samp:`fisheries.rate.method.fisX = constant`, a constant fishing rate (:samp:`fisheries.rate.const.rate.fisX` parameter) is applied during the simulation. The model assumes that this fishing rate is a yearly rate and
 is converted into a seasonal one (i.e. it is divided by the :samp:`ndtPerYear` variable).
 
 By year
 @@@@@@@@@@@@@@
 
-If :samp:`fisheries.rate.method.fisX = byyear`, the user provides the number of different fishing rates per year (:samp:`fisheries.rate.periodsperyear.fisX` parameter) and the associated annual fishing rates (:samp:`fisheries.rate.byyear.rate.fisX` parameter). This fishing rate will be repeated for each simulated year. 
+If :samp:`fisheries.rate.method.fisX = byyear`, the user provides the number of different fishing rates per year (:samp:`fisheries.rate.periodsperyear.fisX` parameter) and the associated annual fishing rates (:samp:`fisheries.rate.byyear.rate.fisX` parameter). This fishing rate will be repeated for each simulated year.
 
 In the example below (top right), 4 fishing rates per year are provided. Therefore, the fishing rate is updated every 12 / 4 = 3 time steps (cf. red lines).
 
@@ -36,7 +36,7 @@ In the example below (bottom left), there are 4 regimes: at time-steps [0, 2], [
 By Dt
 @@@@@@@@@@@@@@@@
 
-If :samp:`fisheries.rate.method.fisX = bydt`, the user provides a fishing rate for each simulation time-step (:samp:`fisheries.rate.bydt.rate.fisX`). 
+If :samp:`fisheries.rate.method.fisX = bydt`, the user provides a fishing rate for each simulation time-step (:samp:`fisheries.rate.bydt.rate.fisX`).
 However, if the number of provided rates is less than the total number of simulation time-steps, the
 fishing rate is repeated cyclically.
 
@@ -44,7 +44,7 @@ In the example below (middle left), only 5 rates are provided. These rates will 
 
 .. warning::
 
-    **It is the only case where the fishing rate is assumed to be seasonal. In all other cases, it is assumed 
+    **It is the only case where the fishing rate is assumed to be seasonal. In all other cases, it is assumed
     that annual rates are provided**
 
 
@@ -55,7 +55,7 @@ In the example below (middle left), only 5 rates are provided. These rates will 
     cwd = os.getcwd()
     print(cwd)
 
-    fpath = "osmose/mort/_static/fisheries/time/plot_timevar.py"
+    fpath = "odd_des/submodel/mort/_static/fisheries/time/plot_timevar.py"
     with open(fpath) as f:
         code = compile(f.read(), fpath, 'exec')
         exec(code)
@@ -63,5 +63,5 @@ In the example below (middle left), only 5 rates are provided. These rates will 
 .. _plot_timevar:
 .. figure:: _static/fisheries/time/plot_timevar.png
     :align: center
-   
+
     Examples of time varying fishing rates.

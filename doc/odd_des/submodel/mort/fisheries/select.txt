@@ -2,7 +2,7 @@ Size/Age selectivity
 ======================
 
 In order to take into account the selectivity of the fisheries on the size or age of
-the focus species, fishing rate are now scaled by a selectivity curve (:math:`S_k(s)` factor in equation 
+the focus species, fishing rate are now scaled by a selectivity curve (:math:`S_k(s)` factor in equation
 :eq:`eqn_fsel`).
 
 First, the user has to define, for each fisherie, which variable will be used to compute
@@ -65,7 +65,7 @@ The three selectities are show in figure :numref:`plot_sel` with :math:`x_{0}=10
     cwd = os.getcwd()
     print(cwd)
 
-    fpath = "osmose/mort/_static/fisheries/select/plot_select.py"
+    fpath = "odd_des/submodel/mort/_static/fisheries/select/plot_select.py"
     with open(fpath) as f:
         code = compile(f.read(), fpath, 'exec')
         exec(code)
@@ -73,5 +73,5 @@ The three selectities are show in figure :numref:`plot_sel` with :math:`x_{0}=10
 .. _plot_sel:
 .. figure:: _static/fisheries/select/plot_select.png
     :align: center
-   
+
     Examples of selectivity curves.

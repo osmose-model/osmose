@@ -2,7 +2,7 @@ import pandas as pd
 import pylab as plt
 import numpy as np
 
-data = pd.read_csv("osmose/mort/_static/fisheries/bycatch/fishingMatrix.csv", index_col=0)
+data = pd.read_csv("odd_des/submodel/mort/_static/fisheries/bycatch/fishingMatrix.csv", index_col=0)
 
 values = data.values
 nfisheries, nspecies = values.shape
@@ -23,4 +23,4 @@ ax.set_xticklabels(splab, rotation=90)
 ax.set_yticks(np.arange(nfisheries))
 ax.set_xlabel('species')
 ax.set_ylabel('fisheries indexes')
-plt.savefig('osmose/mort/_static/fisheries/bycatch/plot_bycatch.png', bbox_inches='tight')
+plt.savefig('odd_des/submodel/mort/_static/fisheries/bycatch/plot_bycatch.png', bbox_inches='tight')

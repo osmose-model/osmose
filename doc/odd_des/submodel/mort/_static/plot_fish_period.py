@@ -2,7 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.patches
 
-dirout = 'osmose/mort/_static/'
+dirout = 'odd_des/submodel/mort/_static/'
 
 def compute_period(start):
     smin = start
@@ -32,14 +32,14 @@ def compute_period(start):
     return period, xpos, flab
 
 def plot_period(period, xpos, flab):
-    
+
     cpt = 0
 
     ax = plt.gca()
 
     ax.axis('equal')
     width, height = 1, 10
-    
+
     for i in range(nstep * nyears):
         xy = i - 0.5, 0
         col = color[period[i]]

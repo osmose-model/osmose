@@ -79,17 +79,17 @@ def plot_axvline():
 plt.figure(figsize = (8,8))
 plt.subplots_adjust(top=0.97, right=0.97, bottom=0.07, left=0.1)
 ax0 = plt.subplot(3, 2, 1)
-ax0.plot(np.zeros(ntot) + 3) 
+ax0.plot(np.zeros(ntot) + 3)
 ax0.set_title('Constant')
 
 ax1 = plt.subplot(3, 2, 2, sharex=ax0)
-ax1.plot(output_byyear) 
+ax1.plot(output_byyear)
 ax1.set_title('By Year')
 plt.axvline(ndt, color='gold', linewidth=2, zorder=100)
 plot_axvline()
 
 ax2 = plt.subplot(3, 2, 3, sharex=ax0)
-ax2.plot(output_bydt) 
+ax2.plot(output_bydt)
 cpt = 0
 N = int(ntot / len(rates))
 for s in range(0, N + 1):
@@ -98,12 +98,12 @@ for s in range(0, N + 1):
 ax2.set_title('By Dt')
 
 ax3 = plt.subplot(3, 2, 4, sharex=ax0)
-ax3.plot(output_lin) 
+ax3.plot(output_lin)
 ax3.set_title('Linear')
 plot_axvline()
 
 ax4 = plt.subplot(3, 2, 5, sharex=ax0)
-ax4.plot(output_shift) 
+ax4.plot(output_shift)
 for s in shift:
     ax4.axvline(s, color='plum', marker='None', linewidth=lw)
 ax4.set_title('Shift')
@@ -119,4 +119,4 @@ for ax in [ax3, ax4]:
 for ax in [ax0, ax2, ax4]:
     ax.set_ylabel('Fishing rate')
 
-plt.savefig('osmose/mort/_static/fisheries/time/plot_timevar', bbox_inches='tight')
+plt.savefig('odd_des/submodel/mort/_static/fisheries/time/plot_timevar', bbox_inches='tight')

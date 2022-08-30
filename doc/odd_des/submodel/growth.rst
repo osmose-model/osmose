@@ -34,7 +34,7 @@ with :math:`C_{S_R}` is the critical predation efficiency and :math:`S_R` the pr
     import os
     import subprocess
     cwd = os.getcwd()
-    fpath = "osmose/process/_static/plot_growth.py"
+    fpath = "odd_des/submodel/_static/plot_growth.py"
     subprocess.call(["python", fpath], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
 
 

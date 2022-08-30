@@ -73,11 +73,11 @@ nbproject
 **/gog
 **/*calib_demo*
 doc/osmose/_static/plot_step_chart.pdf
-doc/osmose/mort/_static/fishing-period.pdf
-doc/osmose/mort/_static/size_ratio.pdf
-doc/osmose/process/_static/gom.pdf
-doc/osmose/process/_static/size_ratio.pdf
-doc/osmose/process/_static/vb.pdf
+doc/odd_des/submodel/mort/_static/fishing-period.pdf
+doc/odd_des/submodel/mort/_static/size_ratio.pdf
+doc/odd_des/submodel/_static/gom.pdf
+doc/odd_des/submodel/_static/size_ratio.pdf
+doc/odd_des/submodel/_static/vb.pdf
 doc/**/_static/*svg
 **.log
 **.aux

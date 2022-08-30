@@ -57,7 +57,7 @@ which is the overlapping range of the predator accessible range and of the resou
     import os
     import subprocess
     cwd = os.getcwd()
-    fpath = "osmose/mort/_static/plot_size_ratios.py"
+    fpath = "odd_des/submodel/mort/_static/plot_size_ratios.py"
     subprocess.call(["python", fpath], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
 
 .. figure::  _static/size_ratio.*

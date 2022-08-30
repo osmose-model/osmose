@@ -74,7 +74,7 @@ If :math:`Y_{start} \neq 0`, then :math:`N_{per} \times N_{year} + 1` values are
     import os
     import subprocess
     cwd = os.getcwd()
-    fpath = "osmose/mort/_static/plot_fish_period.py"
+    fpath = "odd_des/submodel/mort/_static/plot_fish_period.py"
     subprocess.call(["python", fpath], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
 
 .. _fig-fperiod:

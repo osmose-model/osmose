@@ -7,7 +7,7 @@ is the consideration of bycatch.
 
 The :samp:`fisheries.catch.matrix.file` parameter provides the location of a CSV file containing :math:`N_{fisheries}` lines and :math:`N_{species}` columns.
 
-The table provides, for each fisheries, the proportion of each fish biomass that is extracted by the fisherie. 
+The table provides, for each fisheries, the proportion of each fish biomass that is extracted by the fisherie.
 
 In the example provided in :numref:`bycatch_fig`, fisherie 7 targets the sole (proportion of 100%) but with 10% of bycatches of plaice and horse mackerel.
 
@@ -18,21 +18,21 @@ In the example provided in :numref:`bycatch_fig`, fisherie 7 targets the sole (p
     cwd = os.getcwd()
     print(cwd)
 
-    fpath = "osmose/mort/_static/fisheries/bycatch/plot_bycatch.py"
+    fpath = "odd_des/submodel/mort/_static/fisheries/bycatch/plot_bycatch.py"
     with open(fpath) as f:
         code = compile(f.read(), fpath, 'exec')
         exec(code)
- 
+
 .. .. _bycatch_table:
 .. .. table::  Example of a bycatch matrix
-.. 
+..
 ..     .. csv-table::
         :file: _static/fisheries/bycatch/fishingMatrix.csv
 
 .. _bycatch_fig:
 .. figure:: _static/fisheries/bycatch/plot_bycatch.png
     :align: center
-   
+
     By catch matrix.
 
 Let's call this proportion matrix :math:`A_{N_{fisherie}, N_{specie}}`.
@@ -43,7 +43,7 @@ The new fishing mortality process, for a given specie :math:`s`, is done by comp
 
     N_{x, y, s, t-1} = N_{x, y, s, t} \times \exp\left(-\sum_{k=1}^{N_{fisheries}} A_{k,s}F_{k, s, t, x, y}\right)
 
-with :math:`N_{s, t}` the number of individuals of species :math:`s` and :math:`F_{s,k}` the fishing mortality rate. 
+with :math:`N_{s, t}` the number of individuals of species :math:`s` and :math:`F_{s,k}` the fishing mortality rate.
 
 .. note::
 
@@ -54,7 +54,7 @@ In the new implementation of fisheries, the fishing mortality rate :math:`F_{s,k
 
 .. math:: F_{k, s, t, x, y} = R_k(t) \times S_k(s) \times Z_k(x, y, t)
     :label: eqn_fsel
-    
+
 
 with :math:`R_k` the time varying fishing rate, :math:`S_k` the size-dependent multiplication factor and :math:`Z_k` the
 space-dependent multiplication factor, whose calculation is detailed below.
