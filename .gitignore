@@ -85,3 +85,5 @@ doc/**/_static/*svg
 **/verif_fisheries*.png
 doc/rosmose/_static/*png
 **/_static/**/*.png
+random_drift.pdf
+random_drift.svg
