@@ -58,7 +58,7 @@ Another way to define species distribution is to use distribution maps, which ca
 
 A single map is defined as follows:
 
-.. table:: Random distribution parameters
+.. table:: Spatial distribution parameters when CSV maps are provided
     :align: center
 
     .. csv-table::
@@ -66,14 +66,31 @@ A single map is defined as follows:
         :header: Parameter, Description
 
         movement.randomwalk.range.sp# = Number of adjacent cells a species can use during random walk (foraging)
-        movement.map#.file = Name of the CSV file that contains the distribution map
-        movement.map#.species = Name of the species associated with the map.
-        movement.map#.age.min = Minimum age (in years) when to use the map.
-        movement.map#.age.max = Maximum age (in years) when to use the map.
-        movement.map#.year.min = Minimum simulation time (in years) when to use the map.
-        movement.map#.year.max = Maximum simulation time (in years) when to use the map.
-        movement.map#.years = Array of years during when to use the map. (instead of setting initial and final year)
-        movement.map#.season = Array of time-steps during when to use the map
+        movement.file.map# = Name of the CSV file that contains the distribution map
+        movement.species.map# = Name of the species associated with the map.
+        movement.initialAge.map# = Minimum age (in years) when to use the map.
+        movement.lastAge.map# = Maximum age (in years) when to use the map.
+        movement.initialYear.map# = Minimum simulation time (in years) when to use the map.
+        movement.lastYear.map# = Maximum simulation time (in years) when to use the map.
+        movement.years.map# = Array of years during when to use the map. (instead of setting initial and final year)
+        movement.steps.map# = Array of time-steps during when to use the map
+
+
+.. table:: Spatial distribution parameters when NetCDF maps are provided
+    :align: center
+
+    .. csv-table::
+        :delim: =
+        :header: Parameter, Description
+
+        movement.netcdf.enabled = True if NetCDF maps are provided
+        movement.species.map# = Species to which the movement map is associated
+        movement.file.map# = NetCDF file containing the spatial distribution maps
+        movement.nsteps.year.map# = Number of time steps per year associated with the file.
+        movement.initialAge.map# = Minimum age (in years) when to use the map.
+        movement.lastAge.map# = Maximum age (in years) when to use the map.
+        movement.variable.map# = Name of the NetCDF variable containing the spatial distribution file.
+
 
 One map is associated to a unique species for a given age span, year span and season. The full spatial distribution of a species can be represented using as many maps as necessary to cover different age spans and/or year spans and/or seasons. Let's now have a look at each parameter in detail.
 
