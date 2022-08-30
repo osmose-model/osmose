@@ -81,11 +81,13 @@ Note that the CSV file has the same number of lines and columns as the OSMOSE gr
 
 The same CSV file can be used to define different maps.
 
-If the file path is set to ``null`` it means that the schools concerned by this map are out of the simulated domain (e.g., migrating species).
+If the file path is set to ``null`` it means that the schools concerned by this map are out of the simulated domain
+(e.g., migrating species).
 
 .. See the parameter mortality.out.rate.sp for mortality rate of species momentarily out of the simulated area.
 
-When a school comes back to the simulated area, it will be randomly located on a new map (the one corresponding to the species and age class of the school at the current time step of the simulation).
+When a school comes back to the simulated area, it will be randomly located on a new
+map (the one corresponding to the species and age class of the school at the current time step of the simulation).
 
 Several maps can be defined for representing the spatial distribution of a single species. For example:
 
@@ -126,5 +128,30 @@ adults, as many as necessary to describe ontogenetic migrations.
 
 From one time step to an other, the movement manager checks whether a given school remains in the
 same map or should "jump" to an other map (e.g. eggs map to juvenile map or adults in summer to adults in winter).
-In the latter case (change of map), the schools are relocated randomly in the new map. In the former case (same map), the movement
-manager mimics foraging movement with a random-walk that moves schools to immediately adjacent cells within their distribution area.
+
+In the latter case (change of map), the schools are relocated randomly in the new map. The cell selection algorithm is as follows:
+
+- A random cell ocean is selected, whose probability value is :math:`P(i, j)`
+- A random number is drafted, which is called :math:`R`.
+- If :math:`P(i, j) < R \times P_{max}`, the operation is repeated. Else, the cell is selected.
+
+.. mermaid::
+    :align: center
+    :caption: Algorithm to select the cell where to move an unlocated school.
+
+    graph TD;
+
+        id1["Random draft of <br>cell (probability P)"]
+        id2("Random draft of value<br>between 0, 1 (value R)")
+        id3{P < R x Pmax ?}
+        id4(Select cell)
+
+        id1 --> id2
+        id2 --> id3
+
+        id3 -->|True| id4
+        id3 -->|False| id1
+
+In the former case (same map), the movement
+manager mimics foraging movement with a random-walk that moves schools to
+immediately adjacent cells within their distribution area.
