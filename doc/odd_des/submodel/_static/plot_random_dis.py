@@ -36,8 +36,6 @@ mask[3:7, 3:5] = 1
 alreadyChoosen = np.full((ny, nx), False, dtype=bool)
 randomMap = []
 
-print('Init')
-
 i = int(np.round(np.random.rand(1) * (nx - 1)))
 j = int(np.round(np.random.rand(1) * (ny - 1)))
 while(mask[j, i]):
@@ -51,8 +49,6 @@ randomMap.append([j, i, cpt])
 alreadyChoosen[j, i] = True
 
 cpt += 1
-
-print('Init: done')
 
 index = iFirstSorted = iLastSorted = 0
 

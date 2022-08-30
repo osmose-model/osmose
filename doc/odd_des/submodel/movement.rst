@@ -12,6 +12,7 @@ Random distribution
 #########################
 
 .. ipython:: python
+    :suppress:
 
     import os
     import subprocess
@@ -36,7 +37,16 @@ At the beginning of the simulation, during the initialization process, the areas
 can live is initialized:
 
 - If ``ncell`` is not set or is equal to the total number of ocean cells, this areas is set equal to all the ocean cells of the domain.
-- Else, one cell is first randomly picked up in the whole domain, and the domain is extended from neighbours to neighbours until the number of cells reaches ``ncell``.
+- Else, one cell is first randomly picked up in the whole domain, and the domain is extended from neighbours to neighbours until the number of cells reaches ``ncell`` (cf. :numref:`fig_random_dis`)
+
+.. _fig_random_dis:
+
+.. figure:: _static/random_drift.*
+    :width: 600 px
+    :align: center
+
+    Initialization process of species domain when random distribution is used with a limited number of cells.
+    Black squares indicate land cells, colors and numbers indicate the iteration step when the cell is included in the domain.
 
 Then, at each time-step, schools are moved following a random walk method within this domain, with the range defined in the parameters.
 Unlocated schools are randomly put in one of the cell of the defined domain.
