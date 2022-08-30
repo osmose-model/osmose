@@ -8,7 +8,6 @@ In this section, a detailed description of the Osmose model is provided.
    :maxdepth: 2
    :caption: Contents:
 
-   osmose/format.rst
    osmose/grid.rst
    osmose/ltl.rst
    osmose/bkg.rst
