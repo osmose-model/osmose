@@ -28,6 +28,7 @@ For random distribution, two parameters need to be defined:
 
     .. csv-table::
         :delim: =
+        :class: tight-table
         :header: Parameter, Description
 
         movement.distribution.ncell.sp# = Number of cells in which the species is allowed to move. If undefined, the whole domain is used.
@@ -64,6 +65,7 @@ A single map is defined as follows:
     .. csv-table::
         :delim: =
         :header: Parameter, Description
+        :class: tight-table
 
         movement.randomwalk.range.sp# = Number of adjacent cells a species can use during random walk (foraging)
         movement.file.map# = Name of the CSV file that contains the distribution map
@@ -82,6 +84,7 @@ A single map is defined as follows:
     .. csv-table::
         :delim: =
         :header: Parameter, Description
+        :class: tight-table
 
         movement.netcdf.enabled = True if NetCDF maps are provided
         movement.species.map# = Species to which the movement map is associated
