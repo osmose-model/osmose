@@ -93,8 +93,9 @@ public class MeanGenotypeOutput extends SimulationLinker implements IOutput {
     private int record_index = 0;
 
     private final String varname = "meanGenotype";
+    private final String description;
 
-    MeanGenotypeOutput(int rank, String prefix, SchoolVariableGetter weight, Predicate<School> predicate, SchoolSetGetter schoolGetter) {
+    MeanGenotypeOutput(int rank, String prefix, SchoolVariableGetter weight, Predicate<School> predicate, SchoolSetGetter schoolGetter, String description) {
         super(rank);
         nSpecies = this.getConfiguration().getNSpecies();
         nTraits = this.getNEvolvingTraits();
@@ -103,6 +104,7 @@ public class MeanGenotypeOutput extends SimulationLinker implements IOutput {
         this.weight = weight;
         this.predicate = predicate;
         this.schoolGetter = schoolGetter;
+        this.description = description;
     }
 
     private String getFilename() {
@@ -193,6 +195,10 @@ public class MeanGenotypeOutput extends SimulationLinker implements IOutput {
         this.record_index++;
     }
 
+    public String getDescription() {
+        return this.description;
+    }
+
     @Override
     public boolean isTimeToWrite(int iStepSimu) {
         return true;
@@ -226,7 +232,7 @@ public class MeanGenotypeOutput extends SimulationLinker implements IOutput {
         // Create output variable
         outvar = nc.addVariable(null, getVarname(), DataType.FLOAT, this.getNcDims());
         // outvar.addAttribute(new Attribute("units", getUnits()));
-        // outvar.addAttribute(new Attribute("description", getDescription()));
+        outvar.addAttribute(new Attribute("description", getDescription()));
         // outvar.addAttribute(new Attribute("_FillValue", getFillValue()));
 
         try {
