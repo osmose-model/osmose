@@ -141,4 +141,51 @@ public class TestWeightedRandomDraft {
 
     }
 
+
+    @Test
+    public void testProbaWithZeros() {
+
+        Species species = cfg.getSpecies(0);
+        School school1 = new School(species, 10000);
+        School school2 = new School(species, 10000);
+        School school3 = new School(species, 10000);
+
+        double w1 = 1000;
+        double w2 = 0;
+        double w3 = 10000;
+
+        weight_rand.reset();
+        weight_rand.add(w1, school2);
+        weight_rand.add(w2, school1);
+        weight_rand.add(w3, school3);
+
+        int N = 100000000;
+        double output[] = new double[N];
+        double test[] = new double[3];
+        for (int i = 0; i < N; i++) {
+            School school = weight_rand.next();
+            if(school.equals(school2)) {
+                output[i] = 0;
+                test[0]++;
+            } else if (school.equals(school1)) {
+                output[i] = 1;
+                test[1]++;
+            } else if (school.equals(school3)) {
+                output[i] = 2;
+                test[2]++;
+            } else {
+                output[i] = -999;
+            }
+        }
+
+        for (int i = 0; i < 3; i++) {
+            test[i] /= N;
+        }
+
+        double wtot = w1 + w2 + w3;
+        double expected[] = new double[] {w1 / wtot, w2 / wtot, w3/wtot};
+        assertArrayEquals(expected, test, 0.0001);
+
+    }
+
 }
