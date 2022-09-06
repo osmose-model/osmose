@@ -125,6 +125,10 @@ public class SchoolSet extends OsmoseLinker {
         newSchoolset.clear();
     }
 
+    public List<School> getNewBorns() {
+        return this.newSchoolset;
+    }
+
     /**
      * Remove all the schools.
      */
