@@ -1,10 +1,10 @@
-/* 
- * 
+/*
+ *
  * OSMOSE (Object-oriented Simulator of Marine Ecosystems)
  * http://www.osmose-model.org
- * 
+ *
  * Copyright (C) IRD (Institut de Recherche pour le Développement) 2009-2020
- * 
+ *
  * Osmose is a computer program whose purpose is to simulate fish
  * populations and their interactions with their biotic and abiotic environment.
  * OSMOSE is a spatial, multispecies and individual-based model which assumes
@@ -15,7 +15,7 @@
  * processes of fish life cycle (growth, explicit predation, additional and
  * starvation mortalities, reproduction and migration) and fishing mortalities
  * (Shin and Cury 2001, 2004).
- * 
+ *
  * Contributor(s):
  * Yunne SHIN (yunne.shin@ird.fr),
  * Morgane TRAVERS (morgane.travers@ifremer.fr)
@@ -23,20 +23,20 @@
  * Philippe VERLEY (philippe.verley@ird.fr)
  * Laure VELEZ (laure.velez@ird.fr)
  * Nicolas Barrier (nicolas.barrier@ird.fr)
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation (version 3 of the License). Full description
  * is provided on the LICENSE file.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
- * 
+ *
  */
 
 package fr.ird.osmose.process.genet;
@@ -186,7 +186,8 @@ public class Genotype extends SimulationLinker {
     /**
      * Returns the value of the trait for a given genotype.
      *
-     * @param name Name of the trait
+     * @param name
+     *            Name of the trait
      * @return Value of the trait for the given genotype
      * @throws java.lang.Exception
      */
@@ -196,13 +197,18 @@ public class Genotype extends SimulationLinker {
         return (traits[index] + this.traitsEnvNoise[index]);
 
     }
-    
-        public double getgenet_value(String name) throws Exception {
+
+    public double getgenet_value(String name) throws Exception {
 
         int index = this.getTraitIndex(name);
         return (traits[index]);
 
     }
+
+    public double getGeneticTrait(int index) throws Exception {
+        return traits[index];
+    }
+
 
     /**
      * Get the value of a trait provided a list of locus.
@@ -278,7 +284,7 @@ public class Genotype extends SimulationLinker {
     public void setEnvNoise(int itrait, double value) {
         this.traitsEnvNoise[itrait] = value;
     }
-       
+
     /**
      * Forces the value of a Loci pair. Used when restart with genetic.
      *
@@ -287,5 +293,5 @@ public class Genotype extends SimulationLinker {
     public double getEnvNoise(int itrait) {
         return this.traitsEnvNoise[itrait];
     }
-    
+
 }  // end of class
