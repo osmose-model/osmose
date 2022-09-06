@@ -111,7 +111,10 @@ public class SchoolSetSnapshot extends SimulationLinker {
             length.set(s, school.getLength());
             weight.set(s, school.getWeight() * 1e6f);
             trophiclevel.set(s, school.getTrophicLevel());
-            gonadicWeight.set(s, school.getGonadWeight() * 1e6f);
+
+            if(useBioen) {
+                gonadicWeight.set(s, school.getGonadWeight() * 1e6f);
+            }
 
             if(useGenet) {
                 // If use genetic module, save the list of loci pairs for each trait.
@@ -138,13 +141,16 @@ public class SchoolSetSnapshot extends SimulationLinker {
             nc.write(this.lengthVar, length);
             nc.write(this.weightVar, weight);
             nc.write(this.tlVar, trophiclevel);
+
             if(useGenet) {
                 nc.write(this.genetVar, genotype);
                 nc.write(this.traitVar, traitnoise);
             }
+
             if(useBioen) {
                 nc.write(this.gonadWeightVar, gonadicWeight);
             }
+
             nc.close();
             //close(nc);
         } catch (IOException ex) {
@@ -203,6 +209,12 @@ public class SchoolSetSnapshot extends SimulationLinker {
         weightVar = nc.addVariable(null, "weight", DataType.FLOAT, "nschool");
         weightVar.addAttribute(new Attribute("units", "g"));
         weightVar.addAttribute(new Attribute("description", "weight of the fish in the school in gram"));
+
+        if (this.getConfiguration().isBioenEnabled()) {
+            gonadWeightVar = nc.addVariable(null, "gonadWeight", DataType.FLOAT, "nschool");
+            gonadWeightVar.addAttribute(new Attribute("units", "g"));
+            gonadWeightVar.addAttribute(new Attribute("description", "gonad weight of the fish in the school in gram"));
+        }
 
         tlVar = nc.addVariable(null, "trophiclevel", DataType.FLOAT, "nschool");
         tlVar.addAttribute(new Attribute("units", "scalar"));
