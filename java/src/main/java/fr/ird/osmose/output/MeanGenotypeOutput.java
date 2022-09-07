@@ -147,8 +147,8 @@ public class MeanGenotypeOutput extends SimulationLinker implements IOutput {
             if(predicate.test(school)) {
                 int iSpecies = school.getSpeciesIndex();
                 double w = this.weight.getVariable(school);
+                denominator[iSpecies] += w;
                 for(int iTrait = 0; iTrait < this.nTraits; iTrait++) {
-                    denominator[iSpecies] += w;
                     try {
                         output[iSpecies][iTrait] += w * school.getGenotype().getGeneticTrait(iTrait);
                     } catch (Exception e) {
@@ -156,7 +156,6 @@ public class MeanGenotypeOutput extends SimulationLinker implements IOutput {
                     }
                 }
             }
-
         }
     }
 
