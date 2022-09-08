@@ -64,7 +64,10 @@ public class OutputRegion extends AbstractOutputRegion {
         int index = this.getIndex();
 
         // Setting the name of the Survey region.
-        this.setName(getConfiguration().getString("output.regions.name.rg" + index));
+        this.setName(getConfiguration().getString("output.regions.name.rg" + index).replaceAll("_", "").replaceAll("-", ""));
+        if (!this.getName().matches("^[a-zA-Z0-9]*$")) {
+            error("OutputRegion name must contain alphanumeric characters only. Please rename " + this.getName(), null);
+        }
 
         mapSet = new FisheryMapSet(this.getName(), "output.regions.movement", "region");
         mapSet.init();
