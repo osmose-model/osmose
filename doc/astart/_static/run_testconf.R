@@ -10,7 +10,7 @@ print(demo$config_file)
 print(demo$extra_args)
 
 # run the osmose java core
-run_osmose(demo$config_file, parameters=demo$extra_args)
+run_osmose(demo$config_file, parameters=demo$extra_args, force=TRUE)
 
 # read the osmose outputs
 data = read_osmose(demo$output_dir)

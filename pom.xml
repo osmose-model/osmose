@@ -75,6 +75,12 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
             <version>4.6.6</version>
         </dependency>
 
+        <dependency>
+            <groupId>de.elnarion.util</groupId>
+            <artifactId>plantuml-generator-util</artifactId>
+            <version>1.1.2</version>
+        </dependency>
+
         <!-- Commons-Math3 -->
         <dependency>
             <groupId>org.apache.commons</groupId>
@@ -154,7 +160,28 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
               <directory>java/src/test/resources</directory>
             </testResource>
         </testResources>
+
         <plugins>
+
+        <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-javadoc-plugin</artifactId>
+            <version>3.4.0</version>
+            <configuration>
+                <!-- <outputDirectory>doc/_static/javadoc</outputDirectory> -->
+                <reportOutputDirectory>doc/_static/javadoc</reportOutputDirectory>
+                <failOnError>false</failOnError>
+            </configuration>
+            <executions>
+                <execution>
+                    <goals>
+                        <goal>javadoc</goal>
+                    </goals>
+                    <id>execution1</id>
+                    <phase>package</phase>
+                </execution>
+            </executions>
+        </plugin>
 
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -260,6 +287,111 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
                             </descriptorRefs>
                         </configuration>
                     </execution>
+                </executions>
+            </plugin>
+
+            <!-- create UML diagram -->
+            <plugin>
+                <artifactId>plantuml-generator-maven-plugin</artifactId>
+                <groupId>de.elnarion.maven</groupId>
+                <version>1.1.2</version>
+                <executions>
+                    <execution>
+                        <id>full-diagram</id>
+                        <phase>generate-test-sources</phase>
+                        <?m2e execute onConfiguration,onIncremental?>
+                        <goals>
+                            <goal>generate</goal>
+                        </goals>
+                        <configuration>
+                            <outputFilename>osmose-uml.puml</outputFilename>
+                            <outputDirectory>doc/_static/puml/</outputDirectory>
+                            <scanPackages>
+                                <scanPackage>
+                                    fr.ird.osmose
+                                </scanPackage>
+                            </scanPackages>
+                            <blacklistRegexp>.*Test.*</blacklistRegexp>
+                            <enableAsciidocWrapper>true</enableAsciidocWrapper>
+                        </configuration>
+                    </execution>
+
+                    <execution>
+                        <id>osm-school</id>
+                        <phase>generate-test-sources</phase>
+                        <?m2e execute onConfiguration,onIncremental?>
+                        <goals>
+                            <goal>generate</goal>
+                        </goals>
+                        <configuration>
+                            <outputFilename>osmose-school.puml</outputFilename>
+                            <outputDirectory>doc/_static/puml</outputDirectory>
+                            <scanPackages>
+                                <scanPackage>
+                                    fr.ird.osmose
+                                </scanPackage>
+                                <scanPackage>
+                                    fr.ird.osmose.background
+                                </scanPackage>
+                                <scanPackage>
+                                    fr.ird.osmose.resource
+                                </scanPackage>
+                            </scanPackages>
+                            <whitelistRegexp>.*\School|.*Resource</whitelistRegexp>
+                            <hideMethods>true</hideMethods>
+                            <enableAsciidocWrapper>true</enableAsciidocWrapper>
+                        </configuration>
+                    </execution>
+
+                    <execution>
+                        <id>osm-species</id>
+                        <phase>generate-test-sources</phase>
+                        <?m2e execute onConfiguration,onIncremental?>
+                        <goals>
+                            <goal>generate</goal>
+                        </goals>
+                        <configuration>
+                            <outputFilename>osmose-species.puml</outputFilename>
+                            <outputDirectory>doc/_static/puml</outputDirectory>
+                            <scanPackages>
+                                <scanPackage>
+                                    fr.ird.osmose
+                                </scanPackage>
+                                <scanPackage>
+                                    fr.ird.osmose.background
+                                </scanPackage>
+                                <scanPackage>
+                                    fr.ird.osmose.resource
+                                </scanPackage>
+                            </scanPackages>
+                            <whitelistRegexp>.*\.ResourceSpecies|.*\.BackgroundSpecies|.*\.Species|.*\.ISpecies</whitelistRegexp>
+                            <hideMethods>true</hideMethods>
+                            <enableAsciidocWrapper>true</enableAsciidocWrapper>
+                        </configuration>
+                    </execution>
+
+                    <execution>
+                        <id>osm-simulation</id>
+                        <phase>generate-test-sources</phase>
+                        <?m2e execute onConfiguration,onIncremental?>
+                        <goals>
+                            <goal>generate</goal>
+                        </goals>
+                        <configuration>
+                            <outputFilename>osmose-simulation.puml</outputFilename>
+                            <outputDirectory>doc/_static/puml</outputDirectory>
+                            <scanPackages>
+                                <scanPackage>
+                                    fr.ird.osmose
+                                </scanPackage>
+                            </scanPackages>
+                            <whitelistRegexp>.*\.Simulation|.*\.Configuration</whitelistRegexp>
+                            <hideMethods>true</hideMethods>
+                            <enableAsciidocWrapper>true</enableAsciidocWrapper>
+                        </configuration>
+                    </execution>
+
+
                 </executions>
             </plugin>
 

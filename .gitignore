@@ -3,6 +3,8 @@
 .Rapp.history
 .RData
 
+# doc/**/*.puml
+
 **/**ipynb**
 **/*~lock*
 
@@ -44,6 +46,10 @@ inst/doc
 java/target
 target
 
+doc/_static/javadoc
+doc/_static/puml
+
+
 check.sh
 **.html
 build
@@ -67,11 +73,11 @@ nbproject
 **/gog
 **/*calib_demo*
 doc/osmose/_static/plot_step_chart.pdf
-doc/osmose/mort/_static/fishing-period.pdf
-doc/osmose/mort/_static/size_ratio.pdf
-doc/osmose/process/_static/gom.pdf
-doc/osmose/process/_static/size_ratio.pdf
-doc/osmose/process/_static/vb.pdf
+doc/odd_des/submodel/mort/_static/fishing-period.pdf
+doc/odd_des/submodel/mort/_static/size_ratio.pdf
+doc/odd_des/submodel/_static/gom.pdf
+doc/odd_des/submodel/_static/size_ratio.pdf
+doc/odd_des/submodel/_static/vb.pdf
 doc/**/_static/*svg
 **.log
 **.aux
@@ -79,3 +85,5 @@ doc/**/_static/*svg
 **/verif_fisheries*.png
 doc/rosmose/_static/*png
 **/_static/**/*.png
+random_drift.pdf
+random_drift.svg

@@ -9,4 +9,5 @@
     "esbonio.server.excludedModules": [
         "os",
     ],
+    "plantuml.fileExtensions": ".wsd,.pu,.puml,.plantuml,.iuml,.java",
 }

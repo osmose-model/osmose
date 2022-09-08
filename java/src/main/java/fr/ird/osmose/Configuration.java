@@ -292,6 +292,34 @@ public class Configuration extends OLogger {
      */
     private float[] cutoffLength;
 
+    /**
+     * Year to start writing the outputs
+     */
+    private int yearOutput;
+
+    /**
+     * Whether the restart files should be written or not
+     */
+    private boolean writeRestart;
+
+    /**
+     * Record frequency for writing restart files, in number of time step.
+     */
+    private int restartFrequency;
+    /**
+     * Indicates whether the simulation starts from a restart file.
+     */
+    private boolean restart;
+    /**
+     * Number of years before writing restart files.
+     */
+    private int spinupRestart;
+
+    /**
+     * Whether to keep track of prey records during the simulation
+     */
+    private boolean preyRecord;
+
     ///////////////
     // Constructors
     ///////////////
@@ -347,6 +375,25 @@ public class Configuration extends OLogger {
         return VersionManager.getInstance().isConfigurationUpToDate();
     }
 
+    public boolean isPreyRecordEnabled() {
+        return this.preyRecord;
+    }
+
+    private void checkPreyRecord() {
+
+        preyRecord = false;
+        List<String> outputList = this.findKeys("output.diet*enabled*");
+        for(String param : outputList) {
+            preyRecord = preyRecord || getBoolean(param);
+        }
+
+        outputList = this.findKeys("output.*tl*enabled");
+        for(String param : outputList) {
+            preyRecord = preyRecord || getBoolean(param);
+        }
+
+    }
+
     /**
      * Initialises the current configuration. Sets the values of the main variables
      * and creates the grid.
@@ -362,6 +409,8 @@ public class Configuration extends OLogger {
         String keybioen = "simulation.bioen.enabled";
         this.bioenEnabled = this.getBoolean(keybioen);
 
+        this.checkPreyRecord();
+
         this.geneticEnabled = false;
         if (this.bioenEnabled) {
             String key = "simulation.genetic.enabled";
@@ -375,6 +424,28 @@ public class Configuration extends OLogger {
         outputPathname = getFile("output.dir.path");
 
         this.flushEnabled = getBoolean("output.flush.enabled");
+
+        writeRestart = true;
+        if (!this.isNull("output.restart.enabled")) {
+            writeRestart = this.getBoolean("output.restart.enabled");
+        } else {
+            warning("Could not find parameter 'output.restart.enabled'. Osmose assumes it is true and a NetCDF restart file will be created at the end of the simulation (or more, depending on parameters 'simulation.restart.recordfrequency.ndt' and 'simulation.restart.spinup').");
+        }
+
+        restart = false;
+        if (!this.isNull("simulation.restart.file")) {
+            restart = true;
+        }
+
+        restartFrequency = Integer.MAX_VALUE;
+        if (!this.isNull("output.restart.recordfrequency.ndt")) {
+            restartFrequency = this.getInt("output.restart.recordfrequency.ndt");
+        }
+
+        spinupRestart = 0;
+        if (!this.isNull("output.restart.spinup")) {
+            spinupRestart = this.getInt("output.restart.spinup") - 1;
+        }
 
         // Show the output folder
         info("Output folder set to " + outputPathname);
@@ -629,6 +700,34 @@ public class Configuration extends OLogger {
             region.init();
         });
 
+        // Year to start writing the outputs
+        yearOutput = this.getInt("output.start.year");
+
+    }
+
+    public int getRestartFrequency() {
+        return this.restartFrequency;
+    }
+
+    public int getSpinupRestart() {
+        return this.spinupRestart;
+    }
+
+    /**
+     * Checks whether the simulation started from a restart file.
+     *
+     * @return {@code true} if the simulation started from a restart file
+     */
+    public boolean isRestart() {
+        return restart;
+    }
+
+    public boolean isWriteRestartEnabled() {
+        return this.writeRestart;
+    }
+
+    public int getYearOutput() {
+        return this.yearOutput;
     }
 
     public List<AbstractOutputRegion> getOutputRegions() {
@@ -1586,7 +1685,6 @@ public class Configuration extends OLogger {
     public int getNYears() {
         return this.getNStep() / this.getNStepYear();
     }
-
 
     private void setOutputNcFormat() {
 

@@ -11,7 +11,7 @@ The :samp:`species` argument allows to specify the indexes of the species to dis
 
     When several replicates are run, the uncertainty due to the stochastic mortality is displayed as a grey shading.
 
-.. warning:: 
+.. warning::
 
     At this time, only these four variables can be plotted. However, more plot functions (diet matrix, mortality, etc.) will be released soon.
 
@@ -23,9 +23,7 @@ The :samp:`species` argument allows to specify the indexes of the species to dis
     cwd = os.getcwd()
 
     fpath = "rosmose/_static/plot_osmose_outputs.R"
-    with open(fpath) as f:
-        with open(os.devnull, "w") as DEVNULL:
-            subprocess.call(["Rscript", fpath], stdout=DEVNULL, stderr=DEVNULL)
+    subprocess.call(["Rscript", fpath], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
 
 
 .. figure:: _static/biomass.png
@@ -47,4 +45,3 @@ The :samp:`species` argument allows to specify the indexes of the species to dis
     :align: center
 
     Yield abundance plot
-

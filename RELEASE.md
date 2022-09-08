@@ -26,8 +26,10 @@
 - Normalisation of season spawning to 1.
 - Trimming of parameter name in the `Release.findLine` method.
 - Reduction of computation time for new  fisheries implementation
-- Adding the possibility to use a size threshold (``output.cutoff.size.sp#`` parameter
+- Reduction of computation time for new fisheries implementation
+- Adding the possibility to use a size threshold (``output.cutoff.size.sp#`` parameter)
 - Saving maturity variable in restart when bioenergetic module is used.
+- Removing of the ``simulation.onestep`` feature. For debugging, use debugging tools.
 
 ### Bug fixes
 

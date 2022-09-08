@@ -1,10 +1,10 @@
-/* 
- * 
+/*
+ *
  * OSMOSE (Object-oriented Simulator of Marine Ecosystems)
  * http://www.osmose-model.org
- * 
+ *
  * Copyright (C) IRD (Institut de Recherche pour le Développement) 2009-2020
- * 
+ *
  * Osmose is a computer program whose purpose is to simulate fish
  * populations and their interactions with their biotic and abiotic environment.
  * OSMOSE is a spatial, multispecies and individual-based model which assumes
@@ -15,7 +15,7 @@
  * processes of fish life cycle (growth, explicit predation, additional and
  * starvation mortalities, reproduction and migration) and fishing mortalities
  * (Shin and Cury 2001, 2004).
- * 
+ *
  * Contributor(s):
  * Yunne SHIN (yunne.shin@ird.fr),
  * Morgane TRAVERS (morgane.travers@ifremer.fr)
@@ -23,20 +23,20 @@
  * Philippe VERLEY (philippe.verley@ird.fr)
  * Laure VELEZ (laure.velez@ird.fr)
  * Nicolas Barrier (nicolas.barrier@ird.fr)
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation (version 3 of the License). Full description
  * is provided on the LICENSE file.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
- * 
+ *
  */
 package fr.ird.osmose.util.version;
 
@@ -54,7 +54,7 @@ import java.util.List;
 * @author pverley
 */
 public class Releases {
-        
+
     final public static Release[] ALL = new Release[] {
         // 2014/06/01
         new Release("3.1") {
@@ -348,8 +348,8 @@ public class Releases {
                 cfg.findKeys("movement.season.map*").stream().mapToInt(rgKey -> Integer.valueOf(rgKey.substring(rgKey.lastIndexOf(".map") + 4))).forEach(i -> updateKey("movement.season.map" + i, "movement.steps.map" + i));
 
             }
-        }, 
-        
+        },
+
         new Release("4.3.0") {
             @Override
             void updateParameters() {
@@ -422,6 +422,8 @@ public class Releases {
 
                 Configuration cfg = this.getConfiguration();
 
+                deprecateParameter("simulation.onestep");
+
                 int focalIndex[] = cfg.findKeys("species.type.sp*").stream().filter(k -> cfg.getString(k).equals("focal")).mapToInt(rgKey -> Integer.valueOf(rgKey.substring(rgKey.lastIndexOf(".sp") + 3))).sorted().toArray();
 
                 for (int index : focalIndex) {
@@ -464,6 +466,6 @@ public class Releases {
                     }
                 } // end of bioen condition
             } // end of updatePara
-        } // end of Release(4.3.3(
+        }, // end of Release(4.3.3)
     }; // end of ALL array
 } // end of class

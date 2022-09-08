@@ -125,10 +125,7 @@ public class School extends AbstractSchool {
      * Age of the fish expressed in number of time step.
      */
     private int ageDt;
-    /**
-     * Age of the fish in year.
-     */
-    private float age;
+
     /**
      * Length of the fish in centimetre.
      */
@@ -247,7 +244,6 @@ public class School extends AbstractSchool {
         this.species = species;
         this.length = length;
         this.ageDt = ageDt;
-        this.age = ageDt / (float) getConfiguration().getNStepYear();
         out = false;
         preys = new HashMap<>();
         starvationRate = 0.d;
@@ -518,7 +514,7 @@ public class School extends AbstractSchool {
 
     @Override
     public float getAge() {
-        return age;
+        return ageDt / (float) getConfiguration().getNStepYear();
     }
 
     /**
@@ -526,7 +522,6 @@ public class School extends AbstractSchool {
      */
     public void incrementAge() {
         ageDt += 1;
-        age = ageDt / (float) getConfiguration().getNStepYear();
     }
 
     /**

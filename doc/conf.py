@@ -22,6 +22,7 @@
 import os
 import re
 from datetime import date
+import sphinx_rtd_theme
 
 # -- General configuration ------------------------------------------------
 
@@ -41,8 +42,17 @@ extensions = ['sphinx.ext.todo',
     'IPython.sphinxext.ipython_directive',
     'IPython.sphinxext.ipython_console_highlighting',
     'matplotlib.sphinxext.plot_directive',
-
+    'sphinxcontrib.plantuml',
+    'sphinxcontrib.mermaid',
+    'sphinx_rtd_theme',
 ]
+
+plantuml = 'plantuml'
+plantuml_output_format = 'svg_img'
+plantuml_latex_output_format = 'pdf'
+
+mermaid_pdfcrop = 'pdfcrop'
+#mermaid_output_format = 'png'
 
 bibtex_bibfiles = ['_static/biblio.bib']
 
@@ -87,7 +97,7 @@ todo_emit_warnings = True
 #
 # This is also used if you do content translation via gettext catalogs.
 # Usually you set "language" from the command line for these cases.
-language = None
+#language = "en"
 
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
@@ -117,9 +127,7 @@ numfig = True
 # use sections as a reference for figures: X.1, X.2 with X the section
 numfig_secnum_depth = (1)
 
-import sphinx_rtd_theme
 html_theme = "sphinx_rtd_theme"
-html_theme_path = [sphinx_rtd_theme.get_html_theme_path()]
 
 # Theme options are theme-specific and customize the look and feel of a theme
 # further.  For a list of options available for each theme, see the
@@ -138,6 +146,8 @@ html_static_path = ['_static']
 #            ],
 #        }
 
+def setup(app):
+   app.add_css_file('theme_overrides.css')
 
 # -- Options for HTMLHelp output ------------------------------------------
 

@@ -1,0 +1,67 @@
+Time-variability
+=========================
+
+The time varying fishing rates :math:`R_k(t)` (equation :eq:`eqn_fsel`) can be provided using different methods, which are displayed in :numref:`plot_timevar` (for a 24 time step simulation of 2 years).
+
+The method is set through the :samp:`fisheries.rate.method.fisX` parameter, which can take 5 values.
+
+Constant
+@@@@@@@@@@@@@@@@@@@@
+
+If :samp:`fisheries.rate.method.fisX = constant`, a constant fishing rate (:samp:`fisheries.rate.const.rate.fisX` parameter) is applied during the simulation. The model assumes that this fishing rate is a yearly rate and
+is converted into a seasonal one (i.e. it is divided by the :samp:`ndtPerYear` variable).
+
+By year
+@@@@@@@@@@@@@@
+
+If :samp:`fisheries.rate.method.fisX = byyear`, the user provides the number of different fishing rates per year (:samp:`fisheries.rate.periodsperyear.fisX` parameter) and the associated annual fishing rates (:samp:`fisheries.rate.byyear.rate.fisX` parameter). This fishing rate will be repeated for each simulated year.
+
+In the example below (top right), 4 fishing rates per year are provided. Therefore, the fishing rate is updated every 12 / 4 = 3 time steps (cf. red lines).
+
+Linear
+@@@@@@@@@@@
+
+If :samp:`fisheries.rate.method.fisX = linear`, the user provides an initial fishing rate (:samp:`fisheries.rate.linear.rate.fisX` parameter), a slope (:samp:`fisheries.rate.linear.slope.fisX`) and
+the number of different annual fishing rates per year (:samp:`fisheries.rate.periodsperyear.fisX` parameter). The fishing rates are computed by using an affine function.
+
+In the example below (middle right), 4 fishing rates per year are provided. Therefore, the fishing rate is updated every 12 / 4 = 3 time steps (cf. red lines).
+
+Regime shifts
+@@@@@@@@@@@@@@@@@
+
+If :samp:`fisheries.rate.method.fisX = byregime`, the user defines time-steps of regime shifts (:samp:`fisheries.rate.regime.shifts.fisX` parameter) and their associated annual fishing rates (:samp:`fisheries.rate.regime.rates.fisX` parameter) associated with the regimes. Note that :samp:`len(shifts) + 1 = len(rates)`.
+
+In the example below (bottom left), there are 4 regimes: at time-steps [0, 2], [3-4], [5-14], [15-23] (cf. purple lines).
+
+By Dt
+@@@@@@@@@@@@@@@@
+
+If :samp:`fisheries.rate.method.fisX = bydt`, the user provides a fishing rate for each simulation time-step (:samp:`fisheries.rate.bydt.rate.fisX`).
+However, if the number of provided rates is less than the total number of simulation time-steps, the
+fishing rate is repeated cyclically.
+
+In the example below (middle left), only 5 rates are provided. These rates will be applied for steps [0-4], [5-9], etc. (cf. blue lines)
+
+.. warning::
+
+    **It is the only case where the fishing rate is assumed to be seasonal. In all other cases, it is assumed
+    that annual rates are provided**
+
+
+.. ipython:: python
+    :suppress:
+
+    import os
+    cwd = os.getcwd()
+    print(cwd)
+
+    fpath = "odd_des/submodel/mort/_static/fisheries/time/plot_timevar.py"
+    with open(fpath) as f:
+        code = compile(f.read(), fpath, 'exec')
+        exec(code)
+
+.. _plot_timevar:
+.. figure:: _static/fisheries/time/plot_timevar.png
+    :align: center
+
+    Examples of time varying fishing rates.
