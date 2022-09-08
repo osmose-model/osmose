@@ -869,7 +869,8 @@ public class Configuration extends OLogger {
                     Parameter entry = new Parameter(iline, filename);
                     entry.parse(line);
                     if (parameters.containsKey(entry.key)) {
-                        if (entry.key.contains("species.name") || entry.key.contains("species.type")) {
+                        Parameter existingParam = parameters.get(entry.key);
+                        if ((existingParam.source.compareTo("command line") != 0) && (entry.key.contains("species.name") || entry.key.contains("species.type"))) {
                             String errorMsg = String.format("%s has already been defined.", entry.key);
                             error(errorMsg, null);
                         } else {
