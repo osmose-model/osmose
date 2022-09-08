@@ -1,10 +1,10 @@
-/* 
- * 
+/*
+ *
  * OSMOSE (Object-oriented Simulator of Marine Ecosystems)
  * http://www.osmose-model.org
- * 
+ *
  * Copyright (C) IRD (Institut de Recherche pour le Développement) 2009-2020
- * 
+ *
  * Osmose is a computer program whose purpose is to simulate fish
  * populations and their interactions with their biotic and abiotic environment.
  * OSMOSE is a spatial, multispecies and individual-based model which assumes
@@ -15,7 +15,7 @@
  * processes of fish life cycle (growth, explicit predation, additional and
  * starvation mortalities, reproduction and migration) and fishing mortalities
  * (Shin and Cury 2001, 2004).
- * 
+ *
  * Contributor(s):
  * Yunne SHIN (yunne.shin@ird.fr),
  * Morgane TRAVERS (morgane.travers@ifremer.fr)
@@ -23,20 +23,20 @@
  * Philippe VERLEY (philippe.verley@ird.fr)
  * Laure VELEZ (laure.velez@ird.fr)
  * Nicolas Barrier (nicolas.barrier@ird.fr)
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation (version 3 of the License). Full description
  * is provided on the LICENSE file.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
- * 
+ *
  */
 package fr.ird.osmose.process.mortality;
 
@@ -76,10 +76,10 @@ public class FishingGear extends AbstractMortality {
     private FisheryBase fishingBase;
     private FisheryPeriod fishingPeriod;
     private FisherySeasonality fishingSeasonality;
-    
+
     // If economy is on, define a size stage array for fisheries.
     private boolean isEconomyEnabled;
-    
+
     /**
      * Fishery map set.
      */
@@ -100,20 +100,20 @@ public class FishingGear extends AbstractMortality {
     public void init() {
 
         Configuration cfg = Osmose.getInstance().getConfiguration();
-        
+
         int nspecies = cfg.getNSpecies();
         int nbackground = cfg.getNBkgSpecies();
         this.isEconomyEnabled = cfg.isEconomyEnabled();
-        
+
         catchability = new double[nspecies + nbackground];
         discards = new double[nspecies + nbackground];
 
         // set-up the name of the fishery
-        name = cfg.getString("fisheries.name.fsh" + fileFisheryIndex);
+        name = cfg.getString("fisheries.name.fsh" + fileFisheryIndex).replaceAll("_", "").replaceAll("-", "");
 
         // True if fishing mortality components are to be saved for inspection
         checkFisheryEnabled = cfg.getBoolean("fisheries.check.enabled");
-        
+
         // Initialize the time varying array
         fishingBase = new FisheryBase(fileFisheryIndex);
         fishingBase.init();
@@ -279,7 +279,7 @@ public class FishingGear extends AbstractMortality {
     }
 
     final String getFilename() {
-      
+
         File path = new File(getConfiguration().getOutputPathname());
         StringBuilder filename = new StringBuilder(path.getAbsolutePath());
         filename.append(File.separatorChar);
@@ -314,12 +314,12 @@ public class FishingGear extends AbstractMortality {
             discards[cpt] = matrix.getValue(speciesIndex, fishIndex);
         }
     }
-    
-    /** Returns the gear selectivity. 
+
+    /** Returns the gear selectivity.
      * Used to compute available biomass.
      */
     public double getSelectivity(int index, AbstractSchool school) {
         return selectivity.getSelectivity(index, school);
     }
-    
+
 }
