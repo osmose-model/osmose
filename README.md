@@ -97,5 +97,5 @@ To convert the resulting diagram in an image format (SVG for instance), the [Pla
 the diagram has been generated, type:
 
 ```
-plantuml -tsvg doc/_static/puml/osmose-uml.puml
+plantuml -tsvg doc/_static/puml/osmose-full.puml
 ```
