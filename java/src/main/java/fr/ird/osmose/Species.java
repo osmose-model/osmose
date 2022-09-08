@@ -41,8 +41,6 @@
 
 package fr.ird.osmose;
 
-import fr.ird.osmose.util.timeseries.ByClassTimeSeries;
-
 /**
  * This class represents a species. It is characterised by the following
  * variables:
@@ -148,7 +146,8 @@ public class Species implements ISpecies {
         this.fileIndex = fileIndex;
 
         // Initialization of parameters
-        name = cfg.getString("species.name.sp" + fileIndex);
+        name = cfg.getString("species.name.sp" + fileIndex).replaceAll("_", "").replaceAll("-", "");
+
         c = cfg.getFloat("species.length2weight.condition.factor.sp" + fileIndex);
         bPower = cfg.getFloat("species.length2weight.allometric.power.sp" + fileIndex);
 
