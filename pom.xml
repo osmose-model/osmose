@@ -275,7 +275,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
                 <artifactId>maven-javadoc-plugin</artifactId>
                 <version>3.4.0</version>
                 <configuration>
-                    <!-- <outputDirectory>doc/_static/javadoc</outputDirectory> -->
+                    <outputDirectory>doc/_static/javadoc</outputDirectory>
                     <reportOutputDirectory>doc/_static/javadoc</reportOutputDirectory>
                     <failOnError>false</failOnError>
                 </configuration>
@@ -304,6 +304,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
                             </scanPackages>
                             <blacklistRegexp>.*Test.*</blacklistRegexp>
                             <enableAsciidocWrapper>true</enableAsciidocWrapper>
+                            <hideMethods>false</hideMethods>
                         </configuration>
                     </execution>
 
