@@ -222,7 +222,7 @@ public class SchoolSetSnapshot extends SimulationLinker {
             maturityVar.addAttribute(new Attribute("units", ""));
             maturityVar.addAttribute(new Attribute("description", "True if the school is mature"));
         }
-s
+
         tlVar = nc.addVariable(null, "trophiclevel", DataType.FLOAT, "nschool");
         tlVar.addAttribute(new Attribute("units", "scalar"));
         tlVar.addAttribute(new Attribute("description", "trophiclevel of the fish in the school"));
