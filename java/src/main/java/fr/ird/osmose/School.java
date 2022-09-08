@@ -44,6 +44,8 @@ import fr.ird.osmose.process.genet.Genotype;
 import fr.ird.osmose.process.mortality.MortalityCause;
 import fr.ird.osmose.util.GridPoint;
 import java.util.HashMap;
+
+import ucar.ma2.ArrayDouble;
 import ucar.ma2.ArrayFloat;
 
 /**
@@ -875,7 +877,7 @@ public class School extends AbstractSchool {
      * @param genArray Netcdf Array (school, itrait, ilocus, 2)
      * @param envNoise
      */
-    public void restartGenotype(int rank, int index, ArrayFloat.D4 genArray, ArrayFloat.D2 envNoise) {
+    public void restartGenotype(int rank, int index, ArrayDouble.D4 genArray, ArrayDouble.D2 envNoise) {
 
         // Instanciate (i.e. init arrays) genotype for the current school
         this.instance_genotype(rank);
@@ -889,6 +891,7 @@ public class School extends AbstractSchool {
                 double val0 = genArray.get(index, itrait, iloc, 0);
                 double val1 = genArray.get(index, itrait, iloc, 1);
                 this.getGenotype().setLocusVal(itrait, iloc, val0, val1);
+                this.getGenotype().restartTrait(itrait);
 
                 // Sets the value for the environmental noise
                 double envnoise = envNoise.get(index, itrait);
