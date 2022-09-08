@@ -66,7 +66,7 @@ import ucar.nc2.Variable;
 public class SchoolSetSnapshot extends SimulationLinker {
 
     private Variable xVar, yVar, abVar, ageVar, lengthVar, weightVar, tlVar, specVar;
-    private Variable genetVar, traitVar, gonadWeightVar;
+    private Variable genetVar, traitVar, gonadWeightVar, maturityVar;
     private int nTrait=0;
     private int nMaxLoci;
 
@@ -80,6 +80,7 @@ public class SchoolSetSnapshot extends SimulationLinker {
         ArrayFloat.D1 gonadicWeight = null;
         ArrayFloat.D4 genotype = null;
         ArrayFloat.D2 traitnoise = null;
+        ArrayInt.D1 maturity = null;
         NetcdfFileWriter nc = createNCFile(iStepSimu);
         int nSchool = getSchoolSet().getSchools().size();
         ArrayInt.D1 species = new ArrayInt.D1(nSchool);
@@ -92,6 +93,7 @@ public class SchoolSetSnapshot extends SimulationLinker {
         ArrayFloat.D1 trophiclevel = new ArrayFloat.D1(nSchool);
         if (useBioen) {
             gonadicWeight = new ArrayFloat.D1(nSchool);
+            maturity = new ArrayInt.D1(nSchool);
         }
 
         // if use genetic, initialize the output of the genotype (nschool x ntrait x nloci x 2)
@@ -114,6 +116,7 @@ public class SchoolSetSnapshot extends SimulationLinker {
 
             if(useBioen) {
                 gonadicWeight.set(s, school.getGonadWeight() * 1e6f);
+                maturity.set(s, school.isMature() ? 1 : 0);
             }
 
             if(useGenet) {
@@ -149,6 +152,7 @@ public class SchoolSetSnapshot extends SimulationLinker {
 
             if(useBioen) {
                 nc.write(this.gonadWeightVar, gonadicWeight);
+                nc.write(this.maturityVar, maturity);
             }
 
             nc.close();
@@ -214,6 +218,10 @@ public class SchoolSetSnapshot extends SimulationLinker {
             gonadWeightVar = nc.addVariable(null, "gonadWeight", DataType.FLOAT, "nschool");
             gonadWeightVar.addAttribute(new Attribute("units", "g"));
             gonadWeightVar.addAttribute(new Attribute("description", "gonad weight of the fish in the school in gram"));
+
+            maturityVar = nc.addVariable(null, "maturity", DataType.INT, "nschool");
+            maturityVar.addAttribute(new Attribute("units", ""));
+            maturityVar.addAttribute(new Attribute("description", "True if the school is mature"));
         }
 
         tlVar = nc.addVariable(null, "trophiclevel", DataType.FLOAT, "nschool");
