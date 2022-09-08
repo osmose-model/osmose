@@ -87,4 +87,4 @@ doc/rosmose/_static/*png
 **/_static/**/*.png
 random_drift.pdf
 random_drift.svg
-*.sh
+/*.sh
