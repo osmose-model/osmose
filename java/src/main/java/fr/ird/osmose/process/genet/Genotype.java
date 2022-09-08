@@ -1,10 +1,10 @@
-/* 
- * 
+/*
+ *
  * OSMOSE (Object-oriented Simulator of Marine Ecosystems)
  * http://www.osmose-model.org
- * 
+ *
  * Copyright (C) IRD (Institut de Recherche pour le Développement) 2009-2020
- * 
+ *
  * Osmose is a computer program whose purpose is to simulate fish
  * populations and their interactions with their biotic and abiotic environment.
  * OSMOSE is a spatial, multispecies and individual-based model which assumes
@@ -15,7 +15,7 @@
  * processes of fish life cycle (growth, explicit predation, additional and
  * starvation mortalities, reproduction and migration) and fishing mortalities
  * (Shin and Cury 2001, 2004).
- * 
+ *
  * Contributor(s):
  * Yunne SHIN (yunne.shin@ird.fr),
  * Morgane TRAVERS (morgane.travers@ifremer.fr)
@@ -23,20 +23,20 @@
  * Philippe VERLEY (philippe.verley@ird.fr)
  * Laure VELEZ (laure.velez@ird.fr)
  * Nicolas Barrier (nicolas.barrier@ird.fr)
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation (version 3 of the License). Full description
  * is provided on the LICENSE file.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
- * 
+ *
  */
 
 package fr.ird.osmose.process.genet;
@@ -119,9 +119,34 @@ public class Genotype extends SimulationLinker {
                 // initialize each locus using a random draft
                 this.getLocus(i, j).init_random_draft();
             }
-        }  // end of trait loop
+        } // end of trait loop
         this.update_traits();
-    }  // end of method
+    } // end of method
+
+    /**
+     * Restart the value of the trait based on the restarts
+     *
+     */
+    public void restartTrait(int i) {
+
+        Trait trait = this.getSimulation().getEvolvingTrait(i);
+
+        List<Locus> list_locus = this.getLocusList(i);
+
+        double x = 0;
+
+        // Computation of (V1 + V1') + (V2 + V2') + (...) (equation of Alaia's document)
+        // Equation 34 from Alaia's document
+        for (Locus l : list_locus) {
+            x += l.sum();
+        }
+
+        // Multiplication by U + adding xmin
+        // this.x *= u;
+        x += trait.getMean(spec_index);
+        traits[i] = x;
+
+    }
 
     /**
      * Updates, for each trait, the locus values by using the genotypes of both
@@ -196,7 +221,7 @@ public class Genotype extends SimulationLinker {
         return (traits[index] + this.traitsEnvNoise[index]);
 
     }
-    
+
         public double getgenet_value(String name) throws Exception {
 
         int index = this.getTraitIndex(name);
@@ -278,7 +303,11 @@ public class Genotype extends SimulationLinker {
     public void setEnvNoise(int itrait, double value) {
         this.traitsEnvNoise[itrait] = value;
     }
-       
+
+    public double getGeneticTrait(int index) throws Exception {
+        return traits[index];
+    }
+
     /**
      * Forces the value of a Loci pair. Used when restart with genetic.
      *
@@ -287,5 +316,5 @@ public class Genotype extends SimulationLinker {
     public double getEnvNoise(int itrait) {
         return this.traitsEnvNoise[itrait];
     }
-    
+
 }  // end of class
