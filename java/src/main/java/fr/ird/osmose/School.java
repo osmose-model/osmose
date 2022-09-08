@@ -877,7 +877,7 @@ public class School extends AbstractSchool {
      * @param genArray Netcdf Array (school, itrait, ilocus, 2)
      * @param envNoise
      */
-    public void restartGenotype(int rank, int index, ArrayDouble.D4 genArray, ArrayDouble.D2 envNoise) {
+    public void restartGenotype(int rank, int index, ArrayFloat.D4 genArray, ArrayFloat.D2 envNoise) {
 
         // Instanciate (i.e. init arrays) genotype for the current school
         this.instance_genotype(rank);
