@@ -102,6 +102,7 @@ public class BioenReproductionProcess extends ReproductionProcess {
             }
             // increment age
             school.incrementAge();
+
         }
 
         // loop over the species to lay cohort at age class 0
@@ -144,6 +145,10 @@ public class BioenReproductionProcess extends ReproductionProcess {
                     // in this case, the gonad weight times the season variable.
                     float wEgg = school.getGonadWeight() * (float) season;
 
+                    if(wEgg == 0) {
+                        continue;
+                    }
+
                     // the wEgg content is removed from the gonad
                     school.incrementGonadWeight(-wEgg);
 
@@ -157,6 +162,7 @@ public class BioenReproductionProcess extends ReproductionProcess {
                     school.incrementNeggs(nEgg);
 
                     weight_rand.add(nEgg, school);
+
                 }  // end of loop over the school that belong to species i
 
                 boolean transmitGenotype = (this.getSimulation().getIndexTimeSimu() >= this.dateGenoTransmission) ? true : false;
@@ -203,7 +209,6 @@ public class BioenReproductionProcess extends ReproductionProcess {
                     School parent_b = rand_draft.next();
                     school0.getGenotype().transmit_genotype(parent_a.getGenotype(), parent_b.getGenotype());
                 } else {
-
                     school0.getGenotype().init_genotype();
                 }
                 getSchoolSet().addReproductionSchool(school0);
