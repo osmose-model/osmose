@@ -580,7 +580,7 @@ public class School extends AbstractSchool {
 
     @Override
     public void updateBiomAndAbd() {
-        instantaneousAbundance = (abundance - eggRetained) - sum(nDead);
+        instantaneousAbundance = (abundance - eggRetained) - sum(nDead) + nDead[MortalityCause.AGING.index];
         if (instantaneousAbundance < 1.d) {
             instantaneousAbundance = 0.d;
         }
@@ -859,7 +859,7 @@ public class School extends AbstractSchool {
 
     /** Starvation enabled if species is older than first feeding age. */
     public boolean isStarvationEnabled() {
-        return (this.getAgeDt() > this.getSpecies().getFirstFeedingAgeDt());
+        return this.getSpecies().isStarvationEnabled(this);
     }
 
     /**

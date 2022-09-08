@@ -63,7 +63,7 @@ public class SpatialYieldNOutput extends AbstractSpatialOutput {
 
     @Override
     public String getVarName() {
-        return "Yield";
+        return "YieldAbundance";
     }
 
     @Override

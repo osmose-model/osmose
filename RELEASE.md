@@ -26,10 +26,10 @@
 - Normalisation of season spawning to 1.
 - Trimming of parameter name in the `Release.findLine` method.
 - Reduction of computation time for new  fisheries implementation
-- Reduction of computation time for new fisheries implementation
 - Adding the possibility to use a size threshold (``output.cutoff.size.sp#`` parameter)
 - Saving maturity variable in restart when bioenergetic module is used.
 - Removing of the ``simulation.onestep`` feature. For debugging, use debugging tools.
+- Possibility to provide MPAs that occupy only a fraction of a cell.
 
 ### Bug fixes
 
@@ -38,8 +38,9 @@
 - Correction of `CatchesByDtByClassFishingMortality` (`fishableBiomass` was not initialized, hence causing malloc errors)
 - Correction of the starvation mortality in bioen mode. Starvation applied only if species is older than first feeding age.
 - NetCDF output format forced to NetCDF3 instead of NetCDF4 when running in multithread mode (NetCDF4 causes an error and it does not seem possible to do that)
-- Correction of a bug in the use of cutoff ages. Cutoff were not properly working with `OutputWholeRegion.java` class.
 - Correction of a bug in the reading of genetic restarts. Restart were properly read, but genetic traits were not initialised based on these locus value.
+- Correction in the outputs for `OutputWholeRegion`. The `cutOff` parameter was not taken into account. This is fixed.
+- Correction of a bug in the reading of the accessibility matrix. If class is provided using `<` without space before and after, the reading of the name was not working. Therefore, wrong values for the accessibility matrix were used.
 
 ## Osmose 4.3.2
 
