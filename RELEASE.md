@@ -25,9 +25,9 @@
 - `fisheries.rate.bySeason.fsh%d` parameter renamed into `fisheries.rate.byperiod.fsh%d`
 - Normalisation of season spawning to 1.
 - Trimming of parameter name in the `Release.findLine` method.
-- Reduction of computation time for new fisheries implementation
+- Reduction of computation time for new  fisheries implementation
 - Adding the possibility to use a size threshold (``output.cutoff.size.sp#`` parameter
-
+- Saving maturity variable in restart when bioenergetic module is used.
 
 ### Bug fixes
 
@@ -37,6 +37,7 @@
 - Correction of the starvation mortality in bioen mode. Starvation applied only if species is older than first feeding age.
 - NetCDF output format forced to NetCDF3 instead of NetCDF4 when running in multithread mode (NetCDF4 causes an error and it does not seem possible to do that)
 - Correction of a bug in the use of cutoff ages. Cutoff were not properly working with `OutputWholeRegion.java` class.
+- Correction of a bug in the reading of genetic restarts. Restart were properly read, but genetic traits were not initialised based on these locus value.
 
 ## Osmose 4.3.2
 
