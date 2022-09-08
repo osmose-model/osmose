@@ -288,14 +288,14 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
                 <version>1.1.2</version>
                 <executions>
                     <execution>
-                        <id>full-diagram</id>
+                        <id>osmose-full</id>
                         <phase>none</phase>
                         <?m2e execute onConfiguration,onIncremental?>
                         <goals>
                             <goal>generate</goal>
                         </goals>
                         <configuration>
-                            <outputFilename>osmose-uml.puml</outputFilename>
+                            <outputFilename>osmose-full.puml</outputFilename>
                             <outputDirectory>doc/_static/puml/</outputDirectory>
                             <scanPackages>
                                 <scanPackage>
@@ -308,7 +308,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
                     </execution>
 
                     <execution>
-                        <id>osm-school</id>
+                        <id>osmose-school</id>
                         <phase>none</phase>
                         <?m2e execute onConfiguration,onIncremental?>
                         <goals>
@@ -335,7 +335,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
                     </execution>
 
                     <execution>
-                        <id>osm-species</id>
+                        <id>osmose-species</id>
                         <phase>none</phase>
                         <?m2e execute onConfiguration,onIncremental?>
                         <goals>
@@ -362,7 +362,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
                     </execution>
 
                     <execution>
-                        <id>osm-simulation</id>
+                        <id>osmose-simulation</id>
                         <phase>none</phase>
                         <?m2e execute onConfiguration,onIncremental?>
                         <goals>

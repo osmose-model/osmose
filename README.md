@@ -70,3 +70,32 @@ vignette(package = "osmose", topic = "create_run_read")
 [Official website](http://www.osmose-model.org/) of the model, including info about the development of the project as well as references.
 [Documentation website](https://documentation.osmose-model.org/index.html) with information of parameters of java model (the core).
 [Github site](https://github.com/osmose-model/osmose) where the development code is placed.
+
+## Using documentation plugins
+
+Some documentation tools (Javadoc, PlantUML diagrams) can be generated using Maven plugins, which are defined in the `pom.xml` file.
+
+### Building Javadoc
+
+```
+mvn javadoc:javadoc
+```
+
+The Javadoc will be stored on the `doc/_static/javadoc/apidocs/` folder.
+
+### Generate PlantUML diagrams
+
+To generate PlantUML diagrams for the full Osmose project:
+
+```
+mvn plantuml-generator:generate@osmose-full
+```
+
+The PlantUML diagram will be stored on `doc/_static/puml`
+
+To convert the resulting diagram in an image format (SVG for instance), the [PlantUML](https://plantuml.com/fr/) tool is required. When
+the diagram has been generated, type:
+
+```
+plantuml -tsvg doc/_static/puml/osmose-uml.puml
+```
