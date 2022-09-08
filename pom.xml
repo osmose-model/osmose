@@ -163,26 +163,6 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
         <plugins>
 
-        <plugin>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-javadoc-plugin</artifactId>
-            <version>3.4.0</version>
-            <configuration>
-                <!-- <outputDirectory>doc/_static/javadoc</outputDirectory> -->
-                <reportOutputDirectory>doc/_static/javadoc</reportOutputDirectory>
-                <failOnError>false</failOnError>
-            </configuration>
-            <executions>
-                <execution>
-                    <goals>
-                        <goal>javadoc</goal>
-                    </goals>
-                    <id>execution1</id>
-                    <phase>package</phase>
-                </execution>
-            </executions>
-        </plugin>
-
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
@@ -290,6 +270,17 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
                 </executions>
             </plugin>
 
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-javadoc-plugin</artifactId>
+                <version>3.4.0</version>
+                <configuration>
+                    <!-- <outputDirectory>doc/_static/javadoc</outputDirectory> -->
+                    <reportOutputDirectory>doc/_static/javadoc</reportOutputDirectory>
+                    <failOnError>false</failOnError>
+                </configuration>
+            </plugin>
+
             <!-- create UML diagram -->
             <plugin>
                 <artifactId>plantuml-generator-maven-plugin</artifactId>
@@ -298,7 +289,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
                 <executions>
                     <execution>
                         <id>full-diagram</id>
-                        <phase>generate-test-sources</phase>
+                        <phase>none</phase>
                         <?m2e execute onConfiguration,onIncremental?>
                         <goals>
                             <goal>generate</goal>
@@ -318,7 +309,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
                     <execution>
                         <id>osm-school</id>
-                        <phase>generate-test-sources</phase>
+                        <phase>none</phase>
                         <?m2e execute onConfiguration,onIncremental?>
                         <goals>
                             <goal>generate</goal>
@@ -345,7 +336,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
                     <execution>
                         <id>osm-species</id>
-                        <phase>generate-test-sources</phase>
+                        <phase>none</phase>
                         <?m2e execute onConfiguration,onIncremental?>
                         <goals>
                             <goal>generate</goal>
@@ -372,7 +363,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
                     <execution>
                         <id>osm-simulation</id>
-                        <phase>generate-test-sources</phase>
+                        <phase>none</phase>
                         <?m2e execute onConfiguration,onIncremental?>
                         <goals>
                             <goal>generate</goal>
@@ -390,7 +381,6 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
                             <enableAsciidocWrapper>true</enableAsciidocWrapper>
                         </configuration>
                     </execution>
-
 
                 </executions>
             </plugin>
