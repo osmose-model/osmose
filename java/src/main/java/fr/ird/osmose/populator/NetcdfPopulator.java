@@ -46,6 +46,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import ucar.ma2.ArrayFloat;
+import ucar.ma2.ArrayInt;
 import ucar.nc2.NetcdfFile;
 import ucar.nc2.Variable;
 
@@ -99,9 +100,11 @@ public class NetcdfPopulator extends AbstractPopulator {
         Variable genetVar = null; // variable containing the genotype
         Variable traitVarVar = null;  // variable containing the env. noise
         Variable gonadVar = null;
+        Variable maturityVar = null;
         ArrayFloat.D4 genotype = null;   // data array containing the Netcdf genotype array
         ArrayFloat.D2 traitNoise = null;   // data array containing the Netcdf genotype array
         ArrayFloat.D1 gonadWeight = null;
+        ArrayInt.D1 maturity = null;
 
         int nSchool = nc.findDimension("nschool").getLength();
         try {
@@ -123,6 +126,8 @@ public class NetcdfPopulator extends AbstractPopulator {
             if(useBioen) {
                 gonadVar = nc.findVariable("gonadWeight");
                 gonadWeight = (ArrayFloat.D1) gonadVar.read();
+                maturityVar = nc.findVariable("maturity");
+                maturity = (ArrayInt.D1) maturityVar.read();
             }
 
             for (int s = 0; s < nSchool; s++) {
@@ -142,6 +147,7 @@ public class NetcdfPopulator extends AbstractPopulator {
                 if(useBioen) {
                     // Weight is saved in g in netcdf, so must be provided converted in tons.
                     school.setGonadWeight(gonadWeight.get(s) * 1e-6f);
+                    school.setIsMature(maturity.get(s) == 1);
                 }
                 getSchoolSet().add(school);
             }

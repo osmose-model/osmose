@@ -144,6 +144,11 @@ public class BioenReproductionProcess extends ReproductionProcess {
                     // in this case, the gonad weight times the season variable.
                     float wEgg = school.getGonadWeight() * (float) season;
 
+                    // If number of released eggs is 0, does nothing
+                    if(wEgg <= 0) {
+                        continue;
+                    }
+
                     // the wEgg content is removed from the gonad
                     school.incrementGonadWeight(-wEgg);
 

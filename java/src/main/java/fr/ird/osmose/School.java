@@ -893,6 +893,7 @@ public class School extends AbstractSchool {
                 // Sets the value for the environmental noise
                 double envnoise = envNoise.get(index, itrait);
                 this.getGenotype().setEnvNoise(itrait, envnoise);
+                this.getGenotype().restartTrait(itrait);
             }
         }
     }

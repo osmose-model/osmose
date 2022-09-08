@@ -764,6 +764,18 @@ public class OutputManager extends SimulationLinker {
             if (getConfiguration().getBoolean("output.evolvingtraits.enabled")) {
                 outputs.add(new VariableTraitOutput(rank));
             }
+
+            if (getConfiguration().getBoolean("output.meanTraits.newborn.enabled")) {
+                outputs.add(new MeanGenotypeOutput(rank, "meanTraitsNewborn", (school -> 1),
+                        (school -> school.getAgeDt() == 0), (schoolset -> schoolset.getNewBorns()), "Mean traits of child schools"));
+            }
+
+            if (getConfiguration().getBoolean("output.meanTraits.parents.enabled")) {
+                outputs.add(new MeanGenotypeOutput(rank, "meanTraitsParents", (school -> school.getNEggs()),
+                        (school -> school.isMature()), (schoolset -> schoolset.getAliveSchools()), "Mean traits of parent schools, ponderated by number of eggs"));
+            }
+
+
         }
 
         /*
