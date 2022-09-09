@@ -8,7 +8,6 @@ Within each time step, OSMOSE considers each pair of school/source of mortality 
 .. index::
     single: stochastic.mortality.seed
     single: mortality.subdt
-    single: mortality.algorithm
 
 .. table:: Mortality parameters
 
@@ -17,12 +16,6 @@ Within each time step, OSMOSE considers each pair of school/source of mortality 
 
         stochastic.mortality.seed ; Integer to fix the random number generator.
         mortality.subdt ; Number of mortality sub time-steps.
-        mortality.algorithm ; Mortality algorithm (iterative or stochastic) (Osmose <= 4.2.0)
-
-
-.. note::
-
-    In Osmose >= 4.3.0, the :samp:`mortality.algorithm` parameter is no more used. Stochastic mortality algorithm is used.
 
 Mortality processes are detailed below.
 
