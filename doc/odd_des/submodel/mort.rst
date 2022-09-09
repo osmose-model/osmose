@@ -20,6 +20,7 @@ Within each time step, OSMOSE considers each pair of school/source of mortality 
 Mortality processes are detailed below.
 
 .. toctree::
+    :maxdepth: 1
 
     mort/pred.rst
     mort/starv.rst

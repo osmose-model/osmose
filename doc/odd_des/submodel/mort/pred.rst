@@ -12,13 +12,20 @@ Consider a predator school :math:`S_{pred}`.
 Size predation
 +++++++++++++++++++++++++++++++++++++++++
 
-Size-predation matrix is controlled by two parameters. The predator school :math:`S_{pred}` can only feed on prey schools whose length meets:
+Size-predation matrix is controlled by two parameters. The predator school :math:`S_{pred}` can only feed on prey schools whose length belongs
+to a given interval:
 
 .. math::
 
-    R_{min} \le \frac{L_{pred}}{L_{prey}} \le R_{max}
+    R_{max} < \frac{L_{pred}}{L_{prey}} \le R_{min}
 
-with :math:`R_{min}` and :math:`R_{max}` the maximum and minimum predator/prey size ratios. Therefore, the minimum and maximum sizes of a prey that a predator can eat is given by:
+with :math:`R_{min}` and :math:`R_{max}` the maximum and minimum predator/prey size ratios. Reorganizing this inequality, we obtain:
+
+.. math::
+
+    \frac{L_{pred}}{R_{min}} \le L_{prey} < \frac{L_{pred}}{R_{max}}
+
+Therefore, the minimum and maximum sizes of a prey that a predator can eat is given by:
 
 .. math::
 
@@ -29,6 +36,7 @@ with :math:`R_{min}` and :math:`R_{max}` the maximum and minimum predator/prey s
 .. index:: predation.predPrey.stage.structure, predation.predPrey.stage.threshold.sp#, predation.predPrey.sizeRatio.max.sp#, predation.predPrey.sizeRatio.min.sp#
 
 .. table:: Size-predation parameters
+    :class: tight-table
 
     .. csv-table::
         :delim: ;
@@ -41,7 +49,8 @@ with :math:`R_{min}` and :math:`R_{max}` the maximum and minimum predator/prey s
 
 .. danger::
 
-    :math:`R_{min} > R_{max}`
+    To make sure that  :math:`L_{max} < L_{min}`, the `predation.predPrey.sizeRatio.max.sp#` and `predation.predPrey.sizeRatio.min.sp#`
+    must verify :math:`R_{min} > R_{max}`
 
 Since resource groups are defined by a range of sizes, and not by a single sizes, the predator will feed on a given percentage of the resource:
 
