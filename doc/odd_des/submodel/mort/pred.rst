@@ -75,6 +75,7 @@ which is the overlapping range of the predator accessible range and of the resou
 
     Size-based predation in Osmose
 
+.. _predation_access:
 
 Accessibility
 +++++++++++++++++++++++++++++++++
@@ -135,34 +136,40 @@ Finally, the predation rate is computed as follows. First, the total accessible 
 
 .. math::
 
-    P_{tot} = \sum_{p=preys} A(pred, prey) \times B_{prey}
+    B_{avail} = \sum_{p=preys} A(pred, prey) \times B_{prey}
+
+where :math:`B_{avail}` is the total accessible biomass of preys, :math:`A(pred, prey)` is the accessibility coefficient of the predator over
+the given prey (cf. :numref:`predation_access`) and :math:`B_{prey}` is the biomass of the prey.
 
 The total biomass that a predator can eat is also computed as follow:
 
 .. math::
 
-    P_{eatable} = \frac{B_{pred} \times I_{max}}{N_{mort}}
+    B_{eatable} = \frac{B_{pred} \times I_{max}}{N_{mort}}
 
-with :samp:`N_{mort}` the number of sub-step of mortality processes,  :math:`B_{pred}` the total biomass of predator and :math:`I_{max}` the maximum ingestion rate for each species, expressed in grams of food per gram of fish
+with :math:`N_{mort}` the number of sub-step of mortality processes,  :math:`B_{pred}` the total biomass of predator and :math:`I_{max}` the maximum ingestion rate for each species, expressed in grams of food per gram of fish
 and per year. It is assumed that predator eat as much as they can.
 
 The effective biomass that will be eaten by the predator is
 
 .. math::
 
-    P_{eaten} = min(P_{tot}, P_{eatable})
+    B_{eaten} = min(B_{avail}, B_{eatable})
+
+The success rate for the given time-step (:math:`S_R(t)`) is incremented by then the value computed for the given `sub time-step` as:
+
+.. math::
+
+    S_R(t) = S_R(t) + \frac{B_{eaten}} {B_{eatable}}
+
 
 Finally, for each prey, the biomass eaten by the predator is given by:
 
 .. math::
 
-    P_{lost} = P_{eaten} \times \frac{A(pred, prey) \times B_{prey}}{P_{tot}}
+    B_{{lost}_{prey}} = B_{eaten} \times \frac{A(pred, prey) \times B_{prey}}{B_{avail}}
 
-Finally, the success rate is computed as:
-
-.. math::
-
-    S_R = \frac{P_{eaten}} {P_{eatable}}
+and used to increment the number of dead individuals by predation (``nDead`` attribute).
 
 .. index:: predation.ingestion.rate.max.sp#
 
