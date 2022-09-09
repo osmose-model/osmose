@@ -128,6 +128,8 @@ public abstract class AbstractSchool extends GridPoint implements IAggregation {
 
     protected double[] discardedBiomass;
 
+    protected double[] accessibleBiomassToFishery;
+
     public abstract double getEMaint();
     public abstract double getENet();
     public abstract double getKappa();
@@ -219,6 +221,10 @@ public abstract class AbstractSchool extends GridPoint implements IAggregation {
     @Override
     public void discardedBy(int fisheryIndex, double fishedBiomass) {
         this.discardedBiomass[fisheryIndex] += fishedBiomass;
+    }
+
+    public void incrementAccessibleBiomass(int fisheryIndex, double fishedBiomass) {
+        this.accessibleBiomassToFishery[fisheryIndex] += fishedBiomass;
     }
 
     /**

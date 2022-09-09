@@ -73,6 +73,7 @@ public class BackgroundSchool extends AbstractSchool {
         preys = new HashMap<>();
         fishedBiomass = new double[getConfiguration().getNFishery()];
         discardedBiomass = new double[getConfiguration().getNFishery()];
+        accessibleBiomassToFishery = new double[getConfiguration().getNFishery()];
         this.classIndex = classIndex;
         this.moveToCell(cell);
     }
@@ -90,6 +91,7 @@ public class BackgroundSchool extends AbstractSchool {
         predSuccessRate = 0.f;
         reset(fishedBiomass);
         reset(discardedBiomass);
+        reset(this.accessibleBiomassToFishery);
     }
 
     /**
