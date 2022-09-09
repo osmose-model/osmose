@@ -109,6 +109,7 @@ parameters must end with :samp:`.acc#`, with :samp:`#` the number of the accessi
 .. index:: predation.accessibility.stage.structure, predation.accessibility.stage.threshold.sp#, predation.accessibility.file predation.accessibility.file.acc#, predation.accessibility.initialYear.acc#, predation.accessibility.finalYear.acc#, predation.accessibility.years.acc#, predation.accessibility.steps.acc#
 
 .. table:: Parameters for accessibility matric
+    :class: tight-table
 
     .. csv-table::
         :delim: ;
