@@ -257,6 +257,16 @@ public abstract class AbstractSchool extends GridPoint implements IAggregation {
     }
 
     /**
+     * Gets the biomass of the school discarded by a given fishery.
+     *
+     * @param fisheryIndex, the fishery index
+     * @return the fished biomass in tons
+     */
+    public double getAccessibleBiomass(int fisheryIndex) {
+        return accessibleBiomassToFishery[fisheryIndex];
+    }
+
+    /**
      * Gets the abundance of the school at the beginning of the time step.
      *
      * @return the abundance of the school at the beginning of the time step
