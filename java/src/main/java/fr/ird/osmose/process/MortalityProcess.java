@@ -910,6 +910,8 @@ public class MortalityProcess extends AbstractProcess {
                 double sel = gear.getSelectivity(index, school);
                 double incrementBiom = school.getInstantaneousBiomass() * sel;
                 this.getSimulation().getEconomicModule().incrementAccessibleBiomass(iFishery, school, incrementBiom);
+                school.incrementAccessibleBiomass(iFishery, incrementBiom);
+
             }
         }
     }
