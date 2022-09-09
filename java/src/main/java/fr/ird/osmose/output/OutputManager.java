@@ -278,9 +278,20 @@ public class OutputManager extends SimulationLinker {
         }
 
         // Fisheries output
-        if (getConfiguration().isFisheryEnabled() && getConfiguration().getBoolean("output.fishery.enabled")) {
-            outputs.add(new FisheryOutput(rank));
+        if (getConfiguration().isFisheryEnabled()) {
+            if (getConfiguration().getBoolean("output.fishery.enabled")) {
+                outputs.add(new FisheryOutput(rank));
+            }
+
+            if (getConfiguration().getBoolean("output.fishery.byage.enabled")) {
+                outputs.add(new FisheryOutputDistrib(rank, ageDistrib));
+            }
+
+            if (getConfiguration().getBoolean("output.fishery.bysize.enabled")) {
+                outputs.add(new FisheryOutputDistrib(rank, sizeDistrib));
+            }
         }
+
         // Biomass
         if (getConfiguration().getBoolean("output.biomass.enabled")) {
             outputs.add(new SpeciesOutput(rank, null, "biomass",

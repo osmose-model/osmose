@@ -273,11 +273,10 @@ public class MeanGenotypeOutput extends SimulationLinker implements IOutput {
         Dimension speciesDim = nc.addDimension(null, "species", getNSpecies());
         Dimension traitDim = nc.addDimension(null, "trait", getNEvolvingTraits());
 
-        Variable species = nc.addVariable(null, "species", DataType.INT, "species");
+        nc.addVariable(null, "species", DataType.INT, "species");
         this.createSpeciesAttr();
 
-
-        Variable trait = nc.addVariable(null, "trait", DataType.INT, "trait");
+        nc.addVariable(null, "trait", DataType.INT, "trait");
         this.createTraitAttr();
 
         outDims = new ArrayList<>();

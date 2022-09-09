@@ -50,7 +50,6 @@ import fr.ird.osmose.process.mortality.fishery.FisheryPeriod;
 import fr.ird.osmose.process.mortality.fishery.FisherySeasonality;
 import fr.ird.osmose.process.mortality.fishery.FisheryMapSet;
 import fr.ird.osmose.process.mortality.fishery.FisherySelectivity;
-import fr.ird.osmose.stage.SizeStage;
 import fr.ird.osmose.util.Matrix;
 
 import java.io.File;
@@ -77,9 +76,6 @@ public class FishingGear extends AbstractMortality {
     private FisheryPeriod fishingPeriod;
     private FisherySeasonality fishingSeasonality;
 
-    // If economy is on, define a size stage array for fisheries.
-    private boolean isEconomyEnabled;
-
     /**
      * Fishery map set.
      */
@@ -103,7 +99,6 @@ public class FishingGear extends AbstractMortality {
 
         int nspecies = cfg.getNSpecies();
         int nbackground = cfg.getNBkgSpecies();
-        this.isEconomyEnabled = cfg.isEconomyEnabled();
 
         catchability = new double[nspecies + nbackground];
         discards = new double[nspecies + nbackground];
