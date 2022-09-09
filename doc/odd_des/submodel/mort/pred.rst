@@ -49,7 +49,7 @@ Therefore, the minimum and maximum sizes of a prey that a predator can eat is gi
 
 .. danger::
 
-    To make sure that  :math:`L_{max} < L_{min}`, the `predation.predPrey.sizeRatio.max.sp#` and `predation.predPrey.sizeRatio.min.sp#`
+    To make sure that  :math:`L_{max} < L_{min}`, the ``predation.predPrey.sizeRatio.max.sp#`` and ``predation.predPrey.sizeRatio.min.sp#``
     must verify :math:`R_{min} > R_{max}`
 
 Since resource groups are defined by a range of sizes, and not by a single sizes, the predator will feed on a given percentage of the resource:
