@@ -68,6 +68,7 @@ import java.util.stream.Collectors;
 import ucar.ma2.InvalidRangeException;
 import org.apache.commons.lang3.ArrayUtils;
 import ucar.nc2.NetcdfFileWriter;
+import ucar.nc2.write.NetcdfFileFormat;
 
 /**
  * This class handles the Osmose configuration. It knows how to read Osmose
@@ -268,7 +269,7 @@ public class Configuration extends OLogger {
 
     private boolean isEconomyEnabled;
 
-    private NetcdfFileWriter.Version ncOutVersion;
+    private NetcdfFileFormat ncOutVersion;
 
     /** True if fishing Mortality (v3 or v4) is on. */
     private boolean fishingMortalityEnabled = true;
@@ -1679,7 +1680,7 @@ public class Configuration extends OLogger {
     }
 
     /** Recover the output NetCDF version */
-    public NetcdfFileWriter.Version getNcOutVersion() {
+    public NetcdfFileFormat getNcOutVersion() {
         return ncOutVersion;
     }
 
@@ -1691,36 +1692,30 @@ public class Configuration extends OLogger {
 
         // Control of the NetCdf output version from a configuration file.
         // If not provided, NetCdf4 is used.
-        ncOutVersion = NetcdfFileWriter.Version.netcdf3;
+        ncOutVersion = NetcdfFileFormat.NETCDF3;
         if (!isNull("output.netcdf.format")) {
             String outputFormat = getString("output.netcdf.format");
             switch (outputFormat) {
-                case "netcdf3":
-                    ncOutVersion = NetcdfFileWriter.Version.netcdf3;
-                    break;
-
-                case "netcdf4":
-                    ncOutVersion = NetcdfFileWriter.Version.netcdf4;
-                    break;
-
-                case "netcdf4_classic":
-                    ncOutVersion = NetcdfFileWriter.Version.netcdf4_classic;
-                    break;
-
-                case "netcdf3c":
-                    ncOutVersion = NetcdfFileWriter.Version.netcdf3c;
-                    break;
-
                 case "ncstream":
-                    ncOutVersion = NetcdfFileWriter.Version.ncstream;
+                    ncOutVersion = NetcdfFileFormat.NCSTREAM;
                     break;
-
-                case "netcdf3c64":
-                    ncOutVersion = NetcdfFileWriter.Version.netcdf3c64;
+                case "netcdf3":
+                    ncOutVersion = NetcdfFileFormat.NETCDF3;
                     break;
-
+                case "netcdf3_64bit_data":
+                    ncOutVersion = NetcdfFileFormat.NETCDF3_64BIT_DATA;
+                    break;
+                case "netcdf3_64bit_offset":
+                    ncOutVersion = NetcdfFileFormat.NETCDF3_64BIT_OFFSET;
+                    break;
+                case "netcdf4":
+                    ncOutVersion = NetcdfFileFormat.NETCDF4;
+                    break;
+                case "netcdf4_classic":
+                    ncOutVersion = NetcdfFileFormat.NETCDF4_CLASSIC;
+                    break;
                 default:
-                    ncOutVersion = NetcdfFileWriter.Version.netcdf4;
+                    ncOutVersion = NetcdfFileFormat.NETCDF3;
                     break;
             }
         }
