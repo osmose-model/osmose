@@ -52,12 +52,14 @@ import ucar.ma2.ArrayFloat;
 import ucar.ma2.DataType;
 import ucar.ma2.InvalidRangeException;
 import ucar.nc2.Dimension;
-import ucar.nc2.NetcdfFileWriter;
 import fr.ird.osmose.output.IOutput;
 import java.util.ArrayList;
 import java.util.Arrays;
 import ucar.nc2.Attribute;
 import ucar.nc2.Variable;
+import ucar.nc2.write.Nc4Chunking;
+import ucar.nc2.write.Nc4ChunkingStrategy;
+import ucar.nc2.write.NetcdfFormatWriter;
 
 /**
  *
@@ -72,7 +74,8 @@ public abstract class AbstractSpatialOutput extends SimulationLinker implements 
     /**
      * Object for creating/writing netCDF files.
      */
-    protected NetcdfFileWriter nc;
+    protected NetcdfFormatWriter nc;
+    protected NetcdfFormatWriter.Builder bNc;
 
     // spatial indicators
     protected float[][][] data;
@@ -104,46 +107,48 @@ public abstract class AbstractSpatialOutput extends SimulationLinker implements 
     @Override
     public void init() {
 
+        Nc4Chunking.Strategy strategy = Nc4Chunking.Strategy.none;
+        int deflateLevel = 0;
+        boolean shuffle = false;
+        Nc4Chunking chunker = Nc4ChunkingStrategy.factory(strategy, deflateLevel, shuffle);
+
         /*
          * Create NetCDF file
          */
-        try {
-            String filename = getFilename();
-            IOTools.makeDirectories(filename);
-            nc = NetcdfFileWriter.createNew(getConfiguration().getNcOutVersion(), filename);
-        } catch (IOException ex) {
-            Logger.getLogger(AbstractSpatialOutput.class.getName()).log(Level.SEVERE, null, ex);
-        }
+        String filename = getFilename();
+        IOTools.makeDirectories(filename);
+        bNc = NetcdfFormatWriter.createNewNetcdf4(getConfiguration().getNcOutVersion(), filename, chunker);
+
         /*
          * Create dimensions
          */
-        Dimension speciesDim = nc.addDimension(null, "species", getNSpecies());
-        Dimension columnsDim = nc.addDimension(null, "nx", getGrid().get_nx());
-        Dimension linesDim = nc.addDimension(null, "ny", getGrid().get_ny());
-        Dimension timeDim = nc.addUnlimitedDimension("time");
+        Dimension speciesDim = bNc.addDimension("species", getNSpecies());
+        Dimension columnsDim = bNc.addDimension("nx", getGrid().get_nx());
+        Dimension linesDim = bNc.addDimension("ny", getGrid().get_ny());
+        Dimension timeDim = bNc.addUnlimitedDimension("time");
         /*
          * Add variables
          */
-        timeVar = nc.addVariable(null, "time", DataType.FLOAT, "time");
-        timeVar.addAttribute(new Attribute("units", "days since 0-1-1 0:0:0"));
-        timeVar.addAttribute(new Attribute("calendar", "360_day"));
-        timeVar.addAttribute(new Attribute("description", "time ellapsed, in days, since the beginning of the simulation"));
+        Variable.Builder<?> timeVarBuilder = bNc.addVariable("time", DataType.FLOAT, "time");
+        timeVarBuilder.addAttribute(new Attribute("units", "days since 0-1-1 0:0:0"));
+        timeVarBuilder.addAttribute(new Attribute("calendar", "360_day"));
+        timeVarBuilder.addAttribute(new Attribute("description", "time ellapsed, in days, since the beginning of the simulation"));
 
-        outVar = nc.addVariable(null, this.getVarName(), DataType.FLOAT, new ArrayList<>(Arrays.asList(timeDim, speciesDim, linesDim, columnsDim)));
-        outVar.addAttribute(new Attribute("units", "number of fish"));
-        outVar.addAttribute(new Attribute("_FillValue", -99.f));
+        Variable.Builder<?> outVarBuilder = bNc.addVariable(this.getVarName(), DataType.FLOAT, new ArrayList<>(Arrays.asList(timeDim, speciesDim, linesDim, columnsDim)));
+        outVarBuilder.addAttribute(new Attribute("units", "number of fish"));
+        outVarBuilder.addAttribute(new Attribute("_FillValue", -99.f));
 
-        latVar = nc.addVariable(null, "latitude", DataType.FLOAT, new ArrayList<>(Arrays.asList(linesDim, columnsDim)));
-        latVar.addAttribute(new Attribute("units", "degree"));
-        latVar.addAttribute(new Attribute("description", "latitude of the center of the cell"));
+        Variable.Builder<?> latVarBuilder = bNc.addVariable("latitude", DataType.FLOAT, new ArrayList<>(Arrays.asList(linesDim, columnsDim)));
+        latVarBuilder.addAttribute(new Attribute("units", "degree"));
+        latVarBuilder.addAttribute(new Attribute("description", "latitude of the center of the cell"));
 
-        lonVar = nc.addVariable(null, "longitude", DataType.FLOAT, new ArrayList<>(Arrays.asList(linesDim, columnsDim)));
-        lonVar.addAttribute(new Attribute("units", "degree"));
-        lonVar.addAttribute(new Attribute("description", "longitude of the center of the cell"));
+        Variable.Builder<?> lonVarBuilder = bNc.addVariable("longitude", DataType.FLOAT, new ArrayList<>(Arrays.asList(linesDim, columnsDim)));
+        lonVarBuilder.addAttribute(new Attribute("units", "degree"));
+        lonVarBuilder.addAttribute(new Attribute("description", "longitude of the center of the cell"));
         /*
          * Add global attributes
          */
-        nc.addGroupAttribute(null, new Attribute("dimension_step", "step=0 before predation, step=1 after predation"));
+        bNc.addAttribute(new Attribute("dimension_step", "step=0 before predation, step=1 after predation"));
         StringBuilder str = new StringBuilder();
         for (int krsc = 0; krsc < getConfiguration().getNRscSpecies(); krsc++) {
             str.append(krsc);
@@ -151,7 +156,7 @@ public abstract class AbstractSpatialOutput extends SimulationLinker implements 
             str.append(getConfiguration().getResourceSpecies(krsc));
             str.append(" ");
         }
-        nc.addGroupAttribute(null, new Attribute("dimension_rsc", str.toString()));
+        bNc.addAttribute(new Attribute("dimension_rsc", str.toString()));
         str = new StringBuilder();
         for (int ispec = 0; ispec < getConfiguration().getNSpecies(); ispec++) {
             str.append(ispec);
@@ -159,13 +164,13 @@ public abstract class AbstractSpatialOutput extends SimulationLinker implements 
             str.append(getSpecies(ispec).getName());
             str.append(" ");
         }
-        nc.addGroupAttribute(null, new Attribute("dimension_species", str.toString()));
-        nc.addGroupAttribute(null, new Attribute("include_age_class_zero", Boolean.toString(includeClassZero())));
+        bNc.addAttribute(new Attribute("dimension_species", str.toString()));
+        bNc.addAttribute(new Attribute("include_age_class_zero", Boolean.toString(includeClassZero())));
         try {
             /*
              * Validates the structure of the NetCDF file.
              */
-            nc.create();
+            this.nc = this.bNc.build();
             /*
              * Writes variable longitude and latitude
              */
@@ -190,7 +195,7 @@ public abstract class AbstractSpatialOutput extends SimulationLinker implements 
     public void close() {
         try {
             nc.close();
-            String strFilePart = nc.getNetcdfFile().getLocation();
+            String strFilePart = this.getFilename();
             String strFileBase = strFilePart.substring(0, strFilePart.indexOf(".part"));
             File filePart = new File(strFilePart);
             File fileBase = new File(strFileBase);

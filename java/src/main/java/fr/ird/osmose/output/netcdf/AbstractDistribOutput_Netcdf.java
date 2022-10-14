@@ -53,6 +53,7 @@ import java.util.logging.Logger;
 import ucar.ma2.ArrayFloat;
 import ucar.ma2.ArrayInt;
 import ucar.ma2.DataType;
+import ucar.ma2.Index;
 import ucar.ma2.InvalidRangeException;
 import ucar.nc2.Dimension;
 import ucar.nc2.Variable;
@@ -116,12 +117,12 @@ public abstract class AbstractDistribOutput_Netcdf extends AbstractOutput_Netcdf
     @Override
     void init_nc_dims_coords() {
 
-        Dimension speciesDim = getNc().addDimension(null, "species", getNSpecies());
-        Dimension classDim = getNc().addDimension(null, this.getDisName(), this.distrib.getNClass());
-        getNc().addVariable(null, "species", DataType.INT, "species");
-        getNc().addVariable(null, this.getDisName(), DataType.FLOAT, this.getDisName());
+        Dimension speciesDim = getBNc().addDimension("species", getNSpecies());
+        Dimension classDim = getBNc().addDimension(this.getDisName(), this.distrib.getNClass());
+        Variable.Builder<?> speciesVar = getBNc().addVariable("species", DataType.INT, "species");
+        Variable.Builder<?> distribVar = getBNc().addVariable(this.getDisName(), DataType.FLOAT, this.getDisName());
 
-        this.createSpeciesAttr();
+        this.createSpeciesAttr(speciesVar);
 
         // Initialize the outdims (time, class, species) as a NetCDF file
         List<Dimension> outdims = new ArrayList<>(Arrays.asList(getTimeDim(), classDim, speciesDim));
@@ -134,11 +135,13 @@ public abstract class AbstractDistribOutput_Netcdf extends AbstractOutput_Netcdf
         try {
 
             // Writes variable trait (trait names) and species (species names)
-            ArrayInt.D1 arrSpecies = new ArrayInt.D1(this.getNSpecies());
+            ArrayInt arrSpecies = new ArrayInt(new int[] {this.getNSpecies()}, false);
             ArrayFloat.D1 arrClass = new ArrayFloat.D1(this.distrib.getNClass());
+            Index index = arrSpecies.getIndex();
 
             for (int i = 0; i < this.getNSpecies(); i++) {
-                arrSpecies.set(i, i);
+                index.set(i);
+                arrSpecies.set(index, i);
             }
 
             Variable varspec = this.getNc().findVariable("species");
