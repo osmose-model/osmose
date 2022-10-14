@@ -59,7 +59,6 @@ import ucar.nc2.Attribute;
 import ucar.nc2.Dimension;
 import ucar.nc2.Variable;
 import ucar.nc2.write.Nc4Chunking;
-import ucar.nc2.write.Nc4ChunkingStrategy;
 import ucar.nc2.write.NetcdfFormatWriter;
 
 /**
@@ -102,10 +101,7 @@ public class SpatialSizeSpeciesOutput extends SimulationLinker implements IOutpu
     @Override
     public void init() {
 
-        Nc4Chunking.Strategy strategy = Nc4Chunking.Strategy.none;
-        int deflateLevel = 0;
-        boolean shuffle = false;
-        Nc4Chunking chunker = Nc4ChunkingStrategy.factory(strategy, deflateLevel, shuffle);
+        Nc4Chunking chunker = getConfiguration().getChunker();
 
         /*
          * Create NetCDF file

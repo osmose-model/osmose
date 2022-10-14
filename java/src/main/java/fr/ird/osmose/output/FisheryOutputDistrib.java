@@ -57,7 +57,6 @@ import ucar.nc2.Attribute;
 import ucar.nc2.Dimension;
 import ucar.nc2.Variable;
 import ucar.nc2.write.Nc4Chunking;
-import ucar.nc2.write.Nc4ChunkingStrategy;
 import ucar.nc2.write.NetcdfFormatWriter;
 
 /**
@@ -114,10 +113,7 @@ public class FisheryOutputDistrib extends SimulationLinker implements IOutput {
         discards = new double[nSpecies][nFishery][nClass];
         accessibleBiomass = new double[nSpecies][nFishery][nClass];
 
-        Nc4Chunking.Strategy strategy = Nc4Chunking.Strategy.none;
-        int deflateLevel = 0;
-        boolean shuffle = false;
-        Nc4Chunking chunker = Nc4ChunkingStrategy.factory(strategy, deflateLevel, shuffle);
+        Nc4Chunking chunker = getConfiguration().getChunker();
 
         /*
          * Create NetCDF file

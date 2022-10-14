@@ -1727,6 +1727,10 @@ public class Configuration extends OLogger {
 
     public void setChunker() {
 
+        if(this.ncOutVersion != NetcdfFileFormat.NETCDF4) {
+            return;
+        }
+
         int deflateLevel = 0;
         boolean shuffle = false;
 
