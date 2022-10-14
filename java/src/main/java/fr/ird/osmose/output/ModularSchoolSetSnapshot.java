@@ -195,14 +195,14 @@ public class ModularSchoolSetSnapshot extends SimulationLinker implements IOutpu
 
         NetcdfFormatWriter.Builder bNc;
         NetcdfFormatWriter nc = null;
-        file = null;
+        this.file = null;
 
         /*
          * Create NetCDF file
          */
         File path = new File(getConfiguration().getOutputPathname());
-        file = new File(path, getFilename(iStepSimu));
-        file.getParentFile().mkdirs();
+        this.file = new File(path, getFilename(iStepSimu));
+        this.file.getParentFile().mkdirs();
         bNc = NetcdfFormatWriter.createNewNetcdf4(getConfiguration().getNcOutVersion(), file.getAbsolutePath(), null);
 
         /*

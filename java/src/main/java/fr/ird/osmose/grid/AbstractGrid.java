@@ -1,10 +1,10 @@
-/* 
- * 
+/*
+ *
  * OSMOSE (Object-oriented Simulator of Marine Ecosystems)
  * http://www.osmose-model.org
- * 
+ *
  * Copyright (C) IRD (Institut de Recherche pour le Développement) 2009-2020
- * 
+ *
  * Osmose is a computer program whose purpose is to simulate fish
  * populations and their interactions with their biotic and abiotic environment.
  * OSMOSE is a spatial, multispecies and individual-based model which assumes
@@ -15,7 +15,7 @@
  * processes of fish life cycle (growth, explicit predation, additional and
  * starvation mortalities, reproduction and migration) and fishing mortalities
  * (Shin and Cury 2001, 2004).
- * 
+ *
  * Contributor(s):
  * Yunne SHIN (yunne.shin@ird.fr),
  * Morgane TRAVERS (morgane.travers@ifremer.fr)
@@ -23,38 +23,29 @@
  * Philippe VERLEY (philippe.verley@ird.fr)
  * Laure VELEZ (laure.velez@ird.fr)
  * Nicolas Barrier (nicolas.barrier@ird.fr)
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation (version 3 of the License). Full description
  * is provided on the LICENSE file.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
- * 
+ *
  */
 
 package fr.ird.osmose.grid;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import fr.ird.osmose.Cell;
 import fr.ird.osmose.util.OsmoseLinker;
-import fr.ird.osmose.util.io.IOTools;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import ucar.ma2.ArrayDouble;
-import ucar.ma2.DataType;
-import ucar.ma2.InvalidRangeException;
-import ucar.nc2.Attribute;
-import ucar.nc2.Dimension;
-import ucar.nc2.NetcdfFileWriter;
-import ucar.nc2.Variable;
 
 /**
  * This abstract class details the functions that an Osmose grid needs to
@@ -121,7 +112,7 @@ public abstract class AbstractGrid extends OsmoseLinker {
      * Zonal size, in degree, of a cell (delta longitude).
      */
     private float dLong;
-       
+
     private boolean readSurf = false;
 
 /////////////////////////////////////
@@ -326,16 +317,16 @@ public abstract class AbstractGrid extends OsmoseLinker {
          */
         dLat = (latMax - latMin) / (float) ny;
         dLong = (longMax - longMin) / (float) nx;
-        
-        if(!this.readSurf) { 
-            for(int i=0; i<nx; i++) { 
+
+        if(!this.readSurf) {
+            for(int i=0; i<nx; i++) {
                  for(j=0; j<ny; j++) {
                      double surf = this.computeSurface(matrix[j][i].getLat(), matrix[j][i].getLon());
                      matrix[j][i].setSurface((float) surf);
                  }
             }
         }
-        
+
     }
 
     /**
@@ -419,80 +410,9 @@ public abstract class AbstractGrid extends OsmoseLinker {
         return dLong;
     }
 
-    /**
-     * Writes the current Osmose grid as a NetCDF file. Creates a NetCDF file
-     * with three Double 2D arrays: longitude[ny][nx], latitude[ny][nx] and
-     * mask[ny][nx]
-     *
-     * @param filename, the absolute filename of the NetCDF grid file to be
-     * created
-     */
-    public void toNetCDF(String filename) {
-
-        NetcdfFileWriter nc = null;
-        /*
-         * Create NetCDF file
-         */
-        try {
-            IOTools.makeDirectories(filename);
-            nc = NetcdfFileWriter.createNew(getConfiguration().getNcOutVersion(), filename);
-        } catch (IOException ex) {
-            error("Failed to created NetCDF grid file " + filename, ex);
-        }
-        /*
-         * Create dimensions
-         */
-        Dimension nxDim = nc.addDimension(null, "nx", nx);
-        Dimension nyDim = nc.addDimension(null, "ny", ny);
-        /*
-         * Add variables
-         */
-        Variable latVar = nc.addVariable(null, "latitude", DataType.DOUBLE, new ArrayList<>(Arrays.asList(nyDim, nxDim)));
-        latVar.addAttribute(new Attribute("units", "north degree"));
-        latVar.addAttribute(new Attribute("description", "latitude of the center of the cell"));
-
-        Variable lonVar = nc.addVariable(null, "longitude", DataType.DOUBLE, new ArrayList<>(Arrays.asList(nyDim, nxDim)));
-        lonVar.addAttribute(new Attribute("units", "south degree"));
-        lonVar.addAttribute(new Attribute("description", "longitude of the center of the cell"));
-
-        Variable maskVar = nc.addVariable(null, "mask", DataType.DOUBLE, new ArrayList<>(Arrays.asList(nyDim, nxDim)));
-        maskVar.addAttribute(new Attribute("units", "boolean"));
-        maskVar.addAttribute(new Attribute("description", "mask of the grid, one means ocean and zero means continent"));
-        try {
-            /*
-             * Validates the structure of the NetCDF file.
-             */
-            nc.create();
-            /*
-             * Writes variable longitude and latitude
-             */
-            ArrayDouble.D2 arrLon = new ArrayDouble.D2(get_ny(), get_nx());
-            ArrayDouble.D2 arrLat = new ArrayDouble.D2(get_ny(), get_nx());
-            ArrayDouble.D2 arrMask = new ArrayDouble.D2(get_ny(), get_nx());
-            for (Cell cell : getCells()) {
-                arrLon.set(cell.get_jgrid(), cell.get_igrid(), cell.getLon());
-                arrLat.set(cell.get_jgrid(), cell.get_igrid(), cell.getLat());
-                arrMask.set(cell.get_jgrid(), cell.get_igrid(), cell.isLand() ? 0.d : 1.d);
-            }
-            nc.write(lonVar, arrLon);
-            nc.write(latVar, arrLat);
-            nc.write(maskVar, arrMask);
-        } catch (IOException | InvalidRangeException ex) {
-            error("Failed to write the NetCDF grid file", ex);
-        } 
-        /*
-         * CLose the NetCDF file 
-         */
-        try {
-            nc.close();
-        } catch (IOException ex) {
-            // do nothing
-        }
-    }
-    
     /** Computes the surface of a cell on a regular grid.
-     * 
-     * 
+     *
+     *
      * @param lat Latitude (degrees)
      * @param lon Longitude (degrees)
      * @return Surface (m2)
@@ -501,7 +421,7 @@ public abstract class AbstractGrid extends OsmoseLinker {
 
         float dlat = getGrid().getdLat();
         float dlon = getGrid().getdLong();
-        
+
         // Earth radius in m
         double Rt = 6371 * 1e3;
         double surf = Rt * deg2rad(dlat) * Rt * deg2rad(dlon) * Math.cos(deg2rad(lat));
@@ -517,7 +437,7 @@ public abstract class AbstractGrid extends OsmoseLinker {
     private double deg2rad(double value) {
         return value * Math.PI / 180.;
     }
-    
+
     public boolean isReadSurf() {
         return this.readSurf;
     }
@@ -525,5 +445,5 @@ public abstract class AbstractGrid extends OsmoseLinker {
     public void setReadSurf(boolean readSurf) {
         this.readSurf = readSurf;
     }
-    
+
 }
