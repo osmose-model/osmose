@@ -55,8 +55,10 @@ import ucar.ma2.DataType;
 import ucar.ma2.InvalidRangeException;
 import ucar.nc2.Attribute;
 import ucar.nc2.Dimension;
-import ucar.nc2.NetcdfFileWriter;
 import ucar.nc2.Variable;
+import ucar.nc2.write.Nc4Chunking;
+import ucar.nc2.write.Nc4ChunkingStrategy;
+import ucar.nc2.write.NetcdfFormatWriter;
 
 /**
  * Class that manages the input of fisheries data.
@@ -72,7 +74,8 @@ public class FisheryOutputDistrib extends SimulationLinker implements IOutput {
     /*
      * Object for creating/writing netCDF files.
      */
-    private NetcdfFileWriter nc;
+    private NetcdfFormatWriter nc;
+    private NetcdfFormatWriter.Builder bNc;
     /*
      * NetCDF time and biomass variables.
      */
@@ -111,25 +114,26 @@ public class FisheryOutputDistrib extends SimulationLinker implements IOutput {
         discards = new double[nSpecies][nFishery][nClass];
         accessibleBiomass = new double[nSpecies][nFishery][nClass];
 
+        Nc4Chunking.Strategy strategy = Nc4Chunking.Strategy.none;
+        int deflateLevel = 0;
+        boolean shuffle = false;
+        Nc4Chunking chunker = Nc4ChunkingStrategy.factory(strategy, deflateLevel, shuffle);
+
         /*
          * Create NetCDF file
          */
-        try {
-            String filename = getFilename();
-            IOTools.makeDirectories(filename);
-            nc = NetcdfFileWriter.createNew(getConfiguration().getNcOutVersion(), filename);
-        } catch (IOException ex) {
-            Logger.getLogger(FisheryOutputDistrib.class.getName()).log(Level.SEVERE, null, ex);
-        }
+        String filename = getFilename();
+        IOTools.makeDirectories(filename);
+        bNc = NetcdfFormatWriter.createNewNetcdf4(getConfiguration().getNcOutVersion(), filename, chunker);
 
         /*
          * Create dimensions
          */
-        Dimension speciesDim = nc.addDimension(null, "species", getNSpecies() + this.getNBkgSpecies());
-        Dimension fisheriesDim = nc.addDimension(null, "fishery", nFishery);
-        Dimension classDim = nc.addDimension(null, "class", nClass);
+        Dimension speciesDim = bNc.addDimension("species", getNSpecies() + this.getNBkgSpecies());
+        Dimension fisheriesDim = bNc.addDimension("fishery", nFishery);
+        Dimension classDim = bNc.addDimension("class", nClass);
 
-        Dimension timeDim = nc.addUnlimitedDimension("time");
+        Dimension timeDim = bNc.addUnlimitedDimension("time");
 
         String attr = this.getSpeciesNames();
         String fisheryNames = this.getFisheriesNames();
@@ -138,34 +142,34 @@ public class FisheryOutputDistrib extends SimulationLinker implements IOutput {
         /*
          * Add variables
          */
-        timeVar = nc.addVariable(null, "time", DataType.FLOAT, "time");
-        timeVar.addAttribute(new Attribute("units", "days since 0-1-1 0:0:0"));
-        timeVar.addAttribute(new Attribute("calendar", "360_day"));
-        timeVar.addAttribute(new Attribute("description", "time ellapsed, in days, since the beginning of the simulation"));
+        Variable.Builder<?> timeVarBuilder = bNc.addVariable("time", DataType.FLOAT, "time");
+        timeVarBuilder.addAttribute(new Attribute("units", "days since 0-1-1 0:0:0"));
+        timeVarBuilder.addAttribute(new Attribute("calendar", "360_day"));
+        timeVarBuilder.addAttribute(new Attribute("description", "time ellapsed, in days, since the beginning of the simulation"));
 
-        biomassVar = nc.addVariable(null, "landings", DataType.FLOAT, new ArrayList<>(Arrays.asList(timeDim, speciesDim, fisheriesDim, classDim)));
-        biomassVar.addAttribute(new Attribute("units", "ton"));
-        biomassVar.addAttribute(new Attribute("description", "landings, in tons, by species and by fishery"));
-        biomassVar.addAttribute(new Attribute("_FillValue", -99.f));
-        biomassVar.addAttribute(new Attribute("species_names", attr));
-        biomassVar.addAttribute(new Attribute("fisheries_names", fisheryNames));
-        biomassVar.addAttribute(new Attribute("class_names", classNames));
+        Variable.Builder<?> biomassVarBuilder = bNc.addVariable("landings", DataType.FLOAT, new ArrayList<>(Arrays.asList(timeDim, speciesDim, fisheriesDim, classDim)));
+        biomassVarBuilder.addAttribute(new Attribute("units", "ton"));
+        biomassVarBuilder.addAttribute(new Attribute("description", "landings, in tons, by species and by fishery"));
+        biomassVarBuilder.addAttribute(new Attribute("_FillValue", -99.f));
+        biomassVarBuilder.addAttribute(new Attribute("species_names", attr));
+        biomassVarBuilder.addAttribute(new Attribute("fisheries_names", fisheryNames));
+        biomassVarBuilder.addAttribute(new Attribute("class_names", classNames));
 
-        discardsVar = nc.addVariable(null, "discards", DataType.FLOAT, new ArrayList<>(Arrays.asList(timeDim, speciesDim, fisheriesDim, classDim)));
-        discardsVar.addAttribute(new Attribute("units", "ton"));
-        discardsVar.addAttribute(new Attribute("description", "discards, in tons, by species and by fishery"));
-        discardsVar.addAttribute(new Attribute("_FillValue", -99.f));
-        discardsVar.addAttribute(new Attribute("species_names", attr));
-        discardsVar.addAttribute(new Attribute("fisheries_names", fisheryNames));
-        discardsVar.addAttribute(new Attribute("class_names", classNames));
+        Variable.Builder<?> discardsVarBuilder = bNc.addVariable("discards", DataType.FLOAT, new ArrayList<>(Arrays.asList(timeDim, speciesDim, fisheriesDim, classDim)));
+        discardsVarBuilder.addAttribute(new Attribute("units", "ton"));
+        discardsVarBuilder.addAttribute(new Attribute("description", "discards, in tons, by species and by fishery"));
+        discardsVarBuilder.addAttribute(new Attribute("_FillValue", -99.f));
+        discardsVarBuilder.addAttribute(new Attribute("species_names", attr));
+        discardsVarBuilder.addAttribute(new Attribute("fisheries_names", fisheryNames));
+        discardsVarBuilder.addAttribute(new Attribute("class_names", classNames));
 
-        accessibleBiomassVar = nc.addVariable(null, "accessible_biomass", DataType.FLOAT, new ArrayList<>(Arrays.asList(timeDim, speciesDim, fisheriesDim, classDim)));
-        accessibleBiomassVar.addAttribute(new Attribute("units", "ton"));
-        accessibleBiomassVar.addAttribute(new Attribute("description", "accessible biomass, in tons, by species and by fishery"));
-        accessibleBiomassVar.addAttribute(new Attribute("_FillValue", -99.f));
-        accessibleBiomassVar.addAttribute(new Attribute("species_names", attr));
-        accessibleBiomassVar.addAttribute(new Attribute("fisheries_names", fisheryNames));
-        accessibleBiomassVar.addAttribute(new Attribute("class_names", classNames));
+        Variable.Builder<?> accessibleBiomassVarBuilder = bNc.addVariable("accessible_biomass", DataType.FLOAT, new ArrayList<>(Arrays.asList(timeDim, speciesDim, fisheriesDim, classDim)));
+        accessibleBiomassVarBuilder.addAttribute(new Attribute("units", "ton"));
+        accessibleBiomassVarBuilder.addAttribute(new Attribute("description", "accessible biomass, in tons, by species and by fishery"));
+        accessibleBiomassVarBuilder.addAttribute(new Attribute("_FillValue", -99.f));
+        accessibleBiomassVarBuilder.addAttribute(new Attribute("species_names", attr));
+        accessibleBiomassVarBuilder.addAttribute(new Attribute("fisheries_names", fisheryNames));
+        accessibleBiomassVarBuilder.addAttribute(new Attribute("class_names", classNames));
 
 
 
@@ -173,7 +177,7 @@ public class FisheryOutputDistrib extends SimulationLinker implements IOutput {
             /*
              * Validates the structure of the NetCDF file.
              */
-            nc.create();
+            nc = this.bNc.build();
 
         } catch (IOException ex) {
             Logger.getLogger(FisheryOutputDistrib.class.getName()).log(Level.SEVERE, null, ex);
@@ -184,7 +188,7 @@ public class FisheryOutputDistrib extends SimulationLinker implements IOutput {
     public void close() {
         try {
             nc.close();
-            String strFilePart = nc.getNetcdfFile().getLocation();
+            String strFilePart = this.getFilename();
             String strFileBase = strFilePart.substring(0, strFilePart.indexOf(".part"));
             File filePart = new File(strFilePart);
             File fileBase = new File(strFileBase);

@@ -67,7 +67,8 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import ucar.ma2.InvalidRangeException;
 import org.apache.commons.lang3.ArrayUtils;
-import ucar.nc2.NetcdfFileWriter;
+import ucar.nc2.write.Nc4Chunking;
+import ucar.nc2.write.Nc4ChunkingStrategy;
 import ucar.nc2.write.NetcdfFileFormat;
 
 /**
@@ -321,6 +322,8 @@ public class Configuration extends OLogger {
      */
     private boolean preyRecord;
 
+    private Nc4Chunking chunker;
+
     ///////////////
     // Constructors
     ///////////////
@@ -476,6 +479,7 @@ public class Configuration extends OLogger {
 
         // Set the output NetCdf format for
         this.setOutputNcFormat();
+        this.setChunker();
 
         // barrier.n: new way to count the number of species, resource and background
         // based on types.
@@ -1719,6 +1723,53 @@ public class Configuration extends OLogger {
                     break;
             }
         }
+    }
+
+    public void setChunker() {
+
+        int deflateLevel = 0;
+        boolean shuffle = false;
+
+        // if netcdf4 output, check if deflate level is set.
+        String key = "output.netcdf.deflate.level";
+        if (!this.isNull(key)) {
+            deflateLevel = getInt(key);
+        }
+
+        // if deflate > 0, compression is on.
+        if (deflateLevel > 0) {
+
+            key = "output.netcdf.shuffle";
+            // we read whether shuffle parameter is on.
+            if (!this.isNull(key)) {
+                shuffle = getBoolean(key, false);
+            }
+
+            Nc4Chunking.Strategy strategy = Nc4Chunking.Strategy.none;
+            key = "output.netcdf.chunk";
+            if (!this.isNull(key)) {
+                switch (getString(key)) {
+                    case "standard":
+                        strategy = Nc4Chunking.Strategy.standard;
+                        break;
+                    case "grib":
+                        strategy = Nc4Chunking.Strategy.grib;
+                        break;
+                    case "none":
+                        strategy = Nc4Chunking.Strategy.none;
+                        break;
+                    default:
+                        strategy = Nc4Chunking.Strategy.none;
+                }
+            }
+
+            this.chunker = Nc4ChunkingStrategy.factory(strategy, deflateLevel, shuffle);
+
+        }
+    }
+
+    public Nc4Chunking getChunker() {
+        return this.chunker;
     }
 
 }

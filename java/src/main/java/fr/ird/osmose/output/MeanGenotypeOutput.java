@@ -54,11 +54,13 @@ import fr.ird.osmose.util.SimulationLinker;
 import ucar.ma2.ArrayDouble;
 import ucar.ma2.ArrayInt;
 import ucar.ma2.DataType;
+import ucar.ma2.Index;
 import ucar.ma2.InvalidRangeException;
 import ucar.nc2.Attribute;
 import ucar.nc2.Dimension;
-import ucar.nc2.NetcdfFileWriter;
 import ucar.nc2.Variable;
+import ucar.nc2.write.Nc4Chunking;
+import ucar.nc2.write.NetcdfFormatWriter;
 import fr.ird.osmose.util.io.IOTools;
 
 public class MeanGenotypeOutput extends SimulationLinker implements IOutput {
@@ -89,7 +91,8 @@ public class MeanGenotypeOutput extends SimulationLinker implements IOutput {
     /**
      * _FillValue attribute for cells on land
      */
-    private NetcdfFileWriter nc;
+    private NetcdfFormatWriter nc;
+    private NetcdfFormatWriter.Builder bNc;
     private int record_index = 0;
 
     private final String varname = "meanGenotype";
@@ -206,37 +209,33 @@ public class MeanGenotypeOutput extends SimulationLinker implements IOutput {
     @Override
     public void init() {
 
-        /*
-         * Create NetCDF file
-         */
-        try {
-            String filename = getFilename();
-            IOTools.makeDirectories(filename);
-            nc = NetcdfFileWriter.createNew(getConfiguration().getNcOutVersion(), filename);
-        } catch (IOException ex) {
-            Logger.getLogger(MeanGenotypeOutput.class.getName()).log(Level.SEVERE, null, ex);
-        }
+        Nc4Chunking chunk = getConfiguration().getChunker();
+
+        // Create NetCDF file
+        String filename = getFilename();
+        IOTools.makeDirectories(filename);
+        bNc = NetcdfFormatWriter.createNewNetcdf4(getConfiguration().getNcOutVersion(), filename, chunk);
 
         // Add time dim and variable (common to all files)
-        timeDim = nc.addUnlimitedDimension("time");
+        timeDim = bNc.addUnlimitedDimension("time");
 
-        Variable tvar = nc.addVariable(null, "time", DataType.DOUBLE, "time");
-        tvar.addAttribute(new Attribute("units", "days since 0-1-1 0:0:0"));
-        tvar.addAttribute(new Attribute("calendar", "360_day"));
-        tvar.addAttribute(new Attribute("description", "time ellapsed, in days, since the beginning of the simulation"));
+        Variable.Builder<?> tvarBuilder = bNc.addVariable("time", DataType.DOUBLE, "time");
+        tvarBuilder.addAttribute(new Attribute("units", "days since 0-1-1 0:0:0"));
+        tvarBuilder.addAttribute(new Attribute("calendar", "360_day"));
+        tvarBuilder.addAttribute(new Attribute("description", "time ellapsed, in days, since the beginning of the simulation"));
 
         // Init NC dimensions and coords (in define mode)
         this.init_nc_dims_coords();
 
         // Create output variable
-        outvar = nc.addVariable(null, getVarname(), DataType.FLOAT, this.getNcDims());
-        // outvar.addAttribute(new Attribute("units", getUnits()));
-        outvar.addAttribute(new Attribute("description", getDescription()));
-        // outvar.addAttribute(new Attribute("_FillValue", getFillValue()));
+        Variable.Builder<?> outvarBuilder = bNc.addVariable(getVarname(), DataType.FLOAT, this.getNcDims());
+        // outvarBuilder.addAttribute(new Attribute("units", getUnits()));
+        outvarBuilder.addAttribute(new Attribute("description", getDescription()));
+        // outvarBuilder.addAttribute(new Attribute("_FillValue", getFillValue()));
 
         try {
             // Validates the structure of the NetCDF file.
-            nc.create();
+            nc = this.bNc.build();
         } catch (IOException ex) {
             Logger.getLogger(MeanGenotypeOutput.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -250,7 +249,7 @@ public class MeanGenotypeOutput extends SimulationLinker implements IOutput {
     public void close() {
         try {
             nc.close();
-            String strFilePart = nc.getNetcdfFile().getLocation();
+            String strFilePart = getFilename();
             String strFileBase = strFilePart.substring(0, strFilePart.indexOf(".part"));
             File filePart = new File(strFilePart);
             File fileBase = new File(strFileBase);
@@ -270,14 +269,14 @@ public class MeanGenotypeOutput extends SimulationLinker implements IOutput {
      */
     void init_nc_dims_coords() {
 
-        Dimension speciesDim = nc.addDimension(null, "species", getNSpecies());
-        Dimension traitDim = nc.addDimension(null, "trait", getNEvolvingTraits());
+        Dimension speciesDim = bNc.addDimension("species", getNSpecies());
+        Dimension traitDim = bNc.addDimension("trait", getNEvolvingTraits());
 
-        nc.addVariable(null, "species", DataType.INT, "species");
-        this.createSpeciesAttr();
+        Variable.Builder<?> speciesVar = bNc.addVariable("species", DataType.INT, "species");
+        this.createSpeciesAttr(speciesVar);
 
-        nc.addVariable(null, "trait", DataType.INT, "trait");
-        this.createTraitAttr();
+        Variable.Builder<?> traitVar = bNc.addVariable("trait", DataType.INT, "trait");
+        this.createTraitAttr(traitVar);
 
         outDims = new ArrayList<>();
         outDims.add(timeDim);
@@ -289,9 +288,11 @@ public class MeanGenotypeOutput extends SimulationLinker implements IOutput {
     public void write_nc_coords() {
 
         // Writes variable trait (trait names) and species (species names)
-        ArrayInt.D1 arrSpecies = new ArrayInt.D1(this.getNSpecies());
+        ArrayInt arrSpecies = new ArrayInt(new int[] {this.getNSpecies()}, false);
+        Index index = arrSpecies.getIndex();
         for (int i = 0; i < this.getNSpecies(); i++) {
-            arrSpecies.set(i, i);
+            index.set(i);
+            arrSpecies.set(index, i);
         }
 
         Variable varspec = this.nc.findVariable("species");
@@ -303,9 +304,11 @@ public class MeanGenotypeOutput extends SimulationLinker implements IOutput {
         }
 
         // Writes variable trait (trait names) and species (species names)
-        ArrayInt.D1 arrTrait = new ArrayInt.D1(this.getNEvolvingTraits());
+        ArrayInt arrTrait = new ArrayInt(new int[] {this.getNEvolvingTraits()}, false);
+        index = arrTrait.getIndex();
         for (int i = 0; i < this.getNEvolvingTraits(); i++) {
-            arrSpecies.set(i, i);
+            index.set(i);
+            arrSpecies.set(index, i);
         }
 
         Variable vartrait = this.nc.findVariable("trait");
@@ -322,9 +325,8 @@ public class MeanGenotypeOutput extends SimulationLinker implements IOutput {
      * Function to create a species attribute.
      * @return
      */
-    public String createSpeciesAttr() {
+    public String createSpeciesAttr(Variable.Builder<?> species) {
 
-        Variable species = this.nc.findVariable("species");
         StringBuilder bld = new StringBuilder();
         for (int i = 0; i < this.getNSpecies(); i++) {
             String attrname = String.format("species%d", i);
@@ -340,9 +342,8 @@ public class MeanGenotypeOutput extends SimulationLinker implements IOutput {
      * Function to create a species attribute.
      * @return
      */
-    public String createTraitAttr() {
+    public String createTraitAttr(Variable.Builder<?> trait) {
 
-        Variable trait = this.nc.findVariable("trait");
         StringBuilder bld = new StringBuilder();
         for (int i = 0; i < this.getNEvolvingTraits(); i++) {
             String attrname = String.format("trait%d", i);
