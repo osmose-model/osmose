@@ -201,9 +201,8 @@ abstract public class AbstractOutput_Netcdf extends SimulationLinker implements 
      * Function to create a species attribute.
      * @return
      */
-    public String createSpeciesAttr() {
+    public String createSpeciesAttr(Variable.Builder<?> species) {
 
-        Variable species = this.nc.findVariable("species");
         StringBuilder bld = new StringBuilder();
         for (int i = 0; i < this.getNSpecies(); i++) {
             String attrname = String.format("species%d", i);
@@ -260,8 +259,8 @@ abstract public class AbstractOutput_Netcdf extends SimulationLinker implements 
     void init_nc_dims_coords() {
 
         Dimension speciesDim = bNc.addDimension("species", getNSpecies());
-        bNc.addVariable("species", DataType.INT, "species");
-        this.createSpeciesAttr();
+        Variable.Builder<?> variable = bNc.addVariable("species", DataType.INT, "species");
+        this.createSpeciesAttr(variable);
         outDims = new ArrayList<>();
         outDims.add(timeDim);
         outDims.add(speciesDim);
