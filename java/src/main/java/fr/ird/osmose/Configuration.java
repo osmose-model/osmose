@@ -1696,13 +1696,13 @@ public class Configuration extends OLogger {
 
         // Control of the NetCdf output version from a configuration file.
         // If not provided, NetCdf4 is used.
-        ncOutVersion = NetcdfFileFormat.NETCDF3;
+        ncOutVersion = NetcdfFileFormat.NETCDF4;
         if (!isNull("output.netcdf.format")) {
             String outputFormat = getString("output.netcdf.format");
             switch (outputFormat) {
                 case "ncstream":
                     ncOutVersion = NetcdfFileFormat.NCSTREAM;
-                    break;
+                break;
                 case "netcdf3":
                     ncOutVersion = NetcdfFileFormat.NETCDF3;
                     break;
@@ -1727,10 +1727,6 @@ public class Configuration extends OLogger {
 
     public void setChunker() {
 
-        if(this.ncOutVersion != NetcdfFileFormat.NETCDF4) {
-            return;
-        }
-
         int deflateLevel = 0;
         boolean shuffle = false;
 
@@ -1740,36 +1736,31 @@ public class Configuration extends OLogger {
             deflateLevel = getInt(key);
         }
 
-        // if deflate > 0, compression is on.
-        if (deflateLevel > 0) {
-
-            key = "output.netcdf.shuffle";
-            // we read whether shuffle parameter is on.
-            if (!this.isNull(key)) {
-                shuffle = getBoolean(key, false);
-            }
-
-            Nc4Chunking.Strategy strategy = Nc4Chunking.Strategy.none;
-            key = "output.netcdf.chunk";
-            if (!this.isNull(key)) {
-                switch (getString(key)) {
-                    case "standard":
-                        strategy = Nc4Chunking.Strategy.standard;
-                        break;
-                    case "grib":
-                        strategy = Nc4Chunking.Strategy.grib;
-                        break;
-                    case "none":
-                        strategy = Nc4Chunking.Strategy.none;
-                        break;
-                    default:
-                        strategy = Nc4Chunking.Strategy.none;
-                }
-            }
-
-            this.chunker = Nc4ChunkingStrategy.factory(strategy, deflateLevel, shuffle);
-
+        key = "output.netcdf.shuffle";
+        // we read whether shuffle parameter is on.
+        if (!this.isNull(key)) {
+            shuffle = getBoolean(key, false);
         }
+
+        Nc4Chunking.Strategy strategy = Nc4Chunking.Strategy.none;
+        key = "output.netcdf.chunk";
+        if (!this.isNull(key)) {
+            switch (getString(key)) {
+                case "standard":
+                    strategy = Nc4Chunking.Strategy.standard;
+                    break;
+                case "grib":
+                    strategy = Nc4Chunking.Strategy.grib;
+                    break;
+                case "none":
+                    strategy = Nc4Chunking.Strategy.none;
+                    break;
+                default:
+                    strategy = Nc4Chunking.Strategy.none;
+            }
+        }
+
+        this.chunker = Nc4ChunkingStrategy.factory(strategy, deflateLevel, shuffle);
     }
 
     public Nc4Chunking getChunker() {
