@@ -53,6 +53,8 @@ import ucar.ma2.Index;
 import ucar.ma2.InvalidRangeException;
 import ucar.nc2.Attribute;
 import ucar.nc2.Variable;
+import ucar.nc2.write.Nc4Chunking;
+import ucar.nc2.write.Nc4ChunkingStrategy;
 import ucar.nc2.write.NetcdfFormatWriter;
 
 /**
@@ -60,8 +62,6 @@ import ucar.nc2.write.NetcdfFormatWriter;
  * @author pverley
  */
 public class ModularSchoolSetSnapshot extends SimulationLinker implements IOutput {
-
-    private Variable xVar, yVar, abVar, weightVar, specVar, gonadVar, uuidVar;
 
     private boolean includeCoords;
     private boolean includeAbundance;
@@ -164,22 +164,22 @@ public class ModularSchoolSetSnapshot extends SimulationLinker implements IOutpu
         // write the arrays in the NetCDF file
         try {
 
-            nc.write(this.specVar, species);
-            nc.write(this.uuidVar, uuid);
+            nc.write(nc.findVariable("species"), species);
+            nc.write(nc.findVariable("uuid"), uuid);
             if (this.includeCoords) {
-                nc.write(this.xVar, lon);
-                nc.write(this.yVar, lat);
+                nc.write(nc.findVariable("lon"), lon);
+                nc.write(nc.findVariable("lat"), lat);
             }
             if (this.includeAbundance) {
-                nc.write(this.abVar, abundance);
+                nc.write(nc.findVariable("abundance"), abundance);
             }
 
             if (this.includeWeight) {
-                nc.write(this.weightVar, weight);
+                nc.write(nc.findVariable("weight"), weight);
             }
 
             if (useBioen && this.includeGonadWeight) {
-                nc.write(this.gonadVar, gonadicWeight);
+                nc.write(nc.findVariable("gonadWeight"), gonadicWeight);
             }
 
             nc.close();
@@ -203,7 +203,9 @@ public class ModularSchoolSetSnapshot extends SimulationLinker implements IOutpu
         File path = new File(getConfiguration().getOutputPathname());
         this.file = new File(path, getFilename(iStepSimu));
         this.file.getParentFile().mkdirs();
-        bNc = NetcdfFormatWriter.createNewNetcdf4(getConfiguration().getNcOutVersion(), file.getAbsolutePath(), null);
+
+        Nc4Chunking chunker = Nc4ChunkingStrategy.factory(Nc4ChunkingStrategy.Strategy.none, 0, false);
+        bNc = NetcdfFormatWriter.createNewNetcdf4(getConfiguration().getNcOutVersion(), file.getAbsolutePath(), chunker);
 
         /*
          * Create dimensions

@@ -57,6 +57,8 @@ import ucar.ma2.InvalidRangeException;
 import ucar.nc2.Attribute;
 import ucar.nc2.Dimension;
 import ucar.nc2.Variable;
+import ucar.nc2.write.Nc4Chunking;
+import ucar.nc2.write.Nc4ChunkingStrategy;
 import ucar.nc2.write.NetcdfFormatWriter;
 
 /**
@@ -65,8 +67,6 @@ import ucar.nc2.write.NetcdfFormatWriter;
  */
 public class SchoolSetSnapshot extends SimulationLinker {
 
-    private Variable xVar, yVar, abVar, ageVar, lengthVar, weightVar, tlVar, specVar;
-    private Variable genetVar, traitVar, gonadWeightVar, maturityVar;
     private int nTrait=0;
     private int nMaxLoci;
     private File file;
@@ -137,23 +137,23 @@ public class SchoolSetSnapshot extends SimulationLinker {
         }
         // write the arrays in the NetCDF file
         try {
-            nc.write(this.specVar, species);
-            nc.write(this.xVar, x);
-            nc.write(this.yVar, y);
-            nc.write(this.abVar, abundance);
-            nc.write(this.ageVar, age);
-            nc.write(this.lengthVar, length);
-            nc.write(this.weightVar, weight);
-            nc.write(this.tlVar, trophiclevel);
+            nc.write(nc.findVariable("species"), species);
+            nc.write(nc.findVariable("x"), x);
+            nc.write(nc.findVariable("y"), y);
+            nc.write(nc.findVariable("abundance"), abundance);
+            nc.write(nc.findVariable("age"), age);
+            nc.write(nc.findVariable("length"), length);
+            nc.write(nc.findVariable("weight"), weight);
+            nc.write(nc.findVariable("trophiclevel"), trophiclevel);
 
             if(useGenet) {
-                nc.write(this.genetVar, genotype);
-                nc.write(this.traitVar, traitnoise);
+                nc.write(nc.findVariable("genotype"), genotype);
+                nc.write(nc.findVariable("trait_variance"), traitnoise);
             }
 
             if(useBioen) {
-                nc.write(this.gonadWeightVar, gonadicWeight);
-                nc.write(this.maturityVar, maturity);
+                nc.write(nc.findVariable("gonadWeight"), gonadicWeight);
+                nc.write(nc.findVariable("maturity"), maturity);
             }
 
             nc.close();
@@ -177,7 +177,9 @@ public class SchoolSetSnapshot extends SimulationLinker {
         File path = new File(getConfiguration().getOutputPathname());
         this.file = new File(path, getFilename(iStepSimu));
         this.file.getParentFile().mkdirs();
-        bNc = NetcdfFormatWriter.createNewNetcdf4(getConfiguration().getNcOutVersion(), file.getAbsolutePath(), null);
+
+        Nc4Chunking chunker = Nc4ChunkingStrategy.factory(Nc4ChunkingStrategy.Strategy.none, 0, false);
+        bNc = NetcdfFormatWriter.createNewNetcdf4(getConfiguration().getNcOutVersion(), file.getAbsolutePath(), chunker);
 
         /*
          * Create dimensions
@@ -269,6 +271,7 @@ public class SchoolSetSnapshot extends SimulationLinker {
         } catch (IOException ex) {
             error("Could not create snapshot file " + file.getAbsolutePath(), ex);
         }
+
         return nc;
     }
 
