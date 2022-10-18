@@ -86,7 +86,6 @@ public class ResourceOutput extends SimulationLinker implements IOutput {
     private double[][][] rscBiomass1;
 
     private int index;
-    private Variable timeVar, rscBiomVar, rscBiomPredVar, lonVar, latVar;
 
     public ResourceOutput(int rank) {
         super(rank);
@@ -204,9 +203,9 @@ public class ResourceOutput extends SimulationLinker implements IOutput {
 
         //System.out.println("NetCDF saving time " + index + " - " + time);
         try {
-            nc.write(rscBiomVar, new int[]{index, 0, 0, 0}, arrRsc0);
-            nc.write(timeVar, new int[]{index}, arrTime);
-            nc.write(this.rscBiomPredVar, new int[]{index, 0, 0, 0}, arrRsc1);
+            nc.write(nc.findVariable("rsc_biomass"), new int[]{index, 0, 0, 0}, arrRsc0);
+            nc.write(nc.findVariable("time"), new int[]{index}, arrTime);
+            nc.write(nc.findVariable("rsc_biomass_pred"), new int[]{index, 0, 0, 0}, arrRsc1);
             this.index++;
         } catch (IOException | InvalidRangeException ex) {
             Logger.getLogger(ResourceOutput.class.getName()).log(Level.SEVERE, null, ex);
@@ -276,8 +275,8 @@ public class ResourceOutput extends SimulationLinker implements IOutput {
                 arrLon.set(cell.get_jgrid(), cell.get_igrid(), cell.getLon());
                 arrLat.set(cell.get_jgrid(), cell.get_igrid(), cell.getLat());
             }
-            nc.write(lonVar, arrLon);
-            nc.write(latVar, arrLat);
+            nc.write(nc.findVariable("longitude"), arrLon);
+            nc.write(nc.findVariable("latitude"), arrLat);
         } catch (IOException | InvalidRangeException ex) {
             Logger.getLogger(ResourceOutput.class.getName()).log(Level.SEVERE, null, ex);
         }

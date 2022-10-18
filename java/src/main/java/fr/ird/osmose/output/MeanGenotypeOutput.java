@@ -79,8 +79,6 @@ public class MeanGenotypeOutput extends SimulationLinker implements IOutput {
     private final Predicate<School> predicate;
     private final SchoolSetGetter schoolGetter;
 
-
-    Variable outvar;
     private String prefix;
 
 

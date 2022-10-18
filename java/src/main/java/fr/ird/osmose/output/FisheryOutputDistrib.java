@@ -75,10 +75,7 @@ public class FisheryOutputDistrib extends SimulationLinker implements IOutput {
      */
     private NetcdfFormatWriter nc;
     private NetcdfFormatWriter.Builder bNc;
-    /*
-     * NetCDF time and biomass variables.
-     */
-    private Variable timeVar, biomassVar, discardsVar, accessibleBiomassVar;
+
     /*
      * NetCDF time index.
      */
@@ -264,10 +261,10 @@ public class FisheryOutputDistrib extends SimulationLinker implements IOutput {
 
         //System.out.println("NetCDF saving time " + index + " - " + time);
         try {
-            nc.write(timeVar, new int[]{index}, arrTime);
-            nc.write(biomassVar, new int[]{index, 0, 0, 0}, arrBiomass);
-            nc.write(discardsVar, new int[]{index, 0, 0, 0}, arrDiscards);
-            nc.write(accessibleBiomassVar, new int[]{index, 0, 0, 0}, arrAccessBiomass);
+            nc.write(nc.findVariable("time"), new int[]{index}, arrTime);
+            nc.write(nc.findVariable("landings"), new int[]{index, 0, 0, 0}, arrBiomass);
+            nc.write(nc.findVariable("discards"), new int[]{index, 0, 0, 0}, arrDiscards);
+            nc.write(nc.findVariable("accessible_biomass"), new int[]{index, 0, 0, 0}, arrAccessBiomass);
             index++;
         } catch (IOException | InvalidRangeException ex) {
             Logger.getLogger(FisheryOutputDistrib.class.getName()).log(Level.SEVERE, null, ex);

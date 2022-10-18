@@ -87,8 +87,6 @@ public class SpatialOutput extends SimulationLinker implements IOutput {
     private float[][][] yield;
     private int index;
 
-    private Variable timevar, lonvar, latvar, biomassVar, abundanceVar, yieldVar, meanSizeVar, tlVar, ltlbiomVar;
-
     public SpatialOutput(int rank) {
         super(rank);
     }
@@ -197,8 +195,8 @@ public class SpatialOutput extends SimulationLinker implements IOutput {
                 arrLon.set(cell.get_jgrid(), cell.get_igrid(), cell.getLon());
                 arrLat.set(cell.get_jgrid(), cell.get_igrid(), cell.getLat());
             }
-            nc.write(lonvar, arrLon);
-            nc.write(latvar, arrLat);
+            nc.write(nc.findVariable("longitude"), arrLon);
+            nc.write(nc.findVariable("latitude"), arrLat);
         } catch (IOException ex) {
             Logger.getLogger(SpatialOutput.class.getName()).log(Level.SEVERE, null, ex);
         } catch (InvalidRangeException ex) {
@@ -332,13 +330,13 @@ public class SpatialOutput extends SimulationLinker implements IOutput {
 
         //System.out.println("NetCDF saving time " + index + " - " + time);
         try {
-            nc.write(timevar, new int[]{index}, arrTime);
-            nc.write(this.biomassVar, new int[]{index, 0, 0, 0}, arrBiomass);
-            nc.write(this.abundanceVar, new int[]{index, 0, 0, 0}, arrAbundance);
-            nc.write(this.yieldVar, new int[]{index, 0, 0, 0}, arrYield);
-            nc.write(this.meanSizeVar, new int[]{index, 0, 0, 0}, arrSize);
-            nc.write(this.tlVar, new int[]{index, 0, 0, 0}, arrTL);
-            nc.write(this.ltlbiomVar, new int[]{index, 0, 0, 0, 0}, arrLTL);
+            nc.write(nc.findVariable("time"), new int[]{index}, arrTime);
+            nc.write(nc.findVariable("biomass"), new int[]{index, 0, 0, 0}, arrBiomass);
+            nc.write(nc.findVariable("abundance"), new int[]{index, 0, 0, 0}, arrAbundance);
+            nc.write(nc.findVariable("yield"), new int[]{index, 0, 0, 0}, arrYield);
+            nc.write(nc.findVariable("mean_size"), new int[]{index, 0, 0, 0}, arrSize);
+            nc.write(nc.findVariable("trophic_level"), new int[]{index, 0, 0, 0}, arrTL);
+            nc.write(nc.findVariable("ltl_biomass"), new int[]{index, 0, 0, 0, 0}, arrLTL);
             index++;
         } catch (IOException ex) {
             Logger.getLogger(SpatialOutput.class.getName()).log(Level.SEVERE, null, ex);

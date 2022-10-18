@@ -93,7 +93,6 @@ public abstract class AbstractSpatialOutput extends SimulationLinker implements 
     protected int counter;
 
     private int index;
-    private Variable outVar, timeVar, lonVar, latVar;
 
     public AbstractSpatialOutput(int rank) {
         super(rank);
@@ -177,8 +176,8 @@ public abstract class AbstractSpatialOutput extends SimulationLinker implements 
                 arrLat.set(cell.get_jgrid(), cell.get_igrid(), cell.getLat());
             }
             try {
-                nc.write(lonVar, arrLon);
-                nc.write(latVar, arrLat);
+                nc.write(nc.findVariable("longitude"), arrLon);
+                nc.write(nc.findVariable("latitude"), arrLat);
             } catch (InvalidRangeException ex) {
                 Logger.getLogger(AbstractSpatialOutput.class.getName()).log(Level.SEVERE, null, ex);
             }
@@ -260,8 +259,8 @@ public abstract class AbstractSpatialOutput extends SimulationLinker implements 
 
         //System.out.println("NetCDF saving time " + index + " - " + time);
         try {
-            nc.write(timeVar, new int[]{index}, arrTime);
-            nc.write(outVar, new int[]{index, 0, 0, 0}, arrBiomass);
+            nc.write(nc.findVariable("time"), new int[]{index}, arrTime);
+            nc.write(nc.findVariable(this.getVarName()), new int[]{index, 0, 0, 0}, arrBiomass);
             this.incrementIndex();
         } catch (IOException | InvalidRangeException ex) {
             Logger.getLogger(AbstractSpatialOutput.class.getName()).log(Level.SEVERE, null, ex);
@@ -298,11 +297,11 @@ public abstract class AbstractSpatialOutput extends SimulationLinker implements 
     }
 
     public Variable getTimeVar() {
-        return this.timeVar;
+        return nc.findVariable("time");
     }
 
     public Variable getOutVar() {
-        return this.outVar;
+        return nc.findVariable(this.getVarName());
     }
 
 }

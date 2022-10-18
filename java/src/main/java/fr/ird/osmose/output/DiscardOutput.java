@@ -74,10 +74,7 @@ public class DiscardOutput extends SimulationLinker implements IOutput {
      */
     private NetcdfFormatWriter nc;
     private NetcdfFormatWriter.Builder bNc;
-    /*
-     * NetCDF time and biomass variables.
-     */
-    private Variable timeVar, biomassVar;
+
     /*
      * NetCDF time index.
      */
@@ -197,8 +194,8 @@ public class DiscardOutput extends SimulationLinker implements IOutput {
 
         //System.out.println("NetCDF saving time " + index + " - " + time);
         try {
-            nc.write(timeVar, new int[]{index}, arrTime);
-            nc.write(biomassVar, new int[]{index, 0, 0}, arrBiomass);
+            nc.write(nc.findVariable("time"), new int[]{index}, arrTime);
+            nc.write(nc.findVariable("biomass"), new int[]{index, 0, 0}, arrBiomass);
             index++;
         } catch (IOException | InvalidRangeException ex) {
             Logger.getLogger(DiscardOutput.class.getName()).log(Level.SEVERE, null, ex);

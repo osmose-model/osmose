@@ -91,7 +91,6 @@ public class SpatialSizeSpeciesOutput extends SimulationLinker implements IOutpu
     private float[][][][] abundance;
 
     private int ncindex;
-    private Variable timeVar, abunVar, classVar, latVar, lonVar;
 
     public SpatialSizeSpeciesOutput(int rank, AbstractDistribution distrib) {
         super(rank);
@@ -165,9 +164,9 @@ public class SpatialSizeSpeciesOutput extends SimulationLinker implements IOutpu
                 arrClass.set(iclass, this.distrib.getThreshold(iclass));
             }
 
-            nc.write(classVar, arrClass);
-            nc.write(lonVar, arrLon);
-            nc.write(latVar, arrLat);
+            nc.write(nc.findVariable("class"), arrClass);
+            nc.write(nc.findVariable("longitude"), arrLon);
+            nc.write(nc.findVariable("latitude"), arrLat);
         } catch (IOException | InvalidRangeException ex) {
             Logger.getLogger(SpatialSizeSpeciesOutput.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -285,8 +284,8 @@ public class SpatialSizeSpeciesOutput extends SimulationLinker implements IOutpu
 
         //System.out.println("NetCDF saving time " + index + " - " + time);
         try {
-            nc.write(timeVar, new int[]{ncindex}, arrTime);
-            nc.write(this.abunVar, new int[]{ncindex, 0, 0, 0, 0}, arrAbundance);
+            nc.write(nc.findVariable("time"), new int[]{ncindex}, arrTime);
+            nc.write(nc.findVariable("abundance"), new int[]{ncindex, 0, 0, 0, 0}, arrAbundance);
             ncindex++;
         } catch (IOException | InvalidRangeException ex) {
             Logger.getLogger(SpatialSizeSpeciesOutput.class.getName()).log(Level.SEVERE, null, ex);
