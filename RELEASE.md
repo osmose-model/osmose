@@ -30,6 +30,7 @@
 - Saving maturity variable in restart when bioenergetic module is used.
 - Removing of the ``simulation.onestep`` feature. For debugging, use debugging tools.
 - Possibility to provide MPAs that occupy only a fraction of a cell.
+- Update to the latest NetCDF java package (compression features, etc.)
 
 ### Bug fixes
 
