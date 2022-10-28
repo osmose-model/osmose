@@ -55,11 +55,13 @@ import ucar.ma2.ArrayDouble;
 import ucar.ma2.ArrayFloat;
 import ucar.ma2.ArrayInt;
 import ucar.ma2.DataType;
+import ucar.ma2.Index;
 import ucar.ma2.InvalidRangeException;
 import ucar.nc2.Attribute;
 import ucar.nc2.Dimension;
-import ucar.nc2.NetcdfFileWriter;
 import ucar.nc2.Variable;
+import ucar.nc2.write.Nc4Chunking;
+import ucar.nc2.write.NetcdfFormatWriter;
 
 /**
  *
@@ -77,7 +79,10 @@ abstract public class AbstractOutput_Netcdf extends SimulationLinker implements 
      * _FillValue attribute for cells on land
      */
     private final float FILLVALUE = -99.f;
-    private NetcdfFileWriter nc;
+
+    private NetcdfFormatWriter nc;
+    private NetcdfFormatWriter.Builder bNc;
+
     private int record_index;
 
     private List<Dimension> outDims;
@@ -104,21 +109,19 @@ abstract public class AbstractOutput_Netcdf extends SimulationLinker implements 
     @Override
     public void init() {
 
+        Nc4Chunking chunker = getConfiguration().getChunker();
+
         /*
          * Create NetCDF file
          */
-        try {
-            String filename = getFilename();
-            IOTools.makeDirectories(filename);
-            nc = NetcdfFileWriter.createNew(getConfiguration().getNcOutVersion(), filename);
-        } catch (IOException ex) {
-            Logger.getLogger(AbstractOutput_Netcdf.class.getName()).log(Level.SEVERE, null, ex);
-        }
+        String filename = getFilename();
+        IOTools.makeDirectories(filename);
+        bNc = NetcdfFormatWriter.createNewNetcdf4(getConfiguration().getNcOutVersion(), filename, chunker);
 
         // Add time dim and variable (common to all files)
-        timeDim = nc.addUnlimitedDimension("time");
+        timeDim = bNc.addUnlimitedDimension("time");
 
-        Variable tvar = nc.addVariable(null, "time", DataType.DOUBLE, "time");
+        Variable.Builder<?> tvar = bNc.addVariable("time", DataType.DOUBLE, "time");
         tvar.addAttribute(new Attribute("units", "days since 0-1-1 0:0:0"));
         tvar.addAttribute(new Attribute("calendar", "360_day"));
         tvar.addAttribute(new Attribute("description", "time ellapsed, in days, since the beginning of the simulation"));
@@ -127,14 +130,14 @@ abstract public class AbstractOutput_Netcdf extends SimulationLinker implements 
         this.init_nc_dims_coords();
 
         // Create output variable
-        Variable outvar = nc.addVariable(null, getVarname(), DataType.FLOAT, this.getNcDims());
+        Variable.Builder<?> outvar = bNc.addVariable(getVarname(), DataType.FLOAT, this.getNcDims());
         outvar.addAttribute(new Attribute("units", getUnits()));
         outvar.addAttribute(new Attribute("description", getDescription()));
         outvar.addAttribute(new Attribute("_FillValue", getFillValue()));
 
         try {
             // Validates the structure of the NetCDF file.
-            nc.create();
+            nc = bNc.build();
         } catch (IOException ex) {
             Logger.getLogger(AbstractOutput_Netcdf.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -156,7 +159,7 @@ abstract public class AbstractOutput_Netcdf extends SimulationLinker implements 
     public void close() {
         try {
             nc.close();
-            String strFilePart = nc.getNetcdfFile().getLocation();
+            String strFilePart = this.getFilename();
             String strFileBase = strFilePart.substring(0, strFilePart.indexOf(".part"));
             File filePart = new File(strFilePart);
             File fileBase = new File(strFileBase);
@@ -194,9 +197,8 @@ abstract public class AbstractOutput_Netcdf extends SimulationLinker implements 
      * Function to create a species attribute.
      * @return
      */
-    public String createSpeciesAttr() {
+    public String createSpeciesAttr(Variable.Builder<?> species) {
 
-        Variable species = this.nc.findVariable("species");
         StringBuilder bld = new StringBuilder();
         for (int i = 0; i < this.getNSpecies(); i++) {
             String attrname = String.format("species%d", i);
@@ -252,9 +254,9 @@ abstract public class AbstractOutput_Netcdf extends SimulationLinker implements 
      */
     void init_nc_dims_coords() {
 
-        Dimension speciesDim = nc.addDimension(null, "species", getNSpecies());
-        nc.addVariable(null, "species", DataType.INT, "species");
-        this.createSpeciesAttr();
+        Dimension speciesDim = bNc.addDimension("species", getNSpecies());
+        Variable.Builder<?> variable = bNc.addVariable("species", DataType.INT, "species");
+        this.createSpeciesAttr(variable);
         outDims = new ArrayList<>();
         outDims.add(timeDim);
         outDims.add(speciesDim);
@@ -264,10 +266,12 @@ abstract public class AbstractOutput_Netcdf extends SimulationLinker implements 
     public void write_nc_coords() {
 
         // Writes variable trait (trait names) and species (species names)
-        ArrayInt.D1 arrSpecies = new ArrayInt.D1(this.getNSpecies());
+        ArrayInt arrSpecies = new ArrayInt(new int[] {this.getNSpecies()}, false);
+        Index index = arrSpecies.getIndex();
 
         for (int i = 0; i < this.getNSpecies(); i++) {
-            arrSpecies.set(i, i);
+            index.set(i);
+            arrSpecies.set(index, i);
         }
 
         Variable varspec = this.nc.findVariable("species");
@@ -279,8 +283,12 @@ abstract public class AbstractOutput_Netcdf extends SimulationLinker implements 
         }
     }
 
-    public NetcdfFileWriter getNc() {
-        return this.nc;
+    public NetcdfFormatWriter getNc() {
+        return nc;
+    }
+
+    public NetcdfFormatWriter.Builder getBNc() {
+        return bNc;
     }
 
     public void setDims(List<Dimension> dims) {

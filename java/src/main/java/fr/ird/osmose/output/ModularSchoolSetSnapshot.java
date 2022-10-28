@@ -52,8 +52,10 @@ import ucar.ma2.DataType;
 import ucar.ma2.Index;
 import ucar.ma2.InvalidRangeException;
 import ucar.nc2.Attribute;
-import ucar.nc2.NetcdfFileWriter;
 import ucar.nc2.Variable;
+import ucar.nc2.write.Nc4Chunking;
+import ucar.nc2.write.Nc4ChunkingStrategy;
+import ucar.nc2.write.NetcdfFormatWriter;
 
 /**
  *
@@ -61,13 +63,12 @@ import ucar.nc2.Variable;
  */
 public class ModularSchoolSetSnapshot extends SimulationLinker implements IOutput {
 
-    private Variable xVar, yVar, abVar, weightVar, specVar, gonadVar, uuidVar;
-
     private boolean includeCoords;
     private boolean includeAbundance;
     private boolean includeWeight;
     private boolean includeGonadWeight;
     private int savingFrequency;
+    private File file;
 
     public ModularSchoolSetSnapshot(int rank) {
         super(rank);
@@ -108,7 +109,7 @@ public class ModularSchoolSetSnapshot extends SimulationLinker implements IOutpu
         //int nChars = getSchoolSet().getSchools().get(0).getID().toString().length();
 
         ArrayString uuid = new ArrayString(new int[] {nSchool});
-        ArrayInt.D1 species = new ArrayInt.D1(nSchool);
+        ArrayInt species = new ArrayInt(new int[] {nSchool}, false);
 
         if (useBioen && includeGonadWeight) {
             gonadicWeight = new ArrayFloat.D1(nSchool);
@@ -127,14 +128,16 @@ public class ModularSchoolSetSnapshot extends SimulationLinker implements IOutpu
             lat = new ArrayFloat.D1(nSchool);
         }
 
-        NetcdfFileWriter nc = createNCFile(iStepSimu);
+        NetcdfFormatWriter nc = createNCFile(iStepSimu);
 
         int s = 0;
         Index uuidIndex = uuid.getIndex();
+        Index speciesIndex = species.getIndex();
 
         // fill up the arrays
         for (School school : getSchoolSet().getSchools()) {
-            species.set(s, school.getSpeciesIndex());
+            speciesIndex.set(s);
+            species.set(speciesIndex, school.getSpeciesIndex());
             if (includeCoords) {
                 lon.set(s, school.getLon());
                 lat.set(s, school.getLat());
@@ -161,95 +164,95 @@ public class ModularSchoolSetSnapshot extends SimulationLinker implements IOutpu
         // write the arrays in the NetCDF file
         try {
 
-            nc.write(this.specVar, species);
-            nc.write(this.uuidVar, uuid);
+            nc.write(nc.findVariable("species"), species);
+            nc.write(nc.findVariable("uuid"), uuid);
             if (this.includeCoords) {
-                nc.write(this.xVar, lon);
-                nc.write(this.yVar, lat);
+                nc.write(nc.findVariable("lon"), lon);
+                nc.write(nc.findVariable("lat"), lat);
             }
             if (this.includeAbundance) {
-                nc.write(this.abVar, abundance);
+                nc.write(nc.findVariable("abundance"), abundance);
             }
 
             if (this.includeWeight) {
-                nc.write(this.weightVar, weight);
+                nc.write(nc.findVariable("weight"), weight);
             }
 
             if (useBioen && this.includeGonadWeight) {
-                nc.write(this.gonadVar, gonadicWeight);
+                nc.write(nc.findVariable("gonadWeight"), gonadicWeight);
             }
 
             nc.close();
             //close(nc);
         } catch (IOException ex) {
-            error("Error writing snapshot " + nc.getNetcdfFile().getLocation(), ex);
+            error("Error writing snapshot " + file.getAbsolutePath(), ex);
         } catch (InvalidRangeException ex) {
-            error("Error writing snapshot " + nc.getNetcdfFile().getLocation(), ex);
+            error("Error writing snapshot " + file.getAbsolutePath(), ex);
         }
     }
 
-    private NetcdfFileWriter createNCFile(int iStepSimu) {
+    private NetcdfFormatWriter createNCFile(int iStepSimu) {
 
-        NetcdfFileWriter nc = null;
-        File file = null;
+        NetcdfFormatWriter.Builder bNc;
+        NetcdfFormatWriter nc = null;
+        this.file = null;
 
         /*
          * Create NetCDF file
          */
-        try {
-            File path = new File(getConfiguration().getOutputPathname());
-            file = new File(path, getFilename(iStepSimu));
-            file.getParentFile().mkdirs();
-            nc = NetcdfFileWriter.createNew(getConfiguration().getNcOutVersion(), file.getAbsolutePath());
-        } catch (IOException ex) {
-            error("Could not create snapshot file " + file.getAbsolutePath(), ex);
-        }
+        File path = new File(getConfiguration().getOutputPathname());
+        this.file = new File(path, getFilename(iStepSimu));
+        this.file.getParentFile().mkdirs();
+
+        Nc4Chunking chunker = Nc4ChunkingStrategy.factory(Nc4ChunkingStrategy.Strategy.none, 0, false);
+        bNc = NetcdfFormatWriter.createNewNetcdf4(getConfiguration().getNcOutVersion(), file.getAbsolutePath(), chunker);
+
         /*
          * Create dimensions
          */
-        nc.addDimension(null, "nschool", getSchoolSet().getSchools().size());
+        bNc.addDimension("nschool", getSchoolSet().getSchools().size());
 
         /*
          * Add variables
          */
-        specVar = nc.addVariable(null, "species", DataType.INT, "nschool");
-        specVar.addAttribute(new Attribute("description", "index of the species"));
+        Variable.Builder<?> specVarBuilder = bNc.addVariable("species", DataType.INT, "nschool");
+        specVarBuilder.addAttribute(new Attribute("description", "index of the species"));
 
-        uuidVar = nc.addVariable(null, "uuid", DataType.STRING, "nschool");
+        bNc.addVariable("uuid", DataType.STRING, "nschool");
 
 
         if (this.includeCoords) {
-            xVar = nc.addVariable(null, "lon", DataType.FLOAT, "nschool");
-            xVar.addAttribute(new Attribute("units", "scalar"));
-            xVar.addAttribute(new Attribute("description", "longitude of the school"));
+            Variable.Builder<?> xVarBuilder = bNc.addVariable("lon", DataType.FLOAT, "nschool");
+            xVarBuilder.addAttribute(new Attribute("units", "scalar"));
+            xVarBuilder.addAttribute(new Attribute("description", "longitude of the school"));
 
-            yVar = nc.addVariable(null, "lat", DataType.FLOAT, "nschool");
-            yVar.addAttribute(new Attribute("units", "scalar"));
-            yVar.addAttribute(new Attribute("description", "latitude index of the school"));
+            Variable.Builder<?> yVarBuilder = bNc.addVariable("lat", DataType.FLOAT, "nschool");
+            yVarBuilder.addAttribute(new Attribute("units", "scalar"));
+            yVarBuilder.addAttribute(new Attribute("description", "latitude index of the school"));
         }
 
         if (this.includeAbundance) {
-            abVar = nc.addVariable(null, "abundance", DataType.DOUBLE, "nschool");
-            abVar.addAttribute(new Attribute("units", "scalar"));
-            abVar.addAttribute(new Attribute("description", "number of fish in the school"));
+            Variable.Builder<?> abVarBuilder = bNc.addVariable("abundance", DataType.DOUBLE, "nschool");
+            abVarBuilder.addAttribute(new Attribute("units", "scalar"));
+            abVarBuilder.addAttribute(new Attribute("description", "number of fish in the school"));
         }
 
         if (this.includeWeight) {
-            weightVar = nc.addVariable(null, "weight", DataType.FLOAT, "nschool");
-            weightVar.addAttribute(new Attribute("units", "g"));
-            weightVar.addAttribute(new Attribute("description", "weight of the fish in the school in gram"));
+            Variable.Builder<?> weightVarBuilder = bNc.addVariable("weight", DataType.FLOAT, "nschool");
+            weightVarBuilder.addAttribute(new Attribute("units", "g"));
+            weightVarBuilder.addAttribute(new Attribute("description", "weight of the fish in the school in gram"));
         }
 
         if (this.getConfiguration().isBioenEnabled() && this.includeGonadWeight) {
-            gonadVar = nc.addVariable(null, "gonadWeight", DataType.FLOAT, "nschool");
-            gonadVar.addAttribute(new Attribute("units", "g"));
-            gonadVar.addAttribute(new Attribute("description", "gonadic weight of the fish in the school in gram"));
+            Variable.Builder<?> gonadVarBuilder = bNc.addVariable("gonadWeight", DataType.FLOAT, "nschool");
+            gonadVarBuilder.addAttribute(new Attribute("units", "g"));
+            gonadVarBuilder.addAttribute(new Attribute("description", "gonadic weight of the fish in the school in gram"));
         }
 
         /*
          * Add global attributes
          */
-        nc.addGroupAttribute(null, new Attribute("step", String.valueOf(iStepSimu)));
+        bNc.addAttribute(new Attribute("step", String.valueOf(iStepSimu)));
         StringBuilder str = new StringBuilder();
         for (int i = 0; i < getConfiguration().getNSpecies(); i++) {
             str.append(i);
@@ -258,16 +261,16 @@ public class ModularSchoolSetSnapshot extends SimulationLinker implements IOutpu
             str.append(" ");
         }
 
-        nc.addGroupAttribute(null, new Attribute("species", str.toString()));
+        bNc.addAttribute(new Attribute("species", str.toString()));
 
         try {
             /*
              * Validates the structure of the NetCDF file.
              */
-            nc.create();
+            nc = bNc.build();
 
         } catch (IOException ex) {
-            error("Could not create snapshot file " + nc.getNetcdfFile().getLocation(), ex);
+            error("Could not create snapshot file " + file.getAbsolutePath(), ex);
         }
         return nc;
     }
