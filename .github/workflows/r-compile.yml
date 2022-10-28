@@ -19,8 +19,8 @@ jobs:
       - uses: actions/checkout@v2
 
       - name: R install
-        uses: r-lib/actions/setup-r@master
-            
+        uses: r-lib/actions/setup-r@v2
+
       - name: Install NetCDF and Latex
         run:  sudo apt-get install -yq libnetcdf-dev texlive-latex-base texlive-fonts-recommended texlive-fonts-extra
 
