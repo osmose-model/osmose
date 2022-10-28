@@ -141,6 +141,7 @@ public class NetcdfPopulator extends AbstractPopulator {
                         weight[s],
                         Math.round(age[s] * getConfiguration().getNStepYear()),
                         trophiclevel[s]);
+                school.instance_genotype(this.getRank());
                 if (useGenetic) {
                     school.restartGenotype(this.getRank(), s, genotype, traitNoise);
                 }

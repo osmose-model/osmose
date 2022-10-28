@@ -874,9 +874,6 @@ public class School extends AbstractSchool {
      */
     public void restartGenotype(int rank, int index, ArrayFloat.D4 genArray, ArrayFloat.D2 envNoise) {
 
-        // Instanciate (i.e. init arrays) genotype for the current school
-        this.instance_genotype(rank);
-
         // Sets the genotype values from NetCDF files
         int ntrait = this.getGenotype().getNEvolvingTraits();
         for (int itrait = 0; itrait < ntrait; itrait++) {
