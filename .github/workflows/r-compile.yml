@@ -35,7 +35,7 @@ jobs:
 
       - name: Install Osmose dependencies
         if: steps.r-dep.outputs.cache-hit != 'true'
-        run: install.packages(c("rlist", "knitr", "rmarkdown", "stringr", "ncdf4", "mgcv", "fields", "R.utils", "calibrar"), repos="http://cran.us.r-project.org")
+        run: install.packages(c("rlist", "knitr", "rmarkdown", "stringr", "ncdf4", "mgcv", "ggplot2", "spam", "viridis", "fields", "R.utils", "calibrar"), repos="http://cran.us.r-project.org")
         shell: Rscript {0}
 
       - name: Build Osmose without vignettes
