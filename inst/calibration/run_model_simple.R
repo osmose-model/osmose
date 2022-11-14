@@ -7,7 +7,7 @@ run_model = function(par, conf, osmose, is_a_test=FALSE, version="4.3.3", ...) {
   nyear      = get_par(conf, 'simulation.time.nyear')
   ndt = nyear*ndtperyear
   
-  larval_deviates  = get_par(par, 'osmose.user.larval.deviate')
+  larval_deviates  = get_par(par, 'osmose.user.larval.deviate.log')
   fishing_deviates = get_par(par, 'fisheries.rate.byperiod.log')
   
   for(isp in nspp) {
@@ -31,11 +31,8 @@ run_model = function(par, conf, osmose, is_a_test=FALSE, version="4.3.3", ...) {
   
   # remove all osmose.user parameters and clean-up
   par = get_par(par, "osmose.user", invert = TRUE, as.is=TRUE)
-  # ind = grep(names(par), pattern="^osmose.user")
-  # par[ind] = NULL
-  # par = par[sort(names(par))]
-  # class(par) = "osmose.configuration"
-  # write parameters for osmose to understand
+  par = get_par(par, linear=TRUE, as.is = TRUE) # write parameters in linear scale.
+
   write_osmose(par, file='calibration_parameters.osm')
   # run osmose!
   if(!isTRUE(is_a_test)) {
@@ -44,8 +41,11 @@ run_model = function(par, conf, osmose, is_a_test=FALSE, version="4.3.3", ...) {
   
   output = read_osmose(path='output', version=version)
   
-  penalty = list(larval  = 10*sapply(larval_deviates, FUN=sum),
-                 fishing = 10*sapply(larval_deviates, FUN=sum))
+  names(larval_deviates)  = paste("larval", get_species(conf, nm=names(larval_deviates)), sep="_")
+  names(fishing_deviates) = paste("F", get_fisheries(conf, nm=names(fishing_deviates)), sep="_")
+  
+  # random = list(larval  = sapply(larval_deviates,  FUN=function(x) sum(x^2)),
+  #               fishing = sapply(fishing_deviates, FUN=function(x) sum(x^2)))
   
   cal_output = c(biomass = get_var(output, "biomass", how="list", no.error = TRUE),
                  yield   = get_var(output, "yieldBySpecies", how="list", no.error = TRUE),
@@ -77,10 +77,10 @@ run_model = function(par, conf, osmose, is_a_test=FALSE, version="4.3.3", ...) {
   # if is still NULL, we will let calibrar to deal with it.
   if(is.null(cal_output)) {
     cal_output = NULL
-    message("Something wrong happened while running 'run_model'. Returning NULL.")
+    message("Something wrong happened while running 'run_model'. Returning NULL. Check the '.calibrar_dump' folder.")
   }
 
-  cal_output = c(cal_output, penalty=penalty)
+  cal_output = c(cal_output, random=larval_deviates, random=fishing_deviates)
   
   return(invisible(cal_output))
   
