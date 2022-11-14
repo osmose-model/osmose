@@ -306,7 +306,6 @@
             
   for(i in seq_along(cal)) {
     
-    
     bio = cal[[i]]
     year = start + .getYear(bio)
     period = .getTimeIndex(bio)
@@ -316,7 +315,7 @@
     dl = diff(marks)/2
     colnames(bio) = round(marks + dl[1], 3)
     
-    pnames = c(year=1, semester=2, quarter=4, month=12)
+    pnames = c(period=1, semester=2, quarter=4, month=12)
     pname = names(pnames[pnames==freq])
     
     if(length(pname)==0) pname = "period"
@@ -339,7 +338,6 @@
   nm = paste("catchatlength", names(files), sep=".")
   files = file.path("catch_at_length", files)
   names(files) = nm
-  print(files)
   return(invisible(files))
   
 }
@@ -350,7 +348,7 @@
   
   # add total fecudity by time step for mortality calculation
   spp = get_species(conf, type="focal", code=TRUE)
-  fec = lapply(as.numeric(spp), FUN=function(sp, conf) read.fecundity(conf, sp), conf=conf)
+  fec = suppressWarnings(lapply(as.numeric(spp), FUN=function(sp, conf) read.fecundity(conf, sp), conf=conf))
   names(fec) = sprintf("reproduction.fecundity.sp%s", spp)
   conf = c(conf, fec)
   
@@ -362,22 +360,22 @@
 .create_calibration_settings = function(output, files) {
   
   cal_type = c(biomass="lnorm3", yield="lnorm2", catchatlength="multinom", 
-               mortality="normp", growth="normp", penalty="normp")
+               mortality="penalty", growth="penalty", random="re")
   
   cal_cv = c(biomass=0.25, yield=0.05, catchatlength=1, 
-             mortality=1, growth=1, penalty=1)
+             mortality=1/sqrt(2), growth=1/sqrt(2), random=0.5)
   
   cal_useData = c(biomass=TRUE, yield=TRUE, catchatlength=TRUE, 
-                  mortality=FALSE, growth=FALSE, penalty=FALSE)
+                  mortality=FALSE, growth=FALSE, penalty=FALSE, random=FALSE)
   
-  cal_novarid = c("catchatlength", "growth", "mortality", "penalty")
+  cal_novarid = c("catchatlength", "growth", "mortality", "random")
   
   cal_settings = data.frame(variable=names(output))
   cal_settings$itype = sapply(strsplit(names(output), split = "\\."), FUN="[", i=1)
   cal_settings$spp   = sapply(strsplit(names(output), split = "\\."), FUN="[", i=2)
   cal_settings$type  = cal_type[cal_settings$itype]
   cal_settings$calibrate = TRUE
-  cal_settings$weight = 1/(2*cal_cv[cal_settings$itype]^2)
+  cal_settings$cv = cal_cv[cal_settings$itype]
   cal_settings$use_data = cal_useData[cal_settings$itype]
   cal_settings$file = files[cal_settings$variable]
   cal_settings$varid = cal_settings$spp
