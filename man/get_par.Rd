@@ -17,9 +17,9 @@ get_par(
   linear = FALSE
 )
 
-get_species(x, type = NULL, code = FALSE, sp = NULL)
+get_species(x, type = NULL, code = FALSE, sp = NULL, nm = NULL)
 
-get_fisheries(x, code = FALSE, fsh = NULL)
+get_fisheries(x, code = FALSE, fsh = NULL, nm = NULL)
 }
 \arguments{
 \item{conf}{The 'osmose.configuration' object.}
