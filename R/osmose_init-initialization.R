@@ -246,9 +246,9 @@ init_firstyear = function(input, file, parameters = NULL, output = NULL,
 
 init_sofia = function(input, file=NULL, test=FALSE, ...) {
   
-  ow = options("warn")
-  options(warn=1)
-  on.exit(options(ow))
+  # ow = options("warn")
+  # options(warn=1)
+  # on.exit(options(ow))
   
   conf = .readConfiguration(input)
   
@@ -287,7 +287,8 @@ init_sofia = function(input, file=NULL, test=FALSE, ...) {
     if(is.null(sim$nschool))
       stop(sprintf("Parameter 'simulation.nschool.sp%d' not found.", sp))
     sim$larvalM = ndt*sim$larvalM # transform to annual rate, asummed 'by time-step'
-    sim$osmose  = .initial_length_dist(sim, sp)
+    add_larvae = is.null(get_par(this, "mortality.additional.larva.rate.sp"))
+    sim$osmose  = .initial_length_dist(sim, sp, add_larvae)
     pars[[iSpName]] = as.matrix(sim$osmose)
     out[[iSpName]] = sim
     
@@ -565,7 +566,7 @@ lnorm2 = function(obs, sim, tiny=1e-2, ...) {
 
 llw = function(cv) 1/(2*cv^2)
 
-.initial_length_dist = function(sim, sp) {
+.initial_length_dist = function(sim, sp, add_larvae) {
   
   dist = sim$distB
   dist[dist==0] = 1e-3 # 1kg instead of nothing
@@ -582,23 +583,24 @@ llw = function(cv) 1/(2*cv^2)
   
   nschool = pmax(ceiling(sim$nschool*rel_dist), 1)
   
-  out = c(round(log(bio_ini), 3), 
+  out = c(round(bio_ini, 3), 
           paste(format(bio_rel, scientific = FALSE), collapse=", "), 
           paste(round(sim$bins$size,3), collapse=","),
           paste(xage, collapse=","),
           paste(round(tl_sp, 2), collapse=", "),
           paste(nschool, collapse = ", "),
-          round(log(sim$larvalM), 3))
+          round(sim$larvalM, 5))
   dim(out) = c(length(out), 1)
   
+  lpatt = if(add_larvae) "mortality.additional.larva.rate.sp%d" else "initialization.additional.larva.rate.sp%d"
   out = as.data.frame(out)
-  rownames(out) = sprintf(c("population.initialization.biomass.log.sp%d",
+  rownames(out) = sprintf(c("population.initialization.biomass.sp%d",
                             "population.initialization.relativebiomass.sp%d",
                             "population.initialization.size.sp%d",
                             "population.initialization.age.sp%d",
                             "population.initialization.tl.sp%d",
                             "population.initialization.nschool.sp%d",
-                            "mortality.additional.larva.rate.log.sp%d"), sp)
+                            lpatt), sp)
   colnames(out) = NULL
   
   return(out)
