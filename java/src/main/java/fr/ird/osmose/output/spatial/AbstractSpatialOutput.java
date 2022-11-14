@@ -131,7 +131,7 @@ public abstract class AbstractSpatialOutput extends SimulationLinker implements 
 
         Variable.Builder<?> outVarBuilder = bNc.addVariable(this.getVarName(), DataType.FLOAT, new ArrayList<>(Arrays.asList(timeDim, speciesDim, linesDim, columnsDim)));
         outVarBuilder.addAttribute(new Attribute("units", "number of fish"));
-        outVarBuilder.addAttribute(new Attribute("_FillValue", -99.f));
+        outVarBuilder.addAttribute(new Attribute("_FillValue", FILLVALUE));
 
         Variable.Builder<?> latVarBuilder = bNc.addVariable("latitude", DataType.FLOAT, new ArrayList<>(Arrays.asList(linesDim, columnsDim)));
         latVarBuilder.addAttribute(new Attribute("units", "degree"));
