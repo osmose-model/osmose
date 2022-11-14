@@ -7,7 +7,9 @@
   
   mcat("\n#---- Resources species\n", file=allfiles, append = TRUE)
   
-  pars = get_par(conf, "species.accessibility2fish.logit", as.is=TRUE)
+  pars = get_par(conf, "species.accessibility2fish.sp", as.is=TRUE)
+  pars = transform_par(pars, FUN=logit)
+  
   write_osmose(pars, file=guess_file, append = TRUE)
   write_osmose(set_par(pars, -20), file=min_file, append = TRUE)
   write_osmose(set_par(pars, +20), file=max_file, append = TRUE)
@@ -24,7 +26,9 @@
   nbkg = get_par(conf, "nbackground")
   if(!is.null(nbkg)) {
     mcat("\n#---- Background species\n", file=allfiles, append = TRUE)
-    pars = get_par(conf, "species.multiplier.log.sp", as.is=TRUE)
+    pars = get_par(conf, "species.multiplier.sp", as.is=TRUE)
+    pars = transform_par(pars, FUN=log)
+    
     write_osmose(pars, file=guess_file, append = TRUE)
     write_osmose(set_par(pars, 0), file=min_file, append = TRUE)
     write_osmose(set_par(pars, 15), file=max_file, append = TRUE)
@@ -47,20 +51,26 @@
   
   mcat("\n#---- Focal species\n", file=allfiles, append = TRUE)
   
-  pars = get_par(conf, "population.initialization.biomass.log", as.is=TRUE)
+  pars = get_par(conf, "population.initialization.biomass.sp", as.is=TRUE)
+  pars = transform_par(pars, FUN=log)
+  
   write_osmose(pars, file=guess_file, append = TRUE)
   write_osmose(set_par(pars, 0), file=min_file, append = TRUE)
   write_osmose(set_par(pars, 15), file=max_file, append = TRUE)
   write_osmose(set_par(pars, 1), file=phase_file, append = TRUE)
   
-  pars = get_par(conf, "mortality.additional.rate.log", as.is=TRUE)
+  pars = get_par(conf, "mortality.additional.rate.sp", as.is=TRUE)
+  pars = transform_par(pars, FUN=log)
+  
   write_osmose(pars, file=guess_file, append = TRUE)
   write_osmose(set_par(pars, -9), file=min_file, append = TRUE)
   write_osmose(set_par(pars, +2), file=max_file, append = TRUE)
   write_osmose(set_par(pars, 1), file=phase_file, append = TRUE)
   
-  pars = get_par(conf, "mortality.additional.larva.rate.log", as.is=TRUE)
+  pars = get_par(conf, "mortality.additional.larva.rate.sp", as.is=TRUE)
   pars = get_par(pars, par="seasonality", invert = TRUE, as.is=TRUE)
+  pars = transform_par(pars, FUN=log)
+  
   write_osmose(pars, file=guess_file, append = TRUE)
   write_osmose(set_par(pars, -1), file=min_file, append = TRUE)
   write_osmose(set_par(pars, +7), file=max_file, append = TRUE)
@@ -133,13 +143,17 @@
     msg = sprintf("\n-- Fishery %s: %s\n", nmc[i], nmf[i])
     mcat(msg, file=allfiles, append = TRUE)
     this = get_par(conf, sprintf("fsh%s", ifsh))
-    pars = get_par(get_par(this, "fisheries.rate.base", as.is=TRUE), "shift", invert=TRUE, as.is=TRUE)
+    pars = get_par(get_par(this, "fisheries.rate.base.fsh", as.is=TRUE), "shift", invert=TRUE, as.is=TRUE)
+    pars = transform_par(pars, FUN=log)
+    
     write_osmose(pars, file=guess_file, append = TRUE)
     write_osmose(set_par(pars, -9), file=min_file, append = TRUE)
     write_osmose(set_par(pars, +2), file=max_file, append = TRUE)
     write_osmose(set_par(pars, 2), file=phase_file, append = TRUE)
     
-    pars = get_par(this, "fisheries.rate.byperiod", as.is=TRUE)
+    pars = get_par(this, "fisheries.rate.byperiod.fsh", as.is=TRUE)
+    pars = transform_par(pars, FUN=log)
+    
     write_osmose(pars, file=guess_file, append = TRUE)
     write_osmose(set_par(pars, -3), file=min_file, append = TRUE)
     write_osmose(set_par(pars, +3), file=max_file, append = TRUE)

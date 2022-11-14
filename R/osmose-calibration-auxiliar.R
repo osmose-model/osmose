@@ -19,17 +19,32 @@ set_par = function(x, value, ...) {
   return(val)
 }
 
+transform_par = function(x, FUN, ...) {
+  nmfun = deparse(substitute(FUN))
+  FUN = match.fun(FUN)
+  x = as.relistable(x)
+  val = FUN(unlist(x))
+  val = relist(val)
+  nm = names(val)
+  nm = gsub(nm, pattern="\\.sp", replacement=sprintf(".%s.sp", nmfun))
+  nm = gsub(nm, pattern="\\.fsh", replacement=sprintf(".%s.fsh", nmfun))
+  names(val) = nm
+  class(val) = "osmose.configuration"
+  return(val)
+}
+
+
 #' @exportS3Method relist osmose.configuration
 relist.osmose.configuration = function(flesh, skeleton = attr(flesh, "skeleton")) {
-  ind <- 1L
-  result <- skeleton
+  ind = 1L
+  result = skeleton
   for (i in seq_along(skeleton)) {
-    size <- length(unlist(result[[i]]))
-    result[[i]] <- relist(flesh[seq.int(ind, length.out = size)], 
+    size = length(unlist(result[[i]]))
+    result[[i]] = relist(flesh[seq.int(ind, length.out = size)], 
                           result[[i]])
-    ind <- ind + size
+    ind = ind + size
   }
-  result
+  return(result)
 }
 
 mcat = function(..., file = "", sep = " ", fill = FALSE, labels = NULL,
