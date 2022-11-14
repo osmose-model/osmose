@@ -422,6 +422,39 @@ public class Releases {
 
                 Configuration cfg = this.getConfiguration();
 
+                // update name of spatial outputs
+                if(cfg.canFind("output.spatialabundance.enabled")) {
+                    updateKey("output.spatialabundance.enabled", "output.spatial.abundance.enabled");
+                }
+                if(cfg.canFind("output.spatialbiomass.enabled")) {
+                    updateKey("output.spatialbiomass.enabled", "output.spatial.biomass.enabled");
+                }
+                if(cfg.canFind("output.spatialsize.enabled")) {
+                    updateKey("output.spatialsize.enabled", "output.spatial.size.enabled");
+                }
+                if(cfg.canFind("output.spatialenet.enabled")) {
+                    updateKey("output.spatialenet.enabled", "output.spatial.enet.enabled");
+                }
+                if(cfg.canFind("output.spatialenetlarvae.enabled")) {
+                    updateKey("output.spatialenetlarvae.enabled", "output.spatial.enet.larvae.enabled");
+                }
+                if(cfg.canFind("output.spatialenetjuv.enabled")) {
+                    updateKey("output.spatialenetjuv.enabled", "output.spatial.enet.juv.enabled");
+                }
+                if(cfg.canFind("output.spatialMstarv.enabled")) {
+                    updateKey("output.spatialMstarv.enabled", "output.spatial.mstarv.enabled");
+                }
+                if(cfg.canFind("output.spatialMpred.enabled")) {
+                    updateKey("output.spatialMpred.enabled", "output.spatial.mpred.enabled");
+                }
+                if(cfg.canFind("output.spatialdg.enabled")) {
+                    updateKey("output.spatialdg.enabled", "output.spatial.dg.enabled");
+                }
+                if(cfg.canFind("output.spatialegg.enabled")) {
+                    updateKey("output.spatialegg.enabled", "output.spatial.egg.enabled");
+                }
+
+
                 deprecateParameter("simulation.onestep");
 
                 int focalIndex[] = cfg.findKeys("species.type.sp*").stream().filter(k -> cfg.getString(k).equals("focal")).mapToInt(rgKey -> Integer.valueOf(rgKey.substring(rgKey.lastIndexOf(".sp") + 3))).sorted().toArray();

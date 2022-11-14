@@ -236,7 +236,7 @@ public class OutputManager extends SimulationLinker {
             outputs.add(new SpatialMortaStarvOutput(rank));
         }
 
-        if (getConfiguration().getBoolean("output.spatial.Mpred.enabled")) {
+        if (getConfiguration().getBoolean("output.spatial.mpred.enabled")) {
             outputs.add(new SpatialMortaPredOutput(rank));
         }
 
