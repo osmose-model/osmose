@@ -148,7 +148,7 @@ abstract public class AbstractOutput extends SimulationLinker implements IOutput
         int i = 0;
         for (AbstractOutputRegion region : getOutputRegions()) {
             File file = new File(path, getFilename(region.getIndex(), region.getName()));
-            boolean fileExists = file.exists();
+            // boolean fileExists = file.exists();
             file.getParentFile().mkdirs();
             try {
                 // Init stream
