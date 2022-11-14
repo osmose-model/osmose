@@ -89,10 +89,10 @@ public class SpatialEggOutput extends AbstractSpatialOutput {
                 if (null != getSchoolSet().getSchools(cell)) {
                     for (School school : getSchoolSet().getSchools(cell)) {
                         int iSpec = school.getSpeciesIndex();
-                        if (school.isEgg()) {
+                        if (school.isEgg() && school.isAlive()) {
 
                             // here, data is TK weighted by the biomass
-                              temp[iSpec][j][i] += school.getInstantaneousAbundance();
+                            temp[iSpec][j][i] += school.getInstantaneousAbundance();
                             abundance[iSpec][j][i] += 1;
                         }
                     }
