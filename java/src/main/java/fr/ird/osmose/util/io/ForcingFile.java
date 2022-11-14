@@ -1,10 +1,10 @@
-/* 
- * 
+/*
+ *
  * OSMOSE (Object-oriented Simulator of Marine Ecosystems)
  * http://www.osmose-model.org
- * 
+ *
  * Copyright (C) IRD (Institut de Recherche pour le Développement) 2009-2020
- * 
+ *
  * Osmose is a computer program whose purpose is to simulate fish
  * populations and their interactions with their biotic and abiotic environment.
  * OSMOSE is a spatial, multispecies and individual-based model which assumes
@@ -15,7 +15,7 @@
  * processes of fish life cycle (growth, explicit predation, additional and
  * starvation mortalities, reproduction and migration) and fishing mortalities
  * (Shin and Cury 2001, 2004).
- * 
+ *
  * Contributor(s):
  * Yunne SHIN (yunne.shin@ird.fr),
  * Morgane TRAVERS (morgane.travers@ifremer.fr)
@@ -23,20 +23,20 @@
  * Philippe VERLEY (philippe.verley@ird.fr)
  * Laure VELEZ (laure.velez@ird.fr)
  * Nicolas Barrier (nicolas.barrier@ird.fr)
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation (version 3 of the License). Full description
  * is provided on the LICENSE file.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
- * 
+ *
  */
 
 package fr.ird.osmose.util.io;
@@ -54,15 +54,16 @@ import ucar.ma2.Index;
 import ucar.ma2.InvalidRangeException;
 import ucar.nc2.NetcdfFile;
 import ucar.nc2.Variable;
+import ucar.nc2.dataset.NetcdfDatasets;
 
 /**
  * Class that helps managing input files (i.e. LTL or physical variables).
- * 
+ *
  * It is initialized by giving three variables:
  * - A file pattern
  * - A variable name
  * - A number of time-steps per year
- * 
+ *
  */
 public class ForcingFile extends OsmoseLinker {
 
@@ -108,18 +109,18 @@ public class ForcingFile extends OsmoseLinker {
 
     /** Number of time steps within a year.*/
     private final int ncPerYear;
-    
+
     /** Name of the variable to read. */
     private final String varName;
-    
+
     /** File pattern to match. */
     private final String filePattern;
-    
+
     private final double offset;
     private final double factor;
-    
+
     private int previousNcStep = -1;
-    
+
     //////////////
     // Constructor
     //////////////
@@ -145,10 +146,10 @@ public class ForcingFile extends OsmoseLinker {
 
         // Recover the file pattern to match
         String pattern = new File(this.filePattern).getName();
-        
+
         // Recover the directory that is used with the file pattern
         File directory = new File(this.filePattern).getParentFile();
-        
+
         // Check whether the files match the pattern
         String[] fileList = directory.list();
         for (String f : fileList) {
@@ -161,18 +162,18 @@ public class ForcingFile extends OsmoseLinker {
         // Extract the files as a list of sorted String
         this.fileNames = listFiles.stream().sorted().toArray();
         this.nFiles = fileNames.length;
-        
+
         if (this.nFiles == 0) {
             StringBuilder msg = new StringBuilder();
             msg.append("No file has been found to match the patter " + this.filePattern + "\n");
             msg.append("The program will stop");
             error("Error reading resource file", new IOException(msg.toString()));
         }
-        
+
         this.nSteps = new int[this.nFiles];
         int cpt = 0;
 
-        // Loop over all the files 
+        // Loop over all the files
         for (int iFile=0; iFile<this.nFiles; iFile++) {
 
             String temp = (String) fileNames[iFile];
@@ -183,7 +184,7 @@ public class ForcingFile extends OsmoseLinker {
                         new FileNotFoundException("NetCDF file " + ncFile + " does not exist."));
             }
 
-            try (NetcdfFile nc = NetcdfFile.open(ncFile)) {
+            try (NetcdfFile nc = NetcdfDatasets.openDataset(ncFile)) {
                 Variable variable = nc.findVariable(this.varName);
                 int[] shape = variable.getShape();
                 int nDims = shape.length;
@@ -212,12 +213,12 @@ public class ForcingFile extends OsmoseLinker {
         if (!caching.equals(ForcingFileCaching.NONE)) {
             cachedVariable = new HashMap<>();
         }
-    
-        if(caching.equals(ForcingFileCaching.ALL)) { 
-            this.loadCachedVariable();   
+
+        if(caching.equals(ForcingFileCaching.ALL)) {
+            this.loadCachedVariable();
         }
     }
-    
+
     private void loadCachedVariable() {
         // cache whole time series at first time step
         for (int iTime = 0; iTime < timeLength; iTime++) {
@@ -268,10 +269,10 @@ public class ForcingFile extends OsmoseLinker {
 
         int ndt = this.getConfiguration().getNStepYear();
         int iStepNc = (iStepSimu / (ndt / this.ncPerYear)) % timeLength;
-        
+
         // If the Nc step to read has not changed, nothing is done.
         // Variable is kept unchanged.
-        if(iStepNc == this.previousNcStep) { 
+        if(iStepNc == this.previousNcStep) {
             return;
         }
 
@@ -295,16 +296,16 @@ public class ForcingFile extends OsmoseLinker {
                 this.variable = readVariable(iStepNc);
                 break;
         }
-        
+
         // Update previous step to the current step.
         this.previousNcStep = iStepNc;
-        
+
     }
 
     public double getVariable(Cell cell) {
         return variable[0][cell.get_jgrid()][cell.get_igrid()];
     }
-    
+
     public double getVariable(Cell cell, int layer) {
         return variable[layer][cell.get_jgrid()][cell.get_igrid()];
     }
@@ -325,7 +326,7 @@ public class ForcingFile extends OsmoseLinker {
         double[][][] output = null;
 
         // String ncFile = getConfiguration().getFile("species.file.sp" + index);
-        try (NetcdfFile nc = NetcdfFile.open(ncFile)) {
+        try (NetcdfFile nc = NetcdfDatasets.openDataset(ncFile)) {
             // String message = String.format("Step=%d ==> Reading %s from %s, step=%d",
             // iStepNc, name, ncFile, iStep);
             // this.getLogger().info(message);
@@ -350,10 +351,10 @@ public class ForcingFile extends OsmoseLinker {
                 ncArray = ncVariable.read(new int[] { iStep, 0, 0, 0 }, new int[] { 1, nlayer, ny, nx }).reduce();
                 Index ncindex = ncArray.getIndex();
                 output = new double[nlayer][ny][nx];
-                for (Cell cell : getGrid().getCells()) { 
+                for (Cell cell : getGrid().getCells()) {
                     if (cell.isLand()) {
                         continue;
-                    }   
+                    }
                     int i = cell.get_igrid();
                     int j = cell.get_jgrid();
                     for (int k = 0; k < nlayer; k++) {
@@ -367,34 +368,34 @@ public class ForcingFile extends OsmoseLinker {
                         this.varName, ncVariable.getShape().length);
                 error(message, new Exception());
             }
-            
-            
+
+
         } catch (IOException | InvalidRangeException ex) {
             error("File " + ncFile + ", variable " + this.varName + "cannot be read", ex);
         }
-        
+
         return output;
-    
+
     }
-    
+
     public int getTimeLength() {
         return this.timeLength;
     }
-    
-    public int getNcStep(int iStepSimu) {  
+
+    public int getNcStep(int iStepSimu) {
         int ndt = this.getConfiguration().getNStepYear();
         int iStepNc = (iStepSimu / (ndt / this.ncPerYear)) % timeLength;
         return iStepNc;
     }
-    
+
     public String getNcFileName(int iNcStep) {
         return (String) this.fileNames[this.fileMapping[iNcStep]];
     }
-    
+
     public int getNcIndex(int iNcStep) {
         return this.stepMapping[iNcStep];
     }
-    
+
     public HashMap<Integer, double[][][]> getCachedVariable() {
         return this.cachedVariable;
     }

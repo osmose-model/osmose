@@ -49,6 +49,7 @@ import ucar.ma2.ArrayFloat;
 import ucar.ma2.ArrayInt;
 import ucar.nc2.NetcdfFile;
 import ucar.nc2.Variable;
+import ucar.nc2.dataset.NetcdfDatasets;
 
 /**
  *
@@ -86,7 +87,7 @@ public class NetcdfPopulator extends AbstractPopulator {
         String ncfile = rankedFile ? rankedFilename : plainFilename;
         try {
 
-            nc = NetcdfFile.open(ncfile);
+            nc = NetcdfDatasets.openDataset(ncfile);
         } catch (IOException ex) {
             error("Failed to open restart file " + ncfile, ex);
         }
