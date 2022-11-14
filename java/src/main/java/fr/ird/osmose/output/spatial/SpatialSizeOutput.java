@@ -91,6 +91,11 @@ public class SpatialSizeOutput extends AbstractSpatialOutput {
                         if (getConfiguration().isCutoffEnabled() && ((school.getAge() < getConfiguration().getCutoffAge()[iSpec]) || (school.getAge() < getConfiguration().getCutoffAge()[iSpec]))) {
                             continue;
                         }
+
+                        if(!school.isAlive()) {
+                            continue;
+                        }
+
                         if (!school.isUnlocated()) {
                             // here, data is TK weighted by the biomass
                             temp[iSpec][j][i] += school.getLength() * school.getInstantaneousAbundance();

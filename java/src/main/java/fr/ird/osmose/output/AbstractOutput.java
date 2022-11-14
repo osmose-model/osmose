@@ -148,7 +148,7 @@ abstract public class AbstractOutput extends SimulationLinker implements IOutput
         int i = 0;
         for (AbstractOutputRegion region : getOutputRegions()) {
             File file = new File(path, getFilename(region.getIndex(), region.getName()));
-            boolean fileExists = file.exists();
+            // boolean fileExists = file.exists();
             file.getParentFile().mkdirs();
             try {
                 // Init stream
@@ -157,17 +157,16 @@ abstract public class AbstractOutput extends SimulationLinker implements IOutput
                 error("Failed to create output file " + file.getAbsolutePath(), ex);
             }
 
-            if (!fileExists) {
-                prw[i].println(quote(getDescription()));
-                prw[i].print(quote("Time"));
-                String[] headers = getHeaders();
-                for (String header : headers) {
-                    prw[i].print(separator);
-                    prw[i].print(quote(header));
-                }
-                prw[i].println();
-                flushMethod.flushFile(prw[i]);
+            prw[i].println(quote(getDescription()));
+            prw[i].print(quote("Time"));
+            String[] headers = getHeaders();
+            for (String header : headers) {
+                prw[i].print(separator);
+                prw[i].print(quote(header));
             }
+            prw[i].println();
+            flushMethod.flushFile(prw[i]);
+
             i++;
         }
 

@@ -208,43 +208,43 @@ public class OutputManager extends SimulationLinker {
         /*
          * Instantiate indicators
          */
-        if (getConfiguration().getBoolean("output.spatialabundance.enabled")) {
+        if (getConfiguration().getBoolean("output.spatial.abundance.enabled")) {
             outputs.add(new SpatialAbundanceOutput(rank));
         }
 
-        if (getConfiguration().getBoolean("output.spatialbiomass.enabled")) {
+        if (getConfiguration().getBoolean("output.spatial.biomass.enabled")) {
             outputs.add(new SpatialBiomassOutput(rank));
         }
 
-        if (getConfiguration().getBoolean("output.spatialsize.enabled")) {
+        if (getConfiguration().getBoolean("output.spatial.size.enabled")) {
             outputs.add(new SpatialSizeOutput(rank));
         }
 
-        if (getConfiguration().getBoolean("output.spatialenet.enabled")) {
+        if (getConfiguration().getBoolean("output.spatial.enet.enabled")) {
             outputs.add(new SpatialEnetOutput(rank));
         }
 
-        if (getConfiguration().getBoolean("output.spatialenetlarvae.enabled")) {
+        if (getConfiguration().getBoolean("output.spatial.enet.larvae.enabled")) {
             outputs.add(new SpatialEnetOutputlarvae(rank));
         }
 
-        if (getConfiguration().getBoolean("output.spatialenetjuv.enabled")) {
+        if (getConfiguration().getBoolean("output.spatial.enet.juv.enabled")) {
             outputs.add(new SpatialEnetOutputjuv(rank));
         }
 
-        if (getConfiguration().getBoolean("output.spatialMstarv.enabled")) {
+        if (getConfiguration().getBoolean("output.spatial.mstarv.enabled")) {
             outputs.add(new SpatialMortaStarvOutput(rank));
         }
 
-        if (getConfiguration().getBoolean("output.spatialMpred.enabled")) {
+        if (getConfiguration().getBoolean("output.spatial.Mpred.enabled")) {
             outputs.add(new SpatialMortaPredOutput(rank));
         }
 
-        if (getConfiguration().getBoolean("output.spatialdg.enabled")) {
+        if (getConfiguration().getBoolean("output.spatial.dg.enabled")) {
             outputs.add(new SpatialdGOutput(rank));
         }
 
-        if (getConfiguration().getBoolean("output.spatialegg.enabled")) {
+        if (getConfiguration().getBoolean("output.spatial.egg.enabled")) {
             outputs.add(new SpatialEggOutput(rank));
         }
 

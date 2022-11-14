@@ -77,6 +77,11 @@ public class SpatialAbundanceOutput extends AbstractSpatialOutput {
                         if (getConfiguration().isCutoffEnabled() && ((school.getAge() < getConfiguration().getCutoffAge()[iSpec]) || (school.getAge() < getConfiguration().getCutoffAge()[iSpec]))) {
                             continue;
                         }
+
+                        if(!school.isAlive()) {
+                            continue;
+                        }
+
                         if (!school.isUnlocated()) {
                             data[iSpec][j][i] += school.getInstantaneousAbundance();
                         }
