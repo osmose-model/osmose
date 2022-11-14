@@ -19,6 +19,17 @@ initialize_osmose = function(input, file, type="internannual", parameters = NULL
 
   input = suppressWarnings(normalizePath(input, mustWork=TRUE))
   
+  if(missing(file)) {
+    conf = read_osmose(input=input)
+    file = get_par(conf, "osmose.configuration.initialization")
+    if(is.null(file)) {
+      file = file.path(configDir, "input", "initial_conditions.osm")
+      if(!is.null(attr(file, "path"))) file = file.path(attr(file, "path"), file)
+      file  = suppressWarnings(normalizePath(file))
+    }
+      
+  }
+    
   if(!is.null(attr(file, "path"))) file = file.path(attr(file, "path"), file)
   file  = suppressWarnings(normalizePath(file))
   
@@ -32,11 +43,15 @@ initialize_osmose = function(input, file, type="internannual", parameters = NULL
                                         log=log, version=version, osmose=osmose, 
                                         java=java, options=options, verbose=verbose, 
                                         clean=clean, force=force, run=run, append=append, ...),
+               "alaia"  = init_ncdf(input=input, file=file, parameters=parameters, output=output, 
+                                   log=log, version=version, osmose=osmose, 
+                                   java=java, options=options, verbose=verbose, 
+                                   clean=clean, force=force, run=run, append=append, ...),
                "climatology"  = init_firstyear(input=input, file=file, parameters=parameters, output=output, 
                                                log=log, version=version, osmose=osmose, 
                                                java=java, options=options, verbose=verbose, 
                                                clean=clean, force=force, run=run, append=append, ...),
-               "internannual" = init_sofia(input=input, file=file, test=run, ...),
+               "internannual" = init_sofia(input=input, file=file, test=!run, ...),
                stop(sprintf("Type='%s' is not supported.", type))
   )  
 
@@ -45,6 +60,14 @@ initialize_osmose = function(input, file, type="internannual", parameters = NULL
   cat(msg, file=file, append=append)
   cat("# Do not edit by hand.\n", file=file, append=TRUE)
   suppressWarnings(write_osmose(out, file=file, append=TRUE))
+  
+  if(FALSE) {
+    
+    out = "the plankton accessibilities"
+    suppressWarnings(write_osmose(out, file=file, append=TRUE))
+  }
+  
+  message(sprintf("Initialization configuration file written in '%s'.", file))
   
   return(invisible(out))
     
