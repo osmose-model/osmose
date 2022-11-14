@@ -248,6 +248,11 @@ public class SpatialOutput extends SimulationLinker implements IOutput {
                         if (getConfiguration().isCutoffEnabled() && ((school.getAge() < getConfiguration().getCutoffAge()[school.getSpeciesIndex()]) || school.getLength() < getConfiguration().getCutoffLength()[school.getSpeciesIndex()])) {
                             continue;
                         }
+
+                        if(!school.isAlive()) {
+                            continue;
+                        }
+
                         if (!school.isUnlocated()) {
                             int iSpec = school.getSpeciesIndex();
                             biomass[iSpec][j][i] += school.getInstantaneousBiomass();
