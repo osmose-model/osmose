@@ -23,18 +23,19 @@
 #'
 #' @return A list with all the matched parameters.
 #' @export
-get_par = function(conf, par, sp=NULL, fsh=NULL, invert=FALSE, as.is=FALSE, unlist=FALSE, linear=FALSE) {
+get_par = function(conf, par=NULL, sp=NULL, fsh=NULL, invert=FALSE, as.is=FALSE, unlist=FALSE, linear=FALSE) {
   if(!is.null(sp) & !is.null(fsh)) return(NULL)
   if(!is.null(sp)) par = sprintf(".sp%d$", sp)
   if(!is.null(fsh)) par = sprintf(".fsh%d$", fsh)
-  par = tolower(par)
-  out = conf[grep(names(conf), pattern=par, invert=invert)]
-  if(length(out)==0) return(NULL)
-  if(isTRUE(as.is)) {
-    class(out) = "osmose.configuration"
-    return(out)
+  if(!is.null(par)) {
+    par = tolower(par)
+    out = conf[grep(names(conf), pattern=par, invert=invert)]
+  } else {
+    out = conf
   }
   
+  if(length(out)==0) return(NULL)
+
   if(isTRUE(linear)) {
     # log to linear
     ind = grep(x=names(out), pattern="\\.log\\.")
@@ -45,10 +46,16 @@ get_par = function(conf, par, sp=NULL, fsh=NULL, invert=FALSE, as.is=FALSE, unli
     out[ind] = lapply(out[ind], FUN=ilogit)
     names(out)[ind] = gsub(x=names(out)[ind], pattern="\\.logit\\.", replacement = ".")
   }
+
+  if(isTRUE(as.is)) {
+    class(out) = "osmose.configuration"
+    return(out)
+  }
   
   if(length(out)==1) out = out[[1]]
   if(isTRUE(unlist)) return(unlist(out))
   return(out)
+  
 }
 
 # to_do: find all instances of .getPar and replace by get_par
@@ -58,9 +65,20 @@ get_par = function(conf, par, sp=NULL, fsh=NULL, invert=FALSE, as.is=FALSE, unli
 #' @param code Boolean, return the numerical code of the species or fishery?
 #' @rdname get_par
 #' @export
-get_species = function(x, type=NULL, code=FALSE, sp=NULL) {
+get_species = function(x, type=NULL, code=FALSE, sp=NULL, nm=NULL) {
   
   type = match.arg(type, choices = c("all", "focal", "background", "resources"))
+  
+  if(!is.null(sp) & !is.null(nm)) stop("Only 'sp' or 'nm' must be provided.")
+  
+  if(!is.null(nm)) {
+    
+    sp = gsub(regmatches(nm, regexec("sp[0-9]*$", nm)), pattern="sp", replacement = "")
+    sp = suppressWarnings(as.numeric(sp))
+    out = get_species(x)[match(x=sp, get_species(x, code=TRUE))]
+    return(out)
+    
+  }
   
   if(!is.null(sp)) {
     isp = as.numeric(get_species(x, type=type, code = TRUE)[match(x=sp, get_species(x, type=type))])
@@ -83,7 +101,18 @@ get_species = function(x, type=NULL, code=FALSE, sp=NULL) {
 
 #' @rdname get_par
 #' @export
-get_fisheries = function(x, code=FALSE, fsh=NULL) {
+get_fisheries = function(x, code=FALSE, fsh=NULL, nm=NULL) {
+  
+  if(!is.null(fsh) & !is.null(nm)) stop("Only 'fsh' or 'nm' must be provided.")
+  
+  if(!is.null(nm)) {
+    
+    fsh = gsub(regmatches(nm, regexec("fsh[0-9]*$", nm)), pattern="fsh", replacement = "")
+    fsh = suppressWarnings(as.numeric(fsh))
+    out = get_fisheries(x)[match(x=fsh, get_fisheries(x, code=TRUE))]
+    return(out)
+    
+  }
   
   if(!is.null(fsh)) {
     isp = as.numeric(get_fisheries(x, code=TRUE)[match(x=fsh, get_fisheries(x))])
@@ -118,6 +147,8 @@ get_fisheries = function(x, code=FALSE, fsh=NULL) {
 .bioguess = function(x, ndt, ts=FALSE) {
   bio = x$biomass
   bguess = x$bioguess
+  msg = sprintf("More than one '%s' has been provided.", unique(names(bguess)))
+  if(length(bguess)>1) stop(msg)
   if(!is.null(bguess)) {
     out = bguess
     out_ts = rep(NA, ndt)
@@ -128,7 +159,7 @@ get_fisheries = function(x, code=FALSE, fsh=NULL) {
   out_ts = bio[1:ndt]
   out = mean(out_ts, na.rm=TRUE)
   if(is.na(out)) {
-    warning("No biomass information for the first year, using average of time series.")
+    message("No biomass information for the first year, using average of time series.")
     out = mean(bio, na.rm=TRUE)
     out_ts = rep(NA, ndt)
     out_ts[1] = out
@@ -147,6 +178,7 @@ get_fisheries = function(x, code=FALSE, fsh=NULL) {
     return(separator)
   }
   
+  if(length(file)!=1) stop("You can only read one file at the time.")
   file = if(!is.null(attr(file, "path"))) file.path(attr(file, "path"), file) else file
   
   config = readLines(file) # read lines
@@ -228,7 +260,7 @@ read.cal = function(conf, sp) {
   if(is.null(file)) return(NULL)
   
   file = file.path(attr(file, "path"), file)
-  periods = c("year", "quarter", "month", "week")
+  periods = c("year", "quarter", "month", "week","period")
   out = read.csv(file, check.names = FALSE)
   must = names(out)[names(out) %in% periods]
   msg = sprintf("Missing time information in %s's catch-at-length file.", spname)
@@ -261,7 +293,7 @@ read.cal = function(conf, sp) {
   if(all(is.na(mat))) {
     
     msg = sprintf("No catch-at-length data in %s's file is provided, all NAs.", spname)
-    warning(msg)
+    message(msg)
     
     Linf = .getPar(this, "species.linf")
     bins = pretty(c(0, 0.9*Linf), n=15)
@@ -293,7 +325,7 @@ read.cal = function(conf, sp) {
   if(all(is.na(units))) {
     units = 1 # assume CAL is unbiased
     msg = sprintf("No landing data for %s, assuming catch-at-length is unbiased and representing the full landings. 
-            If TRUE, please manually calculate the landings from catch-at-length.", spname)
+            If TRUE, please manually calculate the landings from catch-at-length and run the initialization again.", spname)
     MSG = c(MSG, msg)
   }
   
@@ -302,6 +334,30 @@ read.cal = function(conf, sp) {
   newmat = newmat*units
   
   # check for incomplete rows
+  
+  allna = apply(newmat, 1, FUN = function(x) all(is.na(x)))
+  
+  if(any(allna)) {
+    
+    calmean = colMeans(newmat, na.rm=TRUE)
+    newmat[allna, ] = calmean
+
+    wmat = t(t(newmat)*W2)
+    ilandings = 1e-6*rowSums(wmat)
+    ilandings[ilandings==0] = 1
+    units = landings/ilandings
+    if(all(is.na(units))) {
+      units = 1 # assume CAL is unbiased
+      msg = sprintf("No landing data for %s, assuming catch-at-length is unbiased and representing the full landings. 
+            If TRUE, please manually calculate the landings from catch-at-length and run the initialization again.", spname)
+      MSG = c(MSG, msg)
+    }
+    
+    units[is.na(units)] = 1 # assume unbiased when landing data is not available.
+    
+    newmat = newmat*units
+    
+  }
   
   # check for maximum size
   
@@ -342,7 +398,7 @@ read.cal = function(conf, sp) {
   
   MSG = c(MSG, msg)
   
-  if(!is.null(MSG)) warning(paste(MSG, collapse="\n"))
+  if(!is.null(MSG)) message(paste(MSG, collapse="\n"))
   
   output = list(cal=out, marks=marks, dbin=dbin, mat=newmat, bins=bins, harvested=TRUE, time=time)
   
@@ -355,13 +411,19 @@ read.biomass = function(conf, sp) {
   ndt = conf$simulation.time.ndtperyear 
   T = ndt*conf$simulation.time.nyear
   biofile = .getPar(this, "observed.biomass.file")
-  if(is.null(biofile)) stop("Observed biomass have not been provided.")
+  if(is.null(biofile)) {
+    message(sprintf("Observed biomass has not been provided for species %d.", sp))
+    return(NULL)
+  }
+    
+  q = .getPar(this, "observed.biomass.q")
+  if(is.null(q)) q = 1
   bioref = .readCSV(biofile)
   ivar= .getPar(this, "species.name")
   ndtbio = .getPar(this, "observed.biomass.ndtPerYear")
   if(is.null(ndtbio)) stop("Parameter 'observed.biomass.ndtPerYear' is missing.")
   ix = .time.conv(ndtbio, ndt, nrow(bioref), T)
-  biomass = bioref[ix$ind, ivar]
+  biomass = bioref[ix$ind, ivar]/q
   return(biomass)
   
 }
