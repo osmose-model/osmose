@@ -1,10 +1,10 @@
-/* 
- * 
+/*
+ *
  * OSMOSE (Object-oriented Simulator of Marine Ecosystems)
  * http://www.osmose-model.org
- * 
+ *
  * Copyright (C) IRD (Institut de Recherche pour le Développement) 2009-2020
- * 
+ *
  * Osmose is a computer program whose purpose is to simulate fish
  * populations and their interactions with their biotic and abiotic environment.
  * OSMOSE is a spatial, multispecies and individual-based model which assumes
@@ -15,7 +15,7 @@
  * processes of fish life cycle (growth, explicit predation, additional and
  * starvation mortalities, reproduction and migration) and fishing mortalities
  * (Shin and Cury 2001, 2004).
- * 
+ *
  * Contributor(s):
  * Yunne SHIN (yunne.shin@ird.fr),
  * Morgane TRAVERS (morgane.travers@ifremer.fr)
@@ -23,26 +23,27 @@
  * Philippe VERLEY (philippe.verley@ird.fr)
  * Laure VELEZ (laure.velez@ird.fr)
  * Nicolas Barrier (nicolas.barrier@ird.fr)
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation (version 3 of the License). Full description
  * is provided on the LICENSE file.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
- * 
+ *
  */
 
 package fr.ird.osmose.netcdf;
 
 import java.io.IOException;
 import ucar.nc2.NetcdfFile;
+import ucar.nc2.dataset.NetcdfDatasets;
 
 /**
  *
@@ -65,75 +66,75 @@ public abstract class AbstractInputNetcdf {
 
     /** Number of records (i.e. time steps) in the Netcdf file. */
     private int nRecords;
-    
+
     private int ncIndex;
-    
+
     /** Abstract method for class initialization.
      * @throws java.io.IOException */
     public abstract void init() throws IOException;
-    
+
     /**
      * Variable array to read. Should be of dims (time, prey, pred).
      */
     protected double varArray[][][];  // accessibility matrix: (time, prey, pred)
-    
-    
+
+
     /** Returns the Netcdf filename.
      * @return Filename  */
     public String getFilename() {
         return this.filename;
     }
-    
+
     /** Returns the Netcdf variable name. */
     public String getVarname() {
         return this.varname;
     }
-    
+
     /** Returns the NetcdfFile object.
-     * @return 
+     * @return
      */
     public NetcdfFile getNcFile() {
         return this.nc;
     }
-    
+
     /** Open the NetcdfFile object.
-     * 
-     * @throws IOException 
+     *
+     * @throws IOException
      */
     public void openNcFile() throws IOException {
-        nc = NetcdfFile.open(filename, null);
+        nc = NetcdfDatasets.openDataset(filename);
     }
-    
+
     public void closeNcFile() throws IOException {
         nc.close();
     }
 
-    /** Public constructor. 
-     * 
+    /** Public constructor.
+     *
      * @param filename
-     * @param varname 
+     * @param varname
      */
     public AbstractInputNetcdf(String filename, String varname) {
         this.varname = varname;
         this.filename = filename;
     }
-    
+
     /** Get the number of time steps in the file.
-     * 
-     * @return 
+     *
+     * @return
      */
     public int getNRecords() {
         return this.nRecords;
     }
-    
+
     /** Sets the number of time steps in the file.
-     * 
-     * @param nRecords 
+     *
+     * @param nRecords
      */
     public void setNRecords(int nRecords) {
         this.nRecords = nRecords;
     }
-    
+
     /** Converts char array ([][]) into  string array ([]).
      * @param input
      * @return  */
@@ -142,16 +143,16 @@ public abstract class AbstractInputNetcdf {
         String output[] = new String[nPrey];
         for (int itmp = 0; itmp < nPrey; itmp++) {
             output[itmp] = String.valueOf(input[itmp]);
-        } 
-        return output;    
+        }
+        return output;
     }
-    
-    public void setNcIndex(int timeStep) { 
+
+    public void setNcIndex(int timeStep) {
         this.ncIndex = (timeStep % this.getNRecords());
     }
-    
-    public int getNcIndex() { 
+
+    public int getNcIndex() {
         return this.ncIndex;
     }
-    
+
 }

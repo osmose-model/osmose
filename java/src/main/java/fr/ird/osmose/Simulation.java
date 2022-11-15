@@ -56,6 +56,7 @@ import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 import ucar.nc2.NetcdfFile;
+import ucar.nc2.dataset.NetcdfDatasets;
 
 /**
  * This class is in charge of running one instance of the simulation. Let's
@@ -164,7 +165,7 @@ public class Simulation extends OsmoseLinker {
             String ncfile = getConfiguration().getFile("simulation.restart.file") + "." + rank;
             i_step_simu = 0;
             try {
-                NetcdfFile nc = NetcdfFile.open(ncfile);
+                NetcdfFile nc = NetcdfDatasets.openDataset(ncfile);
                 i_step_simu = Integer.valueOf(nc.findGlobalAttribute("step").getStringValue()) + 1;
                 info("Restarting simulation from year {0} step {1}", new Object[] { this.getYear(),  this.getIndexTimeYear()});
             } catch (IOException ex) {

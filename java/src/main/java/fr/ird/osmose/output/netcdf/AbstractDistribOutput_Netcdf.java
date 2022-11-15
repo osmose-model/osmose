@@ -120,7 +120,7 @@ public abstract class AbstractDistribOutput_Netcdf extends AbstractOutput_Netcdf
         Dimension speciesDim = getBNc().addDimension("species", getNSpecies());
         Dimension classDim = getBNc().addDimension(this.getDisName(), this.distrib.getNClass());
         Variable.Builder<?> speciesVar = getBNc().addVariable("species", DataType.INT, "species");
-        Variable.Builder<?> distribVar = getBNc().addVariable(this.getDisName(), DataType.FLOAT, this.getDisName());
+        getBNc().addVariable(this.getDisName(), DataType.FLOAT, this.getDisName());
 
         this.createSpeciesAttr(speciesVar);
 
