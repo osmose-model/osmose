@@ -43,7 +43,7 @@ initialize_osmose = function(input, file, type="internannual", parameters = NULL
                                         log=log, version=version, osmose=osmose, 
                                         java=java, options=options, verbose=verbose, 
                                         clean=clean, force=force, run=run, append=append, ...),
-               "alaia"  = init_ncdf(input=input, file=file, parameters=parameters, output=output, 
+               "alaia"  = init_alaia(input=input, file=file, parameters=parameters, output=output, 
                                    log=log, version=version, osmose=osmose, 
                                    java=java, options=options, verbose=verbose, 
                                    clean=clean, force=force, run=run, append=append, ...),

@@ -134,6 +134,56 @@ init_ncdf = function(input, file, parameters = NULL, output = NULL,
   
 }
 
+init_alaia = function(input, file, parameters = NULL, output = NULL, 
+                     log = "osmose.log", version = NULL, osmose = NULL, 
+                     java = "java", options = NULL, verbose = TRUE, 
+                     clean = TRUE, force = FALSE, run=TRUE, append=FALSE, ...) {
+  
+  parameters = paste("-Poutput.restart.enabled=TRUE", parameters)
+  
+  if(isTRUE(run)) {
+    run_osmose(input=input, parameters=parameters, output=output, log=log,
+               version=version, osmose=osmose, java=java,
+               options=options, verbose=verbose, clean=clean, force=force)
+  }
+  
+  rpath = file.path(output, "restart")
+  conf = .readConfiguration(input)
+  rfiles = dir(path=rpath, pattern = "\\.nc.*")
+  nf = length(rfiles)
+  
+  spnames = unlist(.getPar(conf, par="species.name")[.getPar(conf, par="species.type")=="focal"])
+  spindex = as.numeric(gsub(names(spnames), pattern="species.name.sp", replacement = ""))
+ 
+  if(!dir.exists(file.path(dirname(file), "initial_conditions")))
+    dir.create(file.path(dirname(file), "initial_conditions"), recursive = TRUE)
+   
+  for(i in seq_along(rfiles)) {
+    ifile = file.path(rpath, rfiles[i])
+    icode = tail(unlist(strsplit(ifile, split="\\.")), 1)
+    bname = sprintf("%s-initial_conditions.nc.%s", .getPar(conf, "output.file.prefix"), icode)
+    ncfile = file.path(dirname(file), "initial_conditions", bname)
+    file.copy(ifile, ncfile)
+    nc = nc_open(ncfile, write=TRUE)
+    ncatt_put(nc, varid = 0, attname="step", attval=-1)
+    nc_close(nc)
+  }
+  
+  mainfile = file.path("initial_conditions", 
+                       sprintf("%s-initial_conditions.nc", .getPar(conf, "output.file.prefix")))
+  
+  # the file is only bname because we are saving in the same folder as file (relative)
+  pars = list(mainfile)
+  pars = as.data.frame(pars)
+  colnames(pars) = NULL
+  rownames(pars) = "population.initialization.file" 
+  xoutput = list(par=pars)
+  class(xoutput) = "osmose.initialization"
+  
+  return(invisible(xoutput))
+  
+}
+
 
 init_firstyear = function(input, file, parameters = NULL, output = NULL, 
                           log = "osmose.log", version = NULL, osmose = NULL, 
