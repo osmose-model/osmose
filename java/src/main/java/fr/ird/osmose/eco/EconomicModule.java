@@ -47,20 +47,20 @@ import fr.ird.osmose.output.distribution.WeightDistribution;
 import fr.ird.osmose.process.AbstractProcess;
 
 public class EconomicModule extends AbstractProcess {
-    
+
     // sizeClasses used to determine variables for fishing economy (costs, etc.)
-    private AbstractDistribution sizeClasses;
+    private AbstractDistribution[] sizeClasses;
     private boolean isCalibrationEnabled = true;
 
     /** Stock elasticity. [nSpecies] */
     private double[] stockElasticity;
-    
+
     /** Baseline costs. [gear, time] */
     private double[][] baselineCosts;
-    
+
     /** Number of fishing gears. If old fisheries used, equals to nSpecies. */
     private int nFisheries;
-    
+
     /** Total accessible biomass. Dims=[fisheries, species] */
     private double[][][] accessibleBiomass;
 
@@ -75,28 +75,28 @@ public class EconomicModule extends AbstractProcess {
      * species, size-class]
      */
     private double[][][] harvestedBiomass;
-    
+
     /** Number of species */
     private int nSpecies;
-    
+
     private String[] namesFisheries;
-    
+
     // /* Computed harvested costs. [gear, species] */
     // private double[][] harvestingCosts;
-    
+
     // /** Substitution elasticity between species (alpha). */
     // private double speciesConsumptionElasticity;
-    
+
     // /** Substitution elasticity between sizes within a species (mu_i). */
     // private double[] sizeConsumptionElasticity;
-    
-    public EconomicModule(int rank) {  
+
+    public EconomicModule(int rank) {
         super(rank);
     }
-    
+
     @Override
     public void init() {
-                
+
         if (getConfiguration().isFisheryEnabled()) {
             nFisheries = getConfiguration().getNFishery();
             namesFisheries = new String[nFisheries];
@@ -110,49 +110,61 @@ public class EconomicModule extends AbstractProcess {
                 namesFisheries[iSpecies] = String.format("fishery%03d", iSpecies);
             }
         }
-        
-        String key = "economic.distribution.type";
-        if (getConfiguration().canFind(key)) {
-            String type = getConfiguration().getString(key);
-            switch (type) {
-                case ("weight"):
-                    this.sizeClasses = new WeightDistribution();
-                    break;
-                case ("age"):
-                    this.sizeClasses = new AgeDistribution();
-                    break;
-                case ("size"):
-                    this.sizeClasses = new SizeDistribution();
-                    break;
-                default:
-                    this.sizeClasses = new SizeDistribution();
-                    break;
-            }
-        } else {
-            this.sizeClasses = new SizeDistribution();
-        }
 
-        this.sizeClasses.init();
-        
+        this.sizeClasses = new AbstractDistribution[this.getNSpecies()];
+        int cpt = 0;
+        for (int fileSpeciesIndex : getConfiguration().getFocalIndex()) {
+            String key = String.format("economic.distribution.type.sp%d", fileSpeciesIndex);
+            if (getConfiguration().canFind(key)) {
+                String type = getConfiguration().getString(key);
+                switch (type) {
+                    case ("weight"):
+                        this.sizeClasses[cpt] = new WeightDistribution(fileSpeciesIndex);
+                        break;
+                    case ("age"):
+                        this.sizeClasses[cpt] = new AgeDistribution(fileSpeciesIndex);
+                        break;
+                    case ("size"):
+                        this.sizeClasses[cpt] = new SizeDistribution(fileSpeciesIndex);
+                        break;
+                    default:
+                        this.sizeClasses[cpt] = new SizeDistribution(fileSpeciesIndex);
+                        break;
+                }
+            } else {
+                this.sizeClasses[cpt] = new SizeDistribution(fileSpeciesIndex);
+            }
+
+            this.sizeClasses[cpt].init();
+            cpt += 1;
+
+        }
     }
-    
+
     public void clearAccessibleBiomass() {
         int nSpecies = this.getNSpecies();
-        int nClass = sizeClasses.getNClass();
-        this.accessibleBiomass = new double[nFisheries][nSpecies][nClass];
-        this.priceAccessibleBiomass = new double[nFisheries][nSpecies][nClass];
-        this.harvestedBiomass = new double[nFisheries][nSpecies][nClass];
+        this.accessibleBiomass = new double[nFisheries][nSpecies][];
+        this.priceAccessibleBiomass = new double[nFisheries][nSpecies][];
+        this.harvestedBiomass = new double[nFisheries][nSpecies][];
+        for (int i = 0; i < nFisheries; i++) {
+            for (int j = 0; j < nSpecies; j++) {
+                int nClass = sizeClasses[j].getNClass();
+                this.accessibleBiomass[i][j] = new double[nClass];
+                this.priceAccessibleBiomass[i][j] = new double[nClass];
+                this.harvestedBiomass[i][j] = new double[nClass];
+            }
+        }
     }
 
     public void incrementAccessibleBiomass(int iFishery, AbstractSchool school, double increment) {
         int iSpecies = school.getSpeciesIndex();
-        int iClass = this.sizeClasses.getClass(school);
+        int iClass = this.sizeClasses[iSpecies].getClass(school);
         this.accessibleBiomass[iFishery][iSpecies][iClass] += increment;
     }
 
     public void incrementHarvestedBiomass(int iFishery, AbstractSchool school, double nDead) {
         int iSpecies = school.getSpeciesIndex();
-        int iClass = this.sizeClasses.getClass(school);
+        int iClass = this.sizeClasses[iSpecies].getClass(school);
         double biomass = school.abd2biom(nDead);
         this.harvestedBiomass[iFishery][iSpecies][iClass] += biomass;
     }
@@ -172,24 +184,24 @@ public class EconomicModule extends AbstractProcess {
     public double getHarvestedBiomass(int iFishery, int iSpecies, int iClass) {
         return this.harvestedBiomass[iFishery][iSpecies][iClass];
     }
-    
+
     public int getSizeClass(AbstractSchool school)  {
-        return sizeClasses.getClass(school);
+        return sizeClasses[school.getSpeciesIndex()].getClass(school);
     }
-    
+
 
         // int cpt;
         // // Recovers the index of fisheries
         // int[] fisheryIndex = this.getConfiguration().findKeys("fisheries.name.fsh*").stream()
-        //         .mapToInt(rgKey -> Integer.valueOf(rgKey.substring(rgKey.lastIndexOf(".fsh") + 4))).sorted().toArray(); 
-        
+        //         .mapToInt(rgKey -> Integer.valueOf(rgKey.substring(rgKey.lastIndexOf(".fsh") + 4))).sorted().toArray();
+
         // // Initialisation of stock elasticity.
         // cpt = 0;
         // for (int i : getFocalIndex()) {
         //     this.stockElasticity[cpt] = getConfiguration().getDouble("species.stock.elasticity.sp" + i);
         //     cpt++;
         // }
-        
+
         // // Reads the time series of baseline costs. Reads one cost per simulation time step.
         // cpt = 0;
         // for (int i : fisheryIndex) {
@@ -199,18 +211,18 @@ public class EconomicModule extends AbstractProcess {
         //     this.baselineCosts[i] = ts.getValues();
         //     cpt++;
         // }
-        
+
         // this.speciesConsumptionElasticity = getConfiguration().getDouble("consumption.elasticity");
-        
+
         // cpt = 0;
         // for (int i : getFocalIndex()) {
         //     this.sizeConsumptionElasticity[cpt] = getConfiguration().getDouble("species.sizeconsumption.elasticity.sp" + i);
         //     cpt++;
         // }
- 
+
     // }
-    
-    
+
+
     // /** Computation of harvesting costs. */
     // public void computeHarvestingCosts() {
     //     int time = this.getSimulation().getIndexTimeSimu();
@@ -239,23 +251,21 @@ public class EconomicModule extends AbstractProcess {
     //         }
     //     }
     // }
-            
+
     @Override
     public void run() {
-        // TODO Auto-generated method stub
-        
     }
-    
-    public AbstractDistribution getSizeClass() {
+
+    public AbstractDistribution[] getSizeClass() {
         return this.sizeClasses;
     }
-    
-    public int getNFisheries() { 
-        return this.nFisheries;   
+
+    public int getNFisheries() {
+        return this.nFisheries;
     }
-    
+
     public String[] getFisheriesNames() {
-        return this.namesFisheries;   
+        return this.namesFisheries;
     }
 
 }
