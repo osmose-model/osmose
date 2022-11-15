@@ -1,10 +1,10 @@
-/* 
- * 
+/*
+ *
  * OSMOSE (Object-oriented Simulator of Marine Ecosystems)
  * http://www.osmose-model.org
- * 
+ *
  * Copyright (C) IRD (Institut de Recherche pour le Développement) 2009-2020
- * 
+ *
  * Osmose is a computer program whose purpose is to simulate fish
  * populations and their interactions with their biotic and abiotic environment.
  * OSMOSE is a spatial, multispecies and individual-based model which assumes
@@ -15,7 +15,7 @@
  * processes of fish life cycle (growth, explicit predation, additional and
  * starvation mortalities, reproduction and migration) and fishing mortalities
  * (Shin and Cury 2001, 2004).
- * 
+ *
  * Contributor(s):
  * Yunne SHIN (yunne.shin@ird.fr),
  * Morgane TRAVERS (morgane.travers@ifremer.fr)
@@ -23,20 +23,20 @@
  * Philippe VERLEY (philippe.verley@ird.fr)
  * Laure VELEZ (laure.velez@ird.fr)
  * Nicolas Barrier (nicolas.barrier@ird.fr)
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation (version 3 of the License). Full description
  * is provided on the LICENSE file.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
- * 
+ *
  */
 
 package fr.ird.osmose.output;
@@ -53,7 +53,7 @@ import fr.ird.osmose.output.distribution.AbstractDistribution;
 import fr.ird.osmose.util.SimulationLinker;
 
 /**
- * 
+ *
  * Class for writting the accessible biomass for fisheries. Outputs is by
  * species (one file
  * per species) and columns provide the accessible biomass for each fishing
@@ -68,9 +68,8 @@ public class FishingAccessBiomassOutput extends SimulationLinker implements IOut
     private int recordFrequency;
     private double output[][][];
     private int nFisheries;
-    private AbstractDistribution sizeClasses;
-    private int nClass;
-    
+    private AbstractDistribution[] sizeClasses;
+
     /**
      * CSV separator
      */
@@ -90,9 +89,13 @@ public class FishingAccessBiomassOutput extends SimulationLinker implements IOut
     @Override
     public void reset() {
         // initialisation of the accessible biomass
-        nClass = this.sizeClasses.getNClass();
-        output = new double[getNSpecies()][nFisheries][nClass];
-
+        output = new double[getNSpecies()][nFisheries][];
+        for (int i = 0; i < getNSpecies(); i++) {
+            int nClass = this.sizeClasses[i].getNClass();
+            for (int j = 0; j < nFisheries; j++) {
+                output[i][j] = new double[nClass];
+            }
+        }
     }
 
     @Override
@@ -100,7 +103,7 @@ public class FishingAccessBiomassOutput extends SimulationLinker implements IOut
         // get accessible biomass (nfisheries, nspecies)
         for (int iFishery = 0; iFishery < nFisheries; iFishery++) {
             for (int iSpecies = 0; iSpecies < getNSpecies(); iSpecies++) {
-                for(int iClass=0; iClass < nClass; iClass++) {  
+                for(int iClass=0; iClass < sizeClasses[iSpecies].getNClass(); iClass++) {
                 output[iSpecies][iFishery][iClass] += getSimulation().getEconomicModule().getAccessibleBiomass(iFishery, iSpecies, iClass);
                 }
             }
@@ -111,10 +114,10 @@ public class FishingAccessBiomassOutput extends SimulationLinker implements IOut
     public void write(float time) {
 
         for (int iSpecies = 0; iSpecies < getNSpecies(); iSpecies++) {
-            for (int iClass = 0; iClass < nClass; iClass++) {
+            for (int iClass = 0; iClass < sizeClasses[iSpecies].getNClass(); iClass++) {
                 prw[iSpecies].print(time);
                 prw[iSpecies].print(separator);
-                prw[iSpecies].print(this.sizeClasses.getThreshold(iClass));
+                prw[iSpecies].print(this.sizeClasses[iSpecies].getThreshold(iClass));
                 prw[iSpecies].print(separator);
                 for (int iFishery = 0; iFishery < nFisheries - 1; iFishery++) {
                     // instantenous mortality rate for eggs additional mortality
@@ -141,7 +144,7 @@ public class FishingAccessBiomassOutput extends SimulationLinker implements IOut
         nFisheries = getSimulation().getEconomicModule().getNFisheries();
         String[] namesFisheries = getSimulation().getEconomicModule().getFisheriesNames();
         this.sizeClasses = getSimulation().getEconomicModule().getSizeClass();
-        
+
         for (int iSpecies = 0; iSpecies < getNSpecies(); iSpecies++) {
             // Create parent directory
             File path = new File(getConfiguration().getOutputPathname());
@@ -149,7 +152,7 @@ public class FishingAccessBiomassOutput extends SimulationLinker implements IOut
             filename.append(File.separatorChar);
             filename.append(getConfiguration().getString("output.file.prefix"));
             filename.append("_accessBiomassBy");
-            filename.append(sizeClasses.getType());
+            filename.append(sizeClasses[iSpecies].getType());
             filename.append("-");
             filename.append(getSpecies(iSpecies).getName());
             filename.append("_Simu");
@@ -182,9 +185,9 @@ public class FishingAccessBiomassOutput extends SimulationLinker implements IOut
                 prw[iSpecies].println();
             }
         }
-        
+
         recordFrequency = getConfiguration().getInt("output.recordfrequency.ndt");
-        
+
     }
 
     @Override

@@ -11,25 +11,24 @@ import fr.ird.osmose.output.distribution.AbstractDistribution;
 import fr.ird.osmose.util.SimulationLinker;
 
 public class FishingHarvestedBiomassDistribOutput extends SimulationLinker implements IOutput {
-    
-    /** Output is the harvested biomass. Dimensions are [species][sizeClass][fisheries] */ 
+
+    /** Output is the harvested biomass. Dimensions are [species][sizeClass][fisheries] */
     private double[][][] output;
-    private AbstractDistribution sizeClasses;
-    private int nFisheries, nSpecies;
+    private AbstractDistribution[] sizeClasses;
+    private int nFisheries;
     private FileOutputStream fos[];
     private PrintWriter prw[];
     private int recordFrequency;
-    private int nClass;
-    
+
     /**
      * CSV separator
      */
     private final String separator;
-    
+
     public FishingHarvestedBiomassDistribOutput(int rank) {
         super(rank);
         separator = getConfiguration().getOutputSeparator();
-        
+
     }
 
     @Override
@@ -40,8 +39,14 @@ public class FishingHarvestedBiomassDistribOutput extends SimulationLinker imple
 
     @Override
     public void reset() {
-        int nClass = this.sizeClasses.getNClass();
-        output = new double[nSpecies][nFisheries][nClass];
+        // initialisation of the accessible biomass
+        output = new double[getNSpecies()][nFisheries][];
+        for (int i = 0; i < getNSpecies(); i++) {
+            int nClass = this.sizeClasses[i].getNClass();
+            for (int j = 0; j < nFisheries; j++) {
+                output[i][j] = new double[nClass];
+            }
+        }
     }
 
     @Override
@@ -49,7 +54,7 @@ public class FishingHarvestedBiomassDistribOutput extends SimulationLinker imple
         // get accessible biomass (nfisheries, nspecies)
         for (int iFishery = 0; iFishery < nFisheries; iFishery++) {
             for (int iSpecies = 0; iSpecies < getNSpecies(); iSpecies++) {
-                for (int iClass = 0; iClass < nClass; iClass++) {
+                for (int iClass = 0; iClass < sizeClasses[iSpecies].getNClass(); iClass++) {
                     output[iSpecies][iFishery][iClass] += getSimulation().getEconomicModule().getHarvestedBiomass(iFishery, iSpecies, iClass);
                 }
             }
@@ -59,10 +64,10 @@ public class FishingHarvestedBiomassDistribOutput extends SimulationLinker imple
     @Override
     public void write(float time) {
         for (int iSpecies = 0; iSpecies < getNSpecies(); iSpecies++) {
-            for (int iClass = 0; iClass < nClass; iClass++) {
+            for (int iClass = 0; iClass < sizeClasses[iSpecies].getNClass(); iClass++) {
                 prw[iSpecies].print(time);
                 prw[iSpecies].print(separator);
-                prw[iSpecies].print(this.sizeClasses.getThreshold(iClass));
+                prw[iSpecies].print(this.sizeClasses[iSpecies].getThreshold(iClass));
                 prw[iSpecies].print(separator);
                 for (int iFishery = 0; iFishery < nFisheries - 1; iFishery++) {
                     // instantenous mortality rate for eggs additional mortality
@@ -83,17 +88,15 @@ public class FishingHarvestedBiomassDistribOutput extends SimulationLinker imple
 
     @Override
     public void init() {
-        
+
         fos = new FileOutputStream[getNSpecies()];
         prw = new PrintWriter[getNSpecies()];
         nFisheries = getSimulation().getEconomicModule().getNFisheries();
-        nSpecies = getConfiguration().getNSpecies();
-        
+
         this.sizeClasses = getSimulation().getEconomicModule().getSizeClass();
-        
+
         String[] namesFisheries = getSimulation().getEconomicModule().getFisheriesNames();
-        nClass = this.sizeClasses.getNClass();
-        
+
         for (int iSpecies = 0; iSpecies < getNSpecies(); iSpecies++) {
             // Create parent directory
             File path = new File(getConfiguration().getOutputPathname());
@@ -101,7 +104,7 @@ public class FishingHarvestedBiomassDistribOutput extends SimulationLinker imple
             filename.append(File.separatorChar);
             filename.append(getConfiguration().getString("output.file.prefix"));
             filename.append("_HarvestedBiomassBy");
-            filename.append(sizeClasses.getType());
+            filename.append(sizeClasses[iSpecies].getType());
             filename.append("-");
             filename.append(getSpecies(iSpecies).getName());
             filename.append("_Simu");
@@ -134,9 +137,9 @@ public class FishingHarvestedBiomassDistribOutput extends SimulationLinker imple
                 prw[iSpecies].println();
             }
         }
-                
+
         recordFrequency = getConfiguration().getInt("output.recordfrequency.ndt");
-        
+
 
     }
 
@@ -149,5 +152,5 @@ public class FishingHarvestedBiomassDistribOutput extends SimulationLinker imple
     private String quote(String str) {
         return "\"" + str + "\"";
     }
-    
+
 }
