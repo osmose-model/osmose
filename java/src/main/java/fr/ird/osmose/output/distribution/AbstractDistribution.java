@@ -1,10 +1,10 @@
-/* 
- * 
+/*
+ *
  * OSMOSE (Object-oriented Simulator of Marine Ecosystems)
  * http://www.osmose-model.org
- * 
+ *
  * Copyright (C) IRD (Institut de Recherche pour le Développement) 2009-2020
- * 
+ *
  * Osmose is a computer program whose purpose is to simulate fish
  * populations and their interactions with their biotic and abiotic environment.
  * OSMOSE is a spatial, multispecies and individual-based model which assumes
@@ -15,7 +15,7 @@
  * processes of fish life cycle (growth, explicit predation, additional and
  * starvation mortalities, reproduction and migration) and fishing mortalities
  * (Shin and Cury 2001, 2004).
- * 
+ *
  * Contributor(s):
  * Yunne SHIN (yunne.shin@ird.fr),
  * Morgane TRAVERS (morgane.travers@ifremer.fr)
@@ -23,20 +23,20 @@
  * Philippe VERLEY (philippe.verley@ird.fr)
  * Laure VELEZ (laure.velez@ird.fr)
  * Nicolas Barrier (nicolas.barrier@ird.fr)
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation (version 3 of the License). Full description
  * is provided on the LICENSE file.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
- * 
+ *
  */
 
 package fr.ird.osmose.output.distribution;
@@ -44,10 +44,10 @@ package fr.ird.osmose.output.distribution;
 import fr.ird.osmose.IMarineOrganism;
 import fr.ird.osmose.util.OsmoseLinker;
 
-/** Species belong to distribution (T) class s if 
- * 
- *   T(s) <=  L(s) < T(s + 1) 
- *  
+/** Species belong to distribution (T) class s if
+ *
+ *   T(s) <=  L(s) < T(s + 1)
+ *
  *
  * @author pverley
  */
@@ -56,7 +56,7 @@ public abstract class AbstractDistribution extends OsmoseLinker {
     // Distribution classes
     float[] classes;
     private final DistributionType type;
-    private final int indexSpecies;
+    private final int fileSpeciesIndex;
 
     abstract float getDefaultMin();
 
@@ -68,7 +68,7 @@ public abstract class AbstractDistribution extends OsmoseLinker {
 
     AbstractDistribution(DistributionType type, int indexSpecies) {
         this.type = type;
-        this.indexSpecies = indexSpecies;
+        this.fileSpeciesIndex = indexSpecies;
     }
 
     AbstractDistribution(DistributionType type) {
@@ -84,7 +84,7 @@ public abstract class AbstractDistribution extends OsmoseLinker {
         // Increment between two contiguous classes of the distribution
         float incr;
 
-        if (indexSpecies >= 0 && speciesDistribExist()) {
+        if (fileSpeciesIndex >= 0 && speciesDistribExist()) {
             min = getConfiguration().getFloat(getKeyMinSpecies());
             max = getConfiguration().getFloat(getKeyMaxSpecies());
             incr = getConfiguration().getFloat(getKeyIncrSpecies());
@@ -98,16 +98,16 @@ public abstract class AbstractDistribution extends OsmoseLinker {
             incr = getDefaultIncr();
         }
 
-        // Number of classes 
+        // Number of classes
         int nClass = (int) Math.ceil((max - min) / incr);
-        
+
         classes = new float[nClass];
         classes[0] = min;
         for (int i = 1; i < nClass; i++) {
             classes[i] = min + i * incr;
         }
     }
-    
+
     public int getClass(IMarineOrganism school) {
         return getClass(getValue(school));
     }
@@ -121,7 +121,7 @@ public abstract class AbstractDistribution extends OsmoseLinker {
         }
         return iClass;
     }
-    
+
     public float getThreshold(int iClass) {
         return classes[iClass];
     }
@@ -139,7 +139,7 @@ public abstract class AbstractDistribution extends OsmoseLinker {
     }
 
     private String getKeyMinSpecies() {
-        return getKeyMin() + ".sp" + indexSpecies;
+        return getKeyMin() + ".sp" + fileSpeciesIndex;
     }
 
     private String getKeyMax() {
@@ -147,7 +147,7 @@ public abstract class AbstractDistribution extends OsmoseLinker {
     }
 
     private String getKeyMaxSpecies() {
-        return getKeyMax() + ".sp" + indexSpecies;
+        return getKeyMax() + ".sp" + fileSpeciesIndex;
     }
 
     private String getKeyIncr() {
@@ -155,7 +155,7 @@ public abstract class AbstractDistribution extends OsmoseLinker {
     }
 
     private String getKeyIncrSpecies() {
-        return getKeyIncr() + ".sp" + indexSpecies;
+        return getKeyIncr() + ".sp" + fileSpeciesIndex;
     }
 
     private boolean speciesDistribExist() {
