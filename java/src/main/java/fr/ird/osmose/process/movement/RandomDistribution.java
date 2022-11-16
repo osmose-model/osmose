@@ -51,7 +51,7 @@ import java.util.List;
  *
  * @author pverley
  */
-public class RandomDistribution extends AbstractDistribution {
+public class RandomDistribution extends AbstractSpatialDistribution {
 
     private final int iSpeciesFile;
     private final int iSpecies;
