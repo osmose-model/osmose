@@ -1,10 +1,10 @@
-/* 
- * 
+/*
+ *
  * OSMOSE (Object-oriented Simulator of Marine Ecosystems)
  * http://www.osmose-model.org
- * 
+ *
  * Copyright (C) IRD (Institut de Recherche pour le Développement) 2009-2020
- * 
+ *
  * Osmose is a computer program whose purpose is to simulate fish
  * populations and their interactions with their biotic and abiotic environment.
  * OSMOSE is a spatial, multispecies and individual-based model which assumes
@@ -15,7 +15,7 @@
  * processes of fish life cycle (growth, explicit predation, additional and
  * starvation mortalities, reproduction and migration) and fishing mortalities
  * (Shin and Cury 2001, 2004).
- * 
+ *
  * Contributor(s):
  * Yunne SHIN (yunne.shin@ird.fr),
  * Morgane TRAVERS (morgane.travers@ifremer.fr)
@@ -23,28 +23,27 @@
  * Philippe VERLEY (philippe.verley@ird.fr)
  * Laure VELEZ (laure.velez@ird.fr)
  * Nicolas Barrier (nicolas.barrier@ird.fr)
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation (version 3 of the License). Full description
  * is provided on the LICENSE file.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
- * 
+ *
  */
 
 package fr.ird.osmose.output;
 
 import fr.ird.osmose.School;
 import fr.ird.osmose.Prey;
-import fr.ird.osmose.stage.DietOutputStage;
-import fr.ird.osmose.stage.IStage;
+import fr.ird.osmose.stage.SchoolStage;
 import fr.ird.osmose.util.SimulationLinker;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -67,7 +66,7 @@ public class PredatorPressureOutput extends SimulationLinker implements IOutput 
     //
     private double[][][][] predatorPressure;
     // Diet output stage
-    private IStage dietOutputStage;
+    private SchoolStage dietOutputStage;
 
     private final String separator;
 
@@ -116,7 +115,7 @@ public class PredatorPressureOutput extends SimulationLinker implements IOutput 
         int nSpec = this.getNSpecies();
         int nBkg = this.getNBkgSpecies();
         int nRsc = this.getNRscSpecies();
-        
+
         int dtRecord = getConfiguration().getInt("output.recordfrequency.ndt");
         for (int iSpec = 0; iSpec < nSpec + nBkg; iSpec++) {
             // iSpec = species index as prey
@@ -179,7 +178,7 @@ public class PredatorPressureOutput extends SimulationLinker implements IOutput 
         recordFrequency = getConfiguration().getInt("output.recordfrequency.ndt");
 
         // Init diet output stage
-        dietOutputStage = new DietOutputStage();
+        dietOutputStage = new SchoolStage("output.diet.stage");
         dietOutputStage.init();
 
         // Create parent directory
