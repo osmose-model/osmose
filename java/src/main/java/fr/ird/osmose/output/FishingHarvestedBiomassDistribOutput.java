@@ -8,13 +8,14 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import fr.ird.osmose.output.distribution.OutputDistribution;
+import fr.ird.osmose.stage.SchoolStage;
 import fr.ird.osmose.util.SimulationLinker;
 
 public class FishingHarvestedBiomassDistribOutput extends SimulationLinker implements IOutput {
 
     /** Output is the harvested biomass. Dimensions are [species][sizeClass][fisheries] */
     private double[][][] output;
-    private OutputDistribution[] sizeClasses;
+    private SchoolStage sizeClasses;
     private int nFisheries;
     private FileOutputStream fos[];
     private PrintWriter prw[];
@@ -42,7 +43,7 @@ public class FishingHarvestedBiomassDistribOutput extends SimulationLinker imple
         // initialisation of the accessible biomass
         output = new double[getNSpecies()][nFisheries][];
         for (int i = 0; i < getNSpecies(); i++) {
-            int nClass = this.sizeClasses[i].getNClass();
+            int nClass = this.sizeClasses.getNStage(i);
             for (int j = 0; j < nFisheries; j++) {
                 output[i][j] = new double[nClass];
             }
@@ -54,7 +55,7 @@ public class FishingHarvestedBiomassDistribOutput extends SimulationLinker imple
         // get accessible biomass (nfisheries, nspecies)
         for (int iFishery = 0; iFishery < nFisheries; iFishery++) {
             for (int iSpecies = 0; iSpecies < getNSpecies(); iSpecies++) {
-                for (int iClass = 0; iClass < sizeClasses[iSpecies].getNClass(); iClass++) {
+                for (int iClass = 0; iClass < this.sizeClasses.getNStage(iSpecies); iClass++) {
                     output[iSpecies][iFishery][iClass] += getSimulation().getEconomicModule().getHarvestedBiomass(iFishery, iSpecies, iClass);
                 }
             }
@@ -64,10 +65,10 @@ public class FishingHarvestedBiomassDistribOutput extends SimulationLinker imple
     @Override
     public void write(float time) {
         for (int iSpecies = 0; iSpecies < getNSpecies(); iSpecies++) {
-            for (int iClass = 0; iClass < sizeClasses[iSpecies].getNClass(); iClass++) {
+            for (int iClass = 0; iClass < this.sizeClasses.getNStage(iSpecies); iClass++) {
                 prw[iSpecies].print(time);
                 prw[iSpecies].print(separator);
-                prw[iSpecies].print(this.sizeClasses[iSpecies].getThreshold(iClass));
+                prw[iSpecies].print(this.sizeClasses.getThresholds(iSpecies, iClass));
                 prw[iSpecies].print(separator);
                 for (int iFishery = 0; iFishery < nFisheries - 1; iFishery++) {
                     // instantenous mortality rate for eggs additional mortality
@@ -104,7 +105,7 @@ public class FishingHarvestedBiomassDistribOutput extends SimulationLinker imple
             filename.append(File.separatorChar);
             filename.append(getConfiguration().getString("output.file.prefix"));
             filename.append("_HarvestedBiomassBy");
-            filename.append(sizeClasses[iSpecies].getType());
+            filename.append(sizeClasses.getType(iSpecies));
             filename.append("-");
             filename.append(getSpecies(iSpecies).getName());
             filename.append("_Simu");

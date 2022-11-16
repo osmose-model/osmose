@@ -49,7 +49,7 @@ import java.io.PrintWriter;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import fr.ird.osmose.output.distribution.OutputDistribution;
+import fr.ird.osmose.stage.SchoolStage;
 import fr.ird.osmose.util.SimulationLinker;
 
 /**
@@ -68,7 +68,7 @@ public class FishingAccessBiomassOutput extends SimulationLinker implements IOut
     private int recordFrequency;
     private double output[][][];
     private int nFisheries;
-    private OutputDistribution[] sizeClasses;
+    private SchoolStage sizeClasses;
 
     /**
      * CSV separator
@@ -91,7 +91,7 @@ public class FishingAccessBiomassOutput extends SimulationLinker implements IOut
         // initialisation of the accessible biomass
         output = new double[getNSpecies()][nFisheries][];
         for (int i = 0; i < getNSpecies(); i++) {
-            int nClass = this.sizeClasses[i].getNClass();
+            int nClass = this.sizeClasses.getNStage(i);
             for (int j = 0; j < nFisheries; j++) {
                 output[i][j] = new double[nClass];
             }
@@ -103,8 +103,8 @@ public class FishingAccessBiomassOutput extends SimulationLinker implements IOut
         // get accessible biomass (nfisheries, nspecies)
         for (int iFishery = 0; iFishery < nFisheries; iFishery++) {
             for (int iSpecies = 0; iSpecies < getNSpecies(); iSpecies++) {
-                for(int iClass=0; iClass < sizeClasses[iSpecies].getNClass(); iClass++) {
-                output[iSpecies][iFishery][iClass] += getSimulation().getEconomicModule().getAccessibleBiomass(iFishery, iSpecies, iClass);
+                for(int iClass=0; iClass < this.sizeClasses.getNStage(iSpecies); iClass++) {
+                    output[iSpecies][iFishery][iClass] += getSimulation().getEconomicModule().getAccessibleBiomass(iFishery, iSpecies, iClass);
                 }
             }
         }
@@ -114,10 +114,10 @@ public class FishingAccessBiomassOutput extends SimulationLinker implements IOut
     public void write(float time) {
 
         for (int iSpecies = 0; iSpecies < getNSpecies(); iSpecies++) {
-            for (int iClass = 0; iClass < sizeClasses[iSpecies].getNClass(); iClass++) {
+            for (int iClass = 0; iClass < this.sizeClasses.getNStage(iSpecies); iClass++) {
                 prw[iSpecies].print(time);
                 prw[iSpecies].print(separator);
-                prw[iSpecies].print(this.sizeClasses[iSpecies].getThreshold(iClass));
+                prw[iSpecies].print(this.sizeClasses.getThresholds(iSpecies, iClass));
                 prw[iSpecies].print(separator);
                 for (int iFishery = 0; iFishery < nFisheries - 1; iFishery++) {
                     // instantenous mortality rate for eggs additional mortality
@@ -152,7 +152,7 @@ public class FishingAccessBiomassOutput extends SimulationLinker implements IOut
             filename.append(File.separatorChar);
             filename.append(getConfiguration().getString("output.file.prefix"));
             filename.append("_accessBiomassBy");
-            filename.append(sizeClasses[iSpecies].getType());
+            filename.append(sizeClasses.getType(iSpecies));
             filename.append("-");
             filename.append(getSpecies(iSpecies).getName());
             filename.append("_Simu");
