@@ -42,6 +42,7 @@
 package fr.ird.osmose.stage;
 
 import fr.ird.osmose.IMarineOrganism;
+import fr.ird.osmose.output.distribution.DistributionType;
 import fr.ird.osmose.util.OsmoseLinker;
 /**
  *
@@ -60,6 +61,7 @@ public class SchoolStage extends OsmoseLinker {
 
     private final String key;
     private ClassGetter[] classGetter;
+    private DistributionType[] distributionTypes;
 
     public SchoolStage(String key) {
         this.key = key;
@@ -73,6 +75,7 @@ public class SchoolStage extends OsmoseLinker {
         int nTot = nSpecies + nBkgSpecies + nResources;
         thresholds = new float[nTot][];
         classGetter = new ClassGetter[nSpecies + nBkgSpecies];
+        distributionTypes = new DistributionType[nSpecies + nBkgSpecies];
 
         // Set values for focal and background species species.
         int cpt = 0;
@@ -98,16 +101,20 @@ public class SchoolStage extends OsmoseLinker {
 
             switch (structure) {
                 case "age":
+                    distributionTypes[cpt] = DistributionType.AGE;
                     classGetter[cpt] = (school -> school.getAge());
                     break;
                 case "size":
+                    distributionTypes[cpt] = DistributionType.SIZE;
                     classGetter[cpt] = (school -> school.getLength());
                     break;
                 case "weight":
+                    distributionTypes[cpt] = DistributionType.WEIGHT;
                     // converts getWeight (in tons) to grams
                     classGetter[cpt] = (school -> school.getWeight() * 1e6);
                     break;
                 case "tl":
+                    distributionTypes[cpt] = DistributionType.TL;
                     classGetter[cpt] = (school -> school.getTrophicLevel());
                     break;
             }
@@ -131,6 +138,10 @@ public class SchoolStage extends OsmoseLinker {
         return thresholds[iSpecies];
     }
 
+    public float getThresholds(int iSpecies, int iClass) {
+        return thresholds[iSpecies][iClass];
+    }
+
     public int getStage(IMarineOrganism school) {
         int stage = 0;
         int iSpec = school.getSpeciesIndex();
@@ -141,6 +152,10 @@ public class SchoolStage extends OsmoseLinker {
             stage++;
         }
         return stage;
+    }
+
+    public DistributionType getType(int iSpecies) {
+        return distributionTypes[iSpecies];
     }
 
 }
