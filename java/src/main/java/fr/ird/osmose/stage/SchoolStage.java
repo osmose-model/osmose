@@ -57,6 +57,7 @@ import fr.ird.osmose.util.OsmoseLinker;
  */
 public class SchoolStage extends OsmoseLinker {
 
+    /** Upper bounds of the threshold. Dimensions are [nSpecies][nClass - 1]. */
     private float[][] thresholds;
 
     private final String key;
@@ -134,6 +135,8 @@ public class SchoolStage extends OsmoseLinker {
         return thresholds[iSpecies].length + 1;
     }
 
+    /** Return the threshold value. Here they are considered
+     * as the upper bound of the size class.*/
     public float[] getThresholds(int iSpecies) {
         return thresholds[iSpecies];
     }
@@ -145,7 +148,7 @@ public class SchoolStage extends OsmoseLinker {
     public int getStage(IMarineOrganism school) {
         int stage = 0;
         int iSpec = school.getSpeciesIndex();
-        for (float threshold : this.getThresholds(iSpec)) {
+        for (float threshold : this.thresholds[iSpec]) {
             if (classGetter[iSpec].getVariable(school) < threshold) {
                 break;
             }

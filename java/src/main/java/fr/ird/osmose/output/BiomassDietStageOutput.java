@@ -103,9 +103,13 @@ public class BiomassDietStageOutput extends AbstractOutput {
                     headers[k] = name;    // Name predators
                 } else {
                     if (s == 0) {
-                        headers[k] = name + " < " + threshold[s];    // Name predators
+                        headers[k] = name + "[0 " + threshold[s] + "[";    // Name predators
+                        headers[k] = String.format("%s in [%f, %f[", name, 0, threshold[s]);
+                    } else if (s == nStage - 1) {
+                        headers[k] = String.format("%s in [%f, %f[", name, 0, threshold[s]);
                     } else {
                         headers[k] = name + " >=" + threshold[s - 1];    // Name predators
+                        headers[k] = String.format("%s in [%f, inf[", name, threshold[s - 1]);
                     }
                 }
                 k++;

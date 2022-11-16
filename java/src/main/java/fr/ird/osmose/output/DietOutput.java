@@ -140,9 +140,11 @@ public class DietOutput extends SimulationLinker implements IOutput {
                     prw.print(name);    // Name predators
                 } else {
                     if (st == 0) {
-                        prw.print(quote(name + " < " + threshold[st]));    // Name predators
+                        prw.print(quote(String.format("%s in [%f, %f[", name, 0, threshold[st])));
+                    } else if (st == nStagePred - 1) {
+                        prw.print(quote(String.format("%s in [%f, %f[", name, 0, threshold[st])));
                     } else {
-                        prw.print(quote(name + " >=" + threshold[st - 1]));    // Name predators
+                        prw.print(quote(String.format("%s in [%f, inf[", name, threshold[st - 1])));
                     }
                 }
                 prw.print(separator);
@@ -150,7 +152,7 @@ public class DietOutput extends SimulationLinker implements IOutput {
                     int nStagePrey = dietOutputStage.getNStage(i);
                     for (int s = 0; s < nStagePrey; s++) {
                         if (abundanceStage[i][s] > 0) {
-                            prw.print((float) (100.d * diet[i][s][iSpec][st] / abundanceStage[i][s]));
+                            prw.print((float) (100.d * diet[i][s][iSpec][s] / abundanceStage[i][s]));
                         } else {
                             prw.print("NaN");
                         }
@@ -244,9 +246,11 @@ public class DietOutput extends SimulationLinker implements IOutput {
                         prw.print(name);    // Name predators
                     } else {
                         if (iStage == 0) {
-                            prw.print(quote(name + " < " + threshold[iStage]));    // Name predators
+                            prw.print(quote(String.format("%s in [%f, %f[", name, 0, threshold[iStage])));
+                        } else if (iStage == nStage - 1) {
+                            prw.print(quote(String.format("%s in [%f, %f[", name, 0, threshold[iStage])));
                         } else {
-                            prw.print(quote(name + " >=" + threshold[iStage - 1]));    // Name predators
+                            prw.print(quote(String.format("%s in [%f, inf[", name, threshold[iStage - 1])));
                         }
                     }
                 }   // end of loop over stage
