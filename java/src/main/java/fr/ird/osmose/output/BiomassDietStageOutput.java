@@ -77,8 +77,6 @@ public class BiomassDietStageOutput extends AbstractOutput {
             nColumns += dietOutputStage.getNStage(cpt);
         }
 
-        nColumns += getConfiguration().getNRscSpecies();
-
         super.init();
     }
 
