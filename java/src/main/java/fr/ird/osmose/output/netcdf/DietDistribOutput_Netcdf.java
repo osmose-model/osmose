@@ -173,9 +173,12 @@ public class DietDistribOutput_Netcdf extends AbstractDistribOutput_Netcdf {
 
             // Writes variable trait (trait names) and species (species names)
             ArrayDouble.D1 arrClass = new ArrayDouble.D1(this.getNClass());
-            for (int i = 0; i < this.getNClass(); i++) {
-                arrClass.set(i, this.getClassThreshold(i));
+
+            arrClass.set(0, 0);
+            for (int i = 0; i < this.getNClass() - 1; i++) {
+                arrClass.set(i + 1, this.getClassThreshold(i));
             }
+
             Variable disvar = this.getNc().findVariable(this.getDisName());
             getNc().write(disvar, arrClass);
 
