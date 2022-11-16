@@ -161,4 +161,61 @@ public class SchoolStage extends OsmoseLinker {
         return distributionTypes[iSpecies];
     }
 
+
+    public int getNValues(boolean includeResource) {
+
+        int nColumns = 0;
+
+        int nAll = this.getNBkgSpecies() + this.getNSpecies();
+
+        if (includeResource) {
+            nAll +=  this.getNRscSpecies();
+        }
+
+        // Sum-up diet stages
+        for (int cpt = 0; cpt < nAll; cpt++) {
+            nColumns += this.getNStage(cpt);
+        }
+
+        return nColumns;
+
+    }
+
+    public String[] getHeaders(boolean includeResource) {
+
+        int nAll = this.getNBkgSpecies() + this.getNSpecies();
+        if (includeResource) {
+            nAll +=  this.getNRscSpecies();
+        }
+
+        int nColumns = this.getNValues(includeResource);
+
+        int k = 0;
+        String[] headers = new String[nColumns];
+        for (int cpt = 0; cpt < nAll; cpt++) {
+            String name = getISpecies(cpt).getName();
+            float[] threshold = this.getThresholds(cpt);
+            int nStage = this.getNStage(cpt);
+            for (int s = 0; s < nStage; s++) {
+                if (nStage == 1) {
+                    headers[k] = name;    // Name predators
+                } else {
+                    if (s == 0) {
+                        // Name predators
+                        headers[k] = String.format("%s [%f, %f[", name, 0.f, threshold[s]);
+                    } else if (s == nStage - 1) {
+                        headers[k] = String.format("%s [%f, inf[", name, threshold[s - 1]);
+                    } else {
+                        headers[k] = String.format("%s [%f, %f[", name, threshold[s - 1], threshold[s]);
+                    }
+                }
+                k++;
+            }
+        } // end of species loop
+
+        return headers;
+
+    }
+
+
 }
