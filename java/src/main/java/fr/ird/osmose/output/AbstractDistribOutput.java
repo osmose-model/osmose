@@ -96,7 +96,7 @@ public abstract class AbstractDistribOutput extends AbstractOutput {
     }
 
     @Override
-    String[] getHeaders() {
+    public String[] getHeaders() {
         int nSpecies = getNSpecies() + this.getNBkgSpecies() + this.getNRscSpecies();
         String[] headers = new String[nSpecies + 1];
         headers[0] = distrib.getType().toString();

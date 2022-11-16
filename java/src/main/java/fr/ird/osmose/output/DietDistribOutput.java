@@ -69,7 +69,7 @@ public class DietDistribOutput extends AbstractDistribOutput {
     }
 
     @Override
-    String[] getHeaders() {
+    public String[] getHeaders() {
 
         int nPreys = getNSpecies() + getConfiguration().getNRscSpecies() + getConfiguration().getNBkgSpecies();
         String[] headers = new String[nPreys + 1];

@@ -83,7 +83,7 @@ abstract public class AbstractOutput extends SimulationLinker implements IOutput
 ///////////////////
     abstract String getDescription();
 
-    abstract String[] getHeaders();
+    public abstract String[] getHeaders();
 
     private interface FlushMethod {
         public void flushFile(PrintWriter prw);

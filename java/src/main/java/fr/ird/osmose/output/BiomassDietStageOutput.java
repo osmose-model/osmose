@@ -88,7 +88,7 @@ public class BiomassDietStageOutput extends AbstractOutput {
     }
 
     @Override
-    String[] getHeaders() {
+    public String[] getHeaders() {
 
         int nAll = this.getNBkgSpecies() + this.getNSpecies() + this.getNRscSpecies();
 
@@ -104,12 +104,12 @@ public class BiomassDietStageOutput extends AbstractOutput {
                 } else {
                     if (s == 0) {
                         headers[k] = name + "[0 " + threshold[s] + "[";    // Name predators
-                        headers[k] = String.format("%s in [%f, %f[", name, 0, threshold[s]);
+                        headers[k] = String.format("%s in [%f, %f[", name, 0.f, threshold[s]);
                     } else if (s == nStage - 1) {
-                        headers[k] = String.format("%s in [%f, %f[", name, 0, threshold[s]);
+                        headers[k] = String.format("%s in [%f, inf[", name, threshold[s - 1]);
                     } else {
                         headers[k] = name + " >=" + threshold[s - 1];    // Name predators
-                        headers[k] = String.format("%s in [%f, inf[", name, threshold[s - 1]);
+                        headers[k] = String.format("%s in [%f, %f[", name, threshold[s - 1], threshold[s]);
                     }
                 }
                 k++;

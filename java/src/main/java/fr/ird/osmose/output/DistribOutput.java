@@ -207,7 +207,7 @@ public class DistribOutput extends AbstractOutput {
     }
 
     @Override
-    String[] getHeaders() {
+    public String[] getHeaders() {
         String[] headers = new String[getNSpecies() + 1];
         int cpt = 0;
         headers[cpt++] = distrib.getType().toString();
