@@ -63,6 +63,9 @@ public class TestSchoolDistribution {
         int nClass = lengthDistribution.getNClass();
         assertEquals(7, nClass);
 
+        int nThres = lengthDistribution.getThresholds().length;
+        assertEquals(6, nThres);
+
     }
 
     @Test
