@@ -42,6 +42,7 @@
 package fr.ird.osmose.output.distribution;
 
 import fr.ird.osmose.IMarineOrganism;
+import fr.ird.osmose.stage.ClassGetter;
 import fr.ird.osmose.util.OsmoseLinker;
 
 /** Species belong to distribution (T) class s if
@@ -51,34 +52,59 @@ import fr.ird.osmose.util.OsmoseLinker;
  *
  * @author pverley
  */
-public abstract class AbstractDistribution extends OsmoseLinker {
+public class OutputDistribution extends OsmoseLinker {
 
     // Distribution classes
-    float[] classes;
+    float[] thresholds;
     private final DistributionType type;
     private final int fileSpeciesIndex;
 
-    abstract float getDefaultMin();
+    private static float AGE_DEFAULT_MIN = 1.f;
+    private static float AGE_DEFAULT_MAX = 25.f;
+    private static float AGE_DEFAULT_INCR = 1.f;
 
-    abstract float getDefaultMax();
+    private static float SIZE_DEFAULT_MIN = 10.f;
+    private static float SIZE_DEFAULT_MAX = 200.f;
+    private static float SIZE_DEFAULT_INCR = 10.f;
 
-    abstract float getDefaultIncr();
+    private static float TL_DEFAULT_MIN = 1.f;
+    private static float TL_DEFAULT_MAX = 6.f;
+    private static float TL_DEFAULT_INCR = 0.1f;
 
-    abstract float getValue(IMarineOrganism school);
+    private static float WEIGHT_DEFAULT_MIN = 25.f;
+    private static float WEIGHT_DEFAULT_MAX = 2000.f;
+    private static float WEIGHT_DEFAULT_INCR = 25.f;
 
     private final String key;
+    private ClassGetter classGetter;
 
-    AbstractDistribution(DistributionType type, int indexSpecies) {
+    public OutputDistribution(DistributionType type, int indexSpecies) {
         this.type = type;
         this.fileSpeciesIndex = indexSpecies;
         this.key = "output.distrib";
     }
 
-    AbstractDistribution(DistributionType type) {
+    public OutputDistribution(DistributionType type) {
         this(type, -1);
     }
 
     final public void init() {
+
+        switch (type) {
+            case AGE:
+                classGetter = (school -> school.getAge());
+                break;
+            case SIZE:
+                classGetter = (school -> school.getLength());
+                break;
+            case WEIGHT:
+                // converts getWeight (in tons) to grams
+                classGetter = (school -> school.getWeight() * 1e6);
+                break;
+            case TL:
+                classGetter = (school -> school.getTrophicLevel());
+                break;
+        }
 
         // Minimal class of the distribution
         float min;
@@ -101,36 +127,49 @@ public abstract class AbstractDistribution extends OsmoseLinker {
             incr = getDefaultIncr();
         }
 
-        // Number of classes
-        int nClass = (int) Math.ceil((max - min) / incr);
+        if(min == 0) {
+            String message = "The minimum value was set equal to 0. It has been corrected to " + String.valueOf(incr);
+            warning(message);
+            min = incr;
+        }
 
-        classes = new float[nClass];
-        classes[0] = min;
+        // Number of classes
+        // if thresholds are from 5 to 30 by 5,
+        // thresholds class are [0, 5[, [5, 10[, .... [30, inf[
+        int nClass = (int) Math.ceil((max - min) / incr) + 1;
+
+        thresholds = new float[nClass];
+        thresholds[0] = min;
         for (int i = 1; i < nClass; i++) {
-            classes[i] = min + i * incr;
+            thresholds[i] = min + i * incr;
         }
     }
 
     public int getClass(IMarineOrganism school) {
-        return getClass(getValue(school));
+        return getClass(classGetter.getVariable(school));
     }
 
-    final public int getClass(float value) {
-        int iClass = classes.length - 1;
-        if (value <= classes[classes.length - 1]) {
-            while ((iClass >= 0) && (value < classes[iClass])) {
-                iClass--;
+    public int getClass(double value) {
+        int stage = 0;
+        for (float threshold : thresholds) {
+            if (value < threshold) {
+                break;
             }
+            stage++;
         }
-        return iClass;
+        return stage;
+    }
+
+    public float[] getThresholds() {
+        return thresholds;
     }
 
     public float getThreshold(int iClass) {
-        return classes[iClass];
+        return thresholds[iClass];
     }
 
     public int getNClass() {
-        return classes.length;
+        return thresholds.length;
     }
 
     public DistributionType getType() {
@@ -172,4 +211,84 @@ public abstract class AbstractDistribution extends OsmoseLinker {
                 && (!getConfiguration().isNull(getKeyMax()))
                 && (!getConfiguration().isNull(getKeyIncr()));
     }
+
+    private float getDefaultMin() {
+
+        float output = -99;
+        switch (type) {
+            case AGE:
+                output = AGE_DEFAULT_MIN;
+                break;
+            case SIZE:
+                output = SIZE_DEFAULT_MIN;
+                break;
+            case WEIGHT:
+                output = WEIGHT_DEFAULT_MIN;
+                break;
+            case TL:
+                output = TL_DEFAULT_MIN;
+                break;
+        }
+
+        if(output < 0) {
+            error("Type " + type.toString() + "is not supported", null);
+        }
+
+        return output;
+
+    }
+
+    private float getDefaultMax() {
+
+        float output = -999;
+        switch (type) {
+            case AGE:
+                output = AGE_DEFAULT_MAX;
+                break;
+            case SIZE:
+                output = SIZE_DEFAULT_MAX;
+                break;
+            case WEIGHT:
+                output = WEIGHT_DEFAULT_MAX;
+                break;
+            case TL:
+                output = TL_DEFAULT_MAX;
+                break;
+        }
+
+        if(output < 0) {
+            error("Type " + type.toString() + "is not supported", null);
+        }
+
+        return output;
+
+    }
+
+    private float getDefaultIncr() {
+
+        float output = -999;
+        switch (type) {
+            case AGE:
+                output = AGE_DEFAULT_INCR;
+                break;
+            case SIZE:
+                output = SIZE_DEFAULT_INCR;
+                break;
+            case WEIGHT:
+                output = WEIGHT_DEFAULT_INCR;
+                break;
+            case TL:
+                output = TL_DEFAULT_INCR;
+                break;
+        }
+
+        if(output < 0) {
+            error("Type " + type.toString() + "is not supported", null);
+        }
+
+        return output;
+
+    }
+
+
 }

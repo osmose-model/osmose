@@ -1,10 +1,10 @@
-/* 
- * 
+/*
+ *
  * OSMOSE (Object-oriented Simulator of Marine Ecosystems)
  * http://www.osmose-model.org
- * 
+ *
  * Copyright (C) IRD (Institut de Recherche pour le Développement) 2009-2020
- * 
+ *
  * Osmose is a computer program whose purpose is to simulate fish
  * populations and their interactions with their biotic and abiotic environment.
  * OSMOSE is a spatial, multispecies and individual-based model which assumes
@@ -15,7 +15,7 @@
  * processes of fish life cycle (growth, explicit predation, additional and
  * starvation mortalities, reproduction and migration) and fishing mortalities
  * (Shin and Cury 2001, 2004).
- * 
+ *
  * Contributor(s):
  * Yunne SHIN (yunne.shin@ird.fr),
  * Morgane TRAVERS (morgane.travers@ifremer.fr)
@@ -23,27 +23,27 @@
  * Philippe VERLEY (philippe.verley@ird.fr)
  * Laure VELEZ (laure.velez@ird.fr)
  * Nicolas Barrier (nicolas.barrier@ird.fr)
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation (version 3 of the License). Full description
  * is provided on the LICENSE file.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
- * 
+ *
  */
 
 package fr.ird.osmose.output;
 
 import fr.ird.osmose.IMarineOrganism;
 import fr.ird.osmose.Species;
-import fr.ird.osmose.output.distribution.AbstractDistribution;
+import fr.ird.osmose.output.distribution.OutputDistribution;
 import fr.ird.osmose.output.distribution.DistributionType;
 
 /**
@@ -54,31 +54,31 @@ public class DistribOutput extends AbstractOutput {
 
     // Output values distributed by species and by class
     double[][][] values;
-    
-    // Distribution 
-    private final AbstractDistribution distrib;
+
+    // Distribution
+    private final OutputDistribution distrib;
     // school variable getter
     protected final SchoolVariableGetter variable;
     // description
     private final String description;
 
     private final boolean computeAverage;
-    
+
     /** Default constructor, in which temporal average is computed.
-     * 
+     *
      * @param rank
      * @param subfolder
      * @param name
      * @param description
      * @param species
      * @param variable
-     * @param distrib 
+     * @param distrib
      */
     public DistribOutput(int rank, String subfolder,
             String name, String description,
             Species species,
             SchoolVariableGetter variable,
-            AbstractDistribution distrib) {
+            OutputDistribution distrib) {
 
         this(rank, subfolder, name, description, species, variable, distrib, true);
 
@@ -100,7 +100,7 @@ public class DistribOutput extends AbstractOutput {
             String name, String description,
             Species species,
             SchoolVariableGetter variable,
-            AbstractDistribution distrib, boolean computeAverage) {
+            OutputDistribution distrib, boolean computeAverage) {
         super(rank, subfolder, name + "DistribBy" + distrib.getType() + (null != species ? "-" + species.getName() : ""));
         this.distrib = distrib;
         this.variable = variable;
@@ -109,29 +109,29 @@ public class DistribOutput extends AbstractOutput {
     }
 
     /** Constructor with compute average but not species.
-     * 
+     *
      * @param rank
      * @param subfolder
      * @param name
      * @param description
      * @param schoolVariable
      * @param distrib
-     * @param computeAverage 
+     * @param computeAverage
      */
-    public DistribOutput(int rank, String subfolder, String name, String description, SchoolVariableGetter schoolVariable, AbstractDistribution distrib, boolean computeAverage) {
+    public DistribOutput(int rank, String subfolder, String name, String description, SchoolVariableGetter schoolVariable, OutputDistribution distrib, boolean computeAverage) {
         this(rank, subfolder, name, description, null, schoolVariable, distrib, computeAverage);
     }
 
     /** Constructor without species and compute_average.
-     * 
+     *
      * @param rank
      * @param subfolder
      * @param name
      * @param description
      * @param schoolVariable
-     * @param distrib 
+     * @param distrib
      */
-    public DistribOutput(int rank, String subfolder, String name, String description, SchoolVariableGetter schoolVariable, AbstractDistribution distrib) {
+    public DistribOutput(int rank, String subfolder, String name, String description, SchoolVariableGetter schoolVariable, OutputDistribution distrib) {
         this(rank, subfolder, name, description, null, schoolVariable, distrib, true);
     }
 
@@ -139,7 +139,7 @@ public class DistribOutput extends AbstractOutput {
     public void reset() {
         int nSpecies = this.getNSpecies();
         values = new double[nSpecies][][];
-        for(int i = 0; i<nSpecies; i++) { 
+        for(int i = 0; i<nSpecies; i++) {
             values[i] = new double[getNOutputRegion()][distrib.getNClass()];
         }
     }

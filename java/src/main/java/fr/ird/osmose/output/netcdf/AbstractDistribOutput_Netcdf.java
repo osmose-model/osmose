@@ -42,7 +42,7 @@
 package fr.ird.osmose.output.netcdf;
 
 import fr.ird.osmose.IMarineOrganism;
-import fr.ird.osmose.output.distribution.AbstractDistribution;
+import fr.ird.osmose.output.distribution.OutputDistribution;
 import fr.ird.osmose.output.distribution.DistributionType;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -67,9 +67,9 @@ public abstract class AbstractDistribOutput_Netcdf extends AbstractOutput_Netcdf
     // Output values distributed by species and by class
     double[][] values;
     // Distribution
-    private final AbstractDistribution distrib;
+    private final OutputDistribution distrib;
 
-    public AbstractDistribOutput_Netcdf(int rank, AbstractDistribution distrib) {
+    public AbstractDistribOutput_Netcdf(int rank, OutputDistribution distrib) {
         super(rank);
         this.distrib = distrib;
     }

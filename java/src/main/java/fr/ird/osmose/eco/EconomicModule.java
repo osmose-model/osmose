@@ -40,16 +40,14 @@
 package fr.ird.osmose.eco;
 
 import fr.ird.osmose.AbstractSchool;
-import fr.ird.osmose.output.distribution.AbstractDistribution;
-import fr.ird.osmose.output.distribution.AgeDistribution;
-import fr.ird.osmose.output.distribution.SizeDistribution;
-import fr.ird.osmose.output.distribution.WeightDistribution;
+import fr.ird.osmose.output.distribution.DistributionType;
+import fr.ird.osmose.output.distribution.OutputDistribution;
 import fr.ird.osmose.process.AbstractProcess;
 
 public class EconomicModule extends AbstractProcess {
 
     // sizeClasses used to determine variables for fishing economy (costs, etc.)
-    private AbstractDistribution[] sizeClasses;
+    private OutputDistribution[] sizeClasses;
     private boolean isCalibrationEnabled = true;
 
     /** Stock elasticity. [nSpecies] */
@@ -111,7 +109,7 @@ public class EconomicModule extends AbstractProcess {
             }
         }
 
-        this.sizeClasses = new AbstractDistribution[this.getNSpecies()];
+        this.sizeClasses = new OutputDistribution[this.getNSpecies()];
         int cpt = 0;
         for (int fileSpeciesIndex : getConfiguration().getFocalIndex()) {
             String key = String.format("economic.distribution.type.sp%d", fileSpeciesIndex);
@@ -119,20 +117,20 @@ public class EconomicModule extends AbstractProcess {
                 String type = getConfiguration().getString(key);
                 switch (type) {
                     case ("weight"):
-                        this.sizeClasses[cpt] = new WeightDistribution(fileSpeciesIndex);
+                        this.sizeClasses[cpt] = new OutputDistribution(DistributionType.WEIGHT, fileSpeciesIndex);
                         break;
                     case ("age"):
-                        this.sizeClasses[cpt] = new AgeDistribution(fileSpeciesIndex);
+                        this.sizeClasses[cpt] = new OutputDistribution(DistributionType.AGE, fileSpeciesIndex);
                         break;
                     case ("size"):
-                        this.sizeClasses[cpt] = new SizeDistribution(fileSpeciesIndex);
+                        this.sizeClasses[cpt] = new OutputDistribution(DistributionType.SIZE, fileSpeciesIndex);
                         break;
                     default:
-                        this.sizeClasses[cpt] = new SizeDistribution(fileSpeciesIndex);
+                        this.sizeClasses[cpt] = new OutputDistribution(DistributionType.SIZE, fileSpeciesIndex);
                         break;
                 }
             } else {
-                this.sizeClasses[cpt] = new SizeDistribution(fileSpeciesIndex);
+                this.sizeClasses[cpt] = new OutputDistribution(DistributionType.SIZE, fileSpeciesIndex);
             }
 
             this.sizeClasses[cpt].init();
@@ -256,7 +254,7 @@ public class EconomicModule extends AbstractProcess {
     public void run() {
     }
 
-    public AbstractDistribution[] getSizeClass() {
+    public OutputDistribution[] getSizeClass() {
         return this.sizeClasses;
     }
 

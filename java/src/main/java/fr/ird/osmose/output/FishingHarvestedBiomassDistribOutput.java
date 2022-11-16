@@ -7,14 +7,14 @@ import java.io.PrintWriter;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import fr.ird.osmose.output.distribution.AbstractDistribution;
+import fr.ird.osmose.output.distribution.OutputDistribution;
 import fr.ird.osmose.util.SimulationLinker;
 
 public class FishingHarvestedBiomassDistribOutput extends SimulationLinker implements IOutput {
 
     /** Output is the harvested biomass. Dimensions are [species][sizeClass][fisheries] */
     private double[][][] output;
-    private AbstractDistribution[] sizeClasses;
+    private OutputDistribution[] sizeClasses;
     private int nFisheries;
     private FileOutputStream fos[];
     private PrintWriter prw[];

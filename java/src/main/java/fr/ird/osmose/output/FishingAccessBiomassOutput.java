@@ -49,7 +49,7 @@ import java.io.PrintWriter;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import fr.ird.osmose.output.distribution.AbstractDistribution;
+import fr.ird.osmose.output.distribution.OutputDistribution;
 import fr.ird.osmose.util.SimulationLinker;
 
 /**
@@ -68,7 +68,7 @@ public class FishingAccessBiomassOutput extends SimulationLinker implements IOut
     private int recordFrequency;
     private double output[][][];
     private int nFisheries;
-    private AbstractDistribution[] sizeClasses;
+    private OutputDistribution[] sizeClasses;
 
     /**
      * CSV separator

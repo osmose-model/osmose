@@ -44,7 +44,7 @@ package fr.ird.osmose.output.netcdf;
 import fr.ird.osmose.School;
 import fr.ird.osmose.Prey;
 import fr.ird.osmose.Species;
-import fr.ird.osmose.output.distribution.AbstractDistribution;
+import fr.ird.osmose.output.distribution.OutputDistribution;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -69,7 +69,7 @@ public class DietDistribOutput_Netcdf extends AbstractDistribOutput_Netcdf {
 
     private final Species species;
 
-    public DietDistribOutput_Netcdf(int rank, Species species, AbstractDistribution distrib) {
+    public DietDistribOutput_Netcdf(int rank, Species species, OutputDistribution distrib) {
         super(rank, distrib);
         this.species = species;
     }

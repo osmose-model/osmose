@@ -43,7 +43,7 @@ package fr.ird.osmose.output.spatial;
 import fr.ird.osmose.Cell;
 import fr.ird.osmose.School;
 import fr.ird.osmose.output.IOutput;
-import fr.ird.osmose.output.distribution.AbstractDistribution;
+import fr.ird.osmose.output.distribution.OutputDistribution;
 import fr.ird.osmose.util.io.IOTools;
 import fr.ird.osmose.util.SimulationLinker;
 import java.io.File;
@@ -75,7 +75,7 @@ public class SpatialSizeSpeciesOutput extends SimulationLinker implements IOutpu
     /**
      * Size/Age distribution.
      */
-    private final AbstractDistribution distrib;
+    private final OutputDistribution distrib;
 
     private double timeOut;
     private int counter;
@@ -92,7 +92,7 @@ public class SpatialSizeSpeciesOutput extends SimulationLinker implements IOutpu
 
     private int ncindex;
 
-    public SpatialSizeSpeciesOutput(int rank, AbstractDistribution distrib) {
+    public SpatialSizeSpeciesOutput(int rank, OutputDistribution distrib) {
         super(rank);
         this.distrib = distrib;
     }

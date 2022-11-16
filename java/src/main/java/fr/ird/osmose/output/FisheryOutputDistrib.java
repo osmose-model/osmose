@@ -42,7 +42,7 @@
 package fr.ird.osmose.output;
 
 import fr.ird.osmose.util.io.IOTools;
-import fr.ird.osmose.output.distribution.AbstractDistribution;
+import fr.ird.osmose.output.distribution.OutputDistribution;
 import fr.ird.osmose.util.SimulationLinker;
 import java.io.File;
 import java.io.IOException;
@@ -83,7 +83,7 @@ public class FisheryOutputDistrib extends SimulationLinker implements IOutput {
 
     private int nClass;
 
-    AbstractDistribution distrib;
+    OutputDistribution distrib;
 
     /*
      * Array containing the fisheries catches by species and by fisheries.
@@ -93,7 +93,7 @@ public class FisheryOutputDistrib extends SimulationLinker implements IOutput {
     private double[][][] discards;
     private double[][][] accessibleBiomass;
 
-    public FisheryOutputDistrib(int rank, AbstractDistribution distrib) {
+    public FisheryOutputDistrib(int rank, OutputDistribution distrib) {
         super(rank);
         this.distrib = distrib;
     }

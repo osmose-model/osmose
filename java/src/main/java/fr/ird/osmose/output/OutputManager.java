@@ -57,11 +57,8 @@ import fr.ird.osmose.output.netcdf.AbundanceOutput_Netcdf;
 import fr.ird.osmose.output.netcdf.YieldDistribOutput_Netcdf;
 import fr.ird.osmose.output.netcdf.YieldNOutput_Netcdf;
 import fr.ird.osmose.output.netcdf.YieldOutput_Netcdf;
-import fr.ird.osmose.output.distribution.AbstractDistribution;
-import fr.ird.osmose.output.distribution.AgeDistribution;
-import fr.ird.osmose.output.distribution.SizeDistribution;
-import fr.ird.osmose.output.distribution.WeightDistribution;
-import fr.ird.osmose.output.distribution.TLDistribution;
+import fr.ird.osmose.output.distribution.DistributionType;
+import fr.ird.osmose.output.distribution.OutputDistribution;
 import fr.ird.osmose.util.io.IOTools;
 import fr.ird.osmose.util.SimulationLinker;
 import java.util.ArrayList;
@@ -110,13 +107,13 @@ public class OutputManager extends SimulationLinker {
             IOTools.deleteRecursively(getConfiguration().getOutputPathname(), pattern);
         }
 
-        AbstractDistribution sizeDistrib = new SizeDistribution();
+        OutputDistribution sizeDistrib = new OutputDistribution(DistributionType.SIZE);
         sizeDistrib.init();
-        AbstractDistribution ageDistrib = new AgeDistribution();
+        OutputDistribution ageDistrib = new OutputDistribution(DistributionType.AGE);
         ageDistrib.init();
-        AbstractDistribution weightDistrib = new WeightDistribution();
+        OutputDistribution weightDistrib = new OutputDistribution(DistributionType.WEIGHT);
         weightDistrib.init();
-        AbstractDistribution tl_distrib = new TLDistribution();
+        OutputDistribution tl_distrib = new OutputDistribution(DistributionType.TL);
         tl_distrib.init();
 
         if (getConfiguration().getBoolean("output.abundance.netcdf.enabled")) {
