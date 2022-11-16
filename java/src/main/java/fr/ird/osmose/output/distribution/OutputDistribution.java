@@ -169,7 +169,7 @@ public class OutputDistribution extends OsmoseLinker {
     }
 
     public int getNClass() {
-        return thresholds.length;
+        return thresholds.length + 1;
     }
 
     public DistributionType getType() {

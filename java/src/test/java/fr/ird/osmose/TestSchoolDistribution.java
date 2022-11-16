@@ -60,6 +60,9 @@ public class TestSchoolDistribution {
         float expected[] = new float[] {5.f, 10.f, 15.f, 20.f, 25.f, 30.f};
         assertArrayEquals(expected, actual);
 
+        int nClass = lengthDistribution.getNClass();
+        assertEquals(7, nClass);
+
     }
 
     @Test
@@ -74,6 +77,8 @@ public class TestSchoolDistribution {
         School school6 = createSchool(0, 27.f, 0.5f, 1.f, 1);
         School school7 = createSchool(0, 17.f, 0.5f, 1.f, 1);
         School school8 = createSchool(0, 21.f, 0.5f, 1.f, 1);
+        School school9 = createSchool(0, 5.f, 0.5f, 1.f, 1);
+        School school10 = createSchool(0, 15.f, 0.5f, 1.f, 1);
 
         int stage1 = lengthDistribution.getClass(school1);
         assertEquals(0, stage1);
@@ -99,6 +104,12 @@ public class TestSchoolDistribution {
 
         int stage8 = lengthDistribution.getClass(school8);
         assertEquals(4, stage8);
+
+        int stage9 = lengthDistribution.getClass(school9);
+        assertEquals(1, stage9);
+
+        int stage10 = lengthDistribution.getClass(school10);
+        assertEquals(3, stage10);
 
     }
 
