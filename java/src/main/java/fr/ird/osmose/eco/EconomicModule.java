@@ -40,14 +40,13 @@
 package fr.ird.osmose.eco;
 
 import fr.ird.osmose.AbstractSchool;
-import fr.ird.osmose.output.distribution.DistributionType;
-import fr.ird.osmose.output.distribution.OutputDistribution;
 import fr.ird.osmose.process.AbstractProcess;
+import fr.ird.osmose.stage.SchoolStage;
 
 public class EconomicModule extends AbstractProcess {
 
     // sizeClasses used to determine variables for fishing economy (costs, etc.)
-    private OutputDistribution[] sizeClasses;
+    private SchoolStage sizeClasses;
     private boolean isCalibrationEnabled = true;
 
     /** Stock elasticity. [nSpecies] */
@@ -109,34 +108,9 @@ public class EconomicModule extends AbstractProcess {
             }
         }
 
-        this.sizeClasses = new OutputDistribution[this.getNSpecies()];
-        int cpt = 0;
-        for (int fileSpeciesIndex : getConfiguration().getFocalIndex()) {
-            String key = String.format("economic.distribution.type.sp%d", fileSpeciesIndex);
-            if (getConfiguration().canFind(key)) {
-                String type = getConfiguration().getString(key);
-                switch (type) {
-                    case ("weight"):
-                        this.sizeClasses[cpt] = new OutputDistribution(DistributionType.WEIGHT, fileSpeciesIndex);
-                        break;
-                    case ("age"):
-                        this.sizeClasses[cpt] = new OutputDistribution(DistributionType.AGE, fileSpeciesIndex);
-                        break;
-                    case ("size"):
-                        this.sizeClasses[cpt] = new OutputDistribution(DistributionType.SIZE, fileSpeciesIndex);
-                        break;
-                    default:
-                        this.sizeClasses[cpt] = new OutputDistribution(DistributionType.SIZE, fileSpeciesIndex);
-                        break;
-                }
-            } else {
-                this.sizeClasses[cpt] = new OutputDistribution(DistributionType.SIZE, fileSpeciesIndex);
-            }
+        this.sizeClasses = new SchoolStage("economic.output.stage");
+        this.sizeClasses.init();
 
-            this.sizeClasses[cpt].init();
-            cpt += 1;
-
-        }
     }
 
     public void clearAccessibleBiomass() {
@@ -146,7 +120,7 @@ public class EconomicModule extends AbstractProcess {
         this.harvestedBiomass = new double[nFisheries][nSpecies][];
         for (int i = 0; i < nFisheries; i++) {
             for (int j = 0; j < nSpecies; j++) {
-                int nClass = sizeClasses[j].getNClass();
+                int nClass = sizeClasses.getNStage(j);
                 this.accessibleBiomass[i][j] = new double[nClass];
                 this.priceAccessibleBiomass[i][j] = new double[nClass];
                 this.harvestedBiomass[i][j] = new double[nClass];
@@ -156,13 +130,13 @@ public class EconomicModule extends AbstractProcess {
 
     public void incrementAccessibleBiomass(int iFishery, AbstractSchool school, double increment) {
         int iSpecies = school.getSpeciesIndex();
-        int iClass = this.sizeClasses[iSpecies].getClass(school);
+        int iClass = this.sizeClasses.getStage(school);
         this.accessibleBiomass[iFishery][iSpecies][iClass] += increment;
     }
 
     public void incrementHarvestedBiomass(int iFishery, AbstractSchool school, double nDead) {
         int iSpecies = school.getSpeciesIndex();
-        int iClass = this.sizeClasses[iSpecies].getClass(school);
+        int iClass = this.sizeClasses.getStage(school);
         double biomass = school.abd2biom(nDead);
         this.harvestedBiomass[iFishery][iSpecies][iClass] += biomass;
     }
@@ -184,7 +158,7 @@ public class EconomicModule extends AbstractProcess {
     }
 
     public int getSizeClass(AbstractSchool school)  {
-        return sizeClasses[school.getSpeciesIndex()].getClass(school);
+        return this.sizeClasses.getStage(school);
     }
 
 
@@ -254,7 +228,7 @@ public class EconomicModule extends AbstractProcess {
     public void run() {
     }
 
-    public OutputDistribution[] getSizeClass() {
+    public SchoolStage getSizeClass() {
         return this.sizeClasses;
     }
 
