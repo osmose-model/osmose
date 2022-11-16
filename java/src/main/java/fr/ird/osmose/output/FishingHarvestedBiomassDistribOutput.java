@@ -7,7 +7,6 @@ import java.io.PrintWriter;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import fr.ird.osmose.output.distribution.OutputDistribution;
 import fr.ird.osmose.stage.SchoolStage;
 import fr.ird.osmose.util.SimulationLinker;
 
@@ -68,7 +67,7 @@ public class FishingHarvestedBiomassDistribOutput extends SimulationLinker imple
             for (int iClass = 0; iClass < this.sizeClasses.getNStage(iSpecies); iClass++) {
                 prw[iSpecies].print(time);
                 prw[iSpecies].print(separator);
-                prw[iSpecies].print(this.sizeClasses.getThresholds(iSpecies, iClass));
+                prw[iSpecies].print(iClass == 0 ? 0 : this.sizeClasses.getThresholds(iSpecies, iClass - 1));
                 prw[iSpecies].print(separator);
                 for (int iFishery = 0; iFishery < nFisheries - 1; iFishery++) {
                     // instantenous mortality rate for eggs additional mortality
@@ -112,7 +111,7 @@ public class FishingHarvestedBiomassDistribOutput extends SimulationLinker imple
             filename.append(getRank());
             filename.append(".csv");
             File file = new File(path, filename.toString());
-            boolean fileExists = file.exists();
+
             file.getParentFile().mkdirs();
             try {
                 // Init stream
@@ -121,22 +120,22 @@ public class FishingHarvestedBiomassDistribOutput extends SimulationLinker imple
                 Logger.getLogger(MortalityOutput.class.getName()).log(Level.SEVERE, null, ex);
             }
             prw[iSpecies] = new PrintWriter(fos[iSpecies], true);
-            if (!fileExists) {
-                // Write headers
-                prw[iSpecies].print(quote("Time"));
-                prw[iSpecies].print(separator);
-                prw[iSpecies].print(quote("Class"));
-                prw[iSpecies].print(separator);
-                for (int iFishery = 0; iFishery < nFisheries - 1; iFishery++) {
-                    String fishingName = namesFisheries[iFishery];
-                    prw[iSpecies].print(quote(fishingName));
-                    prw[iSpecies].print(separator);
-                }
-                int iFishery = nFisheries - 1;
+
+            // Write headers
+            prw[iSpecies].print(quote("Time"));
+            prw[iSpecies].print(separator);
+            prw[iSpecies].print(quote("Class Lower Bound"));
+            prw[iSpecies].print(separator);
+            for (int iFishery = 0; iFishery < nFisheries - 1; iFishery++) {
                 String fishingName = namesFisheries[iFishery];
                 prw[iSpecies].print(quote(fishingName));
-                prw[iSpecies].println();
+                prw[iSpecies].print(separator);
             }
+            int iFishery = nFisheries - 1;
+            String fishingName = namesFisheries[iFishery];
+            prw[iSpecies].print(quote(fishingName));
+            prw[iSpecies].println();
+
         }
 
         recordFrequency = getConfiguration().getInt("output.recordfrequency.ndt");
