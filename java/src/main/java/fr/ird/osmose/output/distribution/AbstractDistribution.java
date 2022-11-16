@@ -66,9 +66,12 @@ public abstract class AbstractDistribution extends OsmoseLinker {
 
     abstract float getValue(IMarineOrganism school);
 
+    private final String key;
+
     AbstractDistribution(DistributionType type, int indexSpecies) {
         this.type = type;
         this.fileSpeciesIndex = indexSpecies;
+        this.key = "output.distrib";
     }
 
     AbstractDistribution(DistributionType type) {
@@ -135,7 +138,7 @@ public abstract class AbstractDistribution extends OsmoseLinker {
     }
 
     private String getKeyMin() {
-        return "output.distrib.by" + type.toString() + ".min";
+        return key + ".by" + type.toString() + ".min";
     }
 
     private String getKeyMinSpecies() {
@@ -143,7 +146,7 @@ public abstract class AbstractDistribution extends OsmoseLinker {
     }
 
     private String getKeyMax() {
-        return "output.distrib.by" + type.toString() + ".max";
+        return key + ".by" + type.toString() + ".max";
     }
 
     private String getKeyMaxSpecies() {
@@ -151,7 +154,7 @@ public abstract class AbstractDistribution extends OsmoseLinker {
     }
 
     private String getKeyIncr() {
-        return "output.distrib.by" + type.toString() + ".incr";
+        return key + ".by" + type.toString() + ".incr";
     }
 
     private String getKeyIncrSpecies() {
