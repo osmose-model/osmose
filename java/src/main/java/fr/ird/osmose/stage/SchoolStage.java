@@ -77,18 +77,25 @@ public class SchoolStage extends OsmoseLinker {
         // Set values for focal and background species species.
         int cpt = 0;
         for (int i : getConfiguration().getPredatorIndex()) {
-            int nStage = !getConfiguration().isNull(key + ".thresholds.sp" + i)
-                    ? getConfiguration().getArrayString(key + ".thresholds.sp" + i).length + 1
+            int nStage = !getConfiguration().isNull(key + ".threshold.sp" + i)
+                    ? getConfiguration().getArrayString(key + ".threshold.sp" + i).length + 1
                     : 1;
             if (nStage > 1) {
-                thresholds[cpt] = getConfiguration().getArrayFloat(key + ".thresholds.sp" + i);
+                thresholds[cpt] = getConfiguration().getArrayFloat(key + ".threshold.sp" + i);
             } else {
                 // if no threshold, init an empty array of length 0, to insure that
                 // stage index is always 0.
                 thresholds[cpt] = new float[0];
             }
 
-            String structure = getConfiguration().getString(key + ".structure.sp" + i);
+            String keysp = key + ".structure.sp" + i;
+            String structure;
+            if (!getConfiguration().isNull(keysp)) {
+                structure = getConfiguration().getString(keysp);
+            } else {
+                structure = getConfiguration().getString(key + ".structure");
+            }
+
             switch (structure) {
                 case "age":
                     classGetter[cpt] = (school -> school.getAge());
@@ -97,7 +104,8 @@ public class SchoolStage extends OsmoseLinker {
                     classGetter[cpt] = (school -> school.getLength());
                     break;
                 case "weight":
-                    classGetter[cpt] = (school -> school.getWeight() * 1e-3);
+                    // converts getWeight (in tons) to grams
+                    classGetter[cpt] = (school -> school.getWeight() * 1e6);
                     break;
                 case "tl":
                     classGetter[cpt] = (school -> school.getTrophicLevel());
