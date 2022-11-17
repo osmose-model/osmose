@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.util.logging.Level;
 import java.util.ArrayList;
 
@@ -224,7 +225,7 @@ public class TestNcSteps {
       */
     private String createSingleLtlFile(String prefix, int nSteps) throws IOException, InvalidRangeException {
 
-        String fileName = File.createTempFile(prefix, ".nc").getAbsolutePath();
+        String fileName = Files.createTempFile(prefix, ".nc").toString();
         NetcdfFormatWriter.Builder bNc = NetcdfFormatWriter.createNewNetcdf4(NC_VERSION, fileName, null);
 
         ArrayList<Dimension> outDims = new ArrayList<>();
