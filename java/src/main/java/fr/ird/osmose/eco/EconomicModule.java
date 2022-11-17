@@ -55,8 +55,6 @@ public class EconomicModule extends AbstractProcess {
     /** Baseline costs. [gear, time] */
     private double[][] baselineCosts;
 
-    /** Number of fishing gears. If old fisheries used, equals to nSpecies. */
-    private int nFisheries;
 
     /** Total accessible biomass. Dims=[fisheries, species] */
     private double[][][] accessibleBiomass;
@@ -76,8 +74,6 @@ public class EconomicModule extends AbstractProcess {
     /** Number of species */
     private int nSpecies;
 
-    private String[] namesFisheries;
-
     // /* Computed harvested costs. [gear, species] */
     // private double[][] harvestingCosts;
 
@@ -94,20 +90,6 @@ public class EconomicModule extends AbstractProcess {
     @Override
     public void init() {
 
-        if (getConfiguration().isFisheryEnabled()) {
-            nFisheries = getConfiguration().getNFishery();
-            namesFisheries = new String[nFisheries];
-            for (int iFishery = 0; iFishery < nFisheries; iFishery++) {
-                namesFisheries[iFishery] = String.format("fishery%03d", iFishery);
-            }
-        } else {
-            nFisheries = getConfiguration().getNSpecies();
-            namesFisheries = new String[nFisheries];
-            for (int iSpecies = 0; iSpecies < nFisheries; iSpecies++) {
-                namesFisheries[iSpecies] = String.format("fishery%03d", iSpecies);
-            }
-        }
-
         this.sizeClasses = new SchoolStage("economic.output.stage");
         this.sizeClasses.init();
 
@@ -115,10 +97,10 @@ public class EconomicModule extends AbstractProcess {
 
     public void clearAccessibleBiomass() {
         int nSpecies = this.getNSpecies();
-        this.accessibleBiomass = new double[nFisheries][nSpecies][];
-        this.priceAccessibleBiomass = new double[nFisheries][nSpecies][];
-        this.harvestedBiomass = new double[nFisheries][nSpecies][];
-        for (int i = 0; i < nFisheries; i++) {
+        this.accessibleBiomass = new double[getConfiguration().getNFisheries()][nSpecies][];
+        this.priceAccessibleBiomass = new double[getConfiguration().getNFisheries()][nSpecies][];
+        this.harvestedBiomass = new double[getConfiguration().getNFisheries()][nSpecies][];
+        for (int i = 0; i < getConfiguration().getNFisheries(); i++) {
             for (int j = 0; j < nSpecies; j++) {
                 int nClass = sizeClasses.getNStage(j);
                 this.accessibleBiomass[i][j] = new double[nClass];
@@ -199,7 +181,7 @@ public class EconomicModule extends AbstractProcess {
     // public void computeHarvestingCosts() {
     //     int time = this.getSimulation().getIndexTimeSimu();
     //     // Loop over fisheries
-    //     for (int iFishery = 0; iFishery < nFisheries; iFishery++) {
+    //     for (int iFishery = 0; iFishery < getConfiguration().getNFisheries(); iFishery++) {
 
     //         double baseCost = this.baselineCosts[iFishery][time]; // get base costs
 
@@ -233,11 +215,11 @@ public class EconomicModule extends AbstractProcess {
     }
 
     public int getNFisheries() {
-        return this.nFisheries;
+        return this.getConfiguration().getNFisheries();
     }
 
     public String[] getFisheriesNames() {
-        return this.namesFisheries;
+        return this.getConfiguration().getFisheriesNames();
     }
 
 }
