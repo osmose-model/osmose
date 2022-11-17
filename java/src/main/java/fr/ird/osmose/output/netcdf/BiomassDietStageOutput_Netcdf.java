@@ -214,7 +214,7 @@ public class BiomassDietStageOutput_Netcdf extends AbstractOutput_Netcdf {
         int nSpec = getNSpecies() + getNBkgSpecies() + getNRscSpecies();
         int k = 0;
         for (int iSpec = 0; iSpec < nSpec; iSpec++) {
-            String name = getSpecies(iSpec).getName();
+            String name = getISpecies(iSpec).getName();
             float[] threshold = dietOutputStage.getThresholds(iSpec);
             int nStage = dietOutputStage.getNStage(iSpec);
             String outname;
