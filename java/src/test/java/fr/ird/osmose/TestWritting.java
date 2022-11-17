@@ -108,6 +108,7 @@ public class TestWritting {
         String bool = "true";
 
         cmd.put("output.dir.path", tmpDir.toString());
+        cmd.put("economic.output.stage.structure", "weight");
 
         cmd.put("output.biomass.enabled", "true");
         cmd.put("output.abundance.enabled", "true");

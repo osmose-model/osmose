@@ -91,11 +91,11 @@ public class FishingHarvestedBiomassDistribOutput extends SimulationLinker imple
 
         fos = new FileOutputStream[getNSpecies()];
         prw = new PrintWriter[getNSpecies()];
-        nFisheries = getSimulation().getEconomicModule().getNFisheries();
+        nFisheries = getConfiguration().getNFisheries();
+        String[] namesFisheries = getConfiguration().getFisheriesNames();
 
-        this.sizeClasses = getSimulation().getEconomicModule().getSizeClass();
-
-        String[] namesFisheries = getSimulation().getEconomicModule().getFisheriesNames();
+        this.sizeClasses = new SchoolStage("economic.output.stage");
+        this.sizeClasses.init();
 
         for (int iSpecies = 0; iSpecies < getNSpecies(); iSpecies++) {
             // Create parent directory

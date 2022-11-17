@@ -160,8 +160,9 @@ public class SpatialSizeSpeciesOutput extends SimulationLinker implements IOutpu
 
             /* Writes out the class array. */
             ArrayFloat.D1 arrClass = new ArrayFloat.D1(this.distrib.getNClass());
-            for (int iclass = 0; iclass < this.distrib.getNClass(); iclass++) {
-                arrClass.set(iclass, this.distrib.getThreshold(iclass));
+            arrClass.set(0, 0);
+            for (int iclass = 1; iclass < this.distrib.getNClass(); iclass++) {
+                arrClass.set(iclass, this.distrib.getThreshold(iclass - 1));
             }
 
             nc.write(nc.findVariable("class"), arrClass);

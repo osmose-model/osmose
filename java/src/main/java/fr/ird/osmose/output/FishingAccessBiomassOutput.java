@@ -139,11 +139,14 @@ public class FishingAccessBiomassOutput extends SimulationLinker implements IOut
 
     @Override
     public void init() {
+
+        this.sizeClasses = new SchoolStage("economic.output.stage");
+        this.sizeClasses.init();
+
         fos = new FileOutputStream[getNSpecies()];
         prw = new PrintWriter[getNSpecies()];
-        nFisheries = getSimulation().getEconomicModule().getNFisheries();
-        String[] namesFisheries = getSimulation().getEconomicModule().getFisheriesNames();
-        this.sizeClasses = getSimulation().getEconomicModule().getSizeClass();
+        nFisheries = getConfiguration().getNFisheries();
+        String[] namesFisheries = getConfiguration().getFisheriesNames();
 
         for (int iSpecies = 0; iSpecies < getNSpecies(); iSpecies++) {
             // Create parent directory
