@@ -353,11 +353,13 @@ public class FisheryOutputDistrib extends SimulationLinker implements IOutput {
 
         StringBuilder strBuild = new StringBuilder();
         strBuild.append(distrib.getType()).append(":");
-        for(int i = 0; i < distrib.getNClass() - 1; i++) {
-            strBuild.append(distrib.getThreshold(i));
+        strBuild.append(0);
+        strBuild.append(",");
+        for(int i = 1; i < distrib.getNClass() - 1; i++) {
+            strBuild.append(distrib.getThreshold(i - 1));
             strBuild.append(",");
         }
-        strBuild.append(distrib.getThreshold(distrib.getNClass() - 1));
+        strBuild.append(distrib.getThreshold(distrib.getNClass() - 1 - 1));
 
         return strBuild.toString();
 

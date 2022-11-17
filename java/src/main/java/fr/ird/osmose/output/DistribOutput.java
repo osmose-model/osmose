@@ -191,7 +191,7 @@ public class DistribOutput extends AbstractOutput {
             double[][] array = new double[nClass][getNSpecies() + 1];
             for (int iClass = 0; iClass < nClass; iClass++) {
                 int cpt = 0;
-                array[iClass][cpt++] = distrib.getThreshold(iClass);
+                array[iClass][cpt++] = (iClass == 0) ? 0: distrib.getThreshold(iClass - 1);
                 if (this.computeAverage) {
                     for (int iSpec = 0; iSpec < nSpecies; iSpec++) {
                         array[iClass][cpt++] = values[iSpec][irg][iClass] / nsteps;

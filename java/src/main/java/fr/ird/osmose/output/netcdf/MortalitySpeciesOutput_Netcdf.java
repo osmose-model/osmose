@@ -218,8 +218,9 @@ public class MortalitySpeciesOutput_Netcdf extends AbstractDistribOutput_Netcdf 
             getNc().write(mortvar, arrMort);
 
             ArrayFloat.D1 arrClass = new ArrayFloat.D1(this.getNClass());
-            for (int i = 0; i < this.getNClass(); i++) {
-                arrClass.set(i, this.getClassThreshold(i));
+            arrClass.set(0, 0);
+            for (int i = 1; i < this.getNClass(); i++) {
+                arrClass.set(i, this.getClassThreshold(i - 1));
             }
             Variable disvar = this.getNc().findVariable(this.getDisName());
             getNc().write(disvar, arrClass);

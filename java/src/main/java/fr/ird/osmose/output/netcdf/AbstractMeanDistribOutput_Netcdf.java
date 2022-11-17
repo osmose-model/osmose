@@ -68,7 +68,7 @@ public abstract class AbstractMeanDistribOutput_Netcdf extends AbstractDistribOu
         int nClass = getNClass();
         double[][] array = new double[nClass][getNSpecies() + 1];
         for (int iClass = 0; iClass < nClass; iClass++) {
-            array[iClass][0] = getClassThreshold(iClass);
+            array[iClass][0] = (iClass == 0) ? 0 : getClassThreshold(iClass - 1);
             for (int iSpec = 0; iSpec < getNSpecies(); iSpec++) {
                 if (denominator[iSpec][iClass] != 0) {
                     array[iClass][iSpec + 1] = values[iSpec][iClass] / denominator[iSpec][iClass];

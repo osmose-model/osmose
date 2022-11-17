@@ -149,8 +149,8 @@ public abstract class AbstractDistribOutput_Netcdf extends AbstractOutput_Netcdf
 
             // Set the first class lower bound to 0
             arrClass.set(0, 0);
-            for (int i = 0; i < this.distrib.getNClass() - 1; i++) {
-                arrClass.set(i + 1, this.getClassThreshold(i));
+            for (int i = 1; i < this.distrib.getNClass(); i++) {
+                arrClass.set(i, this.getClassThreshold(i - 1));
             }
 
             Variable vardis = this.getNc().findVariable(this.getDisName());
