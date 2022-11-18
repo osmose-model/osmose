@@ -225,7 +225,7 @@ public class DietOutput extends SimulationLinker implements IOutput {
         file.getParentFile().mkdirs();
         try {
             // Init stream
-            fos = new FileOutputStream(file, true);
+            fos = new FileOutputStream(file, false);
         } catch (FileNotFoundException ex) {
             Logger.getLogger(DietOutput.class.getName()).log(Level.SEVERE, null, ex);
         }

@@ -115,7 +115,7 @@ public class FishingHarvestedBiomassDistribOutput extends SimulationLinker imple
             file.getParentFile().mkdirs();
             try {
                 // Init stream
-                fos[iSpecies] = new FileOutputStream(file, true);
+                fos[iSpecies] = new FileOutputStream(file, false);
             } catch (FileNotFoundException ex) {
                 Logger.getLogger(MortalityOutput.class.getName()).log(Level.SEVERE, null, ex);
             }
