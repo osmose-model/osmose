@@ -276,7 +276,8 @@ public class FisheryOutputDistrib extends SimulationLinker implements IOutput {
         StringBuilder filename = new StringBuilder(path.getAbsolutePath());
         filename.append(File.separatorChar);
         filename.append(getConfiguration().getString("output.file.prefix"));
-        filename.append("_yieldByFishery_Simu");
+        filename.append("_yieldByFishery");
+        filename.append("DistribBy").append(distrib.getType()). append("_Simu");
         filename.append(getRank());
         filename.append(".nc.part");
         return filename.toString();

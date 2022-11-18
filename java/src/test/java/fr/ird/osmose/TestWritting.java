@@ -101,7 +101,6 @@ public class TestWritting {
         try {
             tmpDir = Files.createTempDirectory(null);
         } catch (IOException e) {
-            // TODO Auto-generated catch block
             e.printStackTrace();
         }
 
