@@ -140,11 +140,11 @@ public class DietOutput extends SimulationLinker implements IOutput {
                     prw.print(name);    // Name predators
                 } else {
                     if (st == 0) {
-                        prw.print(quote(String.format("%s in [%f, %f[", name, 0, threshold[st])));
+                        prw.print(quote(String.format("%s in [%f, %f[", name, 0.f, threshold[st])));
                     } else if (st == nStagePred - 1) {
-                        prw.print(quote(String.format("%s in [%f, %f[", name, 0, threshold[st])));
-                    } else {
                         prw.print(quote(String.format("%s in [%f, inf[", name, threshold[st - 1])));
+                    } else {
+                        prw.print(quote(String.format("%s in [%f, %f[", name, threshold[st - 1], threshold[st])));
                     }
                 }
                 prw.print(separator);

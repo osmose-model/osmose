@@ -87,7 +87,7 @@ public abstract class AbstractDistribOutput extends AbstractOutput {
         double[][] array = new double[nClass][nSpecies + 1];
         for (int iClass = 0; iClass < nClass; iClass++) {
             int cpt = 0;
-            array[iClass][cpt++] = distrib.getThreshold(iClass);
+            array[iClass][cpt++] = iClass == 0 ? 0 : distrib.getThreshold(iClass - 1);
             for (int iSpec = 0; iSpec < nSpecies; iSpec++) {
                 array[iClass][cpt++] = values[iSpec][iClass] / getRecordFrequency();
             }

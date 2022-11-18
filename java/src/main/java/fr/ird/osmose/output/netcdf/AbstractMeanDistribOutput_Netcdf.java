@@ -59,21 +59,21 @@ public abstract class AbstractMeanDistribOutput_Netcdf extends AbstractDistribOu
     @Override
     public void reset() {
         super.reset();
-        denominator = new double[getNSpecies()][getNClass()];
+        denominator = new double[getNColumns()][getNClass()];
     }
 
     @Override
     public void write(float time) {
 
         int nClass = getNClass();
-        double[][] array = new double[nClass][getNSpecies() + 1];
+        double[][] array = new double[nClass][getNColumns()];
         for (int iClass = 0; iClass < nClass; iClass++) {
             array[iClass][0] = (iClass == 0) ? 0 : getClassThreshold(iClass - 1);
-            for (int iSpec = 0; iSpec < getNSpecies(); iSpec++) {
+            for (int iSpec = 0; iSpec < getNColumns(); iSpec++) {
                 if (denominator[iSpec][iClass] != 0) {
-                    array[iClass][iSpec + 1] = values[iSpec][iClass] / denominator[iSpec][iClass];
+                    array[iClass][iSpec] = values[iSpec][iClass] / denominator[iSpec][iClass];
                 } else {
-                    array[iClass][iSpec + 1] = Double.NaN;
+                    array[iClass][iSpec] = Double.NaN;
                 }
             }
         }

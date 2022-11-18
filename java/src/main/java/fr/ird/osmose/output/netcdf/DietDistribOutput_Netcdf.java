@@ -77,7 +77,7 @@ public class DietDistribOutput_Netcdf extends AbstractDistribOutput_Netcdf {
 
     @Override
     public void reset() {
-        values = new double[getNSpecies() + getConfiguration().getNRscSpecies()][getNClass()];
+        values = new double[getConfiguration().getNAllSpecies()][getNClass()];
     }
 
     @Override
@@ -136,15 +136,9 @@ public class DietDistribOutput_Netcdf extends AbstractDistribOutput_Netcdf {
 
         Variable.Builder<?> preyvarBuilder = getBNc().addVariable("prey_index", DataType.INT, preyDim.getName());
         int k = 0;
-        for (int i = 0; i < getNSpecies(); i++) {
+        for (int i = 0; i < getNAllSpecies(); i++) {
             String name = String.format("prey%d", k);
-            preyvarBuilder.addAttribute(new Attribute(name, getSpecies(i).getName()));
-            k++;
-        }
-
-        for (int i = 0; i < getConfiguration().getNRscSpecies(); i++) {
-            String name = String.format("prey%d", k);
-            preyvarBuilder.addAttribute(new Attribute(name, getConfiguration().getResourceSpecies(i).getName()));
+            preyvarBuilder.addAttribute(new Attribute(name, getISpecies(i).getName()));
             k++;
         }
 
@@ -203,5 +197,10 @@ public class DietDistribOutput_Netcdf extends AbstractDistribOutput_Netcdf {
     @Override
     String getVarname() {
         return ("prey_biomass"); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public int getNColumns() {
+        return getNAllSpecies();
     }
 }

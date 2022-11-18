@@ -69,6 +69,10 @@ public abstract class AbstractDistribOutput_Netcdf extends AbstractOutput_Netcdf
     // Distribution
     private final OutputDistribution distrib;
 
+    public int getNColumns() {
+        return this.getNSpecies();
+    }
+
     public AbstractDistribOutput_Netcdf(int rank, OutputDistribution distrib) {
         super(rank);
         this.distrib = distrib;
@@ -76,21 +80,20 @@ public abstract class AbstractDistribOutput_Netcdf extends AbstractOutput_Netcdf
 
     @Override
     public void reset() {
-        values = new double[getNSpecies()][distrib.getNClass()];
+        values = new double[getNColumns()][distrib.getNClass()];
     }
 
     int getClass(IMarineOrganism school) {
         return distrib.getClass(school);
     }
 
-
     @Override
     public void write(float time) {
 
         int nClass = distrib.getNClass();
-        double[][] array = new double[nClass][getNSpecies()];
+        double[][] array = new double[nClass][getNColumns()];
         for (int iClass = 0; iClass < nClass; iClass++) {
-            for (int iSpec = 0; iSpec < getNSpecies(); iSpec++) {
+            for (int iSpec = 0; iSpec < getNColumns(); iSpec++) {
                 array[iClass][iSpec] = values[iSpec][iClass] / getRecordFrequency();
             }
         }

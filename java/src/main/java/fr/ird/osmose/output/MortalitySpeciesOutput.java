@@ -117,7 +117,7 @@ public class MortalitySpeciesOutput extends AbstractDistribOutput {
         double[][] array = new double[getNClass()][nCause + 1];
         for (int iClass = 0; iClass < getNClass(); iClass++) {
             // Size
-            array[iClass][0] = getClassThreshold(iClass);
+            array[iClass][0] = iClass == 0 ? 0 : getClassThreshold(iClass - 1);
             // Mortality rates
             for (int iDeath = 0; iDeath < nCause; iDeath++) {
                 array[iClass][iDeath + 1] = mortalityRates[iDeath][iClass];

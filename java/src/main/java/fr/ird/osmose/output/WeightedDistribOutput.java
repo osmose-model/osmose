@@ -134,7 +134,7 @@ public class WeightedDistribOutput extends DistribOutput {
             double[][] array = new double[nClass][getNSpecies() + 1];
             for (int iClass = 0; iClass < nClass; iClass++) {
                 int cpt = 0;
-                array[iClass][cpt++] = getClassThreshold(iClass);
+                array[iClass][cpt++] = iClass == 0 ? 0 : getClassThreshold(iClass - 1);
                 for (int iSpec = 0; iSpec < nSpecies; iSpec++) {
                     if (denominator[iSpec][irg][iClass] != 0) {
                         array[iClass][cpt++] = values[iSpec][irg][iClass] / denominator[iSpec][irg][iClass];
