@@ -77,7 +77,7 @@ public class YieldDistribOutput_Netcdf extends AbstractDistribOutput_Netcdf {
         filename.append(getType().toString());
         filename.append("_Simu");
         filename.append(getRank());
-        filename.append(".csv");
+        filename.append(".nc.part");
         return filename.toString();
 
     }
@@ -105,5 +105,4 @@ public class YieldDistribOutput_Netcdf extends AbstractDistribOutput_Netcdf {
     String getVarname() {
         return("biomass"); //To change body of generated methods, choose Tools | Templates.
     }
-
 }

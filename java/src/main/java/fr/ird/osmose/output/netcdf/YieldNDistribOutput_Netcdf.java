@@ -77,7 +77,7 @@ public class YieldNDistribOutput_Netcdf extends AbstractDistribOutput_Netcdf {
         filename.append(getType().toString());
         filename.append("_Simu");
         filename.append(getRank());
-        filename.append(".csv");
+        filename.append(".nc.part");
         return filename.toString();
 
     }
