@@ -104,7 +104,7 @@ public class FisheryOutputDistrib extends SimulationLinker implements IOutput {
         // initializes the number of fisheries
         nFishery = getConfiguration().getNFishery();
         int nSpecies = this.getNSpecies() + this.getNBkgSpecies();
-        int nClass = distrib.getNClass();
+        nClass = distrib.getNClass();
 
         biomass = new double[nSpecies][nFishery][nClass];
         discards = new double[nSpecies][nFishery][nClass];

@@ -121,6 +121,7 @@ public class TestWritting {
         cmd.put("output.restart.recordfrequency.ndt", "1");
         cmd.put("output.recordfrequency.ndt", "1");
         cmd.put("simulation.nsimulation", "1");
+        cmd.put("simulation.time.nyear", "1");
 
         cmd.put("economy.enabled", "true");
         cmd.put("economic.output.stage.structure", "weight");
