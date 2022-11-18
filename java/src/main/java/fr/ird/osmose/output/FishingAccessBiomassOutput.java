@@ -117,7 +117,7 @@ public class FishingAccessBiomassOutput extends SimulationLinker implements IOut
             for (int iClass = 0; iClass < this.sizeClasses.getNStage(iSpecies); iClass++) {
                 prw[iSpecies].print(time);
                 prw[iSpecies].print(separator);
-                prw[iSpecies].print(this.sizeClasses.getThresholds(iSpecies, iClass));
+                prw[iSpecies].print(iClass == 0 ? 0: this.sizeClasses.getThresholds(iSpecies, iClass - 1));
                 prw[iSpecies].print(separator);
                 for (int iFishery = 0; iFishery < nFisheries - 1; iFishery++) {
                     // instantenous mortality rate for eggs additional mortality
