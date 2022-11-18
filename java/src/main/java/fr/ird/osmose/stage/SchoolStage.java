@@ -63,6 +63,7 @@ public class SchoolStage extends OsmoseLinker {
     private final String key;
     private ClassGetter[] classGetter;
     private DistributionType[] distributionTypes;
+    private static float NOSTAGE = Float.NaN;
 
     public SchoolStage(String key) {
         this.key = key;
@@ -142,7 +143,7 @@ public class SchoolStage extends OsmoseLinker {
     }
 
     public float getThresholds(int iSpecies, int iClass) {
-        return thresholds[iSpecies][iClass];
+        return thresholds[iSpecies].length == 0 ? NOSTAGE : thresholds[iSpecies][iClass];
     }
 
     public int getStage(IMarineOrganism school) {
