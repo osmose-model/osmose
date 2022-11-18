@@ -162,7 +162,7 @@ public class FishingAccessBiomassOutput extends SimulationLinker implements IOut
             filename.append(getRank());
             filename.append(".csv");
             File file = new File(path, filename.toString());
-            boolean fileExists = file.exists();
+
             file.getParentFile().mkdirs();
             try {
                 // Init stream
@@ -170,23 +170,23 @@ public class FishingAccessBiomassOutput extends SimulationLinker implements IOut
             } catch (FileNotFoundException ex) {
                 Logger.getLogger(MortalityOutput.class.getName()).log(Level.SEVERE, null, ex);
             }
+
             prw[iSpecies] = new PrintWriter(fos[iSpecies], true);
-            if (!fileExists) {
-                // Write headers
-                prw[iSpecies].print(quote("Time"));
-                prw[iSpecies].print(separator);
-                prw[iSpecies].print(quote("Class"));
-                prw[iSpecies].print(separator);
-                for (int iFishery = 0; iFishery < nFisheries - 1; iFishery++) {
-                    String fishingName = namesFisheries[iFishery];
-                    prw[iSpecies].print(quote(fishingName));
-                    prw[iSpecies].print(separator);
-                }
-                int iFishery = nFisheries - 1;
+            // Write headers
+            prw[iSpecies].print(quote("Time"));
+            prw[iSpecies].print(separator);
+            prw[iSpecies].print(quote("Class"));
+            prw[iSpecies].print(separator);
+            for (int iFishery = 0; iFishery < nFisheries - 1; iFishery++) {
                 String fishingName = namesFisheries[iFishery];
                 prw[iSpecies].print(quote(fishingName));
-                prw[iSpecies].println();
+                prw[iSpecies].print(separator);
             }
+            int iFishery = nFisheries - 1;
+            String fishingName = namesFisheries[iFishery];
+            prw[iSpecies].print(quote(fishingName));
+            prw[iSpecies].println();
+
         }
 
         recordFrequency = getConfiguration().getInt("output.recordfrequency.ndt");

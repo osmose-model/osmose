@@ -152,7 +152,7 @@ public class DietOutput extends SimulationLinker implements IOutput {
                     int nStagePrey = dietOutputStage.getNStage(i);
                     for (int s = 0; s < nStagePrey; s++) {
                         if (abundanceStage[i][s] > 0) {
-                            prw.print((float) (100.d * diet[i][s][iSpec][s] / abundanceStage[i][s]));
+                            prw.print((float) (100.d * diet[i][s][iSpec][st] / abundanceStage[i][s]));
                         } else {
                             prw.print("NaN");
                         }
