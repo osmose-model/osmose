@@ -246,11 +246,11 @@ public class DietOutput extends SimulationLinker implements IOutput {
                         prw.print(name);    // Name predators
                     } else {
                         if (iStage == 0) {
-                            prw.print(quote(String.format("%s in [%f, %f[", name, 0, threshold[iStage])));
+                            prw.print(quote(String.format("%s in [%f, %f[", name, 0.f, threshold[iStage])));
                         } else if (iStage == nStage - 1) {
-                            prw.print(quote(String.format("%s in [%f, %f[", name, 0, threshold[iStage])));
-                        } else {
                             prw.print(quote(String.format("%s in [%f, inf[", name, threshold[iStage - 1])));
+                        } else {
+                            prw.print(quote(String.format("%s in [%f, %f[", name, threshold[iStage - 1], threshold[iStage])));
                         }
                     }
                 }   // end of loop over stage
