@@ -266,12 +266,14 @@ public class OutputManager extends SimulationLinker {
             outputs.add(new SpatialSizeSpeciesOutput(rank, ageDistrib));
         }
 
-        if(getConfiguration().getBoolean("output.fishing.accessible.biomass")){
-            outputs.add(new FishingAccessBiomassOutput(rank));
-        }
+        if (getConfiguration().isEconomyEnabled()) {
+            if (getConfiguration().getBoolean("output.fishing.accessible.biomass")) {
+                outputs.add(new FishingAccessBiomassOutput(rank));
+            }
 
-        if(getConfiguration().getBoolean("output.fishing.harvested.biomass")){
-            outputs.add(new FishingHarvestedBiomassDistribOutput(rank));
+            if (getConfiguration().getBoolean("output.fishing.harvested.biomass")) {
+                outputs.add(new FishingHarvestedBiomassDistribOutput(rank));
+            }
         }
 
         // Fisheries output
