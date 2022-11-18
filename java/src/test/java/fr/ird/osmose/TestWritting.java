@@ -40,10 +40,6 @@
 
 package fr.ird.osmose;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -51,8 +47,11 @@ import java.util.HashMap;
 import java.util.logging.Level;
 
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
+import org.junit.jupiter.api.TestMethodOrder;
+import org.junit.jupiter.api.MethodOrderer.OrderAnnotation;
 
 import fr.ird.osmose.output.OutputManager;
 import ucar.ma2.InvalidRangeException;
@@ -61,6 +60,7 @@ import ucar.ma2.InvalidRangeException;
  * longitudes, latitudes, time-steps, etc.)
  */
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
+@TestMethodOrder(OrderAnnotation.class)
 public class TestWritting {
 
     private static Configuration cfg;
@@ -84,6 +84,9 @@ public class TestWritting {
             e.printStackTrace();
         }
 
+        Osmose.getInstance().initSimulation();
+        Osmose.getInstance().getSimulation(0).init();
+
         outputManager = new OutputManager(0);
 
     }
@@ -91,8 +94,15 @@ public class TestWritting {
 
     /** Test that all the outputs can be written */
     @Test
+    @Order(1)
     public void testInit() {
         outputManager.init();
+    }
+
+    @Test
+    @Order(2)
+    public void testRun() {
+        Osmose.getInstance().getSimulation(0).run();
     }
 
     private void setCMD() {
@@ -107,6 +117,12 @@ public class TestWritting {
         String bool = "true";
 
         cmd.put("output.dir.path", tmpDir.toString());
+        cmd.put("output.start.year", "0");
+        cmd.put("output.restart.recordfrequency.ndt", "1");
+        cmd.put("output.recordfrequency.ndt", "1");
+        cmd.put("simulation.nsimulation", "1");
+
+        cmd.put("economy.enabled", "true");
         cmd.put("economic.output.stage.structure", "weight");
 
         cmd.put("output.biomass.enabled", "true");
