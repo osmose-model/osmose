@@ -55,6 +55,19 @@ write_osmose.default = function(x, file, sep = ",", col.names = NA, quote = FALS
 #' @author Ricardo Oliveros-Ramos
 #' 
 #' @export
+#' @method write_osmose data.frame
+write_osmose.data.frame = function(x, file, sep = ",", col.names = TRUE, quote = FALSE, 
+                                row.names = FALSE, append=FALSE, ...) {
+  
+  if(isTRUE(append)) cat("\n", file=file, append=TRUE)
+  write.table(x = x, file = file, sep = sep, col.names = col.names, quote = quote,
+              row.names = row.names, append=append, ...)
+  
+}
+
+#' @author Ricardo Oliveros-Ramos
+#' 
+#' @export
 #' @method write_osmose osmose.configuration
 write_osmose.osmose.configuration = function(x, file, sep = " = ", append=FALSE, 
                                             par.sep=",", ...) {
