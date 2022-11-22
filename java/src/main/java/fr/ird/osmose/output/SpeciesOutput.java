@@ -42,7 +42,9 @@
 package fr.ird.osmose.output;
 
 import java.util.List;
+import java.util.stream.Stream;
 
+import fr.ird.osmose.School;
 import fr.ird.osmose.background.BackgroundSchool;
 
 /**
@@ -57,14 +59,21 @@ public class SpeciesOutput extends AbstractOutput {
     public final boolean computeAverage;
 
     public SpeciesOutput(int rank, String subfolder, String name, String description, SchoolVariableGetter schoolVariable) {
-        super(rank, subfolder, name);
+        super(rank, subfolder, name, true);
         this.description = description;
         this.schoolVariable = schoolVariable;
         this.computeAverage = true;
     }
 
      public SpeciesOutput(int rank, String subfolder, String name, String description, SchoolVariableGetter schoolVariable, boolean computeAverage) {
-        super(rank, subfolder, name);
+        super(rank, subfolder, name, true);
+        this.description = description;
+        this.schoolVariable = schoolVariable;
+        this.computeAverage = computeAverage;
+    }
+
+    public SpeciesOutput(int rank, String subfolder, String name, String description, SchoolVariableGetter schoolVariable, boolean computeAverage, boolean includeOnlyAlive) {
+        super(rank, subfolder, name, includeOnlyAlive);
         this.description = description;
         this.schoolVariable = schoolVariable;
         this.computeAverage = computeAverage;
@@ -87,19 +96,21 @@ public class SpeciesOutput extends AbstractOutput {
     @Override
     public void update() {
 
+        // choose the steam depending on whether only alive schools are in or not the schools
+        Stream<School> stream = this.getOutputSchoolStream();
+
         // recover the values for the focal schools
         int timeStep = this.getSimulation().getIndexTimeSimu();
-        getSchoolSet().getAliveSchools().stream()
-                .forEach(school -> {
-                    int irg = 0;
-                    for (AbstractOutputRegion region : getOutputRegions()) {
-                        if (region.contains(timeStep, school)) {
-                            double select = region.getSelectivity(timeStep, school);
-                            value[school.getSpeciesIndex()][irg] += select * schoolVariable.getVariable(school);
-                        }
-                        irg++;
-                    }
-                });
+        stream.forEach(school -> {
+            int irg = 0;
+            for (AbstractOutputRegion region : getOutputRegions()) {
+                if (region.contains(timeStep, school)) {
+                    double select = region.getSelectivity(timeStep, school);
+                    value[school.getSpeciesIndex()][irg] += select * schoolVariable.getVariable(school);
+                }
+                irg++;
+            }
+        });
 
         // Init the biomass of background species by using the ResourceForcing class
         for (List<BackgroundSchool> bkgSchoolList : this.getBkgSchoolSet().getValues()) { // loop over the cells

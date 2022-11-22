@@ -47,6 +47,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.PrintWriter;
 import java.util.List;
+import java.util.stream.Stream;
 
 /**
  *
@@ -78,6 +79,8 @@ abstract public class AbstractOutput extends SimulationLinker implements IOutput
 
     private final int nOutputRegion;
 
+    private final boolean includeOnlyAlive;
+
 ///////////////////
 // Abstract methods
 ///////////////////
@@ -94,7 +97,14 @@ abstract public class AbstractOutput extends SimulationLinker implements IOutput
 ///////////////
 // Constructors
 ///////////////
+
+    /** Constructor in which alive schools are forced to be included */
     AbstractOutput(int rank, String subfolder, String name) {
+        this(rank, subfolder, name, true);
+    }
+
+    /** Constructor with additional argument which specifies if only alive schools are to be included */
+    AbstractOutput(int rank, String subfolder, String name, boolean includeOnlyAlive) {
         super(rank);
         this.subfolder = subfolder;
         this.name = name;
@@ -105,6 +115,13 @@ abstract public class AbstractOutput extends SimulationLinker implements IOutput
         } else {
             flushMethod = (prw -> {});
         }
+        this.includeOnlyAlive = includeOnlyAlive;
+    }
+
+    public Stream<School> getOutputSchoolStream() {
+        Stream<School> stream = this.includeOnlyAlive ? this.getSchoolSet().getAliveSchools().stream()
+                : this.getSchoolSet().getSchools().stream();
+        return stream;
     }
 
 ////////////////////////////
