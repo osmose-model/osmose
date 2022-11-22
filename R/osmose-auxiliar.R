@@ -56,7 +56,7 @@ readOsmoseFiles = function(path, type, bySpecies=FALSE, ext="csv", varid=NA, ...
   # Get a vector with all files on the path
   allFiles = dir(path = path, recursive = TRUE, include.dirs = FALSE)
   
-  # Get files with the selected extensio: ext
+  # Get files with the selected extension: ext
   extFiles = allFiles[grepl(pattern = paste0("\\.", ext), x = allFiles)]
   
   # Read files 
