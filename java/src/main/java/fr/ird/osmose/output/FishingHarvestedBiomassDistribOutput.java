@@ -124,7 +124,7 @@ public class FishingHarvestedBiomassDistribOutput extends SimulationLinker imple
             // Write headers
             prw[iSpecies].print(quote("Time"));
             prw[iSpecies].print(separator);
-            prw[iSpecies].print(quote("Class Lower Bound"));
+            prw[iSpecies].print(quote("Class"));
             prw[iSpecies].print(separator);
             for (int iFishery = 0; iFishery < nFisheries - 1; iFishery++) {
                 String fishingName = namesFisheries[iFishery];
