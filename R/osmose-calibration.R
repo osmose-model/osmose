@@ -26,7 +26,7 @@ osmose_calibration_setup = function(input, osmose, name=NULL, data_path=NULL, ty
   wd = getwd()
   on.exit(setwd(wd))
   
-  type = match.arg(type, choices=c("simple"))
+  type = match.arg(type, choices=c("simple", "survey"))
   
   control$method = type
   conf = read_osmose(input=input)
@@ -109,6 +109,8 @@ osmose_calibration_setup = function(input, osmose, name=NULL, data_path=NULL, ty
     
     .set_param_fisheries(allfiles, conf)
     
+    .set_param_user(allfiles, conf)
+    
   } else {
     
     message("Previous guess, min, max and phase files found. Conserving them.\n")
@@ -175,13 +177,21 @@ osmose_calibration_setup = function(input, osmose, name=NULL, data_path=NULL, ty
   if(is.null(data_path)) {
     # if not data_path provided, create templates.
     if(!dir.exists(dir_data)) dir.create(dir_data, recursive=TRUE)
-    biomass_file = .write_biomass_files(output, conf, path=dir_data)
+    biomass_file = .write_biomass_files(output, conf, path=dir_data, what="biomass")
     yield_files  = .write_yield_files(output, conf, path=dir_data)
     cal_files    = .write_cal_files(output, conf, path=dir_data)
 
-    observed_files = c(biomass_file, yield_files, cal_files)
+    survey_files = NULL
+    surveyNames = grep(names(output), pattern="biomass\\.", value=TRUE)
+    if(length(surveyNames)!=0) {
+      for(iSurvey in surveyNames) {
+        survey_files = c(survey_files, 
+                         .write_biomass_files(output, conf, path=dir_data, what=iSurvey))
+      }
+    }
+    observed_files = c(biomass_file, survey_files, yield_files, cal_files)
     # create calibration settings
-    cal_settings = .create_calibration_settings(output=simulated, files=observed_files)
+    cal_settings = .create_calibration_settings(output=simulated, files=observed_files, type=control$method)
     if(file.exists(settings_file)) {
       message(sprintf("Settings file (%s) found. Conserving it.", settings_file))      
     } else {

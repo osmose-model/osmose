@@ -1,4 +1,23 @@
 
+.set_param_user = function(allfiles, conf) {
+  guess_file = allfiles["guess"] 
+  min_file = allfiles["min"]
+  max_file = allfiles["max"]
+  phase_file = allfiles["phase"]
+  
+  mcat("\n#---- User parameters\n", file=allfiles, append = TRUE)
+  
+  pars = get_par(conf, "osmose.user", as.is=TRUE)
+  pars = get_par(pars, "osmose.user.larval.deviate.log", invert=TRUE, as.is = TRUE)
+  pars = get_par(pars, "osmose.user.selectivity.delta75.fsh", invert=TRUE, as.is = TRUE)
+  
+  write_osmose(pars, file=guess_file, append = TRUE)
+  write_osmose(set_par(pars, scale=0.8), file=min_file, append = TRUE)
+  write_osmose(set_par(pars, scale=1.2), file=max_file, append = TRUE)
+  write_osmose(set_par(pars, 1), file=phase_file, append = TRUE)
+  return(invisible(NULL))
+}
+
 .set_param_resources = function(allfiles, conf) {
   guess_file = allfiles["guess"] 
   min_file = allfiles["min"]
@@ -45,7 +64,7 @@
   max_file = allfiles["max"]
   phase_file = allfiles["phase"]
   
-  nbkg = get_par(conf, "nbackground")
+  nbkg = get_par(conf, "nspecies")
   
   nyear = get_par(conf, "simulation.time.nyear")
   
@@ -76,7 +95,7 @@
   write_osmose(set_par(pars, +7), file=max_file, append = TRUE)
   write_osmose(set_par(pars, 1), file=phase_file, append = TRUE)
   
-  knots = get_par(conf, "mortality.additional.larva.knots")
+  knots = get_par(conf, "mortality.additional.larva.knots", as.is=TRUE)
   
   pars = list()
   for(isp in get_species(conf, type="focal", code=TRUE)) {
