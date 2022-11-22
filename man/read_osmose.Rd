@@ -12,6 +12,7 @@ read_osmose(
   input = NULL,
   version = "4.3.2",
   species.names = NULL,
+  null.on.error = FALSE,
   ...
 )
 }
@@ -27,8 +28,7 @@ provided to the OSMOSE model. Used for plots and summaries.}
 
 \item{input}{Path to a main OSMOSE configuration file.}
 
-\item{absolute}{Whether the path is absolute (\code{TRUE}) or relative
-(\code{FALSE}). Only used if input is not NULL.}
+\item{null.on.error}{Return NULL if an error happens, useful for robust simulations.}
 }
 \description{
 This function create object of class \code{osmose} with the

@@ -4,11 +4,12 @@
 \alias{get_par}
 \alias{get_species}
 \alias{get_fisheries}
+\alias{get_surveys}
 \title{Get a parameter from a configuration file.}
 \usage{
 get_par(
   conf,
-  par,
+  par = NULL,
   sp = NULL,
   fsh = NULL,
   invert = FALSE,
@@ -20,6 +21,8 @@ get_par(
 get_species(x, type = NULL, code = FALSE, sp = NULL, nm = NULL)
 
 get_fisheries(x, code = FALSE, fsh = NULL, nm = NULL)
+
+get_surveys(x, code = FALSE, sr = NULL, nm = NULL)
 }
 \arguments{
 \item{conf}{The 'osmose.configuration' object.}

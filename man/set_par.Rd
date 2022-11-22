@@ -4,7 +4,7 @@
 \alias{set_par}
 \title{Set values for a parameter list}
 \usage{
-set_par(x, value, ...)
+set_par(x, value = NULL, scale = 1, ...)
 }
 \arguments{
 \item{x}{The osmose.configuration list.}

@@ -3,6 +3,7 @@
 \name{get_var.osmose}
 \alias{get_var.osmose}
 \alias{get_var.list}
+\alias{get_var.NULL}
 \alias{get_var}
 \title{Get variable from an \code{osmose}-like object.}
 \usage{
@@ -12,6 +13,7 @@
   how = c("matrix", "list"),
   expected = FALSE,
   no.error = FALSE,
+  drop = TRUE,
   ...
 )
 
@@ -21,8 +23,11 @@
   how = c("matrix", "list"),
   expected = FALSE,
   no.error = FALSE,
+  drop = TRUE,
   ...
 )
+
+\method{get_var}{`NULL`}(object, ...)
 
 get_var(object, what, how, ...)
 }
