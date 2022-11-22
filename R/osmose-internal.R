@@ -173,10 +173,10 @@
 # Read Osmose CSV files
 .readOsmoseCsv = function(file, sep = ",", skip = 1, row.names = 1,
                           na.strings = c("NA", "NaN"), ...) {
-  out = read.csv(file = file, sep = sep, skip = skip,
+  out = try(read.csv(file = file, sep = sep, skip = skip,
                  row.names = row.names, na.strings = na.strings,
-                 check.names = FALSE, ...)
-
+                 check.names = FALSE, ...), silent=TRUE)
+  if(inherits(out, "try-error")) return(NULL)
   return(out)
 }
 
@@ -319,6 +319,7 @@
   # TO_DO: change for the unified approach! species as list
   if(length(files)!=0) {
     x = .readOsmoseCsv(file.path(path, files[1]), ...)
+    if(is.null(x)) return(NULL)
     species = names(x)
     times   = rownames(x)
 
@@ -352,6 +353,7 @@
   if(length(files)!=0) {
 
     x = .readOsmoseCsv(file.path(path, files[1]), row.names=NULL, ...)
+    if(is.null(x)) return(NULL)
 
     rows    = unique(x[,1])
     cols    = unique(x[,2])
@@ -405,6 +407,7 @@
   if(length(files)!=0) {
 
     x = .readMortalityCsv(file.path(path, files[1]), row.names=NULL, ...)
+    if(is.null(x)) return(NULL)
 
     rows = row.names(x)
     cols = c("pred", "starv", "other", "fishing", "out")
@@ -451,7 +454,9 @@
 
   if(length(files)!=0) {
 
-    nc = nc_open(file.path(path, files[1]))
+    nc = try(nc_open(file.path(path, files[1])))
+    if(inherits(nc, "try-error")) return(NULL)
+    
     x = ncvar_get(nc, varid=varid) # assumes only one variable in the file
     att = ncatt_get(nc, varid, attname="species_names")
     if(att$hasatt) {
@@ -645,10 +650,9 @@ osmose2R.v4r0 = function (path=NULL, species.names=NULL, conf=NULL, ...) {
     # end of temporal
   }
 
-  outputData = .add_surveys(x=outputData$surveyBiomass, out=outputData, type="biomass")
-  outputData = .add_surveys(x=outputData$surveyAbundance, out=outputData, type="abundance")
-  outputData = .add_surveys(x=outputData$surveyYield, out=outputData, type="yield")
-  outputData = .add_surveys(x=outputData$yieldByFishery, out=outputData, type="yield")
+  outputData = .add_surveys(x=outputData$surveyBiomass, out=outputData, type="biomass", conf=conf)
+  outputData = .add_surveys(x=outputData$surveyAbundance, out=outputData, type="abundance", conf=conf)
+  outputData = .add_surveys(x=outputData$yieldByFishery, out=outputData, type="yield", conf=conf)
 
   if(!is.null(conf)) {
     
@@ -661,6 +665,7 @@ osmose2R.v4r0 = function (path=NULL, species.names=NULL, conf=NULL, ...) {
     outputData = .aggregate_catch_byclass(outputData, conf, "age", "biomass")
     
     outputData = .aggregate_catch_bytime(outputData, conf, type="yield")
+    outputData = .aggregate_catch_byyear(outputData, conf, type="yield")
     
     start = get_par(conf, "simulation.time.start")
     if(is.null(start)) start = 0
@@ -911,11 +916,23 @@ configureCalibration = function(L1) {
 
 }
 
-.add_surveys = function(x, out, type) {
+.add_surveys = function(x, out, type, conf) {
+  
   if(is.null(x)) return(out)
+  if(all(sapply(x, is.null))) return(out)
   if(length(x) == 0) return(out)
+  for(i in seq_along(x)) {
+    if(type!="yield") {
+      src = get_surveys(conf, sr=names(x)[i])
+      spc = get_par(conf, par=sprintf("surveys.targetspecies.sr%d", src))
+      if(!is.null(spc)) {
+        spx = get_species(conf, nm=sprintf("sp%d", spc))
+        x[[i]] = x[[i]][, spx, , drop=FALSE]
+      }
+    }
+    class(x[[i]]) = c(sprintf("osmose.%s", type), class(x[[i]]))
+  }
   names(x) = paste(type, names(x), sep=".")
-  for(i in seq_along(x)) class(x[[i]]) = c(sprintf("osmose.%s", type), class(x[[i]]))
   out = c(out, x)
   return(out)
 }

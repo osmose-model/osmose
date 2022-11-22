@@ -168,8 +168,7 @@ run_osmose = function(input, parameters = NULL, output = NULL, log = "osmose.log
 #' @param version OSMOSE version used to run the model.
 #' @param species.names Display names for species, overwrite the species names
 #' provided to the OSMOSE model. Used for plots and summaries.
-#' @param absolute Whether the path is absolute (\code{TRUE}) or relative
-#' (\code{FALSE}). Only used if input is not NULL.
+#' @param null.on.error Return NULL if an error happens, useful for robust simulations.
 #' @param ... Additional arguments.
 #'
 #' @details \code{read_osmose} will return a list of fields with the information
@@ -192,7 +191,7 @@ run_osmose = function(input, parameters = NULL, output = NULL, log = "osmose.log
 #'
 #' @aliases osmose2R
 read_osmose = function(path = NULL, input = NULL, version = "4.3.2",
-                       species.names = NULL, ...){
+                       species.names = NULL, null.on.error=FALSE, ...){
 
   # If both path and input are NULL, then show an error message
   if(is.null(path) & is.null(input)) stop("No output folder or configuration file has been provided.")
@@ -229,13 +228,22 @@ read_osmose = function(path = NULL, input = NULL, version = "4.3.2",
   if(!dir.exists(path)) stop("The output directory does not exist.")
 
   # Depending on the version, apply the corresponding method
-  output = switch(output_version,
+  output = try(switch(output_version,
                   v3r0 = osmose2R.v3r0(path = path, species.names = species.names, ...),
                   v3r1 = osmose2R.v3r1(path = path, species.names = species.names, ...),
                   v3r2 = osmose2R.v3r2(path = path, species.names = species.names, ...),
                   v4r0 = osmose2R.v4r0(path = path, species.names = species.names, conf=config, ...),
-                  stop(sprintf("Incorrect osmose version %s", version)))
+                  stop(sprintf("Incorrect osmose version %s", version))), silent = TRUE)
 
+  if(inherits(output, "try-error")) {
+    if(null.on.error) {
+      warning("There was an error reading osmose, returning NULL.")
+      return(NULL)
+    } else {
+      stop(output)
+    }
+  }
+  
   # Add config info
   output = c(output, config = list(config))
 
