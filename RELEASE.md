@@ -35,6 +35,7 @@
 
 ### Bug fixes
 
+- Correction of some outputs (especially NetCDF) which did not seem to work. Now they are tested using Junit.
 - Correction of spatial outputs. Dead schools were included in the outputs, hence leading to inconsistency between aggregated (CSV) and spatial (Netcdf) outputs. Now, only alive schools are considererd in the spatial outputs.
 - Correction of a bug in the `lengthToAge` method of the `VonBertalanffyGrowth.java` class. Age for `L > Linf` was returned in dt instead of years.
 - Correction of a bug in the map movements. At the first time-step within a year, the map was compared with the one of index `nstepyear - 1`. At step=48, map was compared with map 23 instead of map 47.
