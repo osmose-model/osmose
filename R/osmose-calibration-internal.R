@@ -97,6 +97,8 @@
   from = get_par(conf, sprintf("output.distrib.by%s.min", class))
   to   = get_par(conf, sprintf("output.distrib.by%s.max", class))
   by = get_par(conf, sprintf("output.distrib.by%s.incr", class))
+  start = get_par(conf, "simulation.time.start")
+  if(is.null(start)) start = 0
   
   if(is.null(from)) from = default[1]
   if(is.null(to))     to = default[2]
@@ -109,41 +111,57 @@
     xi = xx[[i]]
     this = get_par(conf, sp=spp[i])
     
-    xndt = get_par(this, "fisheries.recordfrequency.ndt")
+    xndt = get_par(this, "fisheries.distrib.recordfrequency.ndt")
+    if(is.null(xndt))
+      xndt = get_par(this, "fisheries.recordfrequency.ndt")
+    
     if(!is.null(xndt)) {
       indt = xndt/ndt
       rowok = (nrow(xi)%/%indt)*indt
       if(nrow(xi)!=rowok) xi = xi[seq_len(rowok), , ,drop=FALSE]
       ntime = as.numeric(rownames(xi))[c(rep(FALSE, indt-1), TRUE)]
+      del = mean(diff(ntime))/2
+      ntime = start + ntime - del
       xi = rowsum(xi, group=rep(seq_len(rowok/indt), each=indt), na.rm=TRUE)
       rownames(xi) = ntime
+    } else {
+      rownames(xi) = as.numeric(rownames(xi)) + start
     }
     
     xfrom = get_par(this, sprintf("fisheries.distrib.by%s.min", class))
     xto   = get_par(this, sprintf("fisheries.distrib.by%s.max", class))
     xby   = get_par(this, sprintf("fisheries.distrib.by%s.incr", class))
+    usemarks = get_par(this, sprintf("fisheries.distrib.by%s.usemarks", class))
+    plus  = get_par(this, sprintf("fisheries.distrib.by%s.plusgroup", class))
     
     check = !all(is.null(xfrom), is.null(xto), is.null(xby))
     
     if(check) {
       
-      if(is.null(xfrom)) xfrom = from
-      if(is.null(xto))     xto = to
-      if(is.null(xby))     xby = by
+      if(is.null(xfrom))        xfrom = from
+      if(is.null(xto))            xto = to
+      if(is.null(xby))            xby = by
+      if(is.null(usemarks))  usemarks = FALSE
+      if(is.null(plus))  plus = TRUE
       
       check1 = !all(xfrom==from, xto==to, xby==by)
       
       if(check1) {
-        breaks = seq(from=xfrom, to=xto, by=xby)
+        breaks0 = seq(from=xfrom, to=xto+xby, by=xby)
+        if(plus) breaks0[length(breaks0)] = Inf
+        breaks1 = breaks0 - 0.5*xby
+        breaks = if(usemarks) breaks1 else breaks0
         marks = as.numeric(colnames(xi))
         gg = cut(marks, breaks = breaks, right=FALSE, labels = FALSE)
+        gg0 = cut(marks, breaks = breaks0, right=FALSE, labels = FALSE)
         if(any(is.na(gg))) {
           xi = xi[, !is.na(gg), ,drop=FALSE]
-          marks = marks[!is.na(gg)]
+          # marks = marks[!is.na(gg)]
           gg = gg[!is.na(gg)]
+          gg0 = gg0[!is.na(gg)] #  keeping track of labels only.
         }
         xi = colsum(xi, group=gg, na.rm=TRUE)
-        colnames(xi) = marks[!duplicated(gg)]
+        colnames(xi) = marks[!duplicated(gg0) & !is.na(gg0)] # gg0 has the right labels always.
       }
     }
     
@@ -161,6 +179,8 @@
 .aggregate_catch_bytime = function(x, conf, type) {
   
   ndt = get_par(conf, "output.recordfrequency")
+  start = get_par(conf, "simulation.time.start")
+  if(is.null(start)) start = 0
   
   y = get_var.osmose(x, type, no.error=TRUE)
   if(is.null(y)) return(x)
@@ -176,8 +196,12 @@
       rowok = (nrow(xi)%/%indt)*indt
       if(nrow(xi)!=rowok) xi = xi[seq_len(rowok), , ,drop=FALSE]
       ntime = as.numeric(rownames(xi))[c(rep(FALSE, indt-1), TRUE)]
+      del = mean(diff(ntime))/2
+      ntime = start + ntime - del
       xi = rowsum(xi, group=rep(seq_len(rowok/indt), each=indt), na.rm=TRUE)
       rownames(xi) = ntime
+    } else {
+      rownames(xi) = as.numeric(rownames(xi)) + start
     }
     
     xx[[i]] = xi
@@ -187,6 +211,49 @@
   names(xx) = spp
   class(xx) = "osmose.yieldBySpecies"
   x[["yieldBySpecies"]] = xx
+  
+  return(x)
+  
+}
+
+
+.aggregate_catch_byyear = function(x, conf, type) {
+  
+  ndt = get_par(conf, "output.recordfrequency")
+  xdt = get_par(conf, "simulation.time.ndtperyear")
+  
+  y = get_var.osmose(x, type, no.error=TRUE)
+  if(is.null(y)) return(x)
+  spp = colnames(y)
+  xx = list()
+  for(i in seq_len(ncol(y))) {
+    xi = y[, i, , drop=FALSE]
+    this = get_par(conf, sp=get_species(conf, sp=spp[i]))
+    # xndt = get_par(this, "fisheries.recordfrequency.ndt")
+    xndt = xdt
+    
+    if(!is.null(xndt)) {
+      indt = xndt/ndt
+      rowok = (nrow(xi)%/%indt)*indt
+      if(nrow(xi)!=rowok) xi = xi[seq_len(rowok), , ,drop=FALSE]
+      ntime = as.numeric(rownames(xi))[c(rep(FALSE, indt-1), TRUE)]
+      xi = rowsum(xi, group=rep(seq_len(rowok/indt), each=indt), na.rm=TRUE)
+      rownames(xi) = ntime
+    }
+    
+    xx[[i]] = xi
+    
+  }
+  
+  rout = array(dim=c(dim(xi)[1], length(xx), dim(xi)[3]))
+  
+  for(i in seq_len(ncol(y))) {
+    rout[, i, ] = xx[[i]]
+  }
+  rownames(rout) = rownames(xi)
+  colnames(rout) = spp
+  class(rout) = "osmose.yieldByYear"
+  x[["yieldByYear"]] = rout
   
   return(x)
   
@@ -247,7 +314,7 @@
 }
 
 
-.write_biomass_files = function(x, conf, path) {
+.write_biomass_files = function(x, conf, path, what="biomass") {
   
   model = get_par(conf, "output.file.prefix")
   start = get_par(conf, "simulation.time.start")
@@ -256,10 +323,10 @@
     start = 1900
   }
   
-  bio = get_var(x, "biomass", expected=TRUE)
+  bio = get_var(x, what, expected=TRUE, drop=FALSE)
   
   files = character(ncol(bio))
-  names(files) = paste("biomass", colnames(bio), sep=".")
+  names(files) = paste(what, colnames(bio), sep=".")
   
   year = start + .getYear(bio)
   period = .getTimeIndex(bio)
@@ -278,7 +345,8 @@
   
   out = cbind(out, NA*bio)
   
-  fname = sprintf("%s_biomass-index_%s.csv", model, pname)  
+  xwhat = sapply(strsplit(what, split="\\."), FUN=tail, n=1)
+  fname = sprintf("%s_%s-index_%s.csv", model, what, pname)  
   
   files[] = fname
   
@@ -328,6 +396,7 @@
     
     out = cbind(out, NA*bio)
     
+    if(freq==1) pname = "year"
     fname = sprintf("%s_catchatlength-%s_%s.csv", model, names(cal)[i], pname)  
     files[names(cal)[i]] = fname
     
@@ -357,7 +426,21 @@
 }
 
 
-.create_calibration_settings = function(output, files) {
+# Calibration settings ----------------------------------------------------
+
+.create_calibration_settings = function(output, files, type) {
+  
+  out = switch(type, 
+         "simple" = .create_calibration_settings_simple(output, files),
+         "survey" = .create_calibration_settings_survey(output, files),
+         stop("Unrecognized 'type' for calibration.")
+         )
+  
+  return(out)
+
+  }
+
+.create_calibration_settings_simple = function(output, files) {
   
   cal_type = c(biomass="lnorm3", yield="lnorm2", catchatlength="multinom", 
                mortality="penalty", growth="penalty", random="re")
@@ -390,6 +473,40 @@
   
 }
 
+.create_calibration_settings_survey = function(output, files) {
+  
+  cal_type = c(biomass="lnorm4", yield="lnorm2", catchatlength="multinom", 
+               mortality="penalty", growth="penalty", random="re")
+  
+  cal_cv = c(biomass=0.25, yield=0.05, catchatlength=1, 
+             mortality=1/sqrt(2), growth=1/sqrt(2), random=0.5)
+  
+  cal_useData = c(biomass=TRUE, yield=TRUE, catchatlength=TRUE, 
+                  mortality=FALSE, growth=FALSE, penalty=FALSE, random=FALSE)
+  
+  cal_novarid = c("catchatlength", "growth", "mortality", "random")
+  
+  cal_settings = data.frame(variable=names(output))
+  cal_settings$itype = sapply(strsplit(names(output), split = "\\."), FUN="[", i=1)
+  cal_settings$sname = sapply(strsplit(names(output), split = "\\."), FUN="[", i=2)
+  cal_settings$spp   = sapply(strsplit(names(output), split = "\\."), FUN=tail, n=1)
+  cal_settings$type  = cal_type[cal_settings$itype]
+  cal_settings$calibrate = TRUE
+  cal_settings$cv = cal_cv[cal_settings$itype]
+  cal_settings$use_data = cal_useData[cal_settings$itype]
+  cal_settings$file = files[cal_settings$variable]
+  cal_settings$varid = cal_settings$spp
+  cal_settings$varid[cal_settings$itype %in% cal_novarid] = NA
+  
+  cal_settings$nrows = NA
+  
+  cal_settings$itype = NULL
+  cal_settings$sname = NULL
+  cal_settings$spp = NULL
+  
+  return(cal_settings)
+  
+}
 
 
 .getTimeIndex = function(x) {
@@ -431,13 +548,17 @@
 
   test1 = identical(sort(names(observed)), sort(names(simulated)))
   
+  useData = as.logical(setup$use_data)
+  isActive = as.logical(setup$calibrate)
+  readData = useData & isActive
+  
   if(!test1) {
     message("Pre-calibration test: FAILED. Simulated and observed have not the same variable names. Check your calibration settings.\n")
   }
   
   obs_check = lapply(observed, FUN=.dim_or_length)
   sim_check = lapply(simulated, FUN=.dim_or_length)
-  sim_check[!setup$use_data] = 1L
+  sim_check[!readData] = 1L
 
   nm = sort(names(observed))
   obs_check = obs_check[nm]
