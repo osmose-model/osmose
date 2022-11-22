@@ -81,7 +81,7 @@ plot.osmose = function(x, what = "biomass", ...) {
 #' @method get_var osmose
 #' @export
 get_var.osmose = function(object, what, how = c("matrix", "list"), 
-                          expected = FALSE, no.error=FALSE, ...){
+                          expected = FALSE, no.error=FALSE, drop=TRUE, ...){
   
   # Argument verification of 'how' using partial matching
   how = match.arg(how)
@@ -99,18 +99,19 @@ get_var.osmose = function(object, what, how = c("matrix", "list"),
     stop(sprintf(msg, what)) 
   }
   
-  .expected = function(x) {
-    out = drop(apply(x, c(1, 2), mean, na.rm = TRUE))
+  .expected = function(x, drop) {
+    out = apply(x, c(1, 2), mean, na.rm = TRUE)
+    if(isTRUE(drop)) out = drop(out)
     if(is.null(dim(out))) names(out) = NULL
     return(out)
   }
     
   if(is.array(out) & isTRUE(expected)){
-    out = .expected(out)
+    out = .expected(out, drop=drop)
   }
   
   if(is.list(out) & isTRUE(expected)){
-    out = lapply(out, FUN=.expected)
+    out = lapply(out, FUN=.expected, drop=drop)
   }
   
   if(how == "matrix" | is.list(out)) return(out)
@@ -123,6 +124,13 @@ get_var.osmose = function(object, what, how = c("matrix", "list"),
 #' @rdname get_var
 #' @export
 get_var.list = get_var.osmose
+
+#' @rdname get_var
+#' @export
+get_var.NULL = function(object, ...) {
+  return(NULL)
+}
+
 
 #' Print information for an \code{osmose} object
 #'
