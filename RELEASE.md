@@ -4,6 +4,7 @@
 
 ### New features
 
+- Correct the outputs by class (weight, TL) in order to include $[0, L_0[$ and $[L_{N-1}, \infty[$ classes
 - Adding a weight distribution for the outputs (abundance by weight class)
 - Adding outputs for the economic module (accessible and harvested biomass distribution).
 - Adding the possibility to save CSV files that allow to verify the proper definition of fish movements.
