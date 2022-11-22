@@ -619,8 +619,10 @@ llw = function(cv) 1/(2*cv^2)
 .initial_length_dist = function(sim, sp, add_larvae) {
   
   dist = sim$distB
+  biotest = sum(dist)==0
   dist[dist==0] = 1e-3 # 1kg instead of nothing
   bio_ini = sum(dist)
+  if(isTRUE(biotest)) bio_ini = 0
   bio_rel = if(bio_ini==0) dist else dist/bio_ini
   tl_sp = rep(2, length(dist))
   xage  = sim$age
@@ -632,6 +634,7 @@ llw = function(cv) 1/(2*cv^2)
   rel_dist = sim$dist/max(sim$dist, na.rm=TRUE)
   
   nschool = pmax(ceiling(sim$nschool*rel_dist), 1)
+  nschool[is.na(nschool)] = 1
   
   out = c(round(bio_ini, 3), 
           paste(format(bio_rel, scientific = FALSE), collapse=", "), 
