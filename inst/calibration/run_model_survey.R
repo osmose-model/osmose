@@ -30,7 +30,7 @@ run_model = function(par, conf, osmose, is_a_test=FALSE, version="4.3.3", ...) {
   }  
   
   ### BEGIN USER ADDED
-  
+
   ### END USER ADDED
   
   # remove all osmose.user parameters and clean-up
@@ -38,6 +38,10 @@ run_model = function(par, conf, osmose, is_a_test=FALSE, version="4.3.3", ...) {
   par = get_par(par, linear=TRUE, as.is = TRUE) # write parameters in linear scale.
 
   write_osmose(par, file='calibration_parameters.osm')
+  
+  names(larval_deviates)  = paste("larval", get_species(conf, nm=names(larval_deviates)), sep="_")
+  names(fishing_deviates) = paste("F", get_fisheries(conf, nm=names(fishing_deviates)), sep="_")
+  
   # run osmose!
   if(!isTRUE(is_a_test)) {
     run_osmose(input='osmose-calibration.osm', output='output', osmose=osmose, version = version, verbose=FALSE)
@@ -45,13 +49,12 @@ run_model = function(par, conf, osmose, is_a_test=FALSE, version="4.3.3", ...) {
   
   output = read_osmose(path='output', version=version, null.on.error=TRUE)
   
-  names(larval_deviates)  = paste("larval", get_species(conf, nm=names(larval_deviates)), sep="_")
-  names(fishing_deviates) = paste("F", get_fisheries(conf, nm=names(fishing_deviates)), sep="_")
+  surveyNames = grep(names(output), pattern="biomass\\.", value=TRUE)
+  surveys = lapply(surveyNames, FUN=function(what) get_var(object=output, what=what, how="list", no.error = TRUE, drop=FALSE))
+  names(surveys) = surveyNames
+  surveys = unlist(surveys, recursive=FALSE)
   
-  # random = list(larval  = sapply(larval_deviates,  FUN=function(x) sum(x^2)),
-  #               fishing = sapply(fishing_deviates, FUN=function(x) sum(x^2)))
-  
-  cal_output = c(biomass = get_var(output, "biomass", how="list", no.error = TRUE),
+  cal_output = c(surveys, 
                  yield   = get_var(output, "yieldBySpecies", how="list", no.error = TRUE),
                  catchatlength = get_var(output, "yieldNBySize", how="list", no.error = TRUE),
                  mortality = get_var(output, "residualSizeByAge", how="list", no.error = TRUE),
@@ -69,19 +72,24 @@ run_model = function(par, conf, osmose, is_a_test=FALSE, version="4.3.3", ...) {
     
     output = read_osmose(path='output', version=version, null.on.error=TRUE)
     
-    cal_output = c(biomass = get_var(output, "biomass", how="list", no.error = TRUE),
+    surveyNames = grep(names(output), pattern="biomass\\.", value=TRUE)
+    surveys = lapply(surveyNames, FUN=function(what) get_var(object=output, what=what, how="list", no.error = TRUE, drop=FALSE))
+    names(surveys) = surveyNames
+    surveys = unlist(surveys, recursive=FALSE)
+    
+    cal_output = c(surveys, 
                    yield   = get_var(output, "yieldBySpecies", how="list", no.error = TRUE),
                    catchatlength = get_var(output, "yieldNBySize", how="list", no.error = TRUE),
                    mortality = get_var(output, "residualSizeByAge", how="list", no.error = TRUE),
                    growth = get_var(output, "residualMortalityByAge", how="list", no.error = TRUE)
-                   )
+    )
     
   }
   
   # if is still NULL, we will let calibrar to deal with it.
   if(is.null(cal_output)) {
-    cal_output = NULL
     message("Something wrong happened while running 'run_model'. Returning NULL. Check the '.calibrar_dump' folder.")
+    return(invisible(cal_output))
   }
 
   cal_output = c(cal_output, random=larval_deviates, random=fishing_deviates)
