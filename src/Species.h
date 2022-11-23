@@ -1,5 +1,8 @@
+#ifndef SPECIES_H
+#define SPECIES_H
 
 #include <string.h>
+#include "School.h"
 
 using namespace std;
 
@@ -73,6 +76,87 @@ class Species {
      * Trophic level of an egg.
      */
     static const float TL_EGG;
+    
+    /**
+     * Create a new species
+     *
+     * @param fileIndex, an integer, the index of the species
+     *                   {@code [0, nbTotSpecies - 1]}
+     * @param index
+     */
+    Species(int fileIndex, int index);
+    
+    int getFirstFeedingAgeDt();
+    double getBetaBioen();
+    int getDepthLayer();
+    int getLarvaeThresDt();
+    /**
+     * Computes the weight, in gram, corresponding to the given length, in
+     * centimetre.
+     *
+     * @param length, the length in centimetre
+     * @return the weight in gram for this {@code length}
+     */
+    float computeWeight(float length);
+
+    /**
+     * Computes the length, in centimeter, corresponding to the given weight, in
+     * gram.
+     *
+     * @param weight, the weight in gram
+     * @return the length in centimetre for this {@code weight}
+     */
+    float computeLength(float weight);
+    
+    /**
+     * Returns the lifespan of the species. Parameter <i>species.lifespan.sp#</i>
+     *
+     * @return the lifespan, in number of time step
+     */
+    int getLifespanDt();
+    
+     /**
+     * Returns the index of the species.
+     *
+     * @return the index of the species
+     */
+    int getFileSpeciesIndex();
+    
+     /**
+     * Return the global index of the species.
+     * 
+     * Index between [0, Nspec - 1].
+     * 
+     * 
+     * @return
+     */
+    int getSpeciesIndex();
+    
+     /**
+     * Returns the name of the species. Parameter <i>species.name.sp#</i>
+     *
+     * @return the name of the species
+     */
+    string getName();
+    
+     /**
+     * Returns the size of an egg. Parameter <i>species.egg.size.sp#</i>
+     *
+     * @return the size of an egg in centimeter
+     */
+    float getEggSize();
+    
+     /**
+     * Returns the weight of an egg in gram. Parameter <i>species.egg.weight.sp#</i>
+     *
+     * @return the weight of an egg in gram
+     */
+    float getEggWeight();
+    
+    bool isSexuallyMature(School school);
+    
 };
 
 const float Species::TL_EGG = 3.0;
+
+#endif
