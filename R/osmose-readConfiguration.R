@@ -37,6 +37,10 @@ get_par = function(conf, par=NULL, sp=NULL, fsh=NULL, invert=FALSE, as.is=FALSE,
   if(length(out)==0) return(NULL)
 
   if(isTRUE(linear)) {
+    # log10 to linear
+    ind = grep(x=names(out), pattern="\\.log10\\.")
+    out[ind] = lapply(out[ind], FUN=function(x) 10^x)
+    names(out)[ind] = gsub(x=names(out)[ind], pattern="\\.log10\\.", replacement = ".")
     # log to linear
     ind = grep(x=names(out), pattern="\\.log\\.")
     out[ind] = lapply(out[ind], FUN=exp)
@@ -130,7 +134,36 @@ get_fisheries = function(x, code=FALSE, fsh=NULL, nm=NULL) {
   return(this)
 }
 
-
+#' @rdname get_par
+#' @export
+get_surveys = function(x, code=FALSE, sr=NULL, nm=NULL) {
+  
+  if(!is.null(sr) & !is.null(nm)) stop("Only 'sr' or 'nm' must be provided.")
+  
+  if(!is.null(nm)) {
+    
+    sr = gsub(regmatches(nm, regexec("sr[0-9]*$", nm)), pattern="sr", replacement = "")
+    sr = suppressWarnings(as.numeric(sr))
+    out = get_surveys(x)[match(x=sr, get_surveys(x, code=TRUE))]
+    return(out)
+    
+  }
+  
+  if(!is.null(sr)) {
+    isp = as.numeric(get_surveys(x, code=TRUE)[match(x=sr, get_surveys(x))])
+    if(any(is.na(isp))) {
+      xsp = paste(sr[is.na(isp)], collapse=", ")
+      stop(sprintf("These are not surveys in the model: %s.", xsp))
+    }
+    return(isp)
+  }
+  
+  this = unlist(get_par(x, "surveys.name"))
+  xcode = gsub(names(this), pattern="surveys.name.sr", replacement = "")
+  names(this) = NULL
+  if(isTRUE(code)) return(xcode)
+  return(this)
+}
   
 
 
