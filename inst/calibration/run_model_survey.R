@@ -1,5 +1,5 @@
 
-run_model = function(par, conf, osmose, is_a_test=FALSE, version="4.3.3", ...) {
+run_model = function(par, conf, osmose, is_a_test=FALSE, version="4.3.3", options="-Xmx3g -Xms1g", ...) {
   
   nspp = get_species(conf, type="focal", code=TRUE)
   nfsh = get_fisheries(conf, code=TRUE)
@@ -44,7 +44,8 @@ run_model = function(par, conf, osmose, is_a_test=FALSE, version="4.3.3", ...) {
   
   # run osmose!
   if(!isTRUE(is_a_test)) {
-    run_osmose(input='osmose-calibration.osm', output='output', osmose=osmose, version = version, verbose=FALSE)
+    run_osmose(input='osmose-calibration.osm', output='output', osmose=osmose, 
+               version = version, options=options, verbose=FALSE)
   }
   
   output = read_osmose(path='output', version=version, null.on.error=TRUE)
@@ -67,7 +68,8 @@ run_model = function(par, conf, osmose, is_a_test=FALSE, version="4.3.3", ...) {
     # Those are caused by the ghosts in the machine (DATARMOR). To please them, we will run the 
     # model again, and see.
     if(!isTRUE(is_a_test)) {
-      run_osmose(input='osmose-calibration.osm', output='output', osmose=osmose, version = version, verbose=FALSE)
+      run_osmose(input='osmose-calibration.osm', output='output', osmose=osmose, 
+                 version = version, options=options, verbose=FALSE)
     }
     
     output = read_osmose(path='output', version=version, null.on.error=TRUE)
