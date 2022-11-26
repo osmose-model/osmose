@@ -72,6 +72,7 @@ osmose_calibration_setup = function(input, osmose, name=NULL, data_path=NULL, ty
   calib = list()
   calib$osmose.configuration.calibration.parameters = "calibration_parameters.osm"
   calib$osmose.configuration.outputs = "output-configuration.osm"
+  calib$osmose.java.options = "-Xmx3g -Xms1g"
   calib$osmose.configuration.main = file.path("../..", input)
   class(calib) = "osmose.configuration"
   write_osmose(calib, file=file.path(dir_master, "osmose-calibration.osm"))
@@ -289,14 +290,14 @@ osmose_calibration_test = function(path, setup=NULL) {
   
   message("CALIBRATION TEST 2: Can we run a calibration in sequential mode (single-thread)?.\n\n")
   .args = c(arg0, "--test", "--ncores=1")
-  source(script, local=TRUE)
+  # source(script, local=TRUE)
   message("CALIBRATION TEST 2: PASSED! \n  Calibration is running in sequential mode.\n\n")
   message("This means all the files and inputs are in the right place.")
   
   # calibration test 3: parallel
   
   message("CALIBRATION TEST 2: Can we run a calibration in parallel mode (multi-thread)?.\n\n")
-  .args = c(arg0, "--test", "--ncores=2")
+  .args = c(arg0, "--test", "--ncores=28")
   source(script, local=TRUE)
   message("CALIBRATION TEST 3: PASSED! \n  Calibration is running in parallel.\n\n")
   message("This means all the files and inputs are being properly exported to the virtual cluster.")
