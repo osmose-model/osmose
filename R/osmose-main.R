@@ -144,8 +144,11 @@ run_osmose = function(input, parameters = NULL, output = NULL, log = "osmose.log
 
   if(isTRUE(verbose)) message(sprintf("Running: %s", command))
 
+  .t0 = Sys.time()
   system2(java, args = args, stdout = stdout, stderr = stderr, wait = TRUE)
-
+  .t1 = Sys.time()
+  seconds = as.integer(difftime(.t1, .t0, units = "secs"))
+  
   prefix = .getPar(conf, "output.file.prefix")
   if(is.null(prefix)) prefix = "osmose"
   
@@ -153,7 +156,7 @@ run_osmose = function(input, parameters = NULL, output = NULL, log = "osmose.log
   class(conf) = "osmose.configuration"
   write_osmose(conf, file = file.path(output, sprintf("%s-configuration.osm", prefix)))
   
-  return(invisible(command))
+  return(invisible(list(command=command, elapsed=seconds)))
 }
 
 
@@ -193,6 +196,7 @@ run_osmose = function(input, parameters = NULL, output = NULL, log = "osmose.log
 read_osmose = function(path = NULL, input = NULL, version = "4.3.2",
                        species.names = NULL, null.on.error=FALSE, ...){
 
+  .t0 = Sys.time()
   # If both path and input are NULL, then show an error message
   if(is.null(path) & is.null(input)) stop("No output folder or configuration file has been provided.")
 
@@ -244,8 +248,10 @@ read_osmose = function(path = NULL, input = NULL, version = "4.3.2",
     }
   }
   
+  .t1 = Sys.time()
+  seconds = as.integer(difftime(.t1, .t0, units = "secs"))
   # Add config info
-  output = c(output, config = list(config))
+  output = c(output, config = list(config), elapsed=list(seconds))
 
   # Define class of output
   class(output) = "osmose"
