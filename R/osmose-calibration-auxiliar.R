@@ -10,11 +10,26 @@
 #' @return The configuration list with parameter values changed.
 #' @export
 #'
-set_par = function(x, value, ...) {
+set_par = function(x, value=NULL, scale=1, lower=NULL, upper=NULL, delta=0, digits=3, ...) {
+  if(!is.null(lower) & !is.null(upper)) stop("Both 'lower' and 'upper' cannot be set.")
+  xround = ifelse(scale<=1, -1, +1)
+  if(!is.null(lower)) xround = -1
+  if(!is.null(upper)) xround = +1
   x = as.relistable(x)
   val = unlist(x)
-  val[] = value
+  if(!is.null(value)) {
+    val[] = value
+  } else {
+    val = val - (1-scale)*abs(val)
+    val = val + delta
+    fac = 10^ceiling(digits)
+    val = floor(fac*val) + xround
+    val = val/fac
+    if(!is.null(lower)) val = pmin(val, lower)
+    if(!is.null(upper)) val = pmax(val, upper)
+  }
   val = relist(val)
+  attr(val, "skeleton") = NULL
   class(val) = "osmose.configuration"
   return(val)
 }
