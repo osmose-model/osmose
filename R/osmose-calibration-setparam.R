@@ -140,6 +140,20 @@
 }
 
 .set_param_bioen = function(allfiles, conf) {
+  guess_file = allfiles["guess"] 
+  min_file = allfiles["min"]
+  max_file = allfiles["max"]
+  phase_file = allfiles["phase"]
+  
+  mcat("\n#---- Bioenergetics\n", file=allfiles, append = TRUE)
+  
+  pars = get_par(conf, "predation.ingestion.rate.max.bioen.sp", as.is=TRUE)
+  
+  write_osmose(pars, file=guess_file, append = TRUE)
+  write_osmose(set_par(pars, scale=0.8, lower=0), file=min_file, append = TRUE)
+  write_osmose(set_par(pars, scale=1.2, upper=+20), file=max_file, append = TRUE)
+  write_osmose(set_par(pars, 1), file=phase_file, append = TRUE)
+  
   return(invisible(NULL))
 }
 
