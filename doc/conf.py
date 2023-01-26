@@ -42,7 +42,6 @@ extensions = ['sphinx.ext.todo',
     'IPython.sphinxext.ipython_directive',
     'IPython.sphinxext.ipython_console_highlighting',
     'matplotlib.sphinxext.plot_directive',
-    'sphinxcontrib.plantuml',
     'sphinxcontrib.mermaid',
     'sphinx_rtd_theme',
 ]
@@ -55,6 +54,7 @@ mermaid_pdfcrop = 'pdfcrop'
 #mermaid_output_format = 'png'
 
 bibtex_bibfiles = ['_static/biblio.bib']
+bibtex_reference_style = 'author_year'
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
@@ -106,8 +106,6 @@ exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store', 'alias.rst', 'index_priv
 
 # The name of the Pygments (syntax highlighting) style to use.
 pygments_style = 'sphinx'
-
-bibtex_bibfiles = ['_static/biblio.bib']
 
 # If true, `todo` and `todoList` produce output, else they produce nothing.
 todo_include_todos = True
