@@ -42,7 +42,7 @@
 package fr.ird.osmose.output;
 
 import fr.ird.osmose.util.io.IOTools;
-import fr.ird.osmose.output.distribution.AbstractDistribution;
+import fr.ird.osmose.output.distribution.OutputDistribution;
 import fr.ird.osmose.util.SimulationLinker;
 import java.io.File;
 import java.io.IOException;
@@ -83,7 +83,7 @@ public class FisheryOutputDistrib extends SimulationLinker implements IOutput {
 
     private int nClass;
 
-    AbstractDistribution distrib;
+    OutputDistribution distrib;
 
     /*
      * Array containing the fisheries catches by species and by fisheries.
@@ -93,7 +93,7 @@ public class FisheryOutputDistrib extends SimulationLinker implements IOutput {
     private double[][][] discards;
     private double[][][] accessibleBiomass;
 
-    public FisheryOutputDistrib(int rank, AbstractDistribution distrib) {
+    public FisheryOutputDistrib(int rank, OutputDistribution distrib) {
         super(rank);
         this.distrib = distrib;
     }
@@ -104,7 +104,7 @@ public class FisheryOutputDistrib extends SimulationLinker implements IOutput {
         // initializes the number of fisheries
         nFishery = getConfiguration().getNFishery();
         int nSpecies = this.getNSpecies() + this.getNBkgSpecies();
-        int nClass = distrib.getNClass();
+        nClass = distrib.getNClass();
 
         biomass = new double[nSpecies][nFishery][nClass];
         discards = new double[nSpecies][nFishery][nClass];
@@ -276,7 +276,8 @@ public class FisheryOutputDistrib extends SimulationLinker implements IOutput {
         StringBuilder filename = new StringBuilder(path.getAbsolutePath());
         filename.append(File.separatorChar);
         filename.append(getConfiguration().getString("output.file.prefix"));
-        filename.append("_yieldByFishery_Simu");
+        filename.append("_yieldByFishery");
+        filename.append("DistribBy").append(distrib.getType()). append("_Simu");
         filename.append(getRank());
         filename.append(".nc.part");
         return filename.toString();
@@ -353,11 +354,13 @@ public class FisheryOutputDistrib extends SimulationLinker implements IOutput {
 
         StringBuilder strBuild = new StringBuilder();
         strBuild.append(distrib.getType()).append(":");
-        for(int i = 0; i < distrib.getNClass() - 1; i++) {
-            strBuild.append(distrib.getThreshold(i));
+        strBuild.append(0);
+        strBuild.append(",");
+        for(int i = 1; i < distrib.getNClass() - 1; i++) {
+            strBuild.append(distrib.getThreshold(i - 1));
             strBuild.append(",");
         }
-        strBuild.append(distrib.getThreshold(distrib.getNClass() - 1));
+        strBuild.append(distrib.getThreshold(distrib.getNClass() - 1 - 1));
 
         return strBuild.toString();
 

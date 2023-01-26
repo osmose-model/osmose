@@ -45,8 +45,7 @@ import fr.ird.osmose.Configuration;
 import fr.ird.osmose.IAggregation;
 import fr.ird.osmose.School;
 import fr.ird.osmose.stage.ClassGetter;
-import fr.ird.osmose.stage.IStage;
-import fr.ird.osmose.stage.PredPreyStage;
+import fr.ird.osmose.stage.SchoolStage;
 import fr.ird.osmose.util.AccessibilityManager;
 import fr.ird.osmose.util.Matrix;
 import java.util.List;
@@ -69,7 +68,7 @@ public class PredationMortality extends AbstractMortality {
     /*
      * Feeding stages
      */
-    private IStage predPreyStage;
+    private SchoolStage predPreyStage;
 
     private AccessibilityManager predationAccess;
 
@@ -141,7 +140,7 @@ public class PredationMortality extends AbstractMortality {
         }
 
         // Feeding stages (i.e. classes for Lmin/LMax ratios
-        predPreyStage = new PredPreyStage();
+        predPreyStage = new SchoolStage("predation.predPrey.stage");
         predPreyStage.init();
 
     }

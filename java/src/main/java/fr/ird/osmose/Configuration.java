@@ -324,6 +324,10 @@ public class Configuration extends OLogger {
 
     private Nc4Chunking chunker;
 
+    private int nFisheries;
+
+    private String[] namesFisheries;
+
     ///////////////
     // Constructors
     ///////////////
@@ -707,6 +711,8 @@ public class Configuration extends OLogger {
 
         // Year to start writing the outputs
         yearOutput = this.getInt("output.start.year");
+
+        this.initFisheries();
 
     }
 
@@ -1765,6 +1771,31 @@ public class Configuration extends OLogger {
 
     public Nc4Chunking getChunker() {
         return this.chunker;
+    }
+
+    private void initFisheries() {
+
+        if (this.isFisheryEnabled()) {
+            nFisheries = this.getNFishery();
+            namesFisheries = new String[nFisheries];
+            for (int iFishery = 0; iFishery < nFisheries; iFishery++) {
+                namesFisheries[iFishery] = String.format("fishery%03d", iFishery);
+            }
+        } else {
+            nFisheries = this.getNSpecies();
+            namesFisheries = new String[nFisheries];
+            for (int iSpecies = 0; iSpecies < nFisheries; iSpecies++) {
+                namesFisheries[iSpecies] = String.format("fishery%03d", iSpecies);
+            }
+        }
+    }
+
+    public String[] getFisheriesNames() {
+        return this.namesFisheries;
+    }
+
+    public int getNFisheries() {
+        return this.nFisheries;
     }
 
 }

@@ -42,7 +42,7 @@
 package fr.ird.osmose.output.netcdf;
 
 import fr.ird.osmose.IMarineOrganism;
-import fr.ird.osmose.output.distribution.AbstractDistribution;
+import fr.ird.osmose.output.distribution.OutputDistribution;
 import fr.ird.osmose.output.distribution.DistributionType;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -67,30 +67,33 @@ public abstract class AbstractDistribOutput_Netcdf extends AbstractOutput_Netcdf
     // Output values distributed by species and by class
     double[][] values;
     // Distribution
-    private final AbstractDistribution distrib;
+    private final OutputDistribution distrib;
 
-    public AbstractDistribOutput_Netcdf(int rank, AbstractDistribution distrib) {
+    public int getNColumns() {
+        return this.getNSpecies();
+    }
+
+    public AbstractDistribOutput_Netcdf(int rank, OutputDistribution distrib) {
         super(rank);
         this.distrib = distrib;
     }
 
     @Override
     public void reset() {
-        values = new double[getNSpecies()][distrib.getNClass()];
+        values = new double[getNColumns()][distrib.getNClass()];
     }
 
     int getClass(IMarineOrganism school) {
         return distrib.getClass(school);
     }
 
-
     @Override
     public void write(float time) {
 
         int nClass = distrib.getNClass();
-        double[][] array = new double[nClass][getNSpecies()];
+        double[][] array = new double[nClass][getNColumns()];
         for (int iClass = 0; iClass < nClass; iClass++) {
-            for (int iSpec = 0; iSpec < getNSpecies(); iSpec++) {
+            for (int iSpec = 0; iSpec < getNColumns(); iSpec++) {
                 array[iClass][iSpec] = values[iSpec][iClass] / getRecordFrequency();
             }
         }
@@ -120,7 +123,7 @@ public abstract class AbstractDistribOutput_Netcdf extends AbstractOutput_Netcdf
         Dimension speciesDim = getBNc().addDimension("species", getNSpecies());
         Dimension classDim = getBNc().addDimension(this.getDisName(), this.distrib.getNClass());
         Variable.Builder<?> speciesVar = getBNc().addVariable("species", DataType.INT, "species");
-        Variable.Builder<?> distribVar = getBNc().addVariable(this.getDisName(), DataType.FLOAT, this.getDisName());
+        getBNc().addVariable(this.getDisName(), DataType.FLOAT, this.getDisName());
 
         this.createSpeciesAttr(speciesVar);
 
@@ -147,9 +150,12 @@ public abstract class AbstractDistribOutput_Netcdf extends AbstractOutput_Netcdf
             Variable varspec = this.getNc().findVariable("species");
             getNc().write(varspec, arrSpecies);
 
-            for (int i = 0; i < this.distrib.getNClass(); i++) {
-                arrClass.set(i, this.getClassThreshold(i));
+            // Set the first class lower bound to 0
+            arrClass.set(0, 0);
+            for (int i = 1; i < this.distrib.getNClass(); i++) {
+                arrClass.set(i, this.getClassThreshold(i - 1));
             }
+
             Variable vardis = this.getNc().findVariable(this.getDisName());
             getNc().write(vardis, arrClass);
 

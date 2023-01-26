@@ -44,8 +44,8 @@ package fr.ird.osmose.output.netcdf;
 import fr.ird.osmose.Cell;
 import fr.ird.osmose.School;
 import fr.ird.osmose.background.BackgroundSchool;
-import fr.ird.osmose.stage.DietOutputStage;
-import fr.ird.osmose.stage.IStage;
+import fr.ird.osmose.stage.SchoolStage;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -71,7 +71,7 @@ public class BiomassDietStageOutput_Netcdf extends AbstractOutput_Netcdf {
      */
     private double[][] biomassStage;
 
-    private IStage dietOutputStage;
+    private SchoolStage dietOutputStage;
 
     public BiomassDietStageOutput_Netcdf(int rank) {
         super(rank);
@@ -80,7 +80,7 @@ public class BiomassDietStageOutput_Netcdf extends AbstractOutput_Netcdf {
     @Override
     public void init() {
 
-        dietOutputStage = new DietOutputStage();
+        dietOutputStage = new SchoolStage("output.diet.stage");
         dietOutputStage.init();
 
         nColumns = 0;
@@ -214,7 +214,7 @@ public class BiomassDietStageOutput_Netcdf extends AbstractOutput_Netcdf {
         int nSpec = getNSpecies() + getNBkgSpecies() + getNRscSpecies();
         int k = 0;
         for (int iSpec = 0; iSpec < nSpec; iSpec++) {
-            String name = getSpecies(iSpec).getName();
+            String name = getISpecies(iSpec).getName();
             float[] threshold = dietOutputStage.getThresholds(iSpec);
             int nStage = dietOutputStage.getNStage(iSpec);
             String outname;

@@ -1,10 +1,10 @@
-/* 
- * 
+/*
+ *
  * OSMOSE (Object-oriented Simulator of Marine Ecosystems)
  * http://www.osmose-model.org
- * 
+ *
  * Copyright (C) IRD (Institut de Recherche pour le Développement) 2009-2020
- * 
+ *
  * Osmose is a computer program whose purpose is to simulate fish
  * populations and their interactions with their biotic and abiotic environment.
  * OSMOSE is a spatial, multispecies and individual-based model which assumes
@@ -15,7 +15,7 @@
  * processes of fish life cycle (growth, explicit predation, additional and
  * starvation mortalities, reproduction and migration) and fishing mortalities
  * (Shin and Cury 2001, 2004).
- * 
+ *
  * Contributor(s):
  * Yunne SHIN (yunne.shin@ird.fr),
  * Morgane TRAVERS (morgane.travers@ifremer.fr)
@@ -23,28 +23,27 @@
  * Philippe VERLEY (philippe.verley@ird.fr)
  * Laure VELEZ (laure.velez@ird.fr)
  * Nicolas Barrier (nicolas.barrier@ird.fr)
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation (version 3 of the License). Full description
  * is provided on the LICENSE file.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
- * 
+ *
  */
 
 package fr.ird.osmose.output;
 
 import fr.ird.osmose.School;
+import fr.ird.osmose.stage.SchoolStage;
 import fr.ird.osmose.Prey;
-import fr.ird.osmose.stage.DietOutputStage;
-import fr.ird.osmose.stage.IStage;
 import fr.ird.osmose.util.SimulationLinker;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -68,7 +67,7 @@ public class DietOutput extends SimulationLinker implements IOutput {
     private double[][][][] diet;
     private double[][] abundanceStage;
     // Diet output stage
-    private IStage dietOutputStage;
+    private SchoolStage dietOutputStage;
 
     private final String separator;
 
@@ -141,9 +140,11 @@ public class DietOutput extends SimulationLinker implements IOutput {
                     prw.print(name);    // Name predators
                 } else {
                     if (st == 0) {
-                        prw.print(quote(name + " < " + threshold[st]));    // Name predators
+                        prw.print(quote(String.format("%s in [%f, %f[", name, 0.f, threshold[st])));
+                    } else if (st == nStagePred - 1) {
+                        prw.print(quote(String.format("%s in [%f, inf[", name, threshold[st - 1])));
                     } else {
-                        prw.print(quote(name + " >=" + threshold[st - 1]));    // Name predators
+                        prw.print(quote(String.format("%s in [%f, %f[", name, threshold[st - 1], threshold[st])));
                     }
                 }
                 prw.print(separator);
@@ -163,8 +164,8 @@ public class DietOutput extends SimulationLinker implements IOutput {
                 }  // end of loop over focal/bkg species as preds.
                 prw.println();
             }
-        }  // loop of focal/background species as prey. 
-        
+        }  // loop of focal/background species as prey.
+
         // Loop over the resource species, only as prey
         for (int j = 0; j < getConfiguration().getNRscSpecies(); j++) {
             prw.print(time);
@@ -208,7 +209,7 @@ public class DietOutput extends SimulationLinker implements IOutput {
         recordFrequency = getConfiguration().getInt("output.recordfrequency.ndt");
 
         // Init diet output stage
-        dietOutputStage = new DietOutputStage();
+        dietOutputStage = new SchoolStage("output.diet.stage");
         dietOutputStage.init();
 
         // Create parent directory
@@ -224,7 +225,7 @@ public class DietOutput extends SimulationLinker implements IOutput {
         file.getParentFile().mkdirs();
         try {
             // Init stream
-            fos = new FileOutputStream(file, true);
+            fos = new FileOutputStream(file, false);
         } catch (FileNotFoundException ex) {
             Logger.getLogger(DietOutput.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -245,9 +246,11 @@ public class DietOutput extends SimulationLinker implements IOutput {
                         prw.print(name);    // Name predators
                     } else {
                         if (iStage == 0) {
-                            prw.print(quote(name + " < " + threshold[iStage]));    // Name predators
+                            prw.print(quote(String.format("%s in [%f, %f[", name, 0.f, threshold[iStage])));
+                        } else if (iStage == nStage - 1) {
+                            prw.print(quote(String.format("%s in [%f, inf[", name, threshold[iStage - 1])));
                         } else {
-                            prw.print(quote(name + " >=" + threshold[iStage - 1]));    // Name predators
+                            prw.print(quote(String.format("%s in [%f, %f[", name, threshold[iStage - 1], threshold[iStage])));
                         }
                     }
                 }   // end of loop over stage

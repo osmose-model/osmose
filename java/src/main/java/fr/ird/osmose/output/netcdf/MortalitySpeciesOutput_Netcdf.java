@@ -44,7 +44,7 @@ package fr.ird.osmose.output.netcdf;
 import fr.ird.osmose.process.mortality.MortalityCause;
 import fr.ird.osmose.School;
 import fr.ird.osmose.Species;
-import fr.ird.osmose.output.distribution.AbstractDistribution;
+import fr.ird.osmose.output.distribution.OutputDistribution;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -76,7 +76,7 @@ public class MortalitySpeciesOutput_Netcdf extends AbstractDistribOutput_Netcdf 
     // mortality rates por souces and per stages
     private double[][] mortalityRates;
 
-    public MortalitySpeciesOutput_Netcdf(int rank, Species species, AbstractDistribution distrib) {
+    public MortalitySpeciesOutput_Netcdf(int rank, Species species, OutputDistribution distrib) {
         super(rank, distrib);
         this.species = species;
     }
@@ -218,8 +218,9 @@ public class MortalitySpeciesOutput_Netcdf extends AbstractDistribOutput_Netcdf 
             getNc().write(mortvar, arrMort);
 
             ArrayFloat.D1 arrClass = new ArrayFloat.D1(this.getNClass());
-            for (int i = 0; i < this.getNClass(); i++) {
-                arrClass.set(i, this.getClassThreshold(i));
+            arrClass.set(0, 0);
+            for (int i = 1; i < this.getNClass(); i++) {
+                arrClass.set(i, this.getClassThreshold(i - 1));
             }
             Variable disvar = this.getNc().findVariable(this.getDisName());
             getNc().write(disvar, arrClass);

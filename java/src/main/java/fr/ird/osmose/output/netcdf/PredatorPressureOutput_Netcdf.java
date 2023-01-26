@@ -43,8 +43,7 @@ package fr.ird.osmose.output.netcdf;
 
 import fr.ird.osmose.School;
 import fr.ird.osmose.Prey;
-import fr.ird.osmose.stage.DietOutputStage;
-import fr.ird.osmose.stage.IStage;
+import fr.ird.osmose.stage.SchoolStage;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -69,7 +68,7 @@ public class PredatorPressureOutput_Netcdf extends AbstractOutput_Netcdf {
     //
     private double[][][][] predatorPressure;
     // Diet output stage
-    private IStage dietOutputStage;
+    private SchoolStage dietOutputStage;
     private int nPreys;
     private int nPred;
 
@@ -167,7 +166,7 @@ public class PredatorPressureOutput_Netcdf extends AbstractOutput_Netcdf {
     public void init() {
 
         // Init diet output stage
-        dietOutputStage = new DietOutputStage();
+        dietOutputStage = new SchoolStage("output.diet.stage");
         dietOutputStage.init();
         super.init();
 

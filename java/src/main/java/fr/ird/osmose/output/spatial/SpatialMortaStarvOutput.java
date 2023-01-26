@@ -56,7 +56,7 @@ public class SpatialMortaStarvOutput extends AbstractSpatialOutput {
 
     @Override
     public String getVarName() {
-        return "Starvation mortality";
+        return "StarvationMortality";
     }
 
     @Override
