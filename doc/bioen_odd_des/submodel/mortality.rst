@@ -26,7 +26,7 @@ with
 
     j \in \left( j \lor (c(j,t)=c(i,t)) \left( \dfrac{L(i,t)}{R_{max}(i)} \leq L(j, t) \leq \dfrac{L(i,t)}{R_{min}(i)} \right) \right)
 
-where the ration :math:`\dfrac{\dfrac{\gamma(s(j), s(i)) B(i,t)}{P(j, t)}` represents the fact that predators prey on various prey schools according to their relative accessible abundance. Change in the number of individuals of school  due to predation during time step  is then given by:
+where the ratio :math:`\dfrac{\gamma(s(j), s(i)) B(i,t)}{P(j, t)}` represents the fact that predators prey on various prey schools according to their relative accessible abundance. Change in the number of individuals of school  due to predation during time step  is then given by:
 
 .. math::
 

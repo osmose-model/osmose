@@ -1,3 +1,4 @@
+.. include:: <s5defs.txt>
 .. |os| replace:: OSMOSE
 .. |jos| replace:: OSMOSE Java
 .. |dat| replace:: Datarmor
