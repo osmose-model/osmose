@@ -1,4 +1,4 @@
-.. _new_tissue_prod:
+.. _new_tissue:
 
 New tissue production: somatic and gonadic growth
 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -53,7 +53,7 @@ and gonadic growth as:
    \begin{cases}
     \eta \rho(i, t) E_P(i,t) & \text{ if $E_P \geq 0$} \\
     \eta E_P(i,t) &  \text{ if $-g(i,t) \leq \eta E_P(i,t) < 0$}\\
-    -g(i,t) & \text{ if $\eta E_P(i,t) - g(i, t) < 0$}\\
+    -g(i,t) & \text{ if $\eta E_P(i,t) < -g(i, t)$}\\
     \end{cases}
 
 where :math:`\eta` is the ratio of energy density between somatic and gonadic tissues, and the second and third expressions account for maintenance coverage by energy reserves contained in gonads. In the former case, gonads’ energy can fully cover maintenance costs but in the latter it cannot, so that individuals undergo energetic starvation and incur additional starvation mortality (see section 5 Mortality for more details).

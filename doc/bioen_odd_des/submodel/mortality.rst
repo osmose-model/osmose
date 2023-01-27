@@ -30,7 +30,7 @@ where the ration :math:`\dfrac{\dfrac{\gamma(s(j), s(i)) B(i,t)}{P(j, t)}` repre
 
 .. math::
 
-   N(i, t+\Deltat t) = N(i, t) (1 - \sum_j \dfrac{\gamma(s(j), s(i))}{P(j,t)} I(j,t)
+   N(i, t+\Delta t) = N(i, t) (1 - \sum_j \dfrac{\gamma(s(j), s(i))}{P(j,t)} I(j,t)
 
 Organisms face a trade-off between mortality and foraging activity :cite:`mangel2003environment`
 because more active foraging implies a higher exposure to predation, more unfavorable 
@@ -48,3 +48,19 @@ with :math:`\mu_f` a conversion coefficient from foraging activity to mortality 
 .. math::
 
    N(i, t+\Delta t) = N(i, t) e^{-M_f(i) \Delta t}
+
+
+Starvation occurs when an individual cannot cover its maintenance needs, i.e. when net energy is negative , even by drawing energy from its gonadic reserves, i.e. when  (see :numref:`new_tissue` for details). In this case, schools undergo a decrease in biomass equaling the energetic deficit after accounting for the energy reserves contained in the gonadic compartment:
+
+.. math::
+
+    B(i, t + \Delta t) = B(i, t) - N(i,t) \left( \|E_P(i,t)\| - \dfrac{g(i,t)}{\eta}\right) \text{ if $\eta E_P(i, t) < -g(i,t)$}
+
+so that change in the number of individuals of school :math:`i` due to energetic starvation during time step :math:`t` is then given by:
+
+
+.. math::
+
+   N(i, t + \Delta t) = N(i, t) \times \left(1 - \dfrac{\|E_P(i,t)\| - \dfrac{g(i,t)}{\eta}}{w(i,t)} \right) \text{ if $\eta E_P(i, t) < -g(i,t)$}
+
+Starvation mortality at the time step :math:`t+\Delta t` relies on the net energy amount of time step :math:`t`. During the first time step of a school, i.e. at eggs life stage, the school doesn’t feed to model the energy provision yolk reserve. Then, starvation does not occur at the first and second time step as starvation at the second step time relies on first time step. 
