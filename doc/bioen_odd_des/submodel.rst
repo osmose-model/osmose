@@ -7,3 +7,4 @@ Submodels
 
    submodel/energy_uptake.rst
    submodel/maintenance.rst
+   submodel/new_tissue.rst
