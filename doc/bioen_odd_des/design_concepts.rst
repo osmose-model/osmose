@@ -31,7 +31,6 @@ oxygen and temperature translate into plastic responses of the life-history proc
 emerge from the energy allocation scheme described by the biphasic growth model but also into selective pressures as individuals
 will incur “energetic starvation” mortality when net energy rate is negative and cannot be covered by energy reserves contained in gonads.
 
-
 Finally, individuals exhibit adaptive behavior in their movements by avoiding foraging
 in locations of adverse conditions of dissolved oxygen and temperature :cite:`townhill2017fisheries` that would
 impair their net energy rate to the point of certain energetic starvation, thus conforming to the hypothesis of
