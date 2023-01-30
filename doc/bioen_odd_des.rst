@@ -19,4 +19,5 @@ specific issues.
    :caption: Contents:
 
    bioen_odd_des/design_concepts.rst
+   bioen_odd_des/statevar.rst
    bioen_odd_des/submodel.rst

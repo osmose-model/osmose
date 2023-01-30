@@ -13,8 +13,8 @@ of alleles at each locus.
 
 For a given species, the seeding process stops when there is at least
 one mature individual in the population. If the mature part of the population collapses before
- the end of the seeding period, the seeding process is resumed (see maturation description in :numref:`maturation`).
- Seeding ceases definitely at the end of the defined period. If a simulation is stopped before the end of the seeding period,
- the randomly drawn initial pools of functional and neutral alleles need to be saved as state variables in addition to those
- described in :numref:`state_variables` in order to be able to
- restart the ecosystem dynamics from the stopping time step.
+the end of the seeding period, the seeding process is resumed (see maturation description in :numref:`maturation`).
+Seeding ceases definitely at the end of the defined period. If a simulation is stopped before the end of the seeding period,
+the randomly drawn initial pools of functional and neutral alleles need to be saved as state variables in addition to those
+described in :numref:`state_variables` in order to be able to
+restart the ecosystem dynamics from the stopping time step.
