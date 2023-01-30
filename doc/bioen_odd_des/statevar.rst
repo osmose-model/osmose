@@ -3,8 +3,24 @@
 Entities, state variables, and scales
 ---------------------------------------------------
 
+Entities
+++++++++++++++++++
+
+- The `EnergyBudget` entity describes the parameters and the bioenergetic processes of BIOEN-OSMOSE.
+
 State variables
 ++++++++++++++++++
+
+EnergyBudget
+###########################
+
+The ``EnergyBudget`` entity contains the following state variables:
+
+.. csv-table:: ``EnergyBudget`` state variables in BIOEN-OSMOSE
+   :file: _static/energybudget.csv
+   :delim: ;
+   :header-rows: 1
+   :class: tight-table
 
 School
 ###########################
