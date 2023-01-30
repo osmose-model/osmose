@@ -1,3 +1,5 @@
+.. _state_variables:
+
 Entities, state variables, and scales
 ---------------------------------------------------
 
