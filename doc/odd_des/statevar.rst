@@ -111,7 +111,7 @@ For eggs (age 0), weight and sizes are provided as parameters. For the others, c
 
     L = \left(\frac{W}{c}\right)^{\frac{1}{3}}
 
-where the :math:`c` parameter is a 'condition.factor', and :math:`b` the 'allometric.power'.
+where the :math:`c` parameter is a condition factor, and :math:`b` the allometric power.
 
 Biomass to abundance conversion for a school is made by using the mean weight of the school:
 
