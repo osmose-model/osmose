@@ -1,4 +1,4 @@
-.. _odd_des:
+.. _bioen_odd_des:
 
 BIOEN-OSMOSE ODD description
 ##########################################

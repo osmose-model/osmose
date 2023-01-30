@@ -19,7 +19,7 @@ the genotypic values :math:`G_Z(i)`  of trait :math:`Z`  in the population follo
 with :math:`\overline{G_Z}(0)`  the initial genotypic mean and :math:`\sigma^2_{A, Z}(0)` the initial additive genetic variance. 
 It follows (see justification in the next section) that the allelic 
 values :math:`A_{Z, l, k}`  of the :math:`n_{Z, l}`  alleles of locus :math:`l`  initially present in the population are randomly drawn from a normal 
-distribution :math:`N(0, \dfrac{\sigma^2_{A, Z}(0)}{2 l_Z})`
+distribution :math:`N\left(0, \dfrac{\sigma^2_{A, Z}(0)}{2 l_Z}\right)`
 :cite:`soularue2012assortative`. This allelic model defines allelic values as deviations 
 around the initial genotypvic mean :math:`\overline{G_Z}(0)` of the population and allows for heterogeneous allelic values 
 across loci coding for the same trait, many of them with minor effects and a few ones with major effects.

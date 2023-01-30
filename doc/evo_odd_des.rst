@@ -1,4 +1,4 @@
-.. _odd_des:
+.. _evo_odd_des:
 
 EVO-OSMOSE ODD description
 ##########################################

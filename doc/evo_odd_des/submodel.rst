@@ -2,7 +2,7 @@ Submodels
 ==========================
 
 The genetic sub-model introduces a source of 
-intra-specific variability of quantitative traits in OSMOSE, through additive genetic variance :math:`sigma^2_{A,Z}` and 
+intra-specific variability of quantitative traits in OSMOSE, through additive genetic variance :math:`\sigma^2_{A,Z}` and 
 expression variance :math:`\sigma^2_{e,Z}` and parental gene inheritance. The individuals are considered diploid 
 hermaphrodites, i.e. without differentiation between males and females, the model being based on female life 
 history. The genotypic values of the four heritable traits—maximum 
@@ -16,4 +16,6 @@ Hereafter, the genetic sub-model is described for any of the four evolving trait
    :caption: Contents:
 
    submodel/genetic_structure
+   submodel/trait_determinism
+   submodel/genetic_inheritance
 
