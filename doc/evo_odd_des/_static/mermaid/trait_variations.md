@@ -1,5 +1,3 @@
-
-
 graph TD;
 
     id1(Population dynamics<br>birth and mortality rates)
@@ -13,7 +11,7 @@ graph TD;
     id3 --> id2
     id2 --> id1
 
-    id1 ---> |<b>Evolution</b>| id5
+    id1 --> |<b>Evolution</b>| id5
 
     ida(Selective pressures<br>Predation, fishing, climate)
     idb(Macro-environment<br>food, temperature, oxygen)
