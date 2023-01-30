@@ -7,6 +7,8 @@ Entities
 ++++++++++++++++++
 
 - The `EnergyBudget` entity describes the parameters and the bioenergetic processes of BIOEN-OSMOSE.
+- The `TempFunction` entity describes the parameters and the temperature-related processes of BIOEN-OSMOSE.
+- The `OxygenFunction` entity describes the parameters and the oxygen-related processes of BIOEN-OSMOSE.
 
 State variables
 ++++++++++++++++++
@@ -18,6 +20,28 @@ The ``EnergyBudget`` entity contains the following state variables:
 
 .. csv-table:: ``EnergyBudget`` state variables in BIOEN-OSMOSE
    :file: _static/energybudget.csv
+   :delim: ;
+   :header-rows: 1
+   :class: tight-table
+
+TempFunction
+###########################
+
+The ``TempFunction`` entity contains the following state variables:
+
+.. csv-table:: ``TempFunction`` state variables in BIOEN-OSMOSE
+   :file: _static/tempfunction.csv
+   :delim: ;
+   :header-rows: 1
+   :class: tight-table
+
+OxygenFunction
+###########################
+
+The ``OxygenFunction`` entity contains the following state variables:
+
+.. csv-table:: ``OxygenFunction`` state variables in BIOEN-OSMOSE
+   :file: _static/oxygenfunction.csv
    :delim: ;
    :header-rows: 1
    :class: tight-table
