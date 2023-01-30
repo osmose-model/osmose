@@ -18,4 +18,5 @@ specific issues.
    :maxdepth: 1
    :caption: Contents:
 
+   bioen_odd_des/design_concepts.rst
    bioen_odd_des/submodel.rst

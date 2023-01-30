@@ -18,5 +18,6 @@ specific issues.
    :maxdepth: 1
    :caption: Contents:
 
+   evo_odd_des/design_concepts.rst
    evo_odd_des/init.rst
    evo_odd_des/submodel.rst
