@@ -92,9 +92,9 @@ run_osmose = function(input, parameters = NULL, output = NULL, log = "osmose.log
       lib = cacheManager("lib")
       osmose = shQuote(cacheManager(osmose_name))
     } else {
-       osmose_name = sprintf("osmose_%s-jar-with-dependencies.jar", package_version)
+       version = paste(.getVersion(package_version)[1:3], collapse = ".")
+       osmose_name = sprintf("osmose_%s-jar-with-dependencies.jar", version)
        osmose = shQuote(system.file("java", osmose_name, package = "osmose"))
-       version = package_version
     }
   }
 
@@ -148,14 +148,14 @@ run_osmose = function(input, parameters = NULL, output = NULL, log = "osmose.log
   system2(java, args = args, stdout = stdout, stderr = stderr, wait = TRUE)
   .t1 = Sys.time()
   seconds = as.integer(difftime(.t1, .t0, units = "secs"))
-  
+
   prefix = .getPar(conf, "output.file.prefix")
   if(is.null(prefix)) prefix = "osmose"
-  
+
   conf = .add_to_configuration(conf)
   class(conf) = "osmose.configuration"
   write_osmose(conf, file = file.path(output, sprintf("%s-configuration.osm", prefix)))
-  
+
   return(invisible(list(command=command, elapsed=seconds)))
 }
 
@@ -206,9 +206,9 @@ read_osmose = function(path = NULL, input = NULL, version = "4.3.2",
     if(!file.info(path)$isdir) {
       input = path
       path = NULL
-    } 
+    }
   }
-  
+
   # If config is not NULL, then read it
   recursive = TRUE
   if(is.null(input)) {
@@ -247,7 +247,7 @@ read_osmose = function(path = NULL, input = NULL, version = "4.3.2",
       stop(output)
     }
   }
-  
+
   .t1 = Sys.time()
   seconds = as.integer(difftime(.t1, .t0, units = "secs"))
   # Add config info
