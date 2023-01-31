@@ -177,11 +177,10 @@ latex_elements = {
 # Grouping the document tree into LaTeX files. List of tuples
 # (source start file, target name, title,
 #  author, documentclass [howto, manual, or own class]).
-latexauthor = '\\\\'.join(author.split(','))
+latexauthor = '\\and'.join(author.split(','))
 
 latex_documents = [
-    (master_doc, 'OSMOSE.tex', u'OSMOSE Documentation',
-     u'Yunne-Jai Shin \\and Philippe Verley \\and Morgane Travers \\and Laure Velez \\and Ricardo Oliveros-Ramos \\and Arnaud Gruss \\and Nicolas Barrier \\and Alaia Morell \\and Hanna Schenk', 'manual'),
+    (master_doc, 'OSMOSE.tex', u'OSMOSE Documentation', latexauthor, 'manual'),
 ]
 
 
