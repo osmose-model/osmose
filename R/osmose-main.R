@@ -159,6 +159,13 @@ run_osmose = function(input, parameters = NULL, output = NULL, log = "osmose.log
   return(invisible(list(command=command, elapsed=seconds)))
 }
 
+.get_default_osmose_jar = function() {
+  package_version = packageVersion("osmose")
+  version <- paste(.getVersion(package_version)[1:3], collapse = ".")
+  osmose_name <- sprintf("osmose_%s-jar-with-dependencies.jar", version)
+  osmose <- system.file("java", osmose_name, package = "osmose")
+  return(osmose)
+}
 
 # read_osmose -------------------------------------------------------------
 #' @title Read OSMOSE outputs into an R object
