@@ -62,7 +62,7 @@ public class EnergyBudget extends AbstractProcess {
 
     private final OxygenFunction oxygen_function;
     /**
-     * Parameters for the kappa function.
+     * Parameters for the rho function.
      */
     private double[] r;
     private double[] larvaePredationRateBioen;
@@ -180,7 +180,7 @@ public class EnergyBudget extends AbstractProcess {
             this.computeEnetFaced(school);
             
             try {
-                this.getKappa(school);   // computes the kappa function
+                this.getRho(school);   // computes the rho function
             } catch (Exception ex) {
                 Logger.getLogger(EnergyBudget.class.getName()).log(Level.SEVERE, null, ex);
             }
@@ -247,7 +247,7 @@ public class EnergyBudget extends AbstractProcess {
         // If the school is not mature yet, maturation is computed following equation 8
         double age = school.getAge();  // returns the age in years
         double length = school.getLength();   // warning: length in cm.
-        double llim = m0_temp * age + m1_temp;   // computation of a maturity
+        double llim = m0_temp + m1_temp * age ;   // computation of a maturity
 
         int output = (length >= llim) ? 1 : 0;
         if (output == 1) {
@@ -292,7 +292,7 @@ public class EnergyBudget extends AbstractProcess {
 
         // computes the trend in structure weight dw/dt
         // note: dw should be in ton
-        double dgrowth = (school.getENet() > 0) ? (school.getENet() * school.getKappa()) : 0;
+        double dgrowth = (school.getENet() > 0) ? (school.getENet() * (1-school.getRho())) : 0;
 
         if (school.isAlive()) {
             dgrowth /= school.getInstantaneousAbundance();
@@ -312,9 +312,9 @@ public class EnergyBudget extends AbstractProcess {
 
         double output = 0;
         double enet = school.getENet();
-        double kappa = school.getKappa();
+        double rho = school.getRho();
         if ((enet > 0) && school.isAlive()) {
-            output = (1 - kappa) * enet;
+            output = rho * enet;
             output /= school.getInstantaneousAbundance();
             school.incrementGonadWeight((float) output);
         }
@@ -328,8 +328,7 @@ public class EnergyBudget extends AbstractProcess {
      * @throws java.lang.Exception
      */
     
-    // kappa = 1 - rho
-    public void getKappa(School school) throws Exception {
+    public void getRho(School school) throws Exception {
         int ispec = school.getSpeciesIndex();
 
         String key = "r";
@@ -337,12 +336,12 @@ public class EnergyBudget extends AbstractProcess {
         double etaSpecies = eta[ispec];
 
         // If the organism is imature, all the net energy goes to the somatic growth.
-        // else, only a kappa fraction goes to somatic growth
-        double kappa = (!school.isMature()) ? 1 : 1 - r_temp / (etaSpecies * school.get_enet_faced()) * Math.pow(school.getWeight() * 1e6f, 1 - school.getBetaBioen());
-        kappa = ((kappa < 0) ? 0 : kappa); //0 if kappa<0
-        kappa = ((kappa > 1) ? 1 : kappa); //1 if kappa>1
+        // else, only a 1-rho fraction goes to somatic growth
+        double rho = (!school.isMature()) ? 0 : r_temp / (etaSpecies * school.get_enet_faced()) * Math.pow(school.getWeight() * 1e6f, 1 - school.getBetaBioen());
+        rho = ((rho < 0) ? 0 : rho); //0 if rho<0
+        rho = ((rho > 1) ? 1 : rho); //1 if rho>1
 
-        school.setKappa(kappa);
+        school.setRho(rho);
     }
 
 

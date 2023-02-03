@@ -223,7 +223,7 @@ public class BackgroundSchool extends AbstractSchool {
     }
 
     @Override
-    public double getKappa() {
+    public double getRho() {
         // TODO Auto-generated method stub
         return 0;
     }

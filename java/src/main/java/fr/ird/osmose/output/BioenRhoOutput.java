@@ -44,15 +44,15 @@ package fr.ird.osmose.output;
 import fr.ird.osmose.School;
 
 /**
- * Save the kappa values
+ * Save the rho values
  * @author barrier.n
  */
-public class BioenKappaOutput extends AbstractOutput {
+public class BioenRhoOutput extends AbstractOutput {
 
-    public double[] kappa;
+    public double[] rho;
     public double[] abundance;
 
-    public BioenKappaOutput(int rank, String subfolder, String name) {
+    public BioenRhoOutput(int rank, String subfolder, String name) {
         super(rank, subfolder, name);
     }
 
@@ -63,7 +63,7 @@ public class BioenKappaOutput extends AbstractOutput {
 
     @Override
     public void reset() {
-        kappa = new double[getNSpecies()];
+        rho = new double[getNSpecies()];
         abundance = new double[getNSpecies()];
 
     }
@@ -72,7 +72,7 @@ public class BioenKappaOutput extends AbstractOutput {
     public void update() {
         for (School school : getSchoolSet().getAliveSchools()) {
             int i = school.getSpeciesIndex();
-                kappa[i] += school.getKappa() * school.getInstantaneousAbundance();
+                rho[i] += school.getRho() * school.getInstantaneousAbundance();
                 abundance[i] += school.getInstantaneousAbundance();
         }
     }
@@ -82,18 +82,18 @@ public class BioenKappaOutput extends AbstractOutput {
 
         for (int i = 0; i < getConfiguration().getNSpecies(); i++) {
             if (abundance[i] > 0) {
-                kappa[i] = (float) (kappa[i] / abundance[i]);
+                rho[i] = (float) (rho[i] / abundance[i]);
             } else {
-                kappa[i] = Double.NaN;  
+                rho[i] = Double.NaN;  
             }
         }
 
-        writeVariable(time, kappa);
+        writeVariable(time, rho);
     }
 
     @Override
     public String getDescription() {
-        return " Kappa (rate [0-1])";
+        return " Rho (rate [0-1])";
     }
 
     @Override
