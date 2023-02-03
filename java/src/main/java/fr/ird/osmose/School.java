@@ -44,6 +44,8 @@ import fr.ird.osmose.process.genet.Genotype;
 import fr.ird.osmose.process.mortality.MortalityCause;
 import fr.ird.osmose.util.GridPoint;
 import java.util.HashMap;
+
+import ucar.ma2.ArrayDouble;
 import ucar.ma2.ArrayFloat;
 
 /**
@@ -851,6 +853,7 @@ public class School extends AbstractSchool {
                 double val0 = genArray.get(index, itrait, iloc, 0);
                 double val1 = genArray.get(index, itrait, iloc, 1);
                 this.getGenotype().setLocusVal(itrait, iloc, val0, val1);
+                this.getGenotype().restartTrait(itrait);
 
                 // Sets the value for the environmental noise
                 double envnoise = envNoise.get(index, itrait);

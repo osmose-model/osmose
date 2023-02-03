@@ -209,6 +209,31 @@ public class Genotype extends SimulationLinker {
         return traits[index];
     }
 
+    /**
+     * Restart the value of the trait based on the restarts
+     *
+     */
+    public void restartTrait(int i) {
+
+        Trait trait = this.getSimulation().getEvolvingTrait(i);
+
+        List<Locus> list_locus = this.getLocusList(i);
+
+        double x = 0;
+
+        // Computation of (V1 + V1') + (V2 + V2') + (...) (equation of Alaia's document)
+        // Equation 34 from Alaia's document
+        for (Locus l : list_locus) {
+            x += l.sum();
+        }
+
+        // Multiplication by U + adding xmin
+        // this.x *= u;
+        x += trait.getMean(spec_index);
+        traits[i] = x;
+
+    }
+
 
     /**
      * Get the value of a trait provided a list of locus.
