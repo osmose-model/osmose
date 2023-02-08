@@ -1,10 +1,10 @@
-/* 
- * 
+/*
+ *
  * OSMOSE (Object-oriented Simulator of Marine Ecosystems)
  * http://www.osmose-model.org
- * 
+ *
  * Copyright (C) IRD (Institut de Recherche pour le Développement) 2009-2020
- * 
+ *
  * Osmose is a computer program whose purpose is to simulate fish
  * populations and their interactions with their biotic and abiotic environment.
  * OSMOSE is a spatial, multispecies and individual-based model which assumes
@@ -15,7 +15,7 @@
  * processes of fish life cycle (growth, explicit predation, additional and
  * starvation mortalities, reproduction and migration) and fishing mortalities
  * (Shin and Cury 2001, 2004).
- * 
+ *
  * Contributor(s):
  * Yunne SHIN (yunne.shin@ird.fr),
  * Morgane TRAVERS (morgane.travers@ifremer.fr)
@@ -23,20 +23,20 @@
  * Philippe VERLEY (philippe.verley@ird.fr)
  * Laure VELEZ (laure.velez@ird.fr)
  * Nicolas Barrier (nicolas.barrier@ird.fr)
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation (version 3 of the License). Full description
  * is provided on the LICENSE file.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
- * 
+ *
  */
 
 package fr.ird.osmose.process.genet;
@@ -54,7 +54,7 @@ public class Trait extends SimulationLinker {
      * Number of locus that code the traits. One value for each species
      */
     private int[] nLocus;
-    
+
     /** Variance of the trait expressed due to env. One value per species. */
     private double[] envVar;
 
@@ -80,6 +80,8 @@ public class Trait extends SimulationLinker {
      */
     private double[][][] diversity;
 
+    private Random generator;
+
     /**
      * Locus constructor.
      *
@@ -92,6 +94,11 @@ public class Trait extends SimulationLinker {
         // Trait eyecolor = new Trait(rank, "eyecol")
         this.prefix = prefix;
 
+        if(getConfiguration().getBoolean("genetics.randomseed.fixed", false)) {
+            generator = new Random(getConfiguration().getNSpecies());
+        } else {
+            generator = new Random();
+        }
     }
 
     public void init() {
@@ -99,31 +106,31 @@ public class Trait extends SimulationLinker {
         String key;
         int cpt;
         int[] focalIndex = this.getConfiguration().getFocalIndex();
-        
+
         int nspecies = this.getNSpecies();
-        
+
         // look for the mean value of the trait
         xMean = new double[nspecies];
         key = String.format("%s.trait.mean", prefix);
         cpt = 0;
-        for (int iSpeciesFile : focalIndex) { 
+        for (int iSpeciesFile : focalIndex) {
             xMean[cpt] = this.getConfiguration().getDouble(key + ".sp" + iSpeciesFile);
             cpt++;
         }
-    
+
         envVar = new double[nspecies];
         key = String.format("%s.trait.envvar", prefix);
         cpt = 0;
-        for (int iSpeciesFile : focalIndex) { 
+        for (int iSpeciesFile : focalIndex) {
             envVar[cpt] = this.getConfiguration().getDouble(key + ".sp" + iSpeciesFile);
             cpt++;
         }
-        
+
         // look for the variance (sigma^2) of the trait
         xVar = new double[nspecies];
         key = String.format("%s.trait.var", prefix);
         cpt = 0;
-        for (int iSpeciesFile : focalIndex) { 
+        for (int iSpeciesFile : focalIndex) {
             xVar[cpt] = this.getConfiguration().getDouble(key + ".sp" + iSpeciesFile);
             cpt++;
         }
@@ -132,7 +139,7 @@ public class Trait extends SimulationLinker {
         nLocus = new int[nspecies];
         key = String.format("%s.trait.nlocus", prefix);
         cpt = 0;
-        for (int iSpeciesFile : focalIndex) { 
+        for (int iSpeciesFile : focalIndex) {
             nLocus[cpt] = this.getConfiguration().getInt(key + ".sp" + iSpeciesFile);
             cpt++;
         }
@@ -141,7 +148,7 @@ public class Trait extends SimulationLinker {
         nVal = new int[nspecies];
         key = String.format("%s.trait.nval", prefix);
         cpt = 0;
-        for (int iSpeciesFile : focalIndex) { 
+        for (int iSpeciesFile : focalIndex) {
             nVal[cpt] = this.getConfiguration().getInt(key + ".sp" + iSpeciesFile);
             cpt++;
         }
@@ -159,10 +166,9 @@ public class Trait extends SimulationLinker {
             // initialisation of the "diversity" matrix, which is
             // the array of possible values for each of the locis
             // that code the trait
-            Random gaussian_gen = new Random();
             for (int i = 0; i < nLocus[ispec]; i++) {
                 for (int k = 0; k < nVal[ispec]; k++) {  // k = 0, 1
-                    diversity[ispec][i][k] = gaussian_gen.nextGaussian() * stddev;
+                    diversity[ispec][i][k] = generator.nextGaussian() * stddev;
                 }
             }
         }  // end of species loop
@@ -220,25 +226,24 @@ public class Trait extends SimulationLinker {
         return this.xMean[spec_index];
     }
 
-    /** Get the name of the variable trait. 
-     * 
-     * @return Name of the trait. 
+    /** Get the name of the variable trait.
+     *
+     * @return Name of the trait.
      */
     public String getName() {
         return this.prefix;
     }
-    
+
     /**
-     * Add some environmental noise to the trait "expression". Trait expressed is due 
+     * Add some environmental noise to the trait "expression". Trait expressed is due
      * to genotype + some noise (sigma_e^2). Species dependent.
      * @param index
      * @return
      */
     public double addTraitNoise(int index) {
-        Random random = new Random();
         double std = Math.sqrt(this.envVar[index]);
-        double val = random.nextGaussian() * std;
+        double val = generator.nextGaussian() * std;
         return val;
     }
-    
+
 }
