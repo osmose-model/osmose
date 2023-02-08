@@ -422,6 +422,12 @@ public class Releases {
 
                 Configuration cfg = this.getConfiguration();
 
+                if(cfg.canFind("stochastic.mortality.seed")) {
+                    String message = "Parameter replaced by the 'stochastic.mortality.randomseed.fixed' boolean parameter";
+                    commentParameter("stochastic.mortality.seed", message);
+                    addParameter("stochastic.mortality.randomseed.fixed", "true");
+                }
+
                 // update name of spatial outputs
                 if(cfg.canFind("output.spatialabundance.enabled")) {
                     updateKey("output.spatialabundance.enabled", "output.spatial.abundance.enabled");
