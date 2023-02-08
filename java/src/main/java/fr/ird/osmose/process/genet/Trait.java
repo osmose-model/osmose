@@ -88,14 +88,16 @@ public class Trait extends SimulationLinker {
      * @param rank
      * @param prefix
      */
-    public Trait(int rank, String prefix) {
+    public Trait(int rank, String prefix, int traitIndex) {
 
         super(rank);
         // Trait eyecolor = new Trait(rank, "eyecol")
         this.prefix = prefix;
 
         if(getConfiguration().getBoolean("genetics.randomseed.fixed", false)) {
-            generator = new Random(getConfiguration().getNSpecies());
+            // Assumes a seed of dimension [trait][nSimu]
+            long seed = traitIndex * getConfiguration().getNSimulation() + getRank();
+            generator = new Random(seed);
         } else {
             generator = new Random();
         }

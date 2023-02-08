@@ -196,7 +196,7 @@ public class Simulation extends OsmoseLinker {
                 String key = prefix_keys.get(p);
                 // recovers the trait prefix
                 String prefix = key.replace(".trait.mean", "");
-                Trait trait = new Trait(this.rank, prefix);
+                Trait trait = new Trait(this.rank, prefix, p);
                 trait.init();
                 this.evolvingTrait.add(trait);
             }
