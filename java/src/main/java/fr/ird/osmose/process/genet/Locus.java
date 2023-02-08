@@ -81,15 +81,19 @@ public class Locus extends OsmoseLinker {
      * @param spec_index
      * @param trait
      */
-    public Locus(int index, Trait trait, int spec_index) {
+    public Locus(int index, Trait trait, int spec_index, int rank) {
 
         this.index = index;
         this.trait = trait;
         this.spec_index = spec_index;
         value = new double[N];
+        int nSimulation = getConfiguration().getNSimulation();
 
         if(getConfiguration().getBoolean("genetics.randomseed.fixed", false)) {
-            generator = new Random(index);
+            // Assumes a seed array of dimemsion [loci][species][simulation]
+            // Makes sure that random generator is different for each species/simulation/loci
+            long seed = index * nSimulation * getNSpecies() + spec_index * nSimulation + rank;
+            generator = new Random(seed);
         } else {
             generator = new Random();
         }

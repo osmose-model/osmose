@@ -180,9 +180,9 @@ public class MortalityProcess extends AbstractProcess {
         }
 
         // Possibility to use a seed in the definition of mortality algorithm
-        String key = "stochastic.mortality.seed";
-        if (getConfiguration().canFind(key)) {
-            random = new XSRandom(getConfiguration().getLong(key));
+        String key = "stochastic.mortality.randomseed.fixed";
+        if (getConfiguration().getBoolean(key, false)) {
+            random = new XSRandom(getRank());
         } else {
             random = new XSRandom(System.nanoTime());
         }

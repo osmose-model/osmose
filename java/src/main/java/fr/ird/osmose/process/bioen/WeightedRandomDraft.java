@@ -54,6 +54,11 @@ public class WeightedRandomDraft<E> extends OsmoseLinker {
 
   /** Random generator */
   private Random rdDraft;
+  private int rank;
+
+  public WeightedRandomDraft(int rank) {
+    this.rank = rank;
+  }
 
   public void init() {
 
@@ -67,7 +72,8 @@ public class WeightedRandomDraft<E> extends OsmoseLinker {
     // Init random number generator
     if(fixedSeed) {
       int nSpecies = getConfiguration().getNSpecies();
-      rdDraft = new Random(13L * nSpecies);
+      long seed = (13L * nSpecies) * (rank + 1);
+      rdDraft = new Random(seed);
     } else {
       rdDraft = new Random();
     }

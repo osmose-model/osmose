@@ -46,6 +46,7 @@ import fr.ird.osmose.School;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Random;
 
 /**
  *
@@ -63,13 +64,32 @@ public class RandomDistribution extends AbstractSpatialDistribution {
      */
     private int range;
 
-    public RandomDistribution(int speciesFile, int species) {
+    private Random generator;
+
+    private int rank;
+
+    public RandomDistribution(int speciesFile, int species, int rank) {
         this.iSpeciesFile = speciesFile;
         this.iSpecies = species;
+        this.rank = rank;
     }
 
     @Override
     public void init() {
+
+        boolean fixedSeed = false;
+
+        if (!getConfiguration().isNull("movement.randomseed.fixed")) {
+            fixedSeed = getConfiguration().getBoolean("movement.randomseed.fixed");
+        }
+
+        if (fixedSeed) {
+            // seed of dimension [nSpecies]
+            long seed = iSpecies + rank * getNSpecies();
+            generator = new Random(seed);
+        } else {
+            generator = new Random();
+        }
 
         if (!getConfiguration().isNull("movement.distribution.ncell.sp" + iSpeciesFile)) {
             areaSize = getConfiguration().getInt("movement.distribution.ncell.sp" + iSpeciesFile);
@@ -122,11 +142,11 @@ public class RandomDistribution extends AbstractSpatialDistribution {
             boolean[][] alreadyChoosen = new boolean[getGrid().get_ny()][getGrid().get_nx()];
             //Cell[] tabCellsArea = new Cell[speciesAreasSizeTab[numSerie][iSpecies]];
             int i, j;
-            i = (int) Math.round(Math.random() * (getGrid().get_nx() - 1));
-            j = (int) Math.round(Math.random() * (getGrid().get_ny() - 1));
+            i = (int) Math.round(generator.nextDouble() * (getGrid().get_nx() - 1));
+            j = (int) Math.round(generator.nextDouble() * (getGrid().get_ny() - 1));
             while (getGrid().getCell(i, j).isLand()) {
-                i = (int) Math.round(Math.random() * (getGrid().get_nx() - 1));
-                j = (int) Math.round(Math.random() * (getGrid().get_ny() - 1));
+                i = (int) Math.round(generator.nextDouble() * (getGrid().get_nx() - 1));
+                j = (int) Math.round(generator.nextDouble() * (getGrid().get_ny() - 1));
             }
             randomMap.add(getGrid().getCell(i, j));
             alreadyChoosen[j][i] = true;
@@ -163,7 +183,7 @@ public class RandomDistribution extends AbstractSpatialDistribution {
      * @return a cell from the list of cells.
      */
     Cell randomDeal(List<Cell> cells) {
-        int index = (int) Math.round((cells.size() - 1) * Math.random());
+        int index = (int) Math.round((cells.size() - 1) * generator.nextDouble());
         return cells.get(index);
     }
 

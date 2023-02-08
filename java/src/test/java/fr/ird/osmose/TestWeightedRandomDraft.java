@@ -17,7 +17,7 @@ import fr.ird.osmose.process.bioen.WeightedRandomDraft;
 public class TestWeightedRandomDraft {
 
     private Configuration cfg;
-    WeightedRandomDraft<School> weight_rand = new WeightedRandomDraft<>();
+    WeightedRandomDraft<School> weight_rand = new WeightedRandomDraft<>(0);
 
     @BeforeAll
     public void prepareData() throws Exception {
