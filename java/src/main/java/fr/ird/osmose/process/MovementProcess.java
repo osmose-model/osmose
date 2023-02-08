@@ -68,9 +68,9 @@ public class MovementProcess extends AbstractProcess {
         for (int iSpecies : this.getFocalIndex()) {
             String distributionMethod = getConfiguration().getString("movement.distribution.method.sp" + iSpecies);
             if (distributionMethod.equalsIgnoreCase("random")) {
-                spatialDistribution[cpt] = new RandomDistribution(iSpecies, cpt);
+                spatialDistribution[cpt] = new RandomDistribution(iSpecies, cpt, getRank());
             } else if (distributionMethod.equalsIgnoreCase("maps")) {
-                spatialDistribution[cpt] = new MapDistribution(iSpecies, cpt);
+                spatialDistribution[cpt] = new MapDistribution(iSpecies, cpt, getRank());
             } else {
                 throw new UnsupportedOperationException("Distribution method is either 'random' or 'maps'");
             }

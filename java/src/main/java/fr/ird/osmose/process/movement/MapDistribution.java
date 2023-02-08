@@ -65,14 +65,17 @@ public class MapDistribution extends AbstractSpatialDistribution {
     private Random rd1, rd2, rd3;
     private MapSet maps;
     private float[] maxProbaPresence;
+    private int rank;
+
     /*
      * Ranges of movement in cell during one Osmose time step
      */
     private int range;
 
-    public MapDistribution(int iSpeciesFile, int iSpecies) {
+    public MapDistribution(int iSpeciesFile, int iSpecies, int rank) {
         this.iSpeciesFile = iSpeciesFile;
         this.iSpecies = iSpecies;
+        this.rank = rank;
     }
 
     @Override
@@ -83,9 +86,9 @@ public class MapDistribution extends AbstractSpatialDistribution {
             fixedSeed = getConfiguration().getBoolean("movement.randomseed.fixed");
         }
         if (fixedSeed) {
-            rd1 = new Random(13L ^ iSpecies);
-            rd2 = new Random(5L ^ iSpecies);
-            rd3 = new Random(1982L ^ iSpecies);
+            rd1 = new Random((13L ^ iSpecies) * (rank + 1));
+            rd2 = new Random((5L ^ iSpecies) * (rank + 1));
+            rd3 = new Random((1982L ^ iSpecies) * (rank + 1));
             warning("Parameter 'movement.randomseed.fixed' is set to true. It means that two simulations with strictly identical initial school distribution will lead to same movement.");
         } else {
             rd1 = new Random();
