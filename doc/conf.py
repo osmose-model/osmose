@@ -137,6 +137,7 @@ html_theme = "sphinx_rtd_theme"
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
 html_static_path = ['_static']
+html_css_files = ['css/hacks.css']
 
 #html_context = {
 #        'css_files': [
@@ -176,11 +177,10 @@ latex_elements = {
 # Grouping the document tree into LaTeX files. List of tuples
 # (source start file, target name, title,
 #  author, documentclass [howto, manual, or own class]).
-latexauthor = '\\\\'.join(author.split(','))
+latexauthor = '\\and'.join(author.split(','))
 
 latex_documents = [
-    (master_doc, 'OSMOSE.tex', u'OSMOSE Documentation',
-     u'Yunne-Jai Shin \\and Philippe Verley \\and Morgane Travers \\and Laure Velez \\and Ricardo Oliveros-Ramos \\and Arnaud Gruss \\and Nicolas Barrier \\and Alaia Morell \\and Hanna Schenk', 'manual'),
+    (master_doc, 'OSMOSE.tex', u'OSMOSE Documentation', latexauthor, 'manual'),
 ]
 
 

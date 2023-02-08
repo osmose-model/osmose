@@ -1,0 +1,9 @@
+Variable ; Description  ; Type ; Units
+;;;
+e_M;Array of increasing activation energy of the energy mobilization temperature function;float[];J
+e_D;Array of declining activation energy of the energy mobilization temperature function;float[];J
+Tp;"Array of temperature of peak value in energy mobilization
+";float[];C
+e_m;Activation energy of the maintenance temperature function;float[];J
+temperature_input;Temperature input dataset;``PhysicalData``;
+isPhiTActivated;True if the mobilized energy should depend on temperature;bool, default is true;

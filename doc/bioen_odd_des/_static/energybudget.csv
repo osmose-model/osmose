@@ -1,0 +1,12 @@
+Variable ; Description  ; Type ; Units
+;;;
+c_m;Array of mass-specific maintenance rate (one for each species);float[];:math:`g.year^{-1}`
+m0;Array of intercept of a deterministic linear maturation reaction norm (one for each species);float[];:math:`cm`
+m1;Array of slope of a deterministic linear maturation reaction norm (one for each species);float[];:math:`cm.year^{-1}`
+eta;"Array of energy density ratio between somatic and gonadic tissue
+";float[];
+temp_function;Temperature function entity;``TemperatureFunction``;
+oxygen_function;Oxygen function entity;``OxygenFunction``;
+r;Array of gonado-somatic index of school;;
+larvaePredationRateBioen;Array of multiplication factor for ingestion of larva individuals;float[];
+assimilation;Array of assimilation efficiency;float[];

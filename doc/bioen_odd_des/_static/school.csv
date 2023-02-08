@@ -1,0 +1,11 @@
+Variable ;  Description ; Type ; Units
+;;;
+e_gross;Mobilized energy rate of individuals of school  at time step ;float;g / timestep
+e_maint;Maintenance cost rate of individuals of school  at time step ;float;g / timestep
+e_net;Net energy available for new tissue production;float;g / timestep
+ingestion;Ingestion rate of individuals in school  at time step ;float;g / timestep
+ingestionTot;Sum of all the food ingested during life of the school;float;g
+kappa;Proportion of new tissues allocated to the gonadic compartment;float;
+e_net_faced;Mean net energy faced during lifespan of the school;float;g
+mort_starv_rate;;;
+mort_oxy_rate;;;

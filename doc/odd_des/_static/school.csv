@@ -5,10 +5,10 @@ instantaneousAbundance ; Instanteanous number of fish in the school; float;
 instantaneousBiomass ; Instanteanous biomass of the school at the beginning of the school ;float; Tons
 discardedBiomass ; Biomass of the school that has been discarded by each fishing gear  ;float[]; Tons
 fishedBiomass ; Biomass of the school that has been landed by each fishing gear ; float[]; Tons
-nDead ; Number of dead fish in the current time \nstep for each mortality cause (predation, fishing, natural mortality, starvation) ; float[];
+nDead ; Number of dead fish in the current time \nstep for each mortality cause (predation, fishing, natural mortality, starvation) ; float
 predSuccessRate ; Predation success rate ; float;%
 preyedBiomass ; Biomass of prey ingested by the school at current time step  ;float; Tons
-preys ; List of preys eaten by the school ;HashMap<Integer, Prey>;
+preys ; List of preys eaten by the school ;HashMap<Integer; Prey>
 uuid ; Unique identifier of the individual ;UUID;
 lat ; Latitude of the individual ;float; Degrees north
 lon ; Longitude of the individual ;float; Degrees east

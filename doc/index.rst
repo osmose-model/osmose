@@ -36,6 +36,8 @@ The Osmose model assumes opportunistic predation based on spatial co-occurrence 
    :numbered:
 
    odd_des
+   bioen_odd_des
+   evo_odd_des
    astart
    osmose
    osmose-econ
