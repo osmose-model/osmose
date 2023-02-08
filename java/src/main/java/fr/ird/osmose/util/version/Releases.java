@@ -428,6 +428,13 @@ public class Releases {
                     addParameter("stochastic.mortality.randomseed.fixed", "true");
                 }
 
+                if(cfg.canFind("population.initialization.seed")) {
+                    String message = "Parameter replaced by the 'stochastic.mortality.randomseed.fixed' boolean parameter";
+                    commentParameter("population.initialization.seed", message);
+                    addParameter("population.initialization.randomseed.fixed", "true");
+                }
+
+
                 // update name of spatial outputs
                 if(cfg.canFind("output.spatialabundance.enabled")) {
                     updateKey("output.spatialabundance.enabled", "output.spatial.abundance.enabled");
