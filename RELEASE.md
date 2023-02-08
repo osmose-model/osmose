@@ -32,6 +32,7 @@
 - Removing of the ``simulation.onestep`` feature. For debugging, use debugging tools.
 - Possibility to provide MPAs that occupy only a fraction of a cell.
 - Update to the latest NetCDF java package (compression features, etc.)
+- Adding a `genetics.randomseed.fixed` boolean to control stochasticity in Ev-OSMOSE.
 
 ### Bug fixes
 
