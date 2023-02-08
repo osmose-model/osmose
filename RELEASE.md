@@ -33,6 +33,8 @@
 - Possibility to provide MPAs that occupy only a fraction of a cell.
 - Update to the latest NetCDF java package (compression features, etc.)
 - Adding a `genetics.randomseed.fixed` boolean to control stochasticity in Ev-OSMOSE.
+- Modification of the stochasticity control. The simulation output depends on the simulation (`rank`) index. But repeating several times a given set of replicates will lead to identical results.
+- Replacement of the `stochastic.mortality.seed` and `population.initialization.seed` integer parameters by the `stochastic.mortality.randomseed.fixed` and `population.initialization.randomseed.fixed` boolean parameters.
 
 ### Bug fixes
 
