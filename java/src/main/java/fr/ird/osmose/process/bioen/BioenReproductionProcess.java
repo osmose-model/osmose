@@ -68,7 +68,7 @@ public class BioenReproductionProcess extends ReproductionProcess {
 
     public BioenReproductionProcess(int rank) {
         super(rank);
-        weight_rand = new WeightedRandomDraft<>();
+        weight_rand = new WeightedRandomDraft<>(rank);
     }
 
     @Override
