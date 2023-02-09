@@ -1,5 +1,14 @@
 .. _new_tissue:
 
+.. ipython:: python
+    :suppress:
+
+    import os
+    import subprocess
+    cwd = os.getcwd()
+    fpath = "bioen_odd_des/submodel/_static/plot_repfonct.py"
+    subprocess.call(["python", fpath], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+
 New tissue production: somatic and gonadic growth
 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
