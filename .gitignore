@@ -88,3 +88,4 @@ doc/rosmose/_static/*png
 random_drift.pdf
 random_drift.svg
 /*.sh
+doc/bioen_odd_des/submodel/_static/repfonct_bioen.pdf
