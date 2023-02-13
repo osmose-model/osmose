@@ -132,7 +132,7 @@ public abstract class AbstractSchool extends GridPoint implements IAggregation {
 
     public abstract double getEMaint();
     public abstract double getENet();
-    public abstract double getKappa();
+    public abstract double getRho();
     public abstract double getIngestion();
     public abstract float getGonadWeight();
     public abstract double getIngestionTot();

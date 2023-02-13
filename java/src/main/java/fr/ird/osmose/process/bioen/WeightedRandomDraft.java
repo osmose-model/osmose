@@ -54,6 +54,7 @@ public class WeightedRandomDraft<E> extends OsmoseLinker {
 
   /** Random generator */
   private Random rdDraft;
+
   private int rank;
 
   public WeightedRandomDraft(int rank) {

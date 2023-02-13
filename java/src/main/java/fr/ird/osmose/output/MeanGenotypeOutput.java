@@ -91,6 +91,7 @@ public class MeanGenotypeOutput extends SimulationLinker implements IOutput {
      */
     private NetcdfFormatWriter nc;
     private NetcdfFormatWriter.Builder bNc;
+
     private int record_index = 0;
 
     private final String varname = "meanGenotype";
@@ -323,8 +324,8 @@ public class MeanGenotypeOutput extends SimulationLinker implements IOutput {
      * Function to create a species attribute.
      * @return
      */
-    public String createSpeciesAttr(Variable.Builder<?> species) {
 
+    public String createSpeciesAttr(Variable.Builder<?> species) {
         StringBuilder bld = new StringBuilder();
         for (int i = 0; i < this.getNSpecies(); i++) {
             String attrname = String.format("species%d", i);
@@ -341,7 +342,6 @@ public class MeanGenotypeOutput extends SimulationLinker implements IOutput {
      * @return
      */
     public String createTraitAttr(Variable.Builder<?> trait) {
-
         StringBuilder bld = new StringBuilder();
         for (int i = 0; i < this.getNEvolvingTraits(); i++) {
             String attrname = String.format("trait%d", i);

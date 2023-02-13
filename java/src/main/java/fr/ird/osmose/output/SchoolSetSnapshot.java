@@ -79,9 +79,9 @@ public class SchoolSetSnapshot extends SimulationLinker {
         boolean useGenet = this.getConfiguration().isGeneticEnabled();
         boolean useBioen = this.getConfiguration().isBioenEnabled();
         ArrayFloat.D1 gonadicWeight = null;
+        ArrayInt.D1 maturity = null;
         ArrayFloat.D4 genotype = null;
         ArrayFloat.D2 traitnoise = null;
-        ArrayInt.D1 maturity = null;
         NetcdfFormatWriter nc = createNCFile(iStepSimu);
         int nSchool = getSchoolSet().getSchools().size();
         ArrayInt.D1 species = new ArrayInt.D1(nSchool, false);
@@ -137,6 +137,7 @@ public class SchoolSetSnapshot extends SimulationLinker {
         }
         // write the arrays in the NetCDF file
         try {
+
             nc.write(nc.findVariable("species"), species);
             nc.write(nc.findVariable("x"), x);
             nc.write(nc.findVariable("y"), y);

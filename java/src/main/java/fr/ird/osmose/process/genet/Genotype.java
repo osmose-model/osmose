@@ -211,7 +211,8 @@ public class Genotype extends SimulationLinker {
     /**
      * Returns the value of the trait for a given genotype.
      *
-     * @param name Name of the trait
+     * @param name
+     *            Name of the trait
      * @return Value of the trait for the given genotype
      * @throws java.lang.Exception
      */
@@ -222,8 +223,7 @@ public class Genotype extends SimulationLinker {
 
     }
 
-        public double getgenet_value(String name) throws Exception {
-
+    public double getgenet_value(String name) throws Exception {
         int index = this.getTraitIndex(name);
         return (traits[index]);
 

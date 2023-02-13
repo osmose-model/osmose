@@ -44,6 +44,8 @@ import fr.ird.osmose.process.genet.Genotype;
 import fr.ird.osmose.process.mortality.MortalityCause;
 import fr.ird.osmose.util.GridPoint;
 import java.util.HashMap;
+
+import ucar.ma2.ArrayDouble;
 import ucar.ma2.ArrayFloat;
 
 /**
@@ -151,15 +153,11 @@ public class School extends AbstractSchool {
     private double e_maint;    // energy used for maintenance.
     private double e_net;      // net energy (gross - maintenance)
     private double ingestion;   // total ingestion
-    private double kappa;    // kappa value
+    private double rho;    // rho value
     double ingestionTot = 0; // sum of all the food ingested during life of the
     // school
 
-    /**
-     * Mortality rates associated with the bioen module.
-     */
-    private double mort_oxy_rate = 0;
-    private double mort_starv_rate = 0;
+
 
     // Initialisation of maturity variables.
     // by default the school is imature.
@@ -761,10 +759,10 @@ public class School extends AbstractSchool {
     }
 
     /**
-     * Gets the value of kappa
+     * Gets the value of rho
      */
-    public double getKappa() {
-        return this.kappa;
+    public double getRho() {
+        return this.rho;
     }
 
     /**
@@ -773,44 +771,10 @@ public class School extends AbstractSchool {
      *
      * @return
      */
-    public void setKappa(double value) {
-        this.kappa = value;
+    public void setRho(double value) {
+        this.rho = value;
     }
-
-    /**
-     * Gets the value of maintenance energy (ingestion x phiT, equation 5).
-     */
-    public double getOxyMort() {
-        return this.mort_oxy_rate;
-    }
-
-    /**
-     * Returns the net energy, which is the difference between gross and
-     * maintenance energy.
-     *
-     * @return
-     */
-    public void setOxyMort(double value) {
-        this.mort_oxy_rate = value;
-    }
-
-    /**
-     * Gets the value of maintenance energy (ingestion x phiT, equation 5).
-     */
-    public double getStarvMort() {
-        return this.mort_starv_rate;
-    }
-
-    /**
-     * Returns the net energy, which is the difference between gross and
-     * maintenance energy.
-     *
-     * @param value
-     * @return
-     */
-    public void setStarvMort(double value) {
-        this.mort_starv_rate = value;
-    }
+    
 
     public void incrementEnet(double d) {
         this.e_net += d;
@@ -883,6 +847,7 @@ public class School extends AbstractSchool {
                 double val0 = genArray.get(index, itrait, iloc, 0);
                 double val1 = genArray.get(index, itrait, iloc, 1);
                 this.getGenotype().setLocusVal(itrait, iloc, val0, val1);
+                this.getGenotype().restartTrait(itrait);
 
                 // Sets the value for the environmental noise
                 double envnoise = envNoise.get(index, itrait);

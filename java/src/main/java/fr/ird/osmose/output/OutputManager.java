@@ -665,9 +665,9 @@ public class OutputManager extends SimulationLinker {
                 outputs.add(new BioenSizeInfOutput(rank));
             }
 
-            if (getConfiguration().getBoolean("output.bioen.kappa.enabled", NO_WARNING)) {
-                outputs.add(new WeightedSpeciesOutput(rank, "Bioen", "kappa", "Kappa (rate [0-1])",
-                        school -> school.getKappa(), school -> school.getInstantaneousAbundance()));
+            if (getConfiguration().getBoolean("output.bioen.rho.enabled", NO_WARNING)) {
+                outputs.add(new WeightedSpeciesOutput(rank, "Bioen", "rho", "Rho (rate [0-1])",
+                        school -> school.getRho(), school -> school.getInstantaneousAbundance()));
             }
 
             // Alaia's outputs in the new format
@@ -689,16 +689,16 @@ public class OutputManager extends SimulationLinker {
             }
 
             // Alaia's outputs in the new format
-            if (getConfiguration().getBoolean("output.kappa.byAge.enabled")) {
-                outputs.add(new WeightedDistribOutput(rank, "BioenIndicators", "meanKappaDistribBy",
-                        "Mean kappa of fish", school -> (school.getKappa()),
+            if (getConfiguration().getBoolean("output.rho.byAge.enabled")) {
+                outputs.add(new WeightedDistribOutput(rank, "BioenIndicators", "meanRhoDistribBy",
+                        "Mean rho of fish", school -> (school.getRho()),
                         school -> school.getInstantaneousAbundance(), ageDistrib));
             }
 
             // Alaia's outputs in the new format
-            if (getConfiguration().getBoolean("output.kappa.bySize.enabled")) {
-                outputs.add(new WeightedDistribOutput(rank, "BioenIndicators", "meanKappa",
-                        "Mean kappa of fish", school -> (school.getKappa()),
+            if (getConfiguration().getBoolean("output.rho.bySize.enabled")) {
+                outputs.add(new WeightedDistribOutput(rank, "BioenIndicators", "meanRho",
+                        "Mean rho of fish", school -> (school.getRho()),
                         school -> school.getInstantaneousAbundance(), sizeDistrib));
             }
 
@@ -769,8 +769,6 @@ public class OutputManager extends SimulationLinker {
                 outputs.add(new MeanGenotypeOutput(rank, "meanTraitsParents", (school -> school.getNEggs()),
                         (school -> school.isMature()), (schoolset -> schoolset.getAliveSchools()), "Mean traits of parent schools, ponderated by number of eggs"));
             }
-
-
         }
 
         /*

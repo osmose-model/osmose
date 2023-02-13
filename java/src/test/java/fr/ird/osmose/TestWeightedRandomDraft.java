@@ -35,7 +35,6 @@ public class TestWeightedRandomDraft {
         cfg.init();
         weight_rand.init();
 
-
     }
 
     @Test

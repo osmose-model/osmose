@@ -45,6 +45,8 @@ import fr.ird.osmose.School;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+
+import ucar.ma2.ArrayDouble;
 import ucar.ma2.ArrayFloat;
 import ucar.ma2.ArrayInt;
 import ucar.nc2.NetcdfFile;
