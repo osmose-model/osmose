@@ -138,11 +138,6 @@ public class SchoolSet extends OsmoseLinker {
         schoolBySpecies.clear();
     }
 
-    /** Get newborn school */
-    public List<School> getNewBorns() {
-        return this.newSchoolset;
-    }
-
     /**
      * Remove dead schools from the set
      */
