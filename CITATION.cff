@@ -1,12 +1,9 @@
 cff-version: 1.1.0
 message: "If you use this software, please cite it as below."
 authors:
-  - family-names: Jai-Shin
-    given-names: Yunne
+  - family-names: Shin
+    given-names: Yunne-Jai
     orcid: https://orcid.org/0000-0002-7259-9265
-  - family-names: Cury
-    given-names: Philippe
-    orcid: https://orcid.org/0000-0002-4622-4208
   - family-names: Travers-Trolet
     given-names: Morgane
     orcid: https://orcid.org/0000-0003-1493-662X
@@ -28,12 +25,13 @@ authors:
   - family-names: Velez
     given-names: Laure
     orcid: https://orcid.org/0000-0001-9555-6770
-  - family-names: Moullec
-    given-names: Fabien
-    orcid: https://orcid.org/0000-0001-8006-1169
   - family-names: Lau-Medrano
     given-names: Wencheng
     orcid:  https://orcid.org/0000-0002-7979-9710
+  - family-names: Ernande
+    given-names: Bruno
+    orcid:  https://orcid.org/0000-0002-0727-5774
+
 
 title: Object-oriented Simulator of Marine ecOSystEms (OSMOSE)
 version: 4.3.3
