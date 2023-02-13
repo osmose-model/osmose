@@ -1,37 +1,36 @@
 cff-version: 1.1.0
 message: "If you use this software, please cite it as below."
 authors:
-  - family-names: Shin
-    given-names: Yunne-Jai
-    orcid: https://orcid.org/0000-0002-7259-9265
-  - family-names: Travers-Trolet
-    given-names: Morgane
-    orcid: https://orcid.org/0000-0003-1493-662X
-  - family-names: Verley
-    given-names: Philippe
-    orcid: https://orcid.org/0000-0002-5686-2764
   - family-names: Barrier
     given-names: Nicolas
     orcid: https://orcid.org/0000-0002-1693-4719
   - family-names: Oliveros-Ramos
     given-names: Ricardo
     orcid: https://orcid.org/0000-0002-8069-2101
-  - family-names: Morell
-    given-names: Alaia
-    orcid: https://orcid.org/0000-0003-3719-4462
-  - family-names: Luján
-    given-names: Criscely
-    orcid: https://orcid.org/0000-0003-2658-7340
-  - family-names: Velez
-    given-names: Laure
-    orcid: https://orcid.org/0000-0001-9555-6770
-  - family-names: Lau-Medrano
-    given-names: Wencheng
-    orcid:  https://orcid.org/0000-0002-7979-9710
+  - family-names: Verley
+    given-names: Philippe
+    orcid: https://orcid.org/0000-0002-5686-2764
   - family-names: Ernande
     given-names: Bruno
     orcid:  https://orcid.org/0000-0002-0727-5774
-
+  - family-names: Lau-Medrano
+    given-names: Wencheng
+    orcid:  https://orcid.org/0000-0002-7979-9710
+  - family-names: Luján
+    given-names: Criscely
+    orcid: https://orcid.org/0000-0003-2658-7340
+  - family-names: Morell
+    given-names: Alaia
+    orcid: https://orcid.org/0000-0003-3719-4462
+  - family-names: Travers-Trolet
+    given-names: Morgane
+    orcid: https://orcid.org/0000-0003-1493-662X
+  - family-names: Velez
+    given-names: Laure
+    orcid: https://orcid.org/0000-0001-9555-6770
+  - family-names: Shin
+    given-names: Yunne-Jai
+    orcid: https://orcid.org/0000-0002-7259-9265
 
 title: Object-oriented Simulator of Marine ecOSystEms (OSMOSE)
 version: 4.3.3
