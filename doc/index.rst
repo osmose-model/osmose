@@ -42,9 +42,7 @@ The Osmose model assumes opportunistic predation based on spatial co-occurrence 
    osmose
    osmose-econ
    rosmose
-   calib
    biblio
-   misc
    genindex
 
 .. :ref:`genindex`

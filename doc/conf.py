@@ -23,6 +23,7 @@ import os
 import re
 from datetime import date
 import sphinx_rtd_theme
+from glob import glob
 
 # -- General configuration ------------------------------------------------
 
@@ -102,7 +103,9 @@ todo_emit_warnings = True
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
 # This patterns also effect to html_static_path and html_extra_path
-exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store', 'alias.rst', 'index_private.rst', 'index_public.rst']
+exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store', 'alias.rst', 'index_private.rst', 'index_public.rst', 'calib.rst', 'misc.rst']
+exclude_patterns += glob(os.path.join('calib', '*rst'))
+exclude_patterns += glob(os.path.join('misc', '*rst'))
 
 # The name of the Pygments (syntax highlighting) style to use.
 pygments_style = 'sphinx'
