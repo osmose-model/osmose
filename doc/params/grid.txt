@@ -1,0 +1,52 @@
+Grid
+--------------
+
+The grid defines the geographical extent of the simulated domain and the spatial discretization. The grid is defined by a NetCDF file that provides for every cell of the grid the latitude, the longitude and whether it is land or ocean (the mask). OSMOSE does not set any convention regarding the latitude and the longitude. Just make sure it is consistent with the convention of the biotic resource dataset. The grid does not have to be regular.
+
+:samp:`grid.netcdf.file` is the path of the NetCDF grid file.
+
+::
+
+    grid.var.lat = lat
+    grid.var.lon = lon
+    grid.var.mask = mask
+
+is the name of the latitude, longitude and mask variables in the NetCDF grid file.
+
+:samp:`grid.java.classname` is the Java class that should be used to build the OSMOSE grid. Do not change this parameter unless you know exactly what you are doing.
+
+Historically OSMOSE allows to define a regular grid, given a few parameters. Even though it is preferable to use the NetCDF grid definition, here is how a regular grid can be defined:
+
+:: 
+
+    grid.ncolumn = 56
+    grid.nline = 62
+    grid.lowright.lat = -37.5
+    grid.lowright.lon = 24.4
+    grid.upleft.lat = -28.2
+    grid.upleft.lon = 16
+    grid.mask.file = grid-mask.csv
+    grid.java.classname = fr.ird.osmose.grid.OriginalGrid
+
+The mask file is a CSV with :samp:`ncolumn` and :samp:`nline`. Land takes the value :samp:`-99`,  and ocean cell are defined by a :samp:`0`. Here is an example of a CSV mask file for a 4x4 grid:
+
+.. _table_paros_grid_ex:
+.. table:: Example of a 4x4 grid file
+
+    .. csv-table::
+        :delim: ;
+
+        0;0;0;0
+        0;0;0;-99
+        0;0;-99;-99
+        0;0;-99;-99
+
+OSMOSE also allows to define grid based on ECO3M or BFM grid. 
+These are specific cases though for handling the LTL dataset more easily and 
+will not be detailed here. Please refer to section "LTL dataset directly from biogeochemical model".
+
+.. warning::
+
+    **The authors highly advise the users to use regular grid. However, this implies that biotic resource NetCDF file must be pre-processed to fit Osmose requirements.**
+
+

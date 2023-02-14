@@ -1,10 +1,10 @@
-/* 
- * 
+/*
+ *
  * OSMOSE (Object-oriented Simulator of Marine Ecosystems)
  * http://www.osmose-model.org
- * 
+ *
  * Copyright (C) IRD (Institut de Recherche pour le Développement) 2009-2020
- * 
+ *
  * Osmose is a computer program whose purpose is to simulate fish
  * populations and their interactions with their biotic and abiotic environment.
  * OSMOSE is a spatial, multispecies and individual-based model which assumes
@@ -15,7 +15,7 @@
  * processes of fish life cycle (growth, explicit predation, additional and
  * starvation mortalities, reproduction and migration) and fishing mortalities
  * (Shin and Cury 2001, 2004).
- * 
+ *
  * Contributor(s):
  * Yunne SHIN (yunne.shin@ird.fr),
  * Morgane TRAVERS (morgane.travers@ifremer.fr)
@@ -23,20 +23,20 @@
  * Philippe VERLEY (philippe.verley@ird.fr)
  * Laure VELEZ (laure.velez@ird.fr)
  * Nicolas Barrier (nicolas.barrier@ird.fr)
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation (version 3 of the License). Full description
  * is provided on the LICENSE file.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
- * 
+ *
  */
 
 package fr.ird.osmose.output.spatial;
@@ -58,8 +58,9 @@ import ucar.ma2.DataType;
 import ucar.ma2.InvalidRangeException;
 import ucar.nc2.Attribute;
 import ucar.nc2.Dimension;
-import ucar.nc2.NetcdfFileWriter;
 import ucar.nc2.Variable;
+import ucar.nc2.write.Nc4Chunking;
+import ucar.nc2.write.NetcdfFormatWriter;
 
 /**
  *
@@ -74,7 +75,9 @@ public class SpatialOutput extends SimulationLinker implements IOutput {
     /**
      * Object for creating/writing netCDF files.
      */
-    private NetcdfFileWriter nc;
+    private NetcdfFormatWriter nc;
+    private NetcdfFormatWriter.Builder bNc;
+
     // spatial indicators
     private float[][][] biomass;
     private float[][][] mean_size;
@@ -82,108 +85,85 @@ public class SpatialOutput extends SimulationLinker implements IOutput {
     private float[][][] ltlbiomass;
     private float[][][] abundance;
     private float[][][] yield;
-    private boolean cutoffEnabled;
     private int index;
-    
-    private Variable timevar, lonvar, latvar, biomassVar, abundanceVar, yieldVar, meanSizeVar, tlVar, ltlbiomVar;
-    
-    /**
-     * Threshold age (year) for age class zero. This parameter allows to discard
-     * schools younger that this threshold in the calculation of the indicators
-     * when parameter <i>output.cutoff.enabled</i> is set to {@code true}.
-     * Parameter <i>output.cutoff.age.sp#</i>
-     */
-    private float[] cutoffAge;
 
     public SpatialOutput(int rank) {
         super(rank);
     }
 
     private boolean includeClassZero() {
-        return !cutoffEnabled;
+        return !getConfiguration().isCutoffEnabled();
     }
 
     @Override
     public void init() {
 
-        // cutoff for egg, larvae and juveniles
-        cutoffEnabled = getConfiguration().getBoolean("output.cutoff.enabled");
-        cutoffAge = new float[getNSpecies()];
-        if (cutoffEnabled) {
-            int cpt = 0;
-            for (int iSpec : this.getConfiguration().getFocalIndex()) {
-                cutoffAge[cpt] = getConfiguration().getFloat("output.cutoff.age.sp" + iSpec);
-                cpt++;
-            }
-        }
+        Nc4Chunking chunker = getConfiguration().getChunker();
 
         /*
          * Create NetCDF file
          */
-        try {
-            String filename = getFilename();
-            IOTools.makeDirectories(filename);
-            nc = NetcdfFileWriter.createNew(NetcdfFileWriter.Version.netcdf4, filename);
-        } catch (IOException ex) {
-            Logger.getLogger(SpatialOutput.class.getName()).log(Level.SEVERE, null, ex);
-        }
+        String filename = getFilename();
+        IOTools.makeDirectories(filename);
+        bNc = NetcdfFormatWriter.createNewNetcdf4(getConfiguration().getNcOutVersion(), filename, chunker);
+
         /*
          * Create dimensions
          */
-        Dimension speciesDim = nc.addDimension(null, "species", getNSpecies());
-        Dimension ltlDim = nc.addDimension(null, "ltl", getConfiguration().getNRscSpecies());
-        Dimension columnsDim = nc.addDimension(null, "nx", getGrid().get_nx());
-        Dimension linesDim = nc.addDimension(null, "ny", getGrid().get_ny());
-        Dimension timeDim = nc.addUnlimitedDimension("time");
+        Dimension speciesDim = bNc.addDimension("species", getNSpecies());
+        Dimension ltlDim = bNc.addDimension("ltl", getConfiguration().getNRscSpecies());
+        Dimension columnsDim = bNc.addDimension("nx", getGrid().get_nx());
+        Dimension linesDim = bNc.addDimension("ny", getGrid().get_ny());
+        Dimension timeDim = bNc.addUnlimitedDimension("time");
         /*
          * Add variables
          */
-        timevar = nc.addVariable(null, "time", DataType.FLOAT, "time");
-        timevar.addAttribute(new Attribute("units", "days since 0-1-1 0:0:0"));
-        timevar.addAttribute(new Attribute("calendar", "360_day"));
-        timevar.addAttribute(new Attribute("description", "time ellapsed, in days, since the beginning of the simulation"));
-        
-        biomassVar = nc.addVariable(null, "biomass", DataType.FLOAT, new ArrayList<>(Arrays.asList(timeDim, speciesDim, linesDim, columnsDim)));
-        biomassVar.addAttribute(new Attribute("units", "ton"));
-        biomassVar.addAttribute(new Attribute("description", "biomass, in tons, per species and per cell"));
-        biomassVar.addAttribute(new Attribute("_FillValue", -99.f));
-        
-        abundanceVar = nc.addVariable(null, "abundance", DataType.FLOAT, new ArrayList<>(Arrays.asList(timeDim, speciesDim, linesDim, columnsDim)));
-        abundanceVar.addAttribute(new Attribute("units", "number of fish"));
-        abundanceVar.addAttribute(new Attribute("description", "Number of fish per species and per cell"));
-        abundanceVar.addAttribute(new Attribute("_FillValue", -99.f));
-        
-        yieldVar = nc.addVariable(null, "yield", DataType.FLOAT, new ArrayList<>(Arrays.asList(timeDim, speciesDim, linesDim, columnsDim)));
-        yieldVar.addAttribute(new Attribute("units", "ton"));
-        yieldVar.addAttribute(new Attribute("description", "Catches, in tons, per species and per cell"));
-        yieldVar.addAttribute(new Attribute("_FillValue", -99.f));
-        
-        meanSizeVar = nc.addVariable(null, "mean_size", DataType.FLOAT, new ArrayList<>(Arrays.asList(timeDim, speciesDim, linesDim, columnsDim)));
-        meanSizeVar.addAttribute(new Attribute("units", "centimeter"));
-        meanSizeVar.addAttribute(new Attribute("description", "mean size, in centimeter, per species and per cell"));
-        meanSizeVar.addAttribute(new Attribute("_FillValue", -99.f));
-        
-        tlVar = nc.addVariable(null, "trophic_level", DataType.FLOAT, new ArrayList<>(Arrays.asList(timeDim, speciesDim, linesDim, columnsDim)));
-        tlVar.addAttribute(new Attribute("units", "scalar"));
-        tlVar.addAttribute(new Attribute("description", "trophic level per species and per cell"));
-        tlVar.addAttribute(new Attribute("_FillValue", -99.f));
-        
-        ltlbiomVar = nc.addVariable(null, "ltl_biomass", DataType.FLOAT, new ArrayList<>(Arrays.asList(timeDim, ltlDim, linesDim, columnsDim)));
-        ltlbiomVar.addAttribute(new Attribute("units", "ton/km2"));
-        ltlbiomVar.addAttribute(new Attribute("description", "resource biomass, in tons per km2 integrated on water column, per group and per cell"));
-        ltlbiomVar.addAttribute(new Attribute("_FillValue", -99.f));
-        
-        latvar = nc.addVariable(null, "latitude", DataType.FLOAT, new ArrayList<>(Arrays.asList(linesDim, columnsDim)));
-        latvar.addAttribute(new Attribute("units", "degree"));
-        latvar.addAttribute(new Attribute("description", "latitude of the center of the cell"));
-        
-        lonvar = nc.addVariable(null, "longitude", DataType.FLOAT, new ArrayList<>(Arrays.asList(linesDim, columnsDim)));
-        lonvar.addAttribute(new Attribute("units", "degree"));
-        lonvar.addAttribute(new Attribute("description", "longitude of the center of the cell"));
+        Variable.Builder<?> timeVarBuilder = bNc.addVariable("time", DataType.FLOAT, "time");
+        timeVarBuilder.addAttribute(new Attribute("units", "days since 0-1-1 0:0:0"));
+        timeVarBuilder.addAttribute(new Attribute("calendar", "360_day"));
+        timeVarBuilder.addAttribute(new Attribute("description", "time ellapsed, in days, since the beginning of the simulation"));
+
+        Variable.Builder<?> biomassVarBuilder = bNc.addVariable("biomass", DataType.FLOAT, new ArrayList<>(Arrays.asList(timeDim, speciesDim, linesDim, columnsDim)));
+        biomassVarBuilder.addAttribute(new Attribute("units", "ton"));
+        biomassVarBuilder.addAttribute(new Attribute("description", "biomass, in tons, per species and per cell"));
+        biomassVarBuilder.addAttribute(new Attribute("_FillValue", -99.f));
+
+        Variable.Builder<?> abundanceVarBuilder = bNc.addVariable("abundance", DataType.FLOAT, new ArrayList<>(Arrays.asList(timeDim, speciesDim, linesDim, columnsDim)));
+        abundanceVarBuilder.addAttribute(new Attribute("units", "number of fish"));
+        abundanceVarBuilder.addAttribute(new Attribute("description", "Number of fish per species and per cell"));
+        abundanceVarBuilder.addAttribute(new Attribute("_FillValue", -99.f));
+
+        Variable.Builder<?> yieldVarBuilder = bNc.addVariable("yield", DataType.FLOAT, new ArrayList<>(Arrays.asList(timeDim, speciesDim, linesDim, columnsDim)));
+        yieldVarBuilder.addAttribute(new Attribute("units", "ton"));
+        yieldVarBuilder.addAttribute(new Attribute("description", "Catches, in tons, per species and per cell"));
+        yieldVarBuilder.addAttribute(new Attribute("_FillValue", -99.f));
+
+        Variable.Builder<?> meanSizeVarBuilder = bNc.addVariable("mean_size", DataType.FLOAT, new ArrayList<>(Arrays.asList(timeDim, speciesDim, linesDim, columnsDim)));
+        meanSizeVarBuilder.addAttribute(new Attribute("units", "centimeter"));
+        meanSizeVarBuilder.addAttribute(new Attribute("description", "mean size, in centimeter, per species and per cell"));
+        meanSizeVarBuilder.addAttribute(new Attribute("_FillValue", -99.f));
+
+        Variable.Builder<?>  tlVarBuilder = bNc.addVariable("trophic_level", DataType.FLOAT, new ArrayList<>(Arrays.asList(timeDim, speciesDim, linesDim, columnsDim)));
+        tlVarBuilder.addAttribute(new Attribute("units", "scalar"));
+        tlVarBuilder.addAttribute(new Attribute("description", "trophic level per species and per cell"));
+        tlVarBuilder.addAttribute(new Attribute("_FillValue", -99.f));
+
+        Variable.Builder<?>  ltlbiomVarBuilder = bNc.addVariable("ltl_biomass", DataType.FLOAT, new ArrayList<>(Arrays.asList(timeDim, ltlDim, linesDim, columnsDim)));
+        ltlbiomVarBuilder.addAttribute(new Attribute("units", "ton/km2"));
+        ltlbiomVarBuilder.addAttribute(new Attribute("description", "resource biomass, in tons per km2 integrated on water column, per group and per cell"));
+        ltlbiomVarBuilder.addAttribute(new Attribute("_FillValue", -99.f));
+
+        Variable.Builder<?>  latvarBuilder = bNc.addVariable("latitude", DataType.FLOAT, new ArrayList<>(Arrays.asList(linesDim, columnsDim)));
+        latvarBuilder.addAttribute(new Attribute("units", "degree"));
+        latvarBuilder.addAttribute(new Attribute("description", "latitude of the center of the cell"));
+
+        Variable.Builder<?>  lonvarBuilder = bNc.addVariable("longitude", DataType.FLOAT, new ArrayList<>(Arrays.asList(linesDim, columnsDim)));
+        lonvarBuilder.addAttribute(new Attribute("units", "degree"));
+        lonvarBuilder.addAttribute(new Attribute("description", "longitude of the center of the cell"));
         /*
          * Add global attributes
          */
-        nc.addGroupAttribute(null, new Attribute("dimension_step", "step=0 before predation, step=1 after predation"));
+        bNc.addAttribute(new Attribute("dimension_step", "step=0 before predation, step=1 after predation"));
         StringBuilder str = new StringBuilder();
         for (int kltl = 0; kltl < getConfiguration().getNRscSpecies(); kltl++) {
             str.append(kltl);
@@ -191,7 +171,7 @@ public class SpatialOutput extends SimulationLinker implements IOutput {
             str.append(getConfiguration().getResourceSpecies(kltl));
             str.append(" ");
         }
-        nc.addGroupAttribute(null, new Attribute("dimension_ltl", str.toString()));
+        bNc.addAttribute(new Attribute("dimension_ltl", str.toString()));
         str = new StringBuilder();
         for (int ispec = 0; ispec < getConfiguration().getNSpecies(); ispec++) {
             str.append(ispec);
@@ -199,13 +179,13 @@ public class SpatialOutput extends SimulationLinker implements IOutput {
             str.append(getSpecies(ispec).getName());
             str.append(" ");
         }
-        nc.addGroupAttribute(null, new Attribute("dimension_species", str.toString()));
-        nc.addGroupAttribute(null, new Attribute("include_age_class_zero", Boolean.toString(includeClassZero())));
+        bNc.addAttribute(new Attribute("dimension_species", str.toString()));
+        bNc.addAttribute(new Attribute("include_age_class_zero", Boolean.toString(includeClassZero())));
         try {
             /*
              * Validates the structure of the NetCDF file.
              */
-            nc.create();
+            this.nc = this.bNc.build();
             /*
              * Writes variable longitude and latitude
              */
@@ -215,8 +195,8 @@ public class SpatialOutput extends SimulationLinker implements IOutput {
                 arrLon.set(cell.get_jgrid(), cell.get_igrid(), cell.getLon());
                 arrLat.set(cell.get_jgrid(), cell.get_igrid(), cell.getLat());
             }
-            nc.write(lonvar, arrLon);
-            nc.write(latvar, arrLat);
+            nc.write(nc.findVariable("longitude"), arrLon);
+            nc.write(nc.findVariable("latitude"), arrLat);
         } catch (IOException ex) {
             Logger.getLogger(SpatialOutput.class.getName()).log(Level.SEVERE, null, ex);
         } catch (InvalidRangeException ex) {
@@ -228,7 +208,7 @@ public class SpatialOutput extends SimulationLinker implements IOutput {
     public void close() {
         try {
             nc.close();
-            String strFilePart = nc.getNetcdfFile().getLocation();
+            String strFilePart = this.getFilename();
             String strFileBase = strFilePart.substring(0, strFilePart.indexOf(".part"));
             File filePart = new File(strFilePart);
             File fileBase = new File(strFileBase);
@@ -265,9 +245,14 @@ public class SpatialOutput extends SimulationLinker implements IOutput {
                 int j = cell.get_jgrid();
                 if (null != getSchoolSet().getSchools(cell)) {
                     for (School school : getSchoolSet().getSchools(cell)) {
-                        if (cutoffEnabled && school.getAge() < cutoffAge[school.getSpeciesIndex()]) {
+                        if (getConfiguration().isCutoffEnabled() && ((school.getAge() < getConfiguration().getCutoffAge()[school.getSpeciesIndex()]) || school.getLength() < getConfiguration().getCutoffLength()[school.getSpeciesIndex()])) {
                             continue;
                         }
+
+                        if(!school.isAlive()) {
+                            continue;
+                        }
+
                         if (!school.isUnlocated()) {
                             int iSpec = school.getSpeciesIndex();
                             biomass[iSpec][j][i] += school.getInstantaneousBiomass();
@@ -278,7 +263,7 @@ public class SpatialOutput extends SimulationLinker implements IOutput {
                         }
                     }
                 }
-                
+
                 int offset = this.getNBkgSpecies();
                 for (int iRsc = 0; iRsc < getConfiguration().getNRscSpecies(); iRsc++) {
                     ltlbiomass[iRsc][j][i] = (float) getSimulation().getResourceForcing(iRsc + offset).getBiomass(cell);
@@ -350,13 +335,13 @@ public class SpatialOutput extends SimulationLinker implements IOutput {
 
         //System.out.println("NetCDF saving time " + index + " - " + time);
         try {
-            nc.write(timevar, new int[]{index}, arrTime);
-            nc.write(this.biomassVar, new int[]{index, 0, 0, 0}, arrBiomass);
-            nc.write(this.abundanceVar, new int[]{index, 0, 0, 0}, arrAbundance);
-            nc.write(this.yieldVar, new int[]{index, 0, 0, 0}, arrYield);
-            nc.write(this.meanSizeVar, new int[]{index, 0, 0, 0}, arrSize);
-            nc.write(this.tlVar, new int[]{index, 0, 0, 0}, arrTL);
-            nc.write(this.ltlbiomVar, new int[]{index, 0, 0, 0, 0}, arrLTL);
+            nc.write(nc.findVariable("time"), new int[]{index}, arrTime);
+            nc.write(nc.findVariable("biomass"), new int[]{index, 0, 0, 0}, arrBiomass);
+            nc.write(nc.findVariable("abundance"), new int[]{index, 0, 0, 0}, arrAbundance);
+            nc.write(nc.findVariable("yield"), new int[]{index, 0, 0, 0}, arrYield);
+            nc.write(nc.findVariable("mean_size"), new int[]{index, 0, 0, 0}, arrSize);
+            nc.write(nc.findVariable("trophic_level"), new int[]{index, 0, 0, 0}, arrTL);
+            nc.write(nc.findVariable("ltl_biomass"), new int[]{index, 0, 0, 0, 0}, arrLTL);
             index++;
         } catch (IOException ex) {
             Logger.getLogger(SpatialOutput.class.getName()).log(Level.SEVERE, null, ex);

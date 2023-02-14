@@ -1,0 +1,8 @@
+simulation.ncpu;1
+simulation.nresource;10
+simulation.nsimulation;5
+simulation.nspecies;14
+simulation.time.ndtPerYear;24
+simulation.time.nyear;120
+simulation.nfisheries;14
+fishing.mortality.enabled;false

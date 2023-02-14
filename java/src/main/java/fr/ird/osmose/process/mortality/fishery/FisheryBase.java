@@ -1,3 +1,4 @@
+
 /* 
  * 
  * OSMOSE (Object-oriented Simulator of Marine Ecosystems)
@@ -68,23 +69,40 @@ public class FisheryBase extends OsmoseLinker {
      * Initialize the time varying index.
      */
     public void init() {
-
+            
         // If a fishing shift exists, take it to extract the fishing values
         String keyShift = String.format("fisheries.rate.base.shift.fsh%d", this.fisheryIndex);
-        String keyVal = String.format("fisheries.rate.base.fsh%d", this.fisheryIndex);
         
-        boolean useLog10 = getConfiguration().getBoolean("fisheries.rate.base.log.enabled.fsh" + this.fisheryIndex);
+        String keyVal = String.format("fisheries.rate.base.fsh%d", this.fisheryIndex);
+        String keyValLog = String.format("fisheries.rate.base.log.fsh%d", this.fisheryIndex);
+        
+        // test if only one of the two values exists
+        if (getConfiguration().isNull(keyValLog) == getConfiguration().isNull(keyVal)) { 
+            String message = String.format("Both %s and %s parameters are defined. Choose only one.\n", keyValLog, keyVal);
+            error(message, new Exception());
+        }
+        
+        boolean useLog;
+        ByRegimeTimeSeries ts;
+        if(getConfiguration().isNull(keyValLog)) { 
+            // If the key for log values is Null, assume fishing mort in standard mode
+            ts = new ByRegimeTimeSeries(keyShift, keyVal);
+            useLog = false;
+        } else { 
+            // If the key for log values is not null, assume fishing mort in log
+            ts = new ByRegimeTimeSeries(keyShift, keyValLog);
+            useLog = true;
+        }
 
-        ByRegimeTimeSeries ts = new ByRegimeTimeSeries(keyShift, keyVal);
         ts.init();
 
         fisheryBase = ts.getValues();
-        if(useLog10) {
+        if (useLog) {
             for (int i = 0; i < fisheryBase.length; i++) {
-                if(fisheryBase[i] > 0) {
-                    String message = String.format("Fishing mortality rate exponent for fishery %d is positive", this.fisheryIndex);
-                    error(message, new IllegalArgumentException());
-                }
+                //if (fisheryBase[i] > 0) {
+                //    String message = String.format("Fishing base mortality rate exponent for fishery %d is positive", this.fisheryIndex);
+                //    error(message, new IllegalArgumentException());
+                //}
                 fisheryBase[i] = Math.exp(fisheryBase[i]);
             }
         }

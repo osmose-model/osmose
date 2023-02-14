@@ -1,10 +1,10 @@
-/* 
- * 
+/*
+ *
  * OSMOSE (Object-oriented Simulator of Marine Ecosystems)
  * http://www.osmose-model.org
- * 
+ *
  * Copyright (C) IRD (Institut de Recherche pour le Développement) 2009-2020
- * 
+ *
  * Osmose is a computer program whose purpose is to simulate fish
  * populations and their interactions with their biotic and abiotic environment.
  * OSMOSE is a spatial, multispecies and individual-based model which assumes
@@ -15,7 +15,7 @@
  * processes of fish life cycle (growth, explicit predation, additional and
  * starvation mortalities, reproduction and migration) and fishing mortalities
  * (Shin and Cury 2001, 2004).
- * 
+ *
  * Contributor(s):
  * Yunne SHIN (yunne.shin@ird.fr),
  * Morgane TRAVERS (morgane.travers@ifremer.fr)
@@ -23,20 +23,20 @@
  * Philippe VERLEY (philippe.verley@ird.fr)
  * Laure VELEZ (laure.velez@ird.fr)
  * Nicolas Barrier (nicolas.barrier@ird.fr)
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation (version 3 of the License). Full description
  * is provided on the LICENSE file.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
- * 
+ *
  */
 
 package fr.ird.osmose.process.movement;
@@ -58,21 +58,24 @@ import ucar.ma2.InvalidRangeException;
  *
  * @author pverley
  */
-public class MapDistribution extends AbstractDistribution {
+public class MapDistribution extends AbstractSpatialDistribution {
 
     private final int iSpecies;
     private final int iSpeciesFile;
     private Random rd1, rd2, rd3;
     private MapSet maps;
     private float[] maxProbaPresence;
+    private int rank;
+
     /*
      * Ranges of movement in cell during one Osmose time step
      */
     private int range;
 
-    public MapDistribution(int iSpeciesFile, int iSpecies) {
+    public MapDistribution(int iSpeciesFile, int iSpecies, int rank) {
         this.iSpeciesFile = iSpeciesFile;
         this.iSpecies = iSpecies;
+        this.rank = rank;
     }
 
     @Override
@@ -83,9 +86,9 @@ public class MapDistribution extends AbstractDistribution {
             fixedSeed = getConfiguration().getBoolean("movement.randomseed.fixed");
         }
         if (fixedSeed) {
-            rd1 = new Random(13L ^ iSpecies);
-            rd2 = new Random(5L ^ iSpecies);
-            rd3 = new Random(1982L ^ iSpecies);
+            rd1 = new Random((13L ^ iSpecies) * (rank + 1));
+            rd2 = new Random((5L ^ iSpecies) * (rank + 1));
+            rd3 = new Random((1982L ^ iSpecies) * (rank + 1));
             warning("Parameter 'movement.randomseed.fixed' is set to true. It means that two simulations with strictly identical initial school distribution will lead to same movement.");
         } else {
             rd1 = new Random();
@@ -131,7 +134,6 @@ public class MapDistribution extends AbstractDistribution {
 
     private void mapsDistribution(School school, int iStepSimu) {
 
-        int i_step_year = iStepSimu % getConfiguration().getNStepYear();
         int age = school.getAgeDt();
 
         // Get current map and max probability of presence
@@ -146,13 +148,7 @@ public class MapDistribution extends AbstractDistribution {
          */
         boolean sameMap = false;
         if (age > 0 && iStepSimu > 0) {
-            int oldTime;
-            if (i_step_year == 0) {
-                oldTime = getConfiguration().getNStepYear() - 1;
-            } else {
-                oldTime = i_step_year - 1;
-            }
-            int previousIndexMap = maps.getIndexMap(age - 1, oldTime);
+            int previousIndexMap = maps.getIndexMap(age - 1, iStepSimu - 1);
             if (indexMap == previousIndexMap) {
                 sameMap = true;
             }
@@ -165,13 +161,25 @@ public class MapDistribution extends AbstractDistribution {
              * changed from previous cohort and time-step, or because the
              * school was unlocated due to migration.
              */
+            int maxIter = 10000;
+            int nIter = -1;
             int indexCell;
             int nCells = getGrid().get_nx() * getGrid().get_ny();
             double proba;
             do {
+                nIter++;
+                if(nIter >= maxIter) {
+                    StringBuilder bld = new StringBuilder();
+                    bld.append("The maximum number of iterations for map distribution has been reached\n");
+                    String outFmt = String.format("Check movements for species %s", school.getSpecies().getName());
+                    bld.append(outFmt);
+                    outFmt = String.format(" and for age %f\n", (float) age / getConfiguration().getNStepYear());
+                    bld.append(outFmt);
+                    error(bld.toString(), new Exception());
+                }
                 indexCell = (int) Math.round((nCells - 1) * rd1.nextDouble());
                 proba = map.getValue(getGrid().getCell(indexCell));
-            } while (proba <= 0.d || proba < rd2.nextDouble() * maxProbaPresence[indexMap]);
+            } while (proba <= 0.d || proba < rd2.nextDouble() * maxProbaPresence[indexMap] || Double.isNaN(proba));
             school.moveToCell(getGrid().getCell(indexCell));
         } else {
             // Random move in adjacent cells contained in the map.
@@ -203,8 +211,8 @@ public class MapDistribution extends AbstractDistribution {
         while (neighbours.hasNext()) {
             Cell neighbour = neighbours.next();
             // 2. Eliminate cell that is on land
-            // 3. Add the cell if it is within the current map of distribution 
-            if (!neighbour.isLand() && map.getValue(neighbour) > 0) {
+            // 3. Add the cell if it is within the current map of distribution
+            if (!neighbour.isLand() && (map.getValue(neighbour) > 0) && (!Double.isNaN(map.getValue(neighbour)))) {
                 accessibleCells.add(neighbour);
             }
         }

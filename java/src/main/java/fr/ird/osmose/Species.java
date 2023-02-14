@@ -1,10 +1,10 @@
-/* 
- * 
+/*
+ *
  * OSMOSE (Object-oriented Simulator of Marine Ecosystems)
  * http://www.osmose-model.org
- * 
+ *
  * Copyright (C) IRD (Institut de Recherche pour le Développement) 2009-2020
- * 
+ *
  * Osmose is a computer program whose purpose is to simulate fish
  * populations and their interactions with their biotic and abiotic environment.
  * OSMOSE is a spatial, multispecies and individual-based model which assumes
@@ -15,7 +15,7 @@
  * processes of fish life cycle (growth, explicit predation, additional and
  * starvation mortalities, reproduction and migration) and fishing mortalities
  * (Shin and Cury 2001, 2004).
- * 
+ *
  * Contributor(s):
  * Yunne SHIN (yunne.shin@ird.fr),
  * Morgane TRAVERS (morgane.travers@ifremer.fr)
@@ -23,20 +23,20 @@
  * Philippe VERLEY (philippe.verley@ird.fr)
  * Laure VELEZ (laure.velez@ird.fr)
  * Nicolas Barrier (nicolas.barrier@ird.fr)
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation (version 3 of the License). Full description
  * is provided on the LICENSE file.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
- * 
+ *
  */
 
 package fr.ird.osmose;
@@ -113,9 +113,20 @@ public class Species implements ISpecies {
      * Threshold (number of time-steps) at which a species move from larva to
      * adults. Expressed in time steps.
      */
-    private final int lar2ad_thres;
+    private final int firstFeedingAgeDt;
+
+    /** Threshold for moving from larvaeToAdults. */
+    private final int larvaeToAdultsAgeDt;
 
     private double beta_bioen;
+
+    private interface StarvationInterface  {
+        public boolean isStarvationEnabled(School school);
+    }
+
+    private StarvationInterface starvationInterface;
+
+    // private ByClassTimeSeries prices;
 
     //////////////
     // Constructor
@@ -135,9 +146,17 @@ public class Species implements ISpecies {
         this.fileIndex = fileIndex;
 
         // Initialization of parameters
-        name = cfg.getString("species.name.sp" + fileIndex);
+        name = cfg.getString("species.name.sp" + fileIndex).replaceAll("_", "").replaceAll("-", "");
+
         c = cfg.getFloat("species.length2weight.condition.factor.sp" + fileIndex);
         bPower = cfg.getFloat("species.length2weight.allometric.power.sp" + fileIndex);
+
+        // If the economic module is on, then we read the file containing the prices for different
+        // size classes.
+        // if(cfg.isEconomyEnabled()) {
+        //     prices = new ByClassTimeSeries();
+        //     prices.read(cfg.getFile("species.prices.file.sp" + fileIndex));
+        // }
 
         if (!cfg.isBioenEnabled()) {
 
@@ -152,6 +171,7 @@ public class Species implements ISpecies {
                 sizeMaturity = Float.MAX_VALUE;
             }
 
+            starvationInterface = (School sch) -> this.isStarvationEnabledNoBioen(sch);
             eggSize = cfg.getFloat("species.egg.size.sp" + fileIndex);
 
         } else {
@@ -159,6 +179,7 @@ public class Species implements ISpecies {
             sizeMaturity = Float.MAX_VALUE;
             ageMaturity = Float.MAX_VALUE;
             eggSize = Float.MAX_VALUE;
+            starvationInterface = (School sch) -> this.isStarvationEnabledBioen(sch);
         }
 
         eggWeight = cfg.getFloat("species.egg.weight.sp" + fileIndex);
@@ -174,18 +195,47 @@ public class Species implements ISpecies {
 
         // If the key is found, then the age switch in years is converted into
         // time-step.
-        String key = "species.larva2adults.agethres.sp" + fileIndex;
+        String key = "species.first.feeding.age.sp" + fileIndex;
         if (cfg.canFind(key)) {
             float age_adult = cfg.getFloat(key);
-            this.lar2ad_thres = (int) Math.round(age_adult * cfg.getNStepYear());
+            this.firstFeedingAgeDt = (int) Math.round(age_adult * cfg.getNStepYear());
         } else {
             // if no parameter exists, species become larva when ageDt = 1
-            this.lar2ad_thres = 1;
+            this.firstFeedingAgeDt = 1;
         }
+
+        // If bioen is on, use the parameter to get the age at which
+        // a species moves from larvae to adult.
+        if (cfg.isBioenEnabled()) {
+            key = "species.larvae.growth.threshold.age.sp" + fileIndex;
+            if (cfg.canFind(key)) {
+                float age_adult = cfg.getFloat(key);
+                this.larvaeToAdultsAgeDt = (int) Math.round(age_adult * cfg.getNStepYear());
+            } else {
+                // if no parameter exists, species become larva when ageDt = 1
+                this.larvaeToAdultsAgeDt = 1;
+            }
+        } else {
+            this.larvaeToAdultsAgeDt = 0;
+        } // end of test on bioen.
     }
 
-    public int getThresAge() {
-        return this.lar2ad_thres;
+    /** Starvation method for bioenergetics. */
+    private boolean isStarvationEnabledBioen(School school) {
+        return (school.getAgeDt() > this.getFirstFeedingAgeDt());
+    }
+
+    /** Starvation method for non-bioenergetics. */
+    private boolean isStarvationEnabledNoBioen(School school) {
+        return (school.getAgeDt() >= this.getFirstFeedingAgeDt());
+    }
+
+    public boolean isStarvationEnabled(School school) {
+        return starvationInterface.isStarvationEnabled(school);
+    }
+
+    public int getFirstFeedingAgeDt() {
+        return this.firstFeedingAgeDt;
     }
 
     public double getBetaBioen() {
@@ -194,6 +244,10 @@ public class Species implements ISpecies {
 
     public int getDepthLayer() {
         return this.zlayer;
+    }
+
+    public int getLarvaeThresDt() {
+        return this.larvaeToAdultsAgeDt;
     }
 
     //////////////////////////////
@@ -242,10 +296,10 @@ public class Species implements ISpecies {
 
     /**
      * Return the global index of the species.
-     * 
+     *
      * Index between [0, Nspec - 1].
-     * 
-     * 
+     *
+     *
      * @return
      */
     @Override
@@ -297,10 +351,16 @@ public class Species implements ISpecies {
      * @param biomass
      * @return
      */
+
     /*
      * private boolean isVulnerable(double biomass) { double Bv = 0.d; double Sv =
      * 1.d; return (Math.random() > (1.d / (1.d + Math.exp(Sv * (Bv - biomass)))));
      * }
      */
+
+    // /* Returns the prices for the given species. */
+    // public ByClassTimeSeries getPrices() {
+    //     return prices;
+    // }
 
 }

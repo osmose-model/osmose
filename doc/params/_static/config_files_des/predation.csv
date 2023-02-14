@@ -1,0 +1,12 @@
+predation.accessibility.file;Name of the .csv file containing estimates of accessibility coefficients for focal functional groups and theoretical accessibility coefficients for biotic resources
+predation.accessibility.stage.structure;Parameter indicating whether accessibility coefficients are defined for age classes or size classes of the focal functional groups
+predation.predPrey.stage.structure;Parameter indicating whether the predator/prey size ratios of focal functional groups are defined for age classes or size classes
+;
+predation.efficiency.critical.spX;Critical predation efficiency of focal functional group X
+predation.ingestion.rate.max.spX;Maximum annual ingestion rate (in year-1) of focal functional group X
+predation.predPrey.sizeRatio.max.spX;Minimum predator/prey size ratio of the juveniles and adults of focal functional group X
+predation.predPrey.sizeRatio.min.spX;Maximum predator/prey size ratio of the juveniles and adults of focal functional group X
+;
+predation.predPrey.stage.threshold.spX;Array of body size (in cm) or age (in years) delineating the classes of focal functional group X for which minimum and maximum predator/prey size ratios are defined
+;
+predation.accessibility.stage.threshold.spX;Array of body size (in cm) or age (in years) delineating the classes of focal functional group X for which accessibility coefficients are defined

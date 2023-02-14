@@ -1,10 +1,10 @@
-/* 
- * 
+/*
+ *
  * OSMOSE (Object-oriented Simulator of Marine Ecosystems)
  * http://www.osmose-model.org
- * 
+ *
  * Copyright (C) IRD (Institut de Recherche pour le Développement) 2009-2020
- * 
+ *
  * Osmose is a computer program whose purpose is to simulate fish
  * populations and their interactions with their biotic and abiotic environment.
  * OSMOSE is a spatial, multispecies and individual-based model which assumes
@@ -15,7 +15,7 @@
  * processes of fish life cycle (growth, explicit predation, additional and
  * starvation mortalities, reproduction and migration) and fishing mortalities
  * (Shin and Cury 2001, 2004).
- * 
+ *
  * Contributor(s):
  * Yunne SHIN (yunne.shin@ird.fr),
  * Morgane TRAVERS (morgane.travers@ifremer.fr)
@@ -23,20 +23,20 @@
  * Philippe VERLEY (philippe.verley@ird.fr)
  * Laure VELEZ (laure.velez@ird.fr)
  * Nicolas Barrier (nicolas.barrier@ird.fr)
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation (version 3 of the License). Full description
  * is provided on the LICENSE file.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
- * 
+ *
  */
 
 package fr.ird.osmose.output.netcdf;
@@ -55,11 +55,13 @@ import ucar.ma2.ArrayDouble;
 import ucar.ma2.ArrayFloat;
 import ucar.ma2.ArrayInt;
 import ucar.ma2.DataType;
+import ucar.ma2.Index;
 import ucar.ma2.InvalidRangeException;
 import ucar.nc2.Attribute;
 import ucar.nc2.Dimension;
-import ucar.nc2.NetcdfFileWriter;
 import ucar.nc2.Variable;
+import ucar.nc2.write.Nc4Chunking;
+import ucar.nc2.write.NetcdfFormatWriter;
 
 /**
  *
@@ -67,8 +69,6 @@ import ucar.nc2.Variable;
  */
 abstract public class AbstractOutput_Netcdf extends SimulationLinker implements IOutput {
 
-    private boolean cutoffEnabled;
-    private int recordFrequency;
 
     /**
      * List of dimensions of the variable to write out.
@@ -79,16 +79,12 @@ abstract public class AbstractOutput_Netcdf extends SimulationLinker implements 
      * _FillValue attribute for cells on land
      */
     private final float FILLVALUE = -99.f;
-    private NetcdfFileWriter nc;
+
+    private NetcdfFormatWriter nc;
+    private NetcdfFormatWriter.Builder bNc;
+
     private int record_index;
 
-    /**
-     * Threshold age (year) for age class zero. This parameter allows to discard
-     * schools younger that this threshold in the calculation of the indicators
-     * when parameter <i>output.cutoff.enabled</i> is set to {@code true}.
-     * Parameter <i>output.cutoff.age.sp#</i>
-     */
-    private float[] cutoffAge;
     private List<Dimension> outDims;
 
     /**
@@ -113,32 +109,19 @@ abstract public class AbstractOutput_Netcdf extends SimulationLinker implements 
     @Override
     public void init() {
 
-        // Cutoff
-        cutoffEnabled = getConfiguration().getBoolean("output.cutoff.enabled");
-        cutoffAge = new float[getNSpecies()];
-        if (cutoffEnabled) {
-            for (int iSpec = 0; iSpec < getNSpecies(); iSpec++) {
-                cutoffAge[iSpec] = getConfiguration().getFloat("output.cutoff.age.sp" + iSpec);
-            }
-        }
-
-        recordFrequency = getConfiguration().getInt("output.recordfrequency.ndt");
+        Nc4Chunking chunker = getConfiguration().getChunker();
 
         /*
          * Create NetCDF file
          */
-        try {
-            String filename = getFilename();
-            IOTools.makeDirectories(filename);
-            nc = NetcdfFileWriter.createNew(NetcdfFileWriter.Version.netcdf4, filename);
-        } catch (IOException ex) {
-            Logger.getLogger(AbstractOutput_Netcdf.class.getName()).log(Level.SEVERE, null, ex);
-        }
+        String filename = getFilename();
+        IOTools.makeDirectories(filename);
+        bNc = NetcdfFormatWriter.createNewNetcdf4(getConfiguration().getNcOutVersion(), filename, chunker);
 
         // Add time dim and variable (common to all files)
-        timeDim = nc.addUnlimitedDimension("time");
-        
-        Variable tvar = nc.addVariable(null, "time", DataType.DOUBLE, "time");
+        timeDim = bNc.addUnlimitedDimension("time");
+
+        Variable.Builder<?> tvar = bNc.addVariable("time", DataType.DOUBLE, "time");
         tvar.addAttribute(new Attribute("units", "days since 0-1-1 0:0:0"));
         tvar.addAttribute(new Attribute("calendar", "360_day"));
         tvar.addAttribute(new Attribute("description", "time ellapsed, in days, since the beginning of the simulation"));
@@ -147,14 +130,14 @@ abstract public class AbstractOutput_Netcdf extends SimulationLinker implements 
         this.init_nc_dims_coords();
 
         // Create output variable
-        Variable outvar = nc.addVariable(null, getVarname(), DataType.FLOAT, this.getNcDims());
+        Variable.Builder<?> outvar = bNc.addVariable(getVarname(), DataType.FLOAT, this.getNcDims());
         outvar.addAttribute(new Attribute("units", getUnits()));
         outvar.addAttribute(new Attribute("description", getDescription()));
         outvar.addAttribute(new Attribute("_FillValue", getFillValue()));
 
         try {
             // Validates the structure of the NetCDF file.
-            nc.create();
+            nc = bNc.build();
         } catch (IOException ex) {
             Logger.getLogger(AbstractOutput_Netcdf.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -165,18 +148,18 @@ abstract public class AbstractOutput_Netcdf extends SimulationLinker implements 
     }
 
     boolean includeClassZero() {
-        return !cutoffEnabled;
+        return !getConfiguration().isCutoffEnabled();
     }
 
     boolean include(School school) {
-        return ((!cutoffEnabled) || (school.getAge() >= cutoffAge[school.getFileSpeciesIndex()]));
+        return (!getConfiguration().isCutoffEnabled()) || ((school.getAge() >= getConfiguration().getCutoffAge()[school.getFileSpeciesIndex()]) & (school.getLength() >= getConfiguration().getCutoffLength()[school.getFileSpeciesIndex()])) ;
     }
 
     @Override
     public void close() {
         try {
             nc.close();
-            String strFilePart = nc.getNetcdfFile().getLocation();
+            String strFilePart = this.getFilename();
             String strFileBase = strFilePart.substring(0, strFilePart.indexOf(".part"));
             File filePart = new File(strFilePart);
             File fileBase = new File(strFileBase);
@@ -190,12 +173,12 @@ abstract public class AbstractOutput_Netcdf extends SimulationLinker implements 
      * @return the recordFrequency
      */
     public int getRecordFrequency() {
-        return recordFrequency;
+        return getConfiguration().getRecordFrequency();
     }
 
     @Override
     public boolean isTimeToWrite(int iStepSimu) {
-        return (((iStepSimu + 1) % recordFrequency) == 0);
+        return (((iStepSimu + 1) % getConfiguration().getRecordFrequency()) == 0);
     }
 
     public String quote(String str) {
@@ -212,11 +195,10 @@ abstract public class AbstractOutput_Netcdf extends SimulationLinker implements 
 
     /**
      * Function to create a species attribute.
-     * @return 
+     * @return
      */
-    public String createSpeciesAttr() {
+    public String createSpeciesAttr(Variable.Builder<?> species) {
 
-        Variable species = this.nc.findVariable("species");
         StringBuilder bld = new StringBuilder();
         for (int i = 0; i < this.getNSpecies(); i++) {
             String attrname = String.format("species%d", i);
@@ -255,7 +237,7 @@ abstract public class AbstractOutput_Netcdf extends SimulationLinker implements 
         } catch (IOException | InvalidRangeException ex) {
             Logger.getLogger(AbstractOutput_Netcdf.class.getName()).log(Level.SEVERE, null, ex);
         }
-        this.incrementIndex();    
+        this.incrementIndex();
     }
 
     public float getFillValue() {
@@ -272,21 +254,24 @@ abstract public class AbstractOutput_Netcdf extends SimulationLinker implements 
      */
     void init_nc_dims_coords() {
 
-        Dimension speciesDim = nc.addDimension(null, "species", getNSpecies());
-        this.createSpeciesAttr();
+        Dimension speciesDim = bNc.addDimension("species", getNSpecies());
+        Variable.Builder<?> variable = bNc.addVariable("species", DataType.INT, "species");
+        this.createSpeciesAttr(variable);
         outDims = new ArrayList<>();
         outDims.add(timeDim);
         outDims.add(speciesDim);
-                
+
     }
-    
+
     public void write_nc_coords() {
 
         // Writes variable trait (trait names) and species (species names)
-        ArrayInt.D1 arrSpecies = new ArrayInt.D1(this.getNSpecies());
+        ArrayInt arrSpecies = new ArrayInt(new int[] {this.getNSpecies()}, false);
+        Index index = arrSpecies.getIndex();
 
         for (int i = 0; i < this.getNSpecies(); i++) {
-            arrSpecies.set(i, i);
+            index.set(i);
+            arrSpecies.set(index, i);
         }
 
         Variable varspec = this.nc.findVariable("species");
@@ -298,8 +283,12 @@ abstract public class AbstractOutput_Netcdf extends SimulationLinker implements 
         }
     }
 
-    public NetcdfFileWriter getNc() {
-        return this.nc;
+    public NetcdfFormatWriter getNc() {
+        return nc;
+    }
+
+    public NetcdfFormatWriter.Builder getBNc() {
+        return bNc;
     }
 
     public void setDims(List<Dimension> dims) {
@@ -339,7 +328,7 @@ abstract public class AbstractOutput_Netcdf extends SimulationLinker implements 
         filename.append(File.separatorChar);
         return filename;
     }
-    
+
     public void incrementIndex() {
         this.record_index++;
     }

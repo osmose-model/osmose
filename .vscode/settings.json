@@ -1,0 +1,14 @@
+{
+    "java.autobuild.enabled": true,
+    "java.configuration.updateBuildConfiguration": "automatic",
+    "java.format.settings.url": ".vscode/eclipse-formatter.xml",
+    "diffEditor.ignoreTrimWhitespace": true,
+    "files.trimTrailingWhitespace": true,
+    "esbonio.sphinx.buildDir": "doc/_build",
+    "esbonio.sphinx.confDir": "doc",
+    "esbonio.server.excludedModules": [
+        "os",
+    ],
+    "plantuml.fileExtensions": ".wsd,.pu,.puml,.plantuml,.iuml,.java",
+    "java.jdt.ls.vmargs": "-XX:+UseParallelGC -XX:GCTimeRatio=4 -XX:AdaptiveSizePolicyWeight=90 -Dsun.zip.disableMemoryMapping=true -Xmx2G -Xms100m -Xlog:jni+resolve=off",
+}

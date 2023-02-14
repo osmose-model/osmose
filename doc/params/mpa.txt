@@ -1,0 +1,25 @@
+Marine Protected Areas (MPAs)
+---------------------------------------------
+
+.. Constant annual rate/catches by species
+.. ############################################
+
+.. Constant annual rate by species
+.. ++++++++++++++++++++++++++++++++++++++
+
+The user can defined as many MPA as he wishes. Here is how an MPA is defined in the configuration file:
+
+:: 
+
+    mpa.file.mpa0 = maps/mpa0.csv
+    mpa.start.year.mpa0 = 10
+    mpa.end.year.mpa0 = 15
+
+The map is a CSV file similar to the movement maps. The CSV file has the same number of lines and columns as the OSMOSE grid. 
+Land is always indicated with -99, no MPA with 0 and MPA with 1. 
+Start year and end year parameters define the time span when the MPA is enabled.
+
+The MPA are handled within the Fishing process. Every time there is 
+a new MPA to be activated or deactivated, Osmose updates the correction 
+factor that will be applied to the fishing mortality rates in order to take 
+into account the uniform redistribution of the fishing effort outside the MPAs.

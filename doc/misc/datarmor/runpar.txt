@@ -1,0 +1,61 @@
+Running parallel R programs
+===============================
+
+Running parallel R programs in |dat| can be achieved in multiple ways (see the examples in */appli/services/exemples/R/*). 
+
+Running on multiple nodes (MPI)
+---------------------------------
+
+To run the calibration on multiple nodes, the calibration must be run by using the :samp:`RMPISNOW` program. The calibration is run by using the following PBS file:
+
+.. literalinclude:: _static/datarmor/runCalib_MPI.pbs
+    :language: csh
+
+.. hint::
+    
+    It is possible to use BASH instead of CSH. However, it is highly 
+    advised to use CSH, since it is the default |dat| shell.
+
+When using :samp:`RMPISNOW`, the parallel library that must is used is the :samp:`doSNOW` package. As a consequence, the calibration script must be modified as follows:
+
+.. literalinclude:: _static/datarmor/calibrate_MPI.R
+    :language: R
+
+The main differences between this R script and the one described in :numref:`para_cuncal` are:
+
+- :samp:`require("doSNOW")` instead of :samp:`require("parallel")`
+- No arguments in the :samp:`makeCluster` function
+- :samp:`registerDoSNOW` instead of :samp:`registerDoParallel`
+
+Running on a single node
+--------------------------------------------
+
+To run the calibration in parallel on a single node (for instance on a Shared Memory machine), the :samp:`doParallel` library is used. In this case, the PBS file is as follows:
+
+.. literalinclude:: _static/datarmor/runCalib_OMP.pbs
+    :language: csh
+
+The :samp:`calibrate.R` script must be modified as follows:
+
+.. literalinclude:: _static/datarmor/calibrate_OMP.R
+    :language: R
+
+The main difference between this R script and the one described in :numref:`para_cuncal` is:
+
+- :samp:`require("doParallel")` instead of :samp:`require("parallel")`
+
+.. danger::
+
+    The number of cores defined in the :samp:`.pbs` file (:samp:`ncpus`) must be consistent with the value
+    in the :samp:`control$nCores` parameter.
+
+
+Running on a single core (sequential)
+--------------------------------------------
+
+To run R in parallel on a single core (i.e. in sequential), the PBS file must be as follows:
+
+.. literalinclude:: _static/datarmor/runCalib_SEQ.pbs
+    :language: csh
+
+In this case, no parallel libraries need to be loaded. Hence, the script described in :numref:`caldes` can be used without any modifications.

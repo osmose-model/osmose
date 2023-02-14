@@ -1,0 +1,20 @@
+Prey / Predator,lesserSpotted < 0.45 ,lesserSpotted,redMullet < 0.25 ,redMullet
+lesserSpottedDogfish < 0.45 ,0.05,0,0,0.05
+lesserSpottedDogfish,0,0.8,0.4,0
+redMullet < 0.25 ,0,0.4,0.8,0
+redMullet,0.8,0.4,0,0.8
+pouting < 0.25 ,0,0.4,0.8,0
+pouting,0,0.8,0.4,0
+whiting < 0.25 ,0,0.4,0.8,0
+whiting,0,0.8,0.4,0
+Dinoflagellates,0,0.5,1,0
+Diatoms,0,0.5,1,0
+Microzoo,0,0.5,1,0
+Mesozoo,0,0.5,1,0
+Macrozoo,0,0.5,1,0
+VSBVerySmallBenthos,1,0.5,0,1
+SmallBenthos,1,0.5,0,1
+MediumBenthos,1,0.5,0,1
+LargeBenthos,1,0.5,0,1
+VLBVeryLargeBenthos,1,0.5,0,1
+backgroundSpecies,0,0,0,0

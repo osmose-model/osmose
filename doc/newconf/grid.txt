@@ -1,0 +1,19 @@
+Setting up the grid
+*************************
+
+Once the LTL forcing file has been set-up, it can be used to define the Osmose grid parameters.
+
+They should look like:
+
+.. _table_grid_param:
+.. table:: Example of a CSV predation  accessibility file.
+
+    .. csv-table::
+        :delim: ;
+
+        grid.java.classname;NcGrid.java
+        grid.netcdf.file;ltl.nc
+        grid.var.lat;longitude
+        grid.var.lon;latitude
+        grid.var.mask;SPHY
+        grid.var.surf;surface

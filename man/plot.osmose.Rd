@@ -44,6 +44,7 @@
   axes = TRUE,
   legend = TRUE,
   units = "tonnes",
+  zero = FALSE,
   ...
 )
 

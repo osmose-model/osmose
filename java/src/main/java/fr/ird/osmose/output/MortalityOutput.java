@@ -1,10 +1,10 @@
-/* 
- * 
+/*
+ *
  * OSMOSE (Object-oriented Simulator of Marine Ecosystems)
  * http://www.osmose-model.org
- * 
+ *
  * Copyright (C) IRD (Institut de Recherche pour le Développement) 2009-2020
- * 
+ *
  * Osmose is a computer program whose purpose is to simulate fish
  * populations and their interactions with their biotic and abiotic environment.
  * OSMOSE is a spatial, multispecies and individual-based model which assumes
@@ -15,7 +15,7 @@
  * processes of fish life cycle (growth, explicit predation, additional and
  * starvation mortalities, reproduction and migration) and fishing mortalities
  * (Shin and Cury 2001, 2004).
- * 
+ *
  * Contributor(s):
  * Yunne SHIN (yunne.shin@ird.fr),
  * Morgane TRAVERS (morgane.travers@ifremer.fr)
@@ -23,20 +23,20 @@
  * Philippe VERLEY (philippe.verley@ird.fr)
  * Laure VELEZ (laure.velez@ird.fr)
  * Nicolas Barrier (nicolas.barrier@ird.fr)
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation (version 3 of the License). Full description
  * is provided on the LICENSE file.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
- * 
+ *
  */
 
 package fr.ird.osmose.output;
@@ -89,7 +89,7 @@ public class MortalityOutput extends SimulationLinker implements IOutput {
      * CSV separator
      */
     private final String separator;
-    
+
     /** Stage of the schools at the beginning of the time step. */
     private int[] stage_init;
 
@@ -148,8 +148,10 @@ public class MortalityOutput extends SimulationLinker implements IOutput {
                     for (int iDeath = 0; iDeath < nCause; iDeath++) {
                         nDeadTot += nDead[iSpecies][iDeath][iStage];
                     }
+                    // total mortality rate for the species/class based on  D = A (1 - e^{-F})
                     double Ftot = Math.log(abundanceStage[iSpecies][iStage] / (abundanceStage[iSpecies][iStage] - nDeadTot));
 
+                    // Mortality rates is just the proportion Fi = Ftot * Di / D, with D the number of dead.
                     if (Ftot != 0) {
                         for (int iDeath = 0; iDeath < nCause; iDeath++) {
                             mortalityRates[iSpecies][iDeath][iStage] += Ftot * nDead[iSpecies][iDeath][iStage] / ((1 - Math.exp(-Ftot)) * abundanceStage[iSpecies][iStage]);
@@ -169,7 +171,7 @@ public class MortalityOutput extends SimulationLinker implements IOutput {
             for (int iDeath = 0; iDeath < MortalityCause.values().length; iDeath++) {
                 for (int iStage = 0; iStage < STAGES; iStage++) {
                     if (iDeath == MortalityCause.ADDITIONAL.index && iStage == EGG) {
-                        // instantenous mortality rate for eggs additional mortality 
+                        // instantenous mortality rate for eggs additional mortality
                         prw[iSpecies].print(mortalityRates[iSpecies][iDeath][iStage] / recordFrequency);
                     } else {
                         prw[iSpecies].print(mortalityRates[iSpecies][iDeath][iStage]);
@@ -207,7 +209,7 @@ public class MortalityOutput extends SimulationLinker implements IOutput {
             file.getParentFile().mkdirs();
             try {
                 // Init stream
-                fos[iSpecies] = new FileOutputStream(file, true);
+                fos[iSpecies] = new FileOutputStream(file, false);
             } catch (FileNotFoundException ex) {
                 Logger.getLogger(MortalityOutput.class.getName()).log(Level.SEVERE, null, ex);
             }
@@ -240,6 +242,14 @@ public class MortalityOutput extends SimulationLinker implements IOutput {
                     prw[iSpecies].print(separator);
                     prw[iSpecies].print(quote("Mfor"));
                 }
+                for (int i = 0; i < STAGES; i++) {
+                    prw[iSpecies].print(separator);
+                    prw[iSpecies].print(quote("Mdis"));
+                }
+                for (int i = 0; i < STAGES; i++) {
+                    prw[iSpecies].print(separator);
+                    prw[iSpecies].print(quote("Mage"));
+                }
                 prw[iSpecies].println();
                 for (int cpt = 0; cpt < MortalityCause.values().length; cpt++) {
                     prw[iSpecies].print(separator);
@@ -264,18 +274,18 @@ public class MortalityOutput extends SimulationLinker implements IOutput {
                 warning("Could not find parameters mortality.fishing.recruitment.age/size.sp{0}. Osmose assumes it is one year.", new Object[]{iSpecies});
                 recruitmentAge[iSpecies] = getConfiguration().getNStepYear();
                 recruitmentSize[iSpecies] = -1.f;
-                
+
             }
         }
     }
-    
+
     private int getStage(School school) {
-        
+
         int iStage;
-        
+
         if(this.getConfiguration().isBioenEnabled()) {
-    
-            if (school.isLarva()) {
+
+            if (school.isEgg()) {
                 // Eggss
                 iStage = EGG;
 
@@ -287,10 +297,10 @@ public class MortalityOutput extends SimulationLinker implements IOutput {
                 // Recruits
                 iStage = RECRUIT;
             }
-            
+
         } else {
-        
-            if (school.isLarva()) {
+
+            if (school.isEgg()) {
                 // Eggss
                 iStage = EGG;
 

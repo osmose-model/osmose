@@ -1,10 +1,10 @@
-/* 
- * 
+/*
+ *
  * OSMOSE (Object-oriented Simulator of Marine Ecosystems)
  * http://www.osmose-model.org
- * 
+ *
  * Copyright (C) IRD (Institut de Recherche pour le Développement) 2009-2020
- * 
+ *
  * Osmose is a computer program whose purpose is to simulate fish
  * populations and their interactions with their biotic and abiotic environment.
  * OSMOSE is a spatial, multispecies and individual-based model which assumes
@@ -15,7 +15,7 @@
  * processes of fish life cycle (growth, explicit predation, additional and
  * starvation mortalities, reproduction and migration) and fishing mortalities
  * (Shin and Cury 2001, 2004).
- * 
+ *
  * Contributor(s):
  * Yunne SHIN (yunne.shin@ird.fr),
  * Morgane TRAVERS (morgane.travers@ifremer.fr)
@@ -23,20 +23,20 @@
  * Philippe VERLEY (philippe.verley@ird.fr)
  * Laure VELEZ (laure.velez@ird.fr)
  * Nicolas Barrier (nicolas.barrier@ird.fr)
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation (version 3 of the License). Full description
  * is provided on the LICENSE file.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
- * 
+ *
  */
 
 package fr.ird.osmose;
@@ -67,6 +67,9 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import ucar.ma2.InvalidRangeException;
 import org.apache.commons.lang3.ArrayUtils;
+import ucar.nc2.write.Nc4Chunking;
+import ucar.nc2.write.Nc4ChunkingStrategy;
+import ucar.nc2.write.NetcdfFileFormat;
 
 /**
  * This class handles the Osmose configuration. It knows how to read Osmose
@@ -172,6 +175,10 @@ public class Configuration extends OLogger {
      * @see fr.ird.osmose.util.Separator
      */
     private String outputSeparator;
+
+    /** True if output files should be flushed any time they are written. */
+    private boolean flushEnabled;
+
     /**
      * Number of CPUs allocated to {@code Osmose} for running the simulations
      * concurrently. Parameter <i>simulation.ncpu</i>
@@ -261,6 +268,66 @@ public class Configuration extends OLogger {
      */
     private int[] focalIndex, bkgIndex, rscIndex;
 
+    private boolean isEconomyEnabled;
+
+    private NetcdfFileFormat ncOutVersion;
+
+    /** True if fishing Mortality (v3 or v4) is on. */
+    private boolean fishingMortalityEnabled = true;
+
+    private boolean cutoffEnabled;
+    private int recordFrequency;
+
+    /**
+     * Threshold age (year) for age class zero. This parameter allows to discard
+     * schools younger that this threshold in the calculation of the indicators
+     * when parameter <i>output.cutoff.enabled</i> is set to {@code true}.
+     * Parameter <i>output.cutoff.age.sp#</i>
+     */
+    private float[] cutoffAge;
+
+    /**
+     * Threshold size (cm) for age class zero. This parameter allows to discard
+     * schools smaller that this threshold in the calculation of the indicators when
+     * parameter <i>output.cutoff.enabled</i> is set to {@code true}. Parameter
+     * <i>output.cutoff.age.sp#</i>
+     */
+    private float[] cutoffLength;
+
+    /**
+     * Year to start writing the outputs
+     */
+    private int yearOutput;
+
+    /**
+     * Whether the restart files should be written or not
+     */
+    private boolean writeRestart;
+
+    /**
+     * Record frequency for writing restart files, in number of time step.
+     */
+    private int restartFrequency;
+    /**
+     * Indicates whether the simulation starts from a restart file.
+     */
+    private boolean restart;
+    /**
+     * Number of years before writing restart files.
+     */
+    private int spinupRestart;
+
+    /**
+     * Whether to keep track of prey records during the simulation
+     */
+    private boolean preyRecord;
+
+    private Nc4Chunking chunker;
+
+    private int nFisheries;
+
+    private String[] namesFisheries;
+
     ///////////////
     // Constructors
     ///////////////
@@ -281,7 +348,7 @@ public class Configuration extends OLogger {
             debug("Loading parameters from command line");
             for (Entry<String, String> argument : cmd.entrySet()) {
                 Parameter parameter = new Parameter(argument.getKey(), argument.getValue());
-                parameters.put(argument.getKey(), parameter);
+                parameters.put(argument.getKey().toLowerCase(), parameter);
                 debug(". " + parameter.toString());
             }
         }
@@ -316,6 +383,25 @@ public class Configuration extends OLogger {
         return VersionManager.getInstance().isConfigurationUpToDate();
     }
 
+    public boolean isPreyRecordEnabled() {
+        return this.preyRecord;
+    }
+
+    private void checkPreyRecord() {
+
+        preyRecord = false;
+        List<String> outputList = this.findKeys("output.diet*enabled*");
+        for(String param : outputList) {
+            preyRecord = preyRecord || getBoolean(param);
+        }
+
+        outputList = this.findKeys("output.*tl*enabled");
+        for(String param : outputList) {
+            preyRecord = preyRecord || getBoolean(param);
+        }
+
+    }
+
     /**
      * Initialises the current configuration. Sets the values of the main variables
      * and creates the grid.
@@ -331,14 +417,43 @@ public class Configuration extends OLogger {
         String keybioen = "simulation.bioen.enabled";
         this.bioenEnabled = this.getBoolean(keybioen);
 
-        String key = "simulation.genetic.enabled";
-        this.geneticEnabled = this.getBoolean(key);
+        this.checkPreyRecord();
+
+        this.geneticEnabled = false;
+        if (this.bioenEnabled) {
+            String key = "simulation.genetic.enabled";
+            this.geneticEnabled = this.getBoolean(key);
+        }
 
         String keyincom = "simulation.incoming.flux.enabled";
         this.incomingFluxEnabled = this.getBoolean(keyincom);
 
         // Output path
         outputPathname = getFile("output.dir.path");
+
+        this.flushEnabled = getBoolean("output.flush.enabled");
+
+        writeRestart = true;
+        if (!this.isNull("output.restart.enabled")) {
+            writeRestart = this.getBoolean("output.restart.enabled");
+        } else {
+            warning("Could not find parameter 'output.restart.enabled'. Osmose assumes it is true and a NetCDF restart file will be created at the end of the simulation (or more, depending on parameters 'simulation.restart.recordfrequency.ndt' and 'simulation.restart.spinup').");
+        }
+
+        restart = false;
+        if (!this.isNull("simulation.restart.file")) {
+            restart = true;
+        }
+
+        restartFrequency = Integer.MAX_VALUE;
+        if (!this.isNull("output.restart.recordfrequency.ndt")) {
+            restartFrequency = this.getInt("output.restart.recordfrequency.ndt");
+        }
+
+        spinupRestart = 0;
+        if (!this.isNull("output.restart.spinup")) {
+            spinupRestart = this.getInt("output.restart.spinup") - 1;
+        }
 
         // Show the output folder
         info("Output folder set to " + outputPathname);
@@ -365,6 +480,10 @@ public class Configuration extends OLogger {
         } else {
             nCpu = 1;
         }
+
+        // Set the output NetCdf format for
+        this.setOutputNcFormat();
+        this.setChunker();
 
         // barrier.n: new way to count the number of species, resource and background
         // based on types.
@@ -399,7 +518,7 @@ public class Configuration extends OLogger {
         if (nResource_test != nResource) {
             String errorMsg = String.format(
                     "Resource species may be badly defined. simulation.nresource=%d, number of resource types=%d",
-                    nResource_test, nSpecies);
+                    nResource_test, this.nResource);
             error(errorMsg, null);
         }
 
@@ -466,7 +585,7 @@ public class Configuration extends OLogger {
         }
 
         // barrier.n: add number of background species
-        key = "simulation.nbackground";
+        String key = "simulation.nbackground";
         int nBackground_test = 0;
         if (canFind(key)) {
             nBackground_test = getInt(key);
@@ -497,14 +616,37 @@ public class Configuration extends OLogger {
 
         // Fisheries
         boolean fisheryEnabled = getBoolean("fisheries.enabled");
-        nFishery = findKeys("fisheries.name.fsh*").size();
+        this.isEconomyEnabled = getBoolean("economy.enabled");
 
-        // Display warning message if new fishery enabled but no fishers
-        if (fisheryEnabled && (nFishery == 0)) {
-            warning("***************************************************");
-            warning("The new fishery implementation is enabled, but no fisheries ('fisheries.name.fsh*' parameters) has been found");
-            warning("***************************************************");
+        // true if fishingMortality is enabled or not (v3 or v4)
+        if (!isNull("simulation.fishing.mortality.enabled")) {
+            fishingMortalityEnabled = getBoolean("simulation.fishing.mortality.enabled");
         }
+
+        // Init of fisheries at 0.
+        nFishery = 0;
+
+        if (fishingMortalityEnabled && fisheryEnabled) {
+
+            // if fishery is on: read nfisheries
+            nFishery = getInt("simulation.nfisheries");
+
+            // compare with the number of fisheries names
+            int nFisheryTest = findKeys("fisheries.name.fsh*").size();
+
+            // Display warning message if new fishery enabled but no fishers
+            if (nFishery != nFisheryTest) {
+                warning("***************************************************");
+                warning("The 'simulation.nfisheries' parameter is inconsistent "
+                        + "with the number of 'fisheries.name.fsh*' parameters");
+                warning("The program will stop");
+                warning("***************************************************");
+                System.exit(1);
+            }
+        }
+
+        // output some output parameters
+        this.initOutputParameters();
 
         // Output regions
         outputRegions = new ArrayList<>();
@@ -533,7 +675,7 @@ public class Configuration extends OLogger {
                 .map(rgKey -> Integer.valueOf(rgKey.substring(rgKey.lastIndexOf(".sr") + 3)))
                 .collect(Collectors.toList()));
 
-        // Do some test in order to insure that surveys and output
+        // Do some test in order to ensure that surveys and output
         // regions have no duplicate indexes
         HashSet<Integer> total = new HashSet<>();
         total.addAll(rg);
@@ -567,6 +709,36 @@ public class Configuration extends OLogger {
             region.init();
         });
 
+        // Year to start writing the outputs
+        yearOutput = this.getInt("output.start.year");
+
+        this.initFisheries();
+
+    }
+
+    public int getRestartFrequency() {
+        return this.restartFrequency;
+    }
+
+    public int getSpinupRestart() {
+        return this.spinupRestart;
+    }
+
+    /**
+     * Checks whether the simulation started from a restart file.
+     *
+     * @return {@code true} if the simulation started from a restart file
+     */
+    public boolean isRestart() {
+        return restart;
+    }
+
+    public boolean isWriteRestartEnabled() {
+        return this.writeRestart;
+    }
+
+    public int getYearOutput() {
+        return this.yearOutput;
     }
 
     public List<AbstractOutputRegion> getOutputRegions() {
@@ -579,6 +751,14 @@ public class Configuration extends OLogger {
 
     public boolean isFisheryEnabled() {
         return nFishery > 0;
+    }
+
+    public boolean isFishingMortalityEnabled() {
+        return this.fishingMortalityEnabled;
+    }
+
+    public boolean isEconomyEnabled() {
+        return isEconomyEnabled;
     }
 
     /**
@@ -608,6 +788,22 @@ public class Configuration extends OLogger {
      */
     public Species getSpecies(int index) {
         return species[index];
+    }
+
+    /**
+     * Get a species
+     *
+     * @param name,
+     *            the name of the species
+     * @return the {@code name} species.
+     */
+    public Species getSpecies(String name) {
+        for (int i = 0; i < getNSpecies(); i++) {
+            if (getSpecies(i).getName().equalsIgnoreCase(name)) {
+                return getSpecies(i);
+            }
+        }
+        return null;
     }
 
     /**
@@ -684,7 +880,8 @@ public class Configuration extends OLogger {
                     Parameter entry = new Parameter(iline, filename);
                     entry.parse(line);
                     if (parameters.containsKey(entry.key)) {
-                        if (entry.key.contains("species.name") || entry.key.contains("species.type")) {
+                        Parameter existingParam = parameters.get(entry.key);
+                        if ((existingParam.source.compareTo("command line") != 0) && (entry.key.contains("species.name") || entry.key.contains("species.type"))) {
                             String errorMsg = String.format("%s has already been defined.", entry.key);
                             error(errorMsg, null);
                         } else {
@@ -1180,6 +1377,31 @@ public class Configuration extends OLogger {
         return defaultSep;
     }
 
+    private void initOutputParameters() {
+
+        recordFrequency = getInt("output.recordfrequency.ndt");
+
+        cutoffAge = new float[nSpecies];
+        cutoffLength = new float[nSpecies];
+
+        cutoffEnabled = getBoolean("output.cutoff.enabled");
+        if (cutoffEnabled) {
+            int cpt = 0;
+            for (int iSpec : getFocalIndex()) {
+                // If cutoff enabled, look for cutoff age
+                if(!isNull("output.cutoff.age.sp" + iSpec)) {
+                    cutoffAge[cpt] = getFloat("output.cutoff.age.sp" + iSpec);
+                }
+
+                // If cutoff enabled, look for cutoff size
+                if(!isNull("output.cutoff.size.sp" + iSpec)) {
+                    cutoffLength[cpt] = getFloat("output.cutoff.size.sp" + iSpec);
+                }
+                cpt++;
+            }
+        }
+    }
+
     public String getMainFile() {
         return mainFilename;
     }
@@ -1228,6 +1450,22 @@ public class Configuration extends OLogger {
      */
     public boolean isIncomingFluxEnabled() {
         return this.incomingFluxEnabled;
+    }
+
+    public float[] getCutoffLength() {
+        return this.cutoffLength;
+    }
+
+    public float[] getCutoffAge() {
+        return this.cutoffAge;
+    }
+
+    public boolean isCutoffEnabled() {
+        return this.cutoffEnabled;
+    }
+
+    public int getRecordFrequency() {
+        return this.recordFrequency;
     }
 
     /**
@@ -1408,6 +1646,10 @@ public class Configuration extends OLogger {
         return this.focalIndex;
     }
 
+    public boolean isFlushEnabled() {
+        return this.flushEnabled;
+    }
+
     /**
      * Returns the index of the background species.
      *
@@ -1432,7 +1674,7 @@ public class Configuration extends OLogger {
      * Recovers the indexes of the species that can be fished.
      *
      * Returns the concatenated array of focal and background species indexes.
-     * 
+     *
      * @return
      */
     public int[] getPredatorIndex() {
@@ -1445,6 +1687,115 @@ public class Configuration extends OLogger {
 
     public int[] getAllIndex() {
         return (ArrayUtils.addAll(ArrayUtils.addAll(this.focalIndex, this.bkgIndex), this.rscIndex));
+    }
+
+    /** Recover the output NetCDF version */
+    public NetcdfFileFormat getNcOutVersion() {
+        return ncOutVersion;
+    }
+
+    public int getNYears() {
+        return this.getNStep() / this.getNStepYear();
+    }
+
+    private void setOutputNcFormat() {
+
+        // Control of the NetCdf output version from a configuration file.
+        // If not provided, NetCdf4 is used.
+        ncOutVersion = NetcdfFileFormat.NETCDF4;
+        if (!isNull("output.netcdf.format")) {
+            String outputFormat = getString("output.netcdf.format");
+            switch (outputFormat) {
+                case "ncstream":
+                    ncOutVersion = NetcdfFileFormat.NCSTREAM;
+                break;
+                case "netcdf3":
+                    ncOutVersion = NetcdfFileFormat.NETCDF3;
+                    break;
+                case "netcdf3_64bit_data":
+                    ncOutVersion = NetcdfFileFormat.NETCDF3_64BIT_DATA;
+                    break;
+                case "netcdf3_64bit_offset":
+                    ncOutVersion = NetcdfFileFormat.NETCDF3_64BIT_OFFSET;
+                    break;
+                case "netcdf4":
+                    ncOutVersion = NetcdfFileFormat.NETCDF4;
+                    break;
+                case "netcdf4_classic":
+                    ncOutVersion = NetcdfFileFormat.NETCDF4_CLASSIC;
+                    break;
+                default:
+                    ncOutVersion = NetcdfFileFormat.NETCDF3;
+                    break;
+            }
+        }
+    }
+
+    public void setChunker() {
+
+        int deflateLevel = 0;
+        boolean shuffle = false;
+
+        // if netcdf4 output, check if deflate level is set.
+        String key = "output.netcdf.deflate.level";
+        if (!this.isNull(key)) {
+            deflateLevel = getInt(key);
+        }
+
+        key = "output.netcdf.shuffle";
+        // we read whether shuffle parameter is on.
+        if (!this.isNull(key)) {
+            shuffle = getBoolean(key, false);
+        }
+
+        Nc4Chunking.Strategy strategy = Nc4Chunking.Strategy.none;
+        key = "output.netcdf.chunk";
+        if (!this.isNull(key)) {
+            switch (getString(key)) {
+                case "standard":
+                    strategy = Nc4Chunking.Strategy.standard;
+                    break;
+                case "grib":
+                    strategy = Nc4Chunking.Strategy.grib;
+                    break;
+                case "none":
+                    strategy = Nc4Chunking.Strategy.none;
+                    break;
+                default:
+                    strategy = Nc4Chunking.Strategy.none;
+            }
+        }
+
+        this.chunker = Nc4ChunkingStrategy.factory(strategy, deflateLevel, shuffle);
+    }
+
+    public Nc4Chunking getChunker() {
+        return this.chunker;
+    }
+
+    private void initFisheries() {
+
+        if (this.isFisheryEnabled()) {
+            nFisheries = this.getNFishery();
+            namesFisheries = new String[nFisheries];
+            for (int iFishery = 0; iFishery < nFisheries; iFishery++) {
+                namesFisheries[iFishery] = String.format("fishery%03d", iFishery);
+            }
+        } else {
+            nFisheries = this.getNSpecies();
+            namesFisheries = new String[nFisheries];
+            for (int iSpecies = 0; iSpecies < nFisheries; iSpecies++) {
+                namesFisheries[iSpecies] = String.format("fishery%03d", iSpecies);
+            }
+        }
+    }
+
+    public String[] getFisheriesNames() {
+        return this.namesFisheries;
+    }
+
+    public int getNFisheries() {
+        return this.nFisheries;
     }
 
 }

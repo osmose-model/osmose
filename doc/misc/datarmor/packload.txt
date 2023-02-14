@@ -1,0 +1,41 @@
+Package loading
+======================
+
+In order to use the :samp:`osmose` and :samp:`calibrar` R packages on |dat|, the first step is to load the R module as follows:
+
+.. code-block:: csh
+
+    module load R
+    module load nco
+
+The following modules will be loaded::
+
+    Currently Loaded Modulefiles:
+  1) nco/4.7.1_conda            4) impi/2017.2.174
+  2) intel-cc-17/17.0.2.174     5) intel-cmkl-17/17.0.2.174
+  3) java/1.8.0                 6) R/3.4.3-intel-17.0.2.174
+
+.. warning:: 
+
+    The :samp:`nco` module must be loaded in order to use the R :samp:`ncdf4` library.
+
+
+The second step is to define where the libraries are located. In order to avoid multiple copies, a possibility is 
+to use the R libraries that have been built in Nicolas Barrier's home. This is done as follows:
+
+.. code-block:: csh
+
+    # CSH users
+    setenv R_LIBS_USER /home1/datahome/nbarrier/libs/R/lib
+
+.. code-block:: bash
+
+    # BASH/SH users
+    export R_LIBS_USER=/home1/datahome/nbarrier/libs/R/lib
+
+To test whether the libraries are found, run R and types: 
+
+.. code-block:: R
+
+    library("osmose")
+    library("calibrar")

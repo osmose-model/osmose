@@ -246,5 +246,10 @@ public class Resource extends OsmoseLinker implements IAggregation {
         return this.species.getSpeciesIndex();
     }
 
+    @Override
+    public int getFirstFeedingAgeDt() {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
 
 }

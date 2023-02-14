@@ -1,6 +1,13 @@
 # History files
 .Rhistory
 .Rapp.history
+.RData
+
+# doc/**/*.puml
+
+**/**ipynb**
+**/*~lock*
+
 
 # Example code in package build process
 *-Ex.R
@@ -24,6 +31,7 @@ vignettes/*.pdf
 
 inst/extdata/Rplots.pdf
 inst/extdata/plot_test.R
+**/osmose-Ex*
 
 inst/extdata/eec/make_netcdf_mask.R
 *.swp
@@ -35,8 +43,14 @@ inst/doc
 /vignettes/plot_method_cache
 /vignettes/create_run_read_cache
 
+java/target
 target
-**sh
+
+doc/_static/javadoc
+doc/_static/puml
+
+
+check.sh
 **.html
 build
 dist
@@ -46,4 +60,32 @@ nbproject
 **.Rcheck
 
 **/nbactions.xml
+**/.classpath
+**/.settings
+**/.project
+**/*jar-with-dependencies.jar
 
+**/*.ipynb
+
+# doc
+**/_build
+**/eec_4.3.0
+**/gog
+**/*calib_demo*
+doc/osmose/_static/plot_step_chart.pdf
+doc/odd_des/submodel/mort/_static/fishing-period.pdf
+doc/odd_des/submodel/mort/_static/size_ratio.pdf
+doc/odd_des/submodel/_static/gom.pdf
+doc/odd_des/submodel/_static/size_ratio.pdf
+doc/odd_des/submodel/_static/vb.pdf
+doc/**/_static/*svg
+**.log
+**.aux
+
+**/verif_fisheries*.png
+doc/rosmose/_static/*png
+**/_static/**/*.png
+random_drift.pdf
+random_drift.svg
+/*.sh
+doc/bioen_odd_des/submodel/_static/repfonct_bioen.pdf

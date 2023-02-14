@@ -1,10 +1,10 @@
-/* 
- * 
+/*
+ *
  * OSMOSE (Object-oriented Simulator of Marine Ecosystems)
  * http://www.osmose-model.org
- * 
+ *
  * Copyright (C) IRD (Institut de Recherche pour le Développement) 2009-2020
- * 
+ *
  * Osmose is a computer program whose purpose is to simulate fish
  * populations and their interactions with their biotic and abiotic environment.
  * OSMOSE is a spatial, multispecies and individual-based model which assumes
@@ -15,7 +15,7 @@
  * processes of fish life cycle (growth, explicit predation, additional and
  * starvation mortalities, reproduction and migration) and fishing mortalities
  * (Shin and Cury 2001, 2004).
- * 
+ *
  * Contributor(s):
  * Yunne SHIN (yunne.shin@ird.fr),
  * Morgane TRAVERS (morgane.travers@ifremer.fr)
@@ -23,25 +23,26 @@
  * Philippe VERLEY (philippe.verley@ird.fr)
  * Laure VELEZ (laure.velez@ird.fr)
  * Nicolas Barrier (nicolas.barrier@ird.fr)
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation (version 3 of the License). Full description
  * is provided on the LICENSE file.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
- * 
+ *
  */
 
 package fr.ird.osmose;
 
 import fr.ird.osmose.background.BackgroundSchoolSet;
+import fr.ird.osmose.eco.EconomicModule;
 import fr.ird.osmose.output.SchoolSetSnapshot;
 import fr.ird.osmose.populator.PopulatingProcess;
 import fr.ird.osmose.process.genet.Trait;
@@ -52,7 +53,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
+
 import ucar.nc2.NetcdfFile;
+import ucar.nc2.dataset.NetcdfDatasets;
 
 /**
  * This class is in charge of running one instance of the simulation. Let's
@@ -78,6 +82,9 @@ public class Simulation extends OsmoseLinker {
      * The rank of the simulation. (among replicated simulations)
      */
     private final int rank;
+
+    private EconomicModule economicModule;
+
     /**
      * The set of schools.
      */
@@ -90,22 +97,12 @@ public class Simulation extends OsmoseLinker {
      * forcings for bkg species. Indexes from [nbkg, nbkg + nrsc - 1] are for LTL.
      */
     private ResourceForcing[] resourceForcing;
-    /**
-     * Current year of the simulation.
-     */
-    private int year;
-    /**
-     * Time step in the current year. {@code i_step_year = i_step_simu / nyear}
-     */
-    private int i_step_year;
+
     /**
      * Time step of the simulation.
      */
     private int i_step_simu;
-    /**
-     * Total number of time steps of the simulation.
-     */
-    private int n_steps_simu;
+
     /**
      * The object that controls what should be done during one time step.
      */
@@ -115,36 +112,12 @@ public class Simulation extends OsmoseLinker {
      * a NetCDF file. Osmose will be able to restart on such a file.
      */
     private SchoolSetSnapshot snapshot;
-    /**
-     * Record frequency for writing restart files, in number of time step.
-     */
-    private int restartFrequency;
-    /**
-     * Indicates whether the simulation starts from a restart file.
-     */
-    private boolean restart;
-    /**
-     * Number of years before writing restart files.
-     */
-    private int spinupRestart;
-    /**
-     * Whether the restart files should be written or not
-     */
-    private boolean writeRestart;
-    /**
-     * Whether to keep track of prey records during the simulation
-     */
-    private boolean preyRecord;
-    /**
-     * Year to start writing the outputs
-     */
-    private int yearOutput;
 
     /**
      * List of evolving trait.
      */
     private List<Trait> evolvingTrait;
-    private int n_evolving_trait;
+    private int nEvolvingTrait;
 
     //////////////
     // Constructor
@@ -185,51 +158,53 @@ public class Simulation extends OsmoseLinker {
         this.backSchoolSet = new BackgroundSchoolSet();
         this.backSchoolSet.init();
 
-        // Option for running only one time step and stops
-        boolean oneStep = false;
-        if (getConfiguration().canFind("simulation.onestep")) {
-            oneStep = getConfiguration().getBoolean("simulation.onestep");
-        }
-
-        // Initialize time variables
-        n_steps_simu = oneStep ? 1 : getConfiguration().getNStep();
-        year = 0;
-        i_step_year = 0;
         i_step_simu = 0;
 
-        // Look for restart file
-        restart = false;
-        if (!getConfiguration().isNull("simulation.restart.file")) {
+        // Look for restart file if restart is enabled
+        if(getConfiguration().isRestart()) {
             String ncfile = getConfiguration().getFile("simulation.restart.file") + "." + rank;
             i_step_simu = 0;
             try {
-                NetcdfFile nc = NetcdfFile.open(ncfile);
+                NetcdfFile nc = NetcdfDatasets.openDataset(ncfile);
                 i_step_simu = Integer.valueOf(nc.findGlobalAttribute("step").getStringValue()) + 1;
-                if (oneStep) {
-                    n_steps_simu = i_step_simu + 1;
-                }
-                int nStepYear = getConfiguration().getNStepYear();
-                year = i_step_simu / nStepYear;
-                i_step_year = i_step_simu % nStepYear;
-                info("Restarting simulation from year {0} step {1}", new Object[] { year, i_step_year });
-                restart = true;
+                info("Restarting simulation from year {0} step {1}", new Object[] { this.getYear(),  this.getIndexTimeYear()});
             } catch (IOException ex) {
                 error("Failed to open restart file " + ncfile, ex);
             }
         }
 
         if (this.getConfiguration().isGeneticEnabled()) {
-            List<String> genet_keys = this.getConfiguration().findKeys("*.trait.mean");
-            this.n_evolving_trait = genet_keys.size();
+
+            // List all the trait mean parameters
+            List<String> genet_keys = this.getConfiguration().findKeys("*.trait.mean.sp*");
+
+            // Remove the "sp#"
+            List<String> output_keys = new ArrayList<>();
+            for (String strOut : genet_keys) {
+                String prefix = strOut.substring(0, strOut.indexOf(".sp"));
+                output_keys.add(prefix);
+            }
+
+            // Removes duplicates.
+            List<String> prefix_keys = output_keys.stream().distinct().collect(Collectors.toList());
+
+            // Init the arrays
+            this.nEvolvingTrait = prefix_keys.size();
             this.evolvingTrait = new ArrayList<>();
-            for (int p = 0; p < this.n_evolving_trait; p++) {
-                String key = genet_keys.get(p);
+
+            for (int p = 0; p < this.nEvolvingTrait; p++) {
+                String key = prefix_keys.get(p);
                 // recovers the trait prefix
                 String prefix = key.replace(".trait.mean", "");
-                Trait trait = new Trait(this.rank, prefix);
+                Trait trait = new Trait(this.rank, prefix, p);
                 trait.init();
                 this.evolvingTrait.add(trait);
             }
+        }
+
+        if(getConfiguration().isEconomyEnabled()) {
+            economicModule = new EconomicModule(rank);
+            economicModule.init();
         }
 
         // Init resource forcing
@@ -241,7 +216,7 @@ public class Simulation extends OsmoseLinker {
          *          will in turn call outputManager.init() which may request prey
          *          record.
          */
-        preyRecord = false;
+        // preyRecord = false;
 
         // Instantiate the Step
         step = new SimulationStep(rank);
@@ -256,24 +231,6 @@ public class Simulation extends OsmoseLinker {
 
         // Initialize the restart maker
         snapshot = new SchoolSetSnapshot(rank);
-        restartFrequency = Integer.MAX_VALUE;
-        if (!getConfiguration().isNull("output.restart.recordfrequency.ndt")) {
-            restartFrequency = getConfiguration().getInt("output.restart.recordfrequency.ndt");
-        }
-        spinupRestart = 0;
-        if (!getConfiguration().isNull("output.restart.spinup")) {
-            spinupRestart = getConfiguration().getInt("output.restart.spinup") - 1;
-        }
-        writeRestart = true;
-        if (!getConfiguration().isNull("output.restart.enabled")) {
-            writeRestart = getConfiguration().getBoolean("output.restart.enabled");
-        } else {
-            warning("Could not find parameter 'output.restart.enabled'. Osmose assumes it is true and a NetCDF restart file will be created at the end of the simulation (or more, depending on parameters 'simulation.restart.recordfrequency.ndt' and 'simulation.restart.spinup').");
-        }
-
-        // Year to start writing the outputs
-        yearOutput = getConfiguration().getInt("output.start.year");
-
     }
 
     /**
@@ -311,16 +268,6 @@ public class Simulation extends OsmoseLinker {
             resourceIndex++;
             // Name must contain only alphanumerical characters
         }
-
-    }
-
-    /**
-     * Checks whether the simulation started from a restart file.
-     *
-     * @return {@code true} if the simulation started from a restart file
-     */
-    public boolean isRestart() {
-        return restart;
     }
 
     /**
@@ -328,21 +275,21 @@ public class Simulation extends OsmoseLinker {
      */
     public void run() {
 
-        while (i_step_simu < n_steps_simu) {
-            year = i_step_simu / getConfiguration().getNStepYear();
-            i_step_year = i_step_simu % getConfiguration().getNStepYear();
+        while (i_step_simu < getConfiguration().getNStep()) {
+
+            int year = getYear();
 
             // Print progress in console at the beginning of the year
-            if (i_step_simu % getConfiguration().getNStepYear() == 0) {
+            if (getIndexTimeYear() == 0) {
                 info("year {0}", year);
             }
 
             // Run a new step
             step.step(i_step_simu);
-            // fr.ird.osmose.util.SimulationUI.step(year, i_step_year);
 
             // Create a restart file
-            if (writeRestart && (year >= spinupRestart) && ((i_step_simu + 1) % restartFrequency == 0)) {
+            if (getConfiguration().isWriteRestartEnabled() && (year >= getConfiguration().getSpinupRestart())
+                    && ((i_step_simu + 1) % getConfiguration().getRestartFrequency() == 0)) {
                 snapshot.makeSnapshot(i_step_simu);
             }
 
@@ -352,7 +299,7 @@ public class Simulation extends OsmoseLinker {
         step.end();
 
         // Create systematically a restart file at the end of the simulation
-        if (writeRestart) {
+        if (getConfiguration().isWriteRestartEnabled()) {
             snapshot.makeSnapshot(i_step_simu - 1);
         }
     }
@@ -372,16 +319,15 @@ public class Simulation extends OsmoseLinker {
      * @return the current year of the simulation
      */
     public int getYear() {
-        return year;
+        return i_step_simu / getConfiguration().getNStepYear();
     }
-
     /**
      * Returns the time step in the current year.
      *
      * @return the time step in the current year
      */
     public int getIndexTimeYear() {
-        return i_step_year;
+        return i_step_simu % getConfiguration().getNStepYear();
     }
 
     /**
@@ -402,12 +348,12 @@ public class Simulation extends OsmoseLinker {
      * @return true if prey records should be activated
      */
     public boolean isPreyRecord() {
-        return preyRecord && (year >= (yearOutput - 1));
+        return getConfiguration().isPreyRecordEnabled() && (this.getYear() >= (getConfiguration().getYearOutput() - 1));
     }
 
-    public void requestPreyRecord() {
-        preyRecord = true;
-    }
+    // public void requestPreyRecord() {
+    //     preyRecord = true;
+    // }
 
     /**
      * Returns the {@code ResourceForcing} instance for specified resource.
@@ -445,11 +391,15 @@ public class Simulation extends OsmoseLinker {
      * @return The number of evolving trait
      */
     public int getNEvolvingTraits() {
-        return this.n_evolving_trait;
+        return this.nEvolvingTrait;
     }
 
     public BackgroundSchoolSet getBkgSchoolSet() {
         return this.backSchoolSet;
+    }
+
+    public EconomicModule getEconomicModule() {
+        return this.economicModule;
     }
 
 }

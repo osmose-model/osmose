@@ -1,10 +1,10 @@
-/* 
- * 
+/*
+ *
  * OSMOSE (Object-oriented Simulator of Marine Ecosystems)
  * http://www.osmose-model.org
- * 
+ *
  * Copyright (C) IRD (Institut de Recherche pour le Développement) 2009-2020
- * 
+ *
  * Osmose is a computer program whose purpose is to simulate fish
  * populations and their interactions with their biotic and abiotic environment.
  * OSMOSE is a spatial, multispecies and individual-based model which assumes
@@ -15,7 +15,7 @@
  * processes of fish life cycle (growth, explicit predation, additional and
  * starvation mortalities, reproduction and migration) and fishing mortalities
  * (Shin and Cury 2001, 2004).
- * 
+ *
  * Contributor(s):
  * Yunne SHIN (yunne.shin@ird.fr),
  * Morgane TRAVERS (morgane.travers@ifremer.fr)
@@ -23,20 +23,20 @@
  * Philippe VERLEY (philippe.verley@ird.fr)
  * Laure VELEZ (laure.velez@ird.fr)
  * Nicolas Barrier (nicolas.barrier@ird.fr)
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation (version 3 of the License). Full description
  * is provided on the LICENSE file.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
- * 
+ *
  */
 
 package fr.ird.osmose.output;
@@ -57,7 +57,8 @@ import ucar.ma2.DataType;
 import ucar.ma2.InvalidRangeException;
 import ucar.nc2.Attribute;
 import ucar.nc2.Dimension;
-import ucar.nc2.NetcdfFileWriter;
+import ucar.nc2.write.Nc4Chunking;
+import ucar.nc2.write.NetcdfFormatWriter;
 import ucar.nc2.Variable;
 
 /**
@@ -73,7 +74,8 @@ public class ResourceOutput extends SimulationLinker implements IOutput {
     /**
      * Object for creating/writing netCDF files.
      */
-    private NetcdfFileWriter nc;
+    private NetcdfFormatWriter nc;
+    private NetcdfFormatWriter.Builder bNc;
     /**
      * Resource biomass array at the beginning of the time step.
      */
@@ -82,9 +84,8 @@ public class ResourceOutput extends SimulationLinker implements IOutput {
      * Resource biomass array after predation process.
      */
     private double[][][] rscBiomass1;
-    
+
     private int index;
-    private Variable timeVar, rscBiomVar, rscBiomPredVar, lonVar, latVar;
 
     public ResourceOutput(int rank) {
         super(rank);
@@ -104,7 +105,7 @@ public class ResourceOutput extends SimulationLinker implements IOutput {
     public void close() {
         try {
             nc.close();
-            String strFilePart = nc.getNetcdfFile().getLocation();
+            String strFilePart = getFilename();
             String strFileBase = strFilePart.substring(0, strFilePart.indexOf(".part"));
             File filePart = new File(strFilePart);
             File fileBase = new File(strFileBase);
@@ -202,9 +203,9 @@ public class ResourceOutput extends SimulationLinker implements IOutput {
 
         //System.out.println("NetCDF saving time " + index + " - " + time);
         try {
-            nc.write(rscBiomVar, new int[]{index, 0, 0, 0}, arrRsc0);
-            nc.write(timeVar, new int[]{index}, arrTime);
-            nc.write(this.rscBiomPredVar, new int[]{index, 0, 0, 0}, arrRsc1);
+            nc.write(nc.findVariable("rsc_biomass"), new int[]{index, 0, 0, 0}, arrRsc0);
+            nc.write(nc.findVariable("time"), new int[]{index}, arrTime);
+            nc.write(nc.findVariable("rsc_biomass_pred"), new int[]{index, 0, 0, 0}, arrRsc1);
             this.index++;
         } catch (IOException | InvalidRangeException ex) {
             Logger.getLogger(ResourceOutput.class.getName()).log(Level.SEVERE, null, ex);
@@ -212,47 +213,43 @@ public class ResourceOutput extends SimulationLinker implements IOutput {
     }
 
     private void createNCFile(String ncfile) {
-        try {
-            /*
-             * Create NetCDF file
-             */
-            nc = NetcdfFileWriter.createNew(NetcdfFileWriter.Version.netcdf4, ncfile);
-        } catch (IOException ex) {
-            Logger.getLogger(ResourceOutput.class.getName()).log(Level.SEVERE, null, ex);
-        }
- 
+
+        Nc4Chunking chunker = getConfiguration().getChunker();
+
+        bNc = NetcdfFormatWriter.createNewNetcdf4(getConfiguration().getNcOutVersion(), ncfile, chunker);
+
         /*
          * Create dimensions
          */
-        Dimension rscDim = nc.addDimension(null, "rsc", getConfiguration().getNRscSpecies());
-        Dimension nxDim = nc.addDimension(null, "nx", getGrid().get_nx());
-        Dimension nyDim = nc.addDimension(null, "ny", getGrid().get_ny());
-        Dimension timeDim = nc.addUnlimitedDimension("time");
+        Dimension rscDim = bNc.addDimension("rsc", getConfiguration().getNRscSpecies());
+        Dimension nxDim = bNc.addDimension("nx", getGrid().get_nx());
+        Dimension nyDim = bNc.addDimension("ny", getGrid().get_ny());
+        Dimension timeDim = bNc.addUnlimitedDimension("time");
         /*
          * Add variables
          */
-        timeVar = nc.addVariable(null, "time", DataType.FLOAT, "time");
-        timeVar.addAttribute(new Attribute("units", "days since 1-1-1 0:0:0"));
-        timeVar.addAttribute(new Attribute("calendar", "360_day"));
-        timeVar.addAttribute(new Attribute("description", "time ellapsed, in days, since the beginning of the simulation"));
-        
-        rscBiomVar = nc.addVariable(null, "rsc_biomass", DataType.FLOAT, new ArrayList<>(Arrays.asList(timeDim, rscDim, nyDim, nxDim)));
-        rscBiomVar.addAttribute(new Attribute("units", "tons per cell"));
-        rscBiomVar.addAttribute(new Attribute("description", "resource biomass in osmose cell, in tons integrated on water column, per group and per cell"));
-        rscBiomVar.addAttribute(new Attribute("_FillValue", -99.f));
-        
-        rscBiomPredVar = nc.addVariable(null, "rsc_biomass_pred", DataType.FLOAT, new ArrayList<>(Arrays.asList(timeDim, rscDim, nyDim, nxDim)));
-        rscBiomPredVar.addAttribute(new Attribute("units", "tons per cell"));
-        rscBiomPredVar.addAttribute(new Attribute("description", "resource biomass after predation process in osmose cell, in tons integrated on water column, per group and per cell"));
-        rscBiomPredVar.addAttribute(new Attribute("_FillValue", -99.f));
-        
-        latVar = nc.addVariable(null, "latitude", DataType.FLOAT,  new ArrayList<>(Arrays.asList(nyDim, nxDim)));
-        latVar.addAttribute(new Attribute( "units", "degree"));
-        latVar.addAttribute(new Attribute("description", "latitude of the center of the cell"));
-        
-        lonVar = nc.addVariable(null, "longitude", DataType.FLOAT,  new ArrayList<>(Arrays.asList(nyDim, nxDim)));
-        lonVar.addAttribute(new Attribute("units", "degree"));
-        lonVar.addAttribute(new Attribute("description", "longitude of the center of the cell"));
+        Variable.Builder<?> timeVarBuilder = bNc.addVariable("time", DataType.FLOAT, "time");
+        timeVarBuilder.addAttribute(new Attribute("units", "days since 1-1-1 0:0:0"));
+        timeVarBuilder.addAttribute(new Attribute("calendar", "360_day"));
+        timeVarBuilder.addAttribute(new Attribute("description", "time ellapsed, in days, since the beginning of the simulation"));
+
+        Variable.Builder<?> rscBiomVarBuilder = bNc.addVariable("rsc_biomass", DataType.FLOAT, new ArrayList<>(Arrays.asList(timeDim, rscDim, nyDim, nxDim)));
+        rscBiomVarBuilder.addAttribute(new Attribute("units", "tons per cell"));
+        rscBiomVarBuilder.addAttribute(new Attribute("description", "resource biomass in osmose cell, in tons integrated on water column, per group and per cell"));
+        rscBiomVarBuilder.addAttribute(new Attribute("_FillValue", -99.f));
+
+        Variable.Builder<?> rscBiomPredVarBuilder = bNc.addVariable("rsc_biomass_pred", DataType.FLOAT, new ArrayList<>(Arrays.asList(timeDim, rscDim, nyDim, nxDim)));
+        rscBiomPredVarBuilder.addAttribute(new Attribute("units", "tons per cell"));
+        rscBiomPredVarBuilder.addAttribute(new Attribute("description", "resource biomass after predation process in osmose cell, in tons integrated on water column, per group and per cell"));
+        rscBiomPredVarBuilder.addAttribute(new Attribute("_FillValue", -99.f));
+
+        Variable.Builder<?> latVarBuilder = bNc.addVariable("latitude", DataType.FLOAT,  new ArrayList<>(Arrays.asList(nyDim, nxDim)));
+        latVarBuilder.addAttribute(new Attribute( "units", "degree"));
+        latVarBuilder.addAttribute(new Attribute("description", "latitude of the center of the cell"));
+
+        Variable.Builder<?> lonVarBuilder = bNc.addVariable("longitude", DataType.FLOAT,  new ArrayList<>(Arrays.asList(nyDim, nxDim)));
+        lonVarBuilder.addAttribute(new Attribute("units", "degree"));
+        lonVarBuilder.addAttribute(new Attribute("description", "longitude of the center of the cell"));
         /*
          * Add global attributes
          */
@@ -263,12 +260,12 @@ public class ResourceOutput extends SimulationLinker implements IOutput {
             str.append(getConfiguration().getResourceSpecies(kRsc));
             str.append(" ");
         }
-        nc.addGroupAttribute(null, new Attribute("dimension_rsc", str.toString()));
+        bNc.addAttribute(new Attribute("dimension_rsc", str.toString()));
         try {
             /*
              * Validates the structure of the NetCDF file.
              */
-            nc.create();
+            nc = bNc.build();
             /*
              * Writes variable longitude and latitude
              */
@@ -278,8 +275,8 @@ public class ResourceOutput extends SimulationLinker implements IOutput {
                 arrLon.set(cell.get_jgrid(), cell.get_igrid(), cell.getLon());
                 arrLat.set(cell.get_jgrid(), cell.get_igrid(), cell.getLat());
             }
-            nc.write(lonVar, arrLon);
-            nc.write(latVar, arrLat);
+            nc.write(nc.findVariable("longitude"), arrLon);
+            nc.write(nc.findVariable("latitude"), arrLat);
         } catch (IOException | InvalidRangeException ex) {
             Logger.getLogger(ResourceOutput.class.getName()).log(Level.SEVERE, null, ex);
         }

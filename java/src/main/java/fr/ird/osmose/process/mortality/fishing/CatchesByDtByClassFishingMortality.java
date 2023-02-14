@@ -80,23 +80,27 @@ public class CatchesByDtByClassFishingMortality extends AbstractFishingMortality
     @Override
     public void readParameters() {
         int iSpec = getFileSpeciesIndex();
+        int nClasses = 0;
         if (!getConfiguration().isNull("mortality.fishing.catches.byDt.byAge.file.sp" + iSpec)) {
             ByClassTimeSeries timeSerieByAge = new ByClassTimeSeries();
             timeSerieByAge.read(getConfiguration().getFile("mortality.fishing.catches.byDt.byAge.file.sp" + iSpec));
             catches = timeSerieByAge.getValues();
-            ageClasses = new float[timeSerieByAge.getNClass() - 1];
+            ageClasses = new float[timeSerieByAge.getNClass()];
             for (int k = 0; k < ageClasses.length; k++) {
                 // Converts age in year into number of time steps
                 ageClasses[k] = Math.round(timeSerieByAge.getClass(k) * getConfiguration().getNStepYear());
             }
+            nClasses = ageClasses.length;
         } else if (!getConfiguration().isNull("mortality.fishing.catches.byDt.bySize.file.sp" + iSpec)) {
             ByClassTimeSeries timeSerieBySize = new ByClassTimeSeries();
             timeSerieBySize.read(getConfiguration().getFile("mortality.fishing.catches.byDt.bySize.file.sp" + iSpec));
             catches = timeSerieBySize.getValues();
             sizeClasses = timeSerieBySize.getClasses();
+            nClasses = ageClasses.length;
         } else {
             error("Could not found parameters mortality.fishing.catches.byDt.byAge/bySize.file.sp" + iSpec, null);
         }
+        fishableBiomass = new double[nClasses];
     }
 
     @Override

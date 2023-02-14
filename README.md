@@ -5,7 +5,8 @@
 OSMOSE: Modelling Marine Exploited Ecosystems
 =============================================
 
-[![CRAN_Status_Badge](https://www.r-pkg.org/badges/version/osmose)](https://cran.r-project.org/package=osmose)
+<!-- [![CRAN_Status_Badge](https://www.r-pkg.org/badges/version/osmose)](https://cran.r-project.org/package=osmose) -->
+[![DOI](https://zenodo.org/badge/48296200.svg)](https://zenodo.org/badge/latestdoi/48296200)
 [![Latest Release](https://img.shields.io/github/release/osmose-model/osmose.svg)](https://github.com/osmose-model/osmose/releases)
 [![R Build Status](https://github.com/osmose-model/osmose-private/workflows/r-build/badge.svg)](https://github.com/osmose-model/osmose-private/actions)
 [![Java Build Status](https://github.com/osmose-model/osmose-private/workflows/java-build/badge.svg)](https://github.com/osmose-model/osmose-private/actions)
@@ -70,3 +71,50 @@ vignette(package = "osmose", topic = "create_run_read")
 [Official website](http://www.osmose-model.org/) of the model, including info about the development of the project as well as references.
 [Documentation website](https://documentation.osmose-model.org/index.html) with information of parameters of java model (the core).
 [Github site](https://github.com/osmose-model/osmose) where the development code is placed.
+
+## Using documentation plugins
+
+Some documentation tools (Javadoc, PlantUML diagrams) can be generated using Maven plugins, which are defined in the `pom.xml` file.
+
+### Building Javadoc
+
+```
+mvn javadoc:javadoc
+```
+
+The Javadoc will be stored on the `doc/_static/javadoc/apidocs/` folder.
+
+### Generate PlantUML diagrams
+
+To generate PlantUML diagrams for the full Osmose project:
+
+```
+mvn plantuml-generator:generate@osmose-full
+```
+
+The PlantUML diagram will be stored on `doc/_static/puml`
+
+To convert the resulting diagram in an image format (SVG for instance), the [PlantUML](https://plantuml.com/fr/) tool is required. When
+the diagram has been generated, type:
+
+```
+plantuml -tsvg doc/_static/puml/osmose-full.puml
+```
+
+## Acknowledgements
+
+<div align="center">
+<img src="https://osmose-model.org/wp-content/uploads/2020/10/logo_ird.png" height=60pt style="margin-right: 30px;">
+<img src="https://osmose-model.org/wp-content/uploads/2020/10/logo-marbec-1024x549.png" height=60pt>
+</div>
+<br>
+<div align="center">
+<img src="https://osmose-model.org/wp-content/uploads/2020/10/h2020.png" height=50pt style="margin-right: 20px;">
+<img src="https://osmose-model.org/wp-content/uploads/2020/10/belmont-forum-logos-partenaires-removebg-preview.png" height=60pt>
+</div>
+<br>
+
+<div align="center">
+<img src="https://osmose-model.org/wp-content/uploads/2020/10/biodiversa-logos-partenaires-removebg-preview.png" height=70pt style="margin-right: 30px;">
+<img src="https://osmose-model.org/wp-content/uploads/2020/11/Institut_francais_de_recherche_pour_lexploitation_de_la_mer_logo.svg_-1024x190.png" height=30pt>
+</div>

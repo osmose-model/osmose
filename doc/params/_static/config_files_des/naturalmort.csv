@@ -1,0 +1,9 @@
+mortality.natural.larva.rate.spX; Constant mortality rate of larvae
+mortality.natural.larva.rate.bytDt.file.spX;File containing the time series of larvae mortality rates for each time step
+
+mortality.natural.rate.spX;Constant annual mortality rate
+mortality.natural.rate.bytDt.file.spX;File containing the time series of natural mortality rates for each time step
+mortality.natural.rate.byDt.byAge.file.spX;File containing the time series of natural mortality rates by age for each time step
+mortality.natural.rate.byDt.bySize.file.spX;File containing the time series of natural mortality rates by size for each time step
+
+mortality.natural.spatial.distrib.file.spX;Map file containing a spatial map of natural mortality multiplication factor. If null, no factor is applied.

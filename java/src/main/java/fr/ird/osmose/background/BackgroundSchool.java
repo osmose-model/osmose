@@ -1,10 +1,10 @@
-/* 
- * 
+/*
+ *
  * OSMOSE (Object-oriented Simulator of Marine Ecosystems)
  * http://www.osmose-model.org
- * 
+ *
  * Copyright (C) IRD (Institut de Recherche pour le Développement) 2009-2020
- * 
+ *
  * Osmose is a computer program whose purpose is to simulate fish
  * populations and their interactions with their biotic and abiotic environment.
  * OSMOSE is a spatial, multispecies and individual-based model which assumes
@@ -15,7 +15,7 @@
  * processes of fish life cycle (growth, explicit predation, additional and
  * starvation mortalities, reproduction and migration) and fishing mortalities
  * (Shin and Cury 2001, 2004).
- * 
+ *
  * Contributor(s):
  * Yunne SHIN (yunne.shin@ird.fr),
  * Morgane TRAVERS (morgane.travers@ifremer.fr)
@@ -23,20 +23,20 @@
  * Philippe VERLEY (philippe.verley@ird.fr)
  * Laure VELEZ (laure.velez@ird.fr)
  * Nicolas Barrier (nicolas.barrier@ird.fr)
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation (version 3 of the License). Full description
  * is provided on the LICENSE file.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
- * 
+ *
  */
 
 package fr.ird.osmose.background;
@@ -55,7 +55,7 @@ public class BackgroundSchool extends AbstractSchool {
      * Backgroud species associated with the background School.
      */
     final private BackgroundSpecies bkgSpecies;
-    
+
     /** Size class index. */
     private final int classIndex;
 
@@ -73,6 +73,7 @@ public class BackgroundSchool extends AbstractSchool {
         preys = new HashMap<>();
         fishedBiomass = new double[getConfiguration().getNFishery()];
         discardedBiomass = new double[getConfiguration().getNFishery()];
+        accessibleBiomassToFishery = new double[getConfiguration().getNFishery()];
         this.classIndex = classIndex;
         this.moveToCell(cell);
     }
@@ -83,12 +84,14 @@ public class BackgroundSchool extends AbstractSchool {
      */
     public void init() {
         this.reset(nDead);
+        this.reset(ageDeath);
         // Reset diet variables
         preys.clear();
         preyedBiomass = 0.d;
         predSuccessRate = 0.f;
         reset(fishedBiomass);
         reset(discardedBiomass);
+        reset(this.accessibleBiomassToFishery);
     }
 
     /**
@@ -128,7 +131,7 @@ public class BackgroundSchool extends AbstractSchool {
     public double biom2abd(double biomass) {
         return biomass / this.getWeight();
     }
-    
+
     @Override
     public double abd2biom(double abund) {
         return abund * this.getWeight();
@@ -138,7 +141,7 @@ public class BackgroundSchool extends AbstractSchool {
     public int getFileSpeciesIndex() {
         return this.bkgSpecies.getFileSpeciesIndex();
     }
-    
+
     @Override
     public float getAge() {
        return this.bkgSpecies.getAge(classIndex);
@@ -158,12 +161,12 @@ public class BackgroundSchool extends AbstractSchool {
     @Override
     public float getWeight() {
         return this.bkgSpecies.computeWeight(this.getLength());
-    }   
-    
-    /** Returns age as a number of time steps. 
-     * Hard coded to 1 (to insure > 0 for predation), 
+    }
+
+    /** Returns age as a number of time steps.
+     * Hard coded to 1 (to insure > 0 for predation),
      * but to see what should be done about it.
-     * @return 
+     * @return
      */
     @Override
     public int getAgeDt() {
@@ -179,20 +182,21 @@ public class BackgroundSchool extends AbstractSchool {
     public String getSpeciesName() {
         return this.bkgSpecies.getName();
     }
-    
+
     public double getProportion(int step) {
         return this.bkgSpecies.getProportion(this.classIndex, step);
     }
-    
+
     public void setBiomass(double biomass, int step) {
-        this.biomass = biomass * this.getProportion(step);
+        this.biomass = this.instantaneousBiomass = biomass * this.getProportion(step);
+        this.abundance = this.instantaneousAbundance = this.biom2abd(biomass);
     }
 
     @Override
     public double getBetaBioen() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        return this.bkgSpecies.getBetaBioen();
     }
-    
+
     /**
      * Returns the index of the species
      *
@@ -201,6 +205,71 @@ public class BackgroundSchool extends AbstractSchool {
     @Override
     public int getSpeciesIndex() {
         return this.bkgSpecies.getSpeciesIndex();
+    }
+
+    @Override
+    public int getFirstFeedingAgeDt() {
+        return -1;
+    }
+
+    @Override
+    public double getEMaint() {
+        // TODO Auto-generated method stub
+        return 0;
+    }
+
+    @Override
+    public double getENet() {
+        // TODO Auto-generated method stub
+        return 0;
+    }
+
+    @Override
+    public double getRho() {
+        // TODO Auto-generated method stub
+        return 0;
+    }
+
+    @Override
+    public double getIngestion() {
+        // TODO Auto-generated method stub
+        return 0;
+    }
+
+    @Override
+    public float getGonadWeight() {
+        // TODO Auto-generated method stub
+        return 0;
+    }
+
+    @Override
+    public double getIngestionTot() {
+        // TODO Auto-generated method stub
+        return 0;
+    }
+
+    @Override
+    public double getAgeMat() {
+        // TODO Auto-generated method stub
+        return 0;
+    }
+
+    @Override
+    public boolean isSexuallyMature() {
+        // TODO Auto-generated method stub
+        return false;
+    }
+
+    @Override
+    public double getSizeMat() {
+        // TODO Auto-generated method stub
+        return 0;
+    }
+
+    @Override
+    public double getNEggs() {
+        // TODO Auto-generated method stub
+        return 0;
     }
 
 }

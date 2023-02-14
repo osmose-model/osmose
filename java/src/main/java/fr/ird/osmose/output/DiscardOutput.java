@@ -1,10 +1,10 @@
-/* 
- * 
+/*
+ *
  * OSMOSE (Object-oriented Simulator of Marine Ecosystems)
  * http://www.osmose-model.org
- * 
+ *
  * Copyright (C) IRD (Institut de Recherche pour le Développement) 2009-2020
- * 
+ *
  * Osmose is a computer program whose purpose is to simulate fish
  * populations and their interactions with their biotic and abiotic environment.
  * OSMOSE is a spatial, multispecies and individual-based model which assumes
@@ -15,7 +15,7 @@
  * processes of fish life cycle (growth, explicit predation, additional and
  * starvation mortalities, reproduction and migration) and fishing mortalities
  * (Shin and Cury 2001, 2004).
- * 
+ *
  * Contributor(s):
  * Yunne SHIN (yunne.shin@ird.fr),
  * Morgane TRAVERS (morgane.travers@ifremer.fr)
@@ -23,20 +23,20 @@
  * Philippe VERLEY (philippe.verley@ird.fr)
  * Laure VELEZ (laure.velez@ird.fr)
  * Nicolas Barrier (nicolas.barrier@ird.fr)
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation (version 3 of the License). Full description
  * is provided on the LICENSE file.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
- * 
+ *
  */
 
 package fr.ird.osmose.output;
@@ -54,7 +54,8 @@ import ucar.ma2.DataType;
 import ucar.ma2.InvalidRangeException;
 import ucar.nc2.Attribute;
 import ucar.nc2.Dimension;
-import ucar.nc2.NetcdfFileWriter;
+import ucar.nc2.write.Nc4Chunking;
+import ucar.nc2.write.NetcdfFormatWriter;
 import ucar.nc2.Variable;
 
 /**
@@ -71,11 +72,9 @@ public class DiscardOutput extends SimulationLinker implements IOutput {
     /*
      * Object for creating/writing netCDF files.
      */
-    private NetcdfFileWriter nc;
-    /*
-     * NetCDF time and biomass variables.
-     */
-    private Variable timeVar, biomassVar;
+    private NetcdfFormatWriter nc;
+    private NetcdfFormatWriter.Builder bNc;
+
     /*
      * NetCDF time index.
      */
@@ -88,49 +87,48 @@ public class DiscardOutput extends SimulationLinker implements IOutput {
 
     public DiscardOutput(int rank) {
         super(rank);
-        
+
     }
 
     @Override
     public void init() {
-        
+
         // initializes the number of fisheries
         nFishery = getConfiguration().getNFishery();
+
+        Nc4Chunking chunker = getConfiguration().getChunker();
 
         /*
          * Create NetCDF file
          */
-        try {
-            String filename = getFilename();
-            IOTools.makeDirectories(filename);
-            nc = NetcdfFileWriter.createNew(NetcdfFileWriter.Version.netcdf4, filename);
-        } catch (IOException ex) {
-            Logger.getLogger(DiscardOutput.class.getName()).log(Level.SEVERE, null, ex);
-        }
+        String filename = getFilename();
+        IOTools.makeDirectories(filename);
+        bNc = NetcdfFormatWriter.createNewNetcdf4(getConfiguration().getNcOutVersion(), filename, chunker);
+
         /*
          * Create dimensions
          */
-        Dimension speciesDim = nc.addDimension(null, "species", getNSpecies());
-        Dimension fisheriesDim = nc.addDimension(null, "fishery", nFishery);
-        Dimension timeDim = nc.addUnlimitedDimension("time");
+        Dimension speciesDim = bNc.addDimension("species", getNSpecies());
+        Dimension fisheriesDim = bNc.addDimension("fishery", nFishery);
+        Dimension timeDim = bNc.addUnlimitedDimension("time");
         /*
          * Add variables
          */
-        timeVar = nc.addVariable(null, "time", DataType.FLOAT, "time");
-        timeVar.addAttribute(new Attribute("units", "days since 0-1-1 0:0:0"));
-        timeVar.addAttribute(new Attribute("calendar", "360_day"));
-        timeVar.addAttribute(new Attribute("description", "time ellapsed, in days, since the beginning of the simulation"));
+        Variable.Builder<?> timeVarBuilder = bNc.addVariable("time", DataType.FLOAT, "time");
+        timeVarBuilder.addAttribute(new Attribute("units", "days since 0-1-1 0:0:0"));
+        timeVarBuilder.addAttribute(new Attribute("calendar", "360_day"));
+        timeVarBuilder.addAttribute(new Attribute("description", "time ellapsed, in days, since the beginning of the simulation"));
 
-        biomassVar = nc.addVariable(null, "biomass", DataType.FLOAT, new ArrayList<>(Arrays.asList(timeDim, speciesDim, fisheriesDim)));
-        biomassVar.addAttribute(new Attribute("units", "ton"));
-        biomassVar.addAttribute(new Attribute("description", "discared biomass, in tons, per species and per cell"));
-        biomassVar.addAttribute(new Attribute("_FillValue", -99.f));
+        Variable.Builder<?> biomassVarBuilder = bNc.addVariable("biomass", DataType.FLOAT, new ArrayList<>(Arrays.asList(timeDim, speciesDim, fisheriesDim)));
+        biomassVarBuilder.addAttribute(new Attribute("units", "ton"));
+        biomassVarBuilder.addAttribute(new Attribute("description", "discared biomass, in tons, per species and per cell"));
+        biomassVarBuilder.addAttribute(new Attribute("_FillValue", -99.f));
 
         try {
             /*
              * Validates the structure of the NetCDF file.
              */
-            nc.create();
+            this.nc = this.bNc.build();
 
         } catch (IOException ex) {
             Logger.getLogger(DiscardOutput.class.getName()).log(Level.SEVERE, null, ex);
@@ -142,7 +140,7 @@ public class DiscardOutput extends SimulationLinker implements IOutput {
     public void close() {
         try {
             nc.close();
-            String strFilePart = nc.getNetcdfFile().getLocation();
+            String strFilePart = this.getFilename();
             String strFileBase = strFilePart.substring(0, strFilePart.indexOf(".part"));
             File filePart = new File(strFilePart);
             File fileBase = new File(strFileBase);
@@ -196,8 +194,8 @@ public class DiscardOutput extends SimulationLinker implements IOutput {
 
         //System.out.println("NetCDF saving time " + index + " - " + time);
         try {
-            nc.write(timeVar, new int[]{index}, arrTime);
-            nc.write(biomassVar, new int[]{index, 0, 0}, arrBiomass);
+            nc.write(nc.findVariable("time"), new int[]{index}, arrTime);
+            nc.write(nc.findVariable("biomass"), new int[]{index, 0, 0}, arrBiomass);
             index++;
         } catch (IOException | InvalidRangeException ex) {
             Logger.getLogger(DiscardOutput.class.getName()).log(Level.SEVERE, null, ex);

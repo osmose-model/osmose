@@ -85,7 +85,10 @@ public enum MortalityCause {
     FORAGING(5),
     
     /** Mortality due to discards. */
-    DISCARDS(6);
+    DISCARDS(6),
+    
+    /** Mortality for aging schools **/
+    AGING(7);
     
     /**
      * Index of the mortality cause

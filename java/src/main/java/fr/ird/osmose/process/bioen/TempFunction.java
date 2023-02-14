@@ -51,14 +51,28 @@ import java.io.IOException;
  */
 public class TempFunction extends AbstractProcess {
 
-    private double[] km, gamma;
+    /**
+     * Parameters for the energy mobilization.
+     */
+
+    private double[] e_M, e_D, Tp;
 
     /**
      * Parameters for the energy maintenance.
      */
-    private double[] c_t, Tr;
+    private double[] e_m;
 
     PhysicalData temperature_input;
+
+    private boolean isPhiTActivated;
+
+    /** Interface for the computation of PhiT */
+    @FunctionalInterface
+    private interface LambdaPhiT {
+        double getPhiT(School school);
+    }
+
+    LambdaPhiT lambdaPhiT;
 
     public TempFunction(int rank) throws IOException {
 
@@ -74,43 +88,60 @@ public class TempFunction extends AbstractProcess {
     public void init() {
 
         int cpt;
+        String key;
         int nSpecies = this.getNSpecies();
 
-        km = new double[nSpecies];
-        gamma = new double[nSpecies];
-        c_t = new double[nSpecies];
-        Tr = new double[nSpecies];
+        e_M = new double[nSpecies];
+        e_D = new double[nSpecies];
+        Tp = new double[nSpecies];
+        e_m = new double[nSpecies];
 
-        String key;
-        key = "bioen.gross.energy.km";
+        // Check whether the phiT calculation is activated or not.
+        // Default is trur
+        key = "simulation.bioen.phit.enabled";
+        if (getConfiguration().isNull(key)) {
+            this.isPhiTActivated = true;
+        } else {
+            this.isPhiTActivated = getConfiguration().getBoolean(key);
+        }
+
+        // If PhiT is on, we use the computePhiT function
+        // if PhiT is off, returns 1.0
+        if (this.isPhiTActivated) {
+            lambdaPhiT = this::computePhiT;
+        } else {
+            lambdaPhiT = (school) -> 1.0;
+        }
+
+        key = "species.bioen.mobilized.e.mobi";
         cpt = 0;
         for (int i : getConfiguration().getFocalIndex()) {
             String keytmp = String.format("%s.sp%d", key, i);
-            km[cpt] = getConfiguration().getDouble(keytmp);
+            e_M[cpt] = getConfiguration().getDouble(keytmp);
             cpt++;
         }
 
-        key = "bioen.gross.energy.gamma";
+        key = "species.bioen.mobilized.e.D";
         cpt = 0;
         for (int i : getConfiguration().getFocalIndex()) {
             String keytmp = String.format("%s.sp%d", key, i);
-            gamma[cpt] = getConfiguration().getDouble(keytmp);
+            e_D[cpt] = getConfiguration().getDouble(keytmp);
             cpt++;
         }
 
-        key = "bioen.arrh.ct";
+        key = "species.bioen.mobilized.Tp";
         cpt = 0;
         for (int i : getConfiguration().getFocalIndex()) {
             String keytmp = String.format("%s.sp%d", key, i);
-            c_t[cpt] = getConfiguration().getDouble(keytmp);
+            Tp[cpt] = getConfiguration().getDouble(keytmp);
             cpt++;
         }
 
-        key = "bioen.maint.energy.Tr";
         cpt = 0;
+        key = "species.bioen.maint.e.maint";
         for (int i : getConfiguration().getFocalIndex()) {
             String keytmp = String.format("%s.sp%d", key, i);
-            Tr[cpt] = getConfiguration().getDouble(keytmp);
+            e_m[cpt] = getConfiguration().getDouble(keytmp);
             cpt++;
         }
 
@@ -118,40 +149,46 @@ public class TempFunction extends AbstractProcess {
 
     @Override
     public void run() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        this.temperature_input.update(this.getSimulation().getIndexTimeSimu());
     }
 
     /**
-     * Computes the phiT coefficients function for gross energy. Equation 4
+     * Computes the phiT coefficients function for mobilized energy. Equation 4
      */
     /**
      * Returns the temperature for a given school.
      */
     public double getTemp(School school) {
-
         return temperature_input.getValue(school);
 
     }
 
     /**
-     * Returns the phiT function for gross energy. Equation 4
+     * Returns the phiT function for mobilized energy. Equation 4
      *
      * @param school
      * @return
      */
-    public double get_phiT(School school) {
+    public double computePhiT(School school) {
 
         // Recovers the temperature of the school cell
-        double temp = temperature_input.getValue(school);
+        double temp = this.getTemp(school);
         int i = school.getSpeciesIndex();
+        double k = 8.62e-5;
 
-        double output = (temp - this.gamma[i]) / (temp - this.gamma[i] + this.km[i]);
+        double output = Math.exp(-this.e_M[i] / (k * (temp + 273.15)))
+                / (1 + (this.e_M[i] / (this.e_D[i] - this.e_M[i]))
+                        * Math.exp((this.e_D[i]) / k * (1 / (this.Tp[i] + 273.15) - 1 / (temp + 273.15))))
+                / (Math.exp(-this.e_M[i] / (k * (this.Tp[i] + 273.15)))
+                        / (1 + this.e_M[i] / (this.e_D[i] - this.e_M[i])));
+
         return output;
 
     }
 
     /**
-     * Returns the Arrhenius function for a given school. Cf. equation 6
+     * Returns the Arrhenius function for a given school for maintenance. Cf.
+     * equation 6
      *
      * @param school
      * @return
@@ -159,12 +196,17 @@ public class TempFunction extends AbstractProcess {
     public double get_Arrhenius(School school) {
 
         // Recovers the temperature of the school cell
-        // Autre formulation de Arrhénius : la plus récente des deux 
+        // Autre formulation de Arrhénius : la plus récente des deux
         double temp = this.getTemp(school);
         int i = school.getSpeciesIndex();
+        double k = 8.62e-5;
 
-        return Math.exp(this.c_t[i] * (1 / this.Tr[i] - 1 / (temp + 273.15)));
+        return Math.exp(-this.e_m[i] / (k * (temp + 273.15)));
 
+    }
+
+    public double getPhiT(School school) {
+        return this.lambdaPhiT.getPhiT(school);
     }
 
 }

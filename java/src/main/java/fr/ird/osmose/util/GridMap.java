@@ -1,10 +1,10 @@
-/* 
- * 
+/*
+ *
  * OSMOSE (Object-oriented Simulator of Marine Ecosystems)
  * http://www.osmose-model.org
- * 
+ *
  * Copyright (C) IRD (Institut de Recherche pour le Développement) 2009-2020
- * 
+ *
  * Osmose is a computer program whose purpose is to simulate fish
  * populations and their interactions with their biotic and abiotic environment.
  * OSMOSE is a spatial, multispecies and individual-based model which assumes
@@ -15,7 +15,7 @@
  * processes of fish life cycle (growth, explicit predation, additional and
  * starvation mortalities, reproduction and migration) and fishing mortalities
  * (Shin and Cury 2001, 2004).
- * 
+ *
  * Contributor(s):
  * Yunne SHIN (yunne.shin@ird.fr),
  * Morgane TRAVERS (morgane.travers@ifremer.fr)
@@ -23,20 +23,20 @@
  * Philippe VERLEY (philippe.verley@ird.fr)
  * Laure VELEZ (laure.velez@ird.fr)
  * Nicolas Barrier (nicolas.barrier@ird.fr)
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation (version 3 of the License). Full description
  * is provided on the LICENSE file.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
- * 
+ *
  */
 
 package fr.ird.osmose.util;
@@ -66,6 +66,17 @@ public class GridMap extends OsmoseLinker {
                 matrix[cell.get_jgrid()][cell.get_igrid()] = Cell.LAND_VALUE;
             } else {
                 matrix[cell.get_jgrid()][cell.get_igrid()] = defaultValue;
+            }
+        }
+    }
+
+    public GridMap(double[][] input) {
+        matrix = new float[getGrid().get_ny()][getGrid().get_nx()];
+        for (Cell cell : getGrid().getCells()) {
+            if (cell.isLand()) {
+                matrix[cell.get_jgrid()][cell.get_igrid()] = Cell.LAND_VALUE;
+            } else {
+                matrix[cell.get_jgrid()][cell.get_igrid()] = (float) input[cell.get_jgrid()][cell.get_igrid()];
             }
         }
     }
@@ -137,11 +148,36 @@ public class GridMap extends OsmoseLinker {
      * @return
      */
     public float count() {
+        return this.count(false);
+    }
+
+    /**
+     * Sums the matrix over space
+     *
+     * @author Nicolas Barrier
+     * @return
+     */
+    public float count(boolean exclude_zeros) {
 
         float output = 0;
-        for (int j = 0; j < getGrid().get_ny(); j++) {
-            for (int i = 0; i < getGrid().get_nx(); i++) {
-                output += matrix[j][i];
+
+        if (!exclude_zeros) {
+            // exclude only NaN values
+            for (int j = 0; j < getGrid().get_ny(); j++) {
+                for (int i = 0; i < getGrid().get_nx(); i++) {
+                    if (!getGrid().getCell(i, j).isLand()) {
+                        output += matrix[j][i];
+                    }
+                }
+            }
+        } else {
+            // Exclude NaN values and also 0 values
+            for (int j = 0; j < getGrid().get_ny(); j++) {
+                for (int i = 0; i < getGrid().get_nx(); i++) {
+                    if (!getGrid().getCell(i, j).isLand() & (matrix[j][i] != 0)) {
+                        output += matrix[j][i];
+                    }
+                }
             }
         }
 
@@ -160,7 +196,13 @@ public class GridMap extends OsmoseLinker {
 
         for (int j = 0; j < getGrid().get_ny(); j++) {
             for (int i = 0; i < getGrid().get_nx(); i++) {
-                if (matrix[j][i] != map2.getValue(i, j)) {
+                float val1 = matrix[j][i];
+                float val2 =  map2.getValue(i, j);
+                // manage the case where both values are NaN
+                if(Float.isNaN(val1) && Float.isNaN(val2)) {
+                    continue;
+                }
+                if (val1 != val2) {
                     return false;
                 }
             }
@@ -179,6 +221,10 @@ public class GridMap extends OsmoseLinker {
      * @throws InvalidRangeException
      */
     public void read(NetcdfFile nc, int mapIndex) throws IOException, InvalidRangeException {
+        this.read(nc, mapIndex, "map");
+    }
+
+    public void read(NetcdfFile nc, int mapIndex, String varname) throws IOException, InvalidRangeException {
 
         // Defines the indexes of the NetCDF variable to read
         int nx = getConfiguration().getGrid().get_nx();
@@ -187,21 +233,51 @@ public class GridMap extends OsmoseLinker {
         int count[] = {1, ny, nx};
 
         // Extracts the FillValue attribute
-        int fillValue = -99;
-        if (!nc.findVariable("map").getAttributes().isEmpty()) {
-            // The first attribute must be _FillValue
-            fillValue = nc.findVariable("map").getAttributes().get(0).getNumericValue().intValue();
+        double fillValue = -99;
+        if (!nc.findVariable(varname).attributes().isEmpty()) {
+            // Loop over all the attributes to define a size.
+            if(nc.findVariable(varname).attributes().hasAttribute("_FillValue")) {
+                fillValue = nc.findVariable(varname).attributes().findAttribute("_FillValue").getNumericValue().doubleValue();
+            }
         }
 
         // Reads the NetCDF variable
-        Array temp = nc.findVariable("map").read(start, count).reduce();
+        Array temp = nc.findVariable(varname).read(start, count).reduce();
         Index index = temp.getIndex();
         for (int j = 0; j < ny; j++) {
             for (int i = 0; i < nx; i++) {
                 index.set(j, i);
-                matrix[j][i] = (temp.getFloat(index) == fillValue) ? 0 : temp.getFloat(index);
+                matrix[j][i] = (temp.getDouble(index) == fillValue) ? 0.f : (float) temp.getDouble(index);
+            }
+        }
+    }
+
+    public void read(NetcdfFile nc, int mapIndex, int classIndex, String varname) throws IOException, InvalidRangeException {
+
+        // Defines the indexes of the NetCDF variable to read
+        int nx = getConfiguration().getGrid().get_nx();
+        int ny = getConfiguration().getGrid().get_ny();
+        int start[] = {mapIndex, classIndex, 0, 0};
+        int count[] = {1, 1, ny, nx};
+
+        // Extracts the FillValue attribute
+        double fillValue = -99;
+        if (!nc.findVariable(varname).attributes().isEmpty()) {
+            // Loop over all the attributes to define a size.
+            if(nc.findVariable(varname).attributes().hasAttribute("_FillValue")) {
+                fillValue = nc.findVariable(varname).attributes().findAttribute("_FillValue").getNumericValue().doubleValue();
             }
         }
 
+        // Reads the NetCDF variable
+        Array temp = nc.findVariable(varname).read(start, count).reduce();
+        Index index = temp.getIndex();
+        for (int j = 0; j < ny; j++) {
+            for (int i = 0; i < nx; i++) {
+                index.set(j, i);
+                matrix[j][i] = (temp.getDouble(index) == fillValue) ? 0.f : (float) temp.getDouble(index);
+            }
+        }
     }
+
 }

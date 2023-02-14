@@ -1,0 +1,13 @@
+mortality.fishing.rate.spX;Constant annual fishing rate
+mortality.fishing.rate.byYear.file.spX;File containing the time-series of yearly fishing rates
+mortality.fishing.rate.byDt.byAge.file.spX;File containing the fishing rate by age and by time-step
+mortality.fishing.rate.byDt.bySize.file.spX;File containing the fishing rate by size and by time-step
+
+mortality.fishing.catches.spX;Constant annual catch
+mortality.fishing.catches.byYear.file.spX;File containing the time-series of yearly catchs
+mortality.fishing.catches.byDt.byAge.file.spX;File containing the catches by age and by time-step
+mortality.fishing.catches.byDt.bySize.file.spX;File containing the catches by size and by time-step
+
+mortality.fishing.recruitment.age.spX;Age at which a fish can be recruited.
+mortality.fishing.recruitment.size.spX;Size at which a fish can be recruited.
+mortality.fishing.season.distrib.file.spX;File containing the seasonal distribution of the fishing mortality or catches (the sum of all values must equal one)

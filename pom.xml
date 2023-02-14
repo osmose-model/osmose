@@ -1,0 +1,390 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+OSMOSE (Object-oriented Simulator of Marine ecOSystems Exploitation)
+http://www.osmose-model.org
+
+Copyright (C) IRD (Institut de Recherche pour le Développement) 2009-2020
+
+Osmose is a computer program whose purpose is to simulate fish
+populations and their interactions with their biotic and abiotic environment.
+OSMOSE is a spatial, multispecies and individual-based model which assumes
+size-based opportunistic predation based on spatio-temporal co-occurrence
+and size adequacy between a predator and its prey. It represents fish
+individuals grouped into schools, which are characterized by their size,
+weight, age, taxonomy and geographical location, and which undergo major
+processes of fish life cycle (growth, explicit predation, additional and
+starvation mortalities, reproduction and migration) and fishing mortalities
+(Shin and Cury 2001, 2004).
+
+Contributor(s):
+Yunne SHIN (yunne.shin@ird.fr),
+Morgane TRAVERS (morgane.travers@ifremer.fr)
+Ricardo OLIVEROS RAMOS (ricardo.oliveros@gmail.com)
+Philippe VERLEY (philippe.verley@ird.fr)
+Laure VELEZ (laure.velez@ird.fr)
+Nicolas Barrier (nicolas.barrier@ird.fr)
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation (version 3 of the License). Full description
+is provided on the LICENSE file.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+-->
+
+
+<project>
+    <!-- Maven properties -->
+    <modelVersion>4.0.0</modelVersion>
+    <groupId>fr.ird</groupId>
+    <artifactId>osmose</artifactId>
+    <version>4.3.3</version>
+    <packaging>jar</packaging>
+    <name>Osmose</name>
+    <description></description>
+
+    <!-- Project properties -->
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <maven.compiler.release>8</maven.compiler.release>
+        <mainClass>fr.ird.osmose.Osmose</mainClass>
+        <skipTests>true</skipTests>
+    </properties>
+
+    <!-- Libraries declarations -->
+    <dependencies>
+        <!-- OpenCSV -->
+        <dependency>
+            <groupId>au.com.bytecode</groupId>
+            <artifactId>opencsv</artifactId>
+            <version>2.4</version>
+        </dependency>
+
+        <!-- NetCDF -->
+        <dependency>
+            <groupId>edu.ucar</groupId>
+            <artifactId>netcdfAll</artifactId>
+            <version>5.5.2</version>
+        </dependency>
+
+        <dependency>
+            <groupId>de.elnarion.util</groupId>
+            <artifactId>plantuml-generator-util</artifactId>
+            <version>1.5.4</version>
+        </dependency>
+
+        <!-- Commons-Math3 -->
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-math3</artifactId>
+            <version>3.6.1</version>
+        </dependency>
+
+        <!-- Options -->
+        <dependency>
+            <groupId>ml.options</groupId>
+            <artifactId>options</artifactId>
+            <version>1.0.0</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-lang3</artifactId>
+            <version>3.12.0</version>
+        </dependency>
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-api</artifactId>
+            <version>5.9.1</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-engine</artifactId>
+            <version>5.9.1</version>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+
+    <!-- Address to the libraries repositories -->
+    <repositories>
+        <!-- Default Maven repository -->
+        <repository>
+            <id>default</id>
+            <url>http://repo.maven.apache.org/maven2/</url>
+        </repository>
+
+        <!-- Local repository -->
+        <repository>
+            <id>project.local</id>
+            <name>project</name>
+            <url>file:${project.basedir}/java/local/</url>
+        </repository>
+
+        <!-- NetCDF releases repository -->
+        <repository>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+            <id>amap-maven-central</id>
+            <name>libs-release</name>
+            <url>https://artifacts.unidata.ucar.edu/repository/unidata-releases/</url>
+        </repository>
+
+        <!-- NetCDF snapshots repository -->
+        <repository>
+            <id>amap-maven-snapshots</id>
+            <name>libs-snapshot</name>
+            <url>https://artifacts.unidata.ucar.edu/repository/unidata-snapshots/</url>
+        </repository>
+    </repositories>
+
+    <build>
+        <finalName>${project.artifactId}_${project.version}</finalName>
+        <sourceDirectory>java/src/main/java/</sourceDirectory>
+        <testSourceDirectory>java/src/test/java/</testSourceDirectory>
+        <resources>
+            <resource>
+              <directory>java/src/main/resources</directory>
+            </resource>
+        </resources>
+        <testResources>
+            <testResource>
+              <directory>java/src/test/resources</directory>
+            </testResource>
+        </testResources>
+
+        <plugins>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.8.0</version>
+                <configuration>
+                    <release>${maven.compiler.release}</release>
+                </configuration>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>3.0.0-M6</version>
+                <configuration>
+                    <skipTests>${skipTests}</skipTests>
+                </configuration>
+            </plugin>
+
+            <!-- Execute the jar file on "Run Project" -->
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>exec-maven-plugin</artifactId>
+                <version>1.6.0</version>
+                <executions>
+                    <execution>
+                        <id>default-cli</id>
+                        <goals>
+                            <goal>exec</goal>
+                        </goals>
+                        <configuration>
+                            <executable>${java.home}/bin/java</executable>
+                            <commandlineArgs>-classpath "${project.build.directory}/lib" -jar "${project.build.directory}/${project.build.finalName}.jar" ${exec.appArgs}</commandlineArgs>
+                            <workingDirectory>${exec.workingdir}</workingDirectory>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <!-- Copy dependencies in lib folder -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>copy-dependencies</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>copy-dependencies</goal>
+                        </goals>
+                        <configuration>
+                            <overWriteReleases>false</overWriteReleases>
+                            <overWriteSnapshots>false</overWriteSnapshots>
+                            <overWriteIfNewer>true</overWriteIfNewer>
+                            <excludeScope>system</excludeScope>
+                            <excludeGroupIds>junit,org.hamcrest</excludeGroupIds>
+                            <outputDirectory>${project.build.directory}/lib</outputDirectory>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <!-- Link the jar with the dependencies in libs folder -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <version>3.2.0</version>
+                <configuration>
+                    <archive>
+                        <manifest>
+                            <addClasspath>true</addClasspath>
+                            <classpathPrefix>lib/</classpathPrefix>
+                            <mainClass>${mainClass}</mainClass>
+                            <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
+                        </manifest>
+                    </archive>
+                </configuration>
+            </plugin>
+
+            <!-- Create a jar with dependencies inside -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-assembly-plugin</artifactId>
+                <version>3.2.0</version>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>single</goal>
+                        </goals>
+                        <configuration>
+			                <outputDirectory>${project.basedir}/inst/java/</outputDirectory>
+                            <archive>
+                                <manifest>
+                                    <addClasspath>true</addClasspath>
+                                    <classpathPrefix>lib/</classpathPrefix>
+                                    <mainClass>${mainClass}</mainClass>
+                                    <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
+                                </manifest>
+                            </archive>
+                            <descriptorRefs>
+                                <descriptorRef>jar-with-dependencies</descriptorRef>
+                            </descriptorRefs>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-javadoc-plugin</artifactId>
+                <version>3.4.0</version>
+                <configuration>
+                    <outputDirectory>doc/_static/javadoc</outputDirectory>
+                    <reportOutputDirectory>doc/_static/javadoc</reportOutputDirectory>
+                    <failOnError>false</failOnError>
+                </configuration>
+            </plugin>
+
+            <!-- create UML diagram -->
+            <plugin>
+                <artifactId>plantuml-generator-maven-plugin</artifactId>
+                <groupId>de.elnarion.maven</groupId>
+                <version>1.1.2</version>
+                <executions>
+                    <execution>
+                        <id>osmose-full</id>
+                        <phase>none</phase>
+                        <?m2e execute onConfiguration,onIncremental?>
+                        <goals>
+                            <goal>generate</goal>
+                        </goals>
+                        <configuration>
+                            <outputFilename>osmose-full.puml</outputFilename>
+                            <outputDirectory>doc/_static/puml/</outputDirectory>
+                            <scanPackages>
+                                <scanPackage>
+                                    fr.ird.osmose
+                                </scanPackage>
+                            </scanPackages>
+                            <blacklistRegexp>.*Test.*</blacklistRegexp>
+                            <enableAsciidocWrapper>true</enableAsciidocWrapper>
+                            <hideMethods>false</hideMethods>
+                        </configuration>
+                    </execution>
+
+                    <execution>
+                        <id>osmose-school</id>
+                        <phase>none</phase>
+                        <?m2e execute onConfiguration,onIncremental?>
+                        <goals>
+                            <goal>generate</goal>
+                        </goals>
+                        <configuration>
+                            <outputFilename>osmose-school.puml</outputFilename>
+                            <outputDirectory>doc/_static/puml</outputDirectory>
+                            <scanPackages>
+                                <scanPackage>
+                                    fr.ird.osmose
+                                </scanPackage>
+                                <scanPackage>
+                                    fr.ird.osmose.background
+                                </scanPackage>
+                                <scanPackage>
+                                    fr.ird.osmose.resource
+                                </scanPackage>
+                            </scanPackages>
+                            <whitelistRegexp>.*\School|.*Resource</whitelistRegexp>
+                            <hideMethods>true</hideMethods>
+                            <enableAsciidocWrapper>true</enableAsciidocWrapper>
+                        </configuration>
+                    </execution>
+
+                    <execution>
+                        <id>osmose-species</id>
+                        <phase>none</phase>
+                        <?m2e execute onConfiguration,onIncremental?>
+                        <goals>
+                            <goal>generate</goal>
+                        </goals>
+                        <configuration>
+                            <outputFilename>osmose-species.puml</outputFilename>
+                            <outputDirectory>doc/_static/puml</outputDirectory>
+                            <scanPackages>
+                                <scanPackage>
+                                    fr.ird.osmose
+                                </scanPackage>
+                                <scanPackage>
+                                    fr.ird.osmose.background
+                                </scanPackage>
+                                <scanPackage>
+                                    fr.ird.osmose.resource
+                                </scanPackage>
+                            </scanPackages>
+                            <whitelistRegexp>.*\.ResourceSpecies|.*\.BackgroundSpecies|.*\.Species|.*\.ISpecies</whitelistRegexp>
+                            <hideMethods>true</hideMethods>
+                            <enableAsciidocWrapper>true</enableAsciidocWrapper>
+                        </configuration>
+                    </execution>
+
+                    <execution>
+                        <id>osmose-simulation</id>
+                        <phase>none</phase>
+                        <?m2e execute onConfiguration,onIncremental?>
+                        <goals>
+                            <goal>generate</goal>
+                        </goals>
+                        <configuration>
+                            <outputFilename>osmose-simulation.puml</outputFilename>
+                            <outputDirectory>doc/_static/puml</outputDirectory>
+                            <scanPackages>
+                                <scanPackage>
+                                    fr.ird.osmose
+                                </scanPackage>
+                            </scanPackages>
+                            <whitelistRegexp>.*\.Simulation|.*\.Configuration</whitelistRegexp>
+                            <hideMethods>true</hideMethods>
+                            <enableAsciidocWrapper>true</enableAsciidocWrapper>
+                        </configuration>
+                    </execution>
+
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+</project>

@@ -7,15 +7,7 @@
 \usage{
 write.osmose(x, file)
 
-write_osmose(
-  x,
-  file,
-  sep = ",",
-  col.names = NA,
-  quote = FALSE,
-  row.names = TRUE,
-  ...
-)
+write_osmose(x, file, sep = ",", ...)
 }
 \arguments{
 \item{x}{Object to be written (table or data frame)}
@@ -24,6 +16,8 @@ write_osmose(
 
 \item{sep}{The field separator string. Values within each row of x are 
 separated by this string.}
+
+\item{...}{Extra arguments passed to \code{write.table} funtion.}
 
 \item{col.names}{either a logical value indicating whether the column names 
 of x are to be written along with x, or a character vector of column names to 
@@ -37,7 +31,7 @@ be written. See the section on ‘CSV files’ for the meaning of
 are to be written along with x, or a character vector of row names to be 
 written.}
 
-\item{...}{Extra arguments passed to \code{write.table} funtion.}
+\item{append}{Append to 'file' or create a new one?}
 }
 \description{
 Write an array or dataframe in the Osmose format.

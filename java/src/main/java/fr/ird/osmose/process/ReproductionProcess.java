@@ -1,10 +1,10 @@
-/* 
- * 
+/*
+ *
  * OSMOSE (Object-oriented Simulator of Marine Ecosystems)
  * http://www.osmose-model.org
- * 
+ *
  * Copyright (C) IRD (Institut de Recherche pour le Développement) 2009-2020
- * 
+ *
  * Osmose is a computer program whose purpose is to simulate fish
  * populations and their interactions with their biotic and abiotic environment.
  * OSMOSE is a spatial, multispecies and individual-based model which assumes
@@ -15,7 +15,7 @@
  * processes of fish life cycle (growth, explicit predation, additional and
  * starvation mortalities, reproduction and migration) and fishing mortalities
  * (Shin and Cury 2001, 2004).
- * 
+ *
  * Contributor(s):
  * Yunne SHIN (yunne.shin@ird.fr),
  * Morgane TRAVERS (morgane.travers@ifremer.fr)
@@ -23,22 +23,24 @@
  * Philippe VERLEY (philippe.verley@ird.fr)
  * Laure VELEZ (laure.velez@ird.fr)
  * Nicolas Barrier (nicolas.barrier@ird.fr)
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation (version 3 of the License). Full description
  * is provided on the LICENSE file.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
- * 
+ *
  */
 package fr.ird.osmose.process;
+
+import java.util.ArrayList;
 
 import fr.ird.osmose.School;
 import fr.ird.osmose.Species;
@@ -48,7 +50,7 @@ import fr.ird.osmose.util.timeseries.SingleTimeSeries;
  * This class controls the reproduction process in the simulated domain. The
  * user defines the spawning season (a CSV file per Species) either annual or
  * interannual, the percentage of female in the population (sex ratio) and the
- * number of eggs per gramme of mature female (beta) for every species. Osmose
+ * annual number of eggs per gramme of mature female (beta) for every species. Osmose
  * estimates the spawning stock biomass (SSB) and calculates the number of eggs
  * to be released in the system at every time steps.<br />
  * During the spin-up of the simulation (duration of spin-up either set by the
@@ -68,7 +70,7 @@ public class ReproductionProcess extends AbstractProcess {
      */
     private double[] sexRatio;
     /*
-     * Number of eggs per gram of mature female
+     * Annual number of eggs per gram of mature female
      */
     private double[] beta;
     /*
@@ -76,7 +78,7 @@ public class ReproductionProcess extends AbstractProcess {
      */
     private double[] seedingBiomass;
     /*
-     * Year max for seeding collapsed species, in number of time steps 
+     * Year max for seeding collapsed species, in number of time steps
      */
     private int yearMaxSeeding;
 
@@ -86,6 +88,11 @@ public class ReproductionProcess extends AbstractProcess {
 
     @Override
     public void init() {
+
+        boolean normalisationEnabled = false;
+        if(!getConfiguration().isNull("reproduction.normalisation.enabled")) {
+            normalisationEnabled = getConfiguration().getBoolean("reproduction.normalisation.enabled");
+        }
 
         int nSpecies = getNSpecies();
         sexRatio = new double[nSpecies];
@@ -115,6 +122,16 @@ public class ReproductionProcess extends AbstractProcess {
                 beta[cpt] = getConfiguration().getDouble("species.relativefecundity.sp" + i);
             }
             cpt++;
+        }
+
+        if (normalisationEnabled) {
+            info("Normalisation of season spawning is on for all species");
+            // normalisation of seasonSpawning.
+            if (getConfiguration().isBioenEnabled()) {
+                this.normSeasonBioen();
+            } else {
+                this.normSeason();
+            }
         }
 
         // Seeding biomass
@@ -152,7 +169,7 @@ public class ReproductionProcess extends AbstractProcess {
 
         // check whether the species do reproduce or not
         boolean[] reproduce = new boolean[nSpecies];
-        for (cpt = 0; cpt < this.getNSpecies(); cpt++) { 
+        for (cpt = 0; cpt < this.getNSpecies(); cpt++) {
             reproduce[cpt] = (sexRatio[cpt] > 0.d && beta[cpt] > 0.d);
         }
 
@@ -169,7 +186,7 @@ public class ReproductionProcess extends AbstractProcess {
 
         // Loop over all species
         for (cpt = 0; cpt < this.getNSpecies(); cpt++) {
-            
+
             // ignore species that do not reproduce
             if (!reproduce[cpt]) {
                 continue;
@@ -191,15 +208,81 @@ public class ReproductionProcess extends AbstractProcess {
                 // do nothing, zero school
             } else if (nEgg < nSchool) {
                 School school0 = new School(species, nEgg);
-                getSchoolSet().add(school0);
+                getSchoolSet().addReproductionSchool(school0);
             } else if (nEgg >= nSchool) {
                 for (int s = 0; s < nSchool; s++) {
                     School school0 = new School(species, nEgg / nSchool);
-                    getSchoolSet().add(school0);
+                    getSchoolSet().addReproductionSchool(school0);
                 }
             }
         }  // end of focal species loop
     }
+
+    /** Normalize season in the case of classical Osmose run */
+    protected void normSeason() {
+
+        for (int iSpec = 0; iSpec < getNSpecies(); iSpec++) {
+
+            int length = seasonSpawning[iSpec].length;
+
+            // no normalisation done if length == 1 (assumes
+            // evenly distributed reproduction
+            if(length == 1) continue;
+
+            // If time series if of length nStep/year (i.e. 24 for instance)
+            // one single normalisation is made for the series
+            if (length == getConfiguration().getNStepYear()) {
+
+                double sum = 0;
+
+                // computes the sum over the vector
+                for (double val : seasonSpawning[iSpec]) {
+                    sum += val;
+                }
+
+                // if the sum is not 0 and if the sum different than 1, normalisation
+                if ((sum > 0) && (sum != 1)) {
+                    for (int cpt = 0; cpt < length; cpt++) {
+                        seasonSpawning[iSpec][cpt] /= sum;
+                    }
+                }
+            }
+
+            // If the lenght of the time series is > nstepYear (i.e. values by years)
+            else if (length > getConfiguration().getNStepYear()) {
+
+                int start = 0;
+                int end = getConfiguration().getNStepYear();
+
+                // number of years = length / nstepyear. For instance, if length=48, nstep year=
+                // 24, nyears = 2
+                int nyears = length / getConfiguration().getNStepYear();
+
+                // Loop over the years
+                for (int iyear = 0; iyear < nyears; iyear++) {
+
+                    double sum = 0;
+
+                    // computes the sum
+                    for (int cpt = start; cpt < end; cpt++) {
+                        sum += seasonSpawning[iSpec][cpt];
+                    }
+
+                    // if the sum is not 0 and if the sum different than 1, normalisation
+                    if ((sum > 0) && (sum != 1)) {
+                        for (int cpt = start; cpt < end; cpt++) {
+                            seasonSpawning[iSpec][cpt] /= sum;
+                        }
+                    }
+
+                    // increment of the start/end indexes
+                    end += getConfiguration().getNStepYear();
+                    start += getConfiguration().getNStepYear();
+
+                } // end of year for loop
+            } // end of if condition on length
+        } // end of species loop
+    }  // end of method
 
     protected double getSeason(int iStepSimu, Species species) {
 
@@ -231,5 +314,93 @@ public class ReproductionProcess extends AbstractProcess {
     public double getBeta(int i) {
         return this.beta[i];
     }
+
+
+    /** Normalize season in the case of Osmose Bioen run */
+    protected void normSeasonBioen() {
+
+        // Computes the indexes that will be used for the normalisation
+        for (int iSpec = 0; iSpec < getNSpecies(); iSpec++) {
+
+            // length of the seasonspawning vector
+            int length = seasonSpawning[iSpec].length;
+
+            // if no spawning time-series provided, assumes that
+            // evenly distributed
+            if(length == 1) continue;
+
+            // Init the list of reproduction start and end events
+            ArrayList<Integer> startIndex = new ArrayList<>();
+            ArrayList<Integer> endIndex = new ArrayList<>();
+
+            // Array containing the normalized season spawning.
+            double[] seasonSpawningTemp;
+
+            if (length == getConfiguration().getNStepYear()) {
+                // If nstep == nstepyear, seasonal variable.
+                // It is duplicated 3 times, in order to facilitate
+                // the normalisation along winter months
+                seasonSpawningTemp = new double[3 * length];
+                for (int k = 0; k < 3; k++) {
+                    for (int p = 0; p < length; p++) {
+                        seasonSpawningTemp[k * length + p] = seasonSpawning[iSpec][p];
+                    }
+                }
+            } else {
+                // if nsteps > nstep year, full copy is made.
+                seasonSpawningTemp = new double[length];
+                for (int p = 0; p < length; p++) {
+                    seasonSpawningTemp[p] = seasonSpawning[iSpec][p];
+                }
+            }
+
+            // loop over all the time-steps of the temporary vector
+            for(int i = 0; i < seasonSpawningTemp.length; i++) {
+                if(seasonSpawningTemp[i] > 0) {
+                    // when the spawning is 1, reproduction event.
+                    startIndex.add(i);
+                    // loop over the season spawning index until end of vector or end of season
+                    while((i < length) && (seasonSpawningTemp[i] > 0)) {
+                        i++;
+                    }
+                    endIndex.add(i);
+                } // end of spawning test
+                i++;
+            }
+
+
+            int nEvents = startIndex.size();
+            for(int i =0; i<nEvents; i++) {
+
+                double sum = 0;
+                int start = startIndex.get(i);
+                int end = endIndex.get(i);
+
+                for (int p = start; p < end; p++) {
+                    sum += seasonSpawningTemp[p];
+                }
+
+                if(sum != 1) {
+                    for (int p = start; p < end; p++) {
+                        seasonSpawningTemp[p] /= sum;
+                    }
+                }  // end of norm test
+
+            } // end of loop on normalisation events
+
+            if (length == getConfiguration().getNStepYear()) {
+                for(int p = 0; p < getConfiguration().getNStepYear(); p++) {
+                    // take the middle of the series, which insures continuity over winter months
+                    seasonSpawning[iSpec][p] = seasonSpawningTemp[p + getConfiguration().getNStepYear()];
+                }
+            } else {
+                for(int p = 0; p < length; p++) {
+                    seasonSpawning[iSpec][p] = seasonSpawningTemp[p];
+                }
+            }
+
+
+        } // end of species loop
+    }  // end of method
 
 }

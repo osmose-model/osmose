@@ -1,0 +1,22 @@
+#!/bin/csh
+#PBS -q mpi_2
+#PBS -l select=2:ncpus=28:mpiprocs=14:mem=125g
+#PBS -l walltime=24:00:00
+
+cd $PBS_O_WORKDIR
+echo $HOST
+pbsnodes $HOST
+
+# recovering the number of MPI processes (here, 2 * 14 = 28)
+setenv mpiproc `cat $PBS_NODEFILE  |wc -l`
+
+# load the R libraries
+source /usr/share/Modules/3.2.10/init/csh
+module load R
+module load nco
+
+# set the path of the osmose/calibrar libraries
+setenv R_LIBS /home1/datahome/nbarrier/libs/R/lib
+
+# Run R in parallel mode.
+time mpiexec -np $mpiproc /appli/R/3.3.2-intel-cc-17.0.2.174/lib64/R/library/snow/RMPISNOW --no-save -q < calibrate_MPI.R >& ea.out

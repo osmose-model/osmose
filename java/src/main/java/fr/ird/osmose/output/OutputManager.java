@@ -1,10 +1,10 @@
-/* 
- * 
+/*
+ *
  * OSMOSE (Object-oriented Simulator of Marine Ecosystems)
  * http://www.osmose-model.org
- * 
+ *
  * Copyright (C) IRD (Institut de Recherche pour le Développement) 2009-2020
- * 
+ *
  * Osmose is a computer program whose purpose is to simulate fish
  * populations and their interactions with their biotic and abiotic environment.
  * OSMOSE is a spatial, multispecies and individual-based model which assumes
@@ -15,7 +15,7 @@
  * processes of fish life cycle (growth, explicit predation, additional and
  * starvation mortalities, reproduction and migration) and fishing mortalities
  * (Shin and Cury 2001, 2004).
- * 
+ *
  * Contributor(s):
  * Yunne SHIN (yunne.shin@ird.fr),
  * Morgane TRAVERS (morgane.travers@ifremer.fr)
@@ -23,20 +23,20 @@
  * Philippe VERLEY (philippe.verley@ird.fr)
  * Laure VELEZ (laure.velez@ird.fr)
  * Nicolas Barrier (nicolas.barrier@ird.fr)
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation (version 3 of the License). Full description
  * is provided on the LICENSE file.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
- * 
+ *
  */
 
 package fr.ird.osmose.output;
@@ -57,10 +57,8 @@ import fr.ird.osmose.output.netcdf.AbundanceOutput_Netcdf;
 import fr.ird.osmose.output.netcdf.YieldDistribOutput_Netcdf;
 import fr.ird.osmose.output.netcdf.YieldNOutput_Netcdf;
 import fr.ird.osmose.output.netcdf.YieldOutput_Netcdf;
-import fr.ird.osmose.output.distribution.AbstractDistribution;
-import fr.ird.osmose.output.distribution.AgeDistribution;
-import fr.ird.osmose.output.distribution.SizeDistribution;
-import fr.ird.osmose.output.distribution.TLDistribution;
+import fr.ird.osmose.output.distribution.DistributionType;
+import fr.ird.osmose.output.distribution.OutputDistribution;
 import fr.ird.osmose.util.io.IOTools;
 import fr.ird.osmose.util.SimulationLinker;
 import java.util.ArrayList;
@@ -71,6 +69,13 @@ import fr.ird.osmose.output.spatial.SpatialYieldOutput;
 import fr.ird.osmose.output.spatial.SpatialYieldNOutput;
 import fr.ird.osmose.output.spatial.SpatialTLOutput;
 import fr.ird.osmose.output.spatial.SpatialSizeOutput;
+import fr.ird.osmose.output.spatial.SpatialEnetOutput;
+import fr.ird.osmose.output.spatial.SpatialEnetOutputlarvae;
+import fr.ird.osmose.output.spatial.SpatialEnetOutputjuv;
+import fr.ird.osmose.output.spatial.SpatialdGOutput;
+import fr.ird.osmose.output.spatial.SpatialEggOutput;
+import fr.ird.osmose.output.spatial.SpatialMortaPredOutput;
+import fr.ird.osmose.output.spatial.SpatialMortaStarvOutput;
 import fr.ird.osmose.process.mortality.MortalityCause;
 
 /**
@@ -81,41 +86,12 @@ public class OutputManager extends SimulationLinker {
 
     // List of the indicators
     final private List<IOutput> outputs;
-    /**
-     * Object that is able to take a snapshot of the set of schools and write it in
-     * a NetCDF file. Osmose will be able to restart on such a file.
-     */
-    final private SchoolSetSnapshot snapshot;
-    /**
-     * Record frequency fclor writing restart files, in number of time step.
-     */
-    private int restartFrequency;
-    /**
-     * Whether the restart files should be written or not
-     */
-    private boolean writeRestart;
-    /**
-     * Number of years before writing restart files.
-     */
-    private int spinupRestart;
-    /**
-     * Whether first age class is discarded or not from output.
-     */
-    private boolean cutoff;
-    /**
-     * Threshold age (year) for age class zero. This parameter allows to discard
-     * schools younger that this threshold in the calculation of the indicators when
-     * parameter <i>output.cutoff.enabled</i> is set to {@code true}. Parameter
-     * <i>output.cutoff.age.sp#</i>
-     */
-    private float[] cutoffAge;
 
     private final static boolean NO_WARNING = false;
 
     public OutputManager(int rank) {
         super(rank);
         outputs = new ArrayList<>();
-        snapshot = new SchoolSetSnapshot(rank);
     }
 
     public void init() {
@@ -125,27 +101,20 @@ public class OutputManager extends SimulationLinker {
         /*
          * Delete existing outputs from previous simulation
          */
-        if (!getSimulation().isRestart()) {
+        if (!getConfiguration().isRestart()) {
             // Delete previous simulation of the same name
             String pattern = getConfiguration().getString("output.file.prefix") + "*_Simu" + rank + "*";
             IOTools.deleteRecursively(getConfiguration().getOutputPathname(), pattern);
         }
 
-        AbstractDistribution sizeDistrib = new SizeDistribution();
+        OutputDistribution sizeDistrib = new OutputDistribution(DistributionType.SIZE);
         sizeDistrib.init();
-        AbstractDistribution ageDistrib = new AgeDistribution();
+        OutputDistribution ageDistrib = new OutputDistribution(DistributionType.AGE);
         ageDistrib.init();
-        AbstractDistribution tl_distrib = new TLDistribution();
+        OutputDistribution weightDistrib = new OutputDistribution(DistributionType.WEIGHT);
+        weightDistrib.init();
+        OutputDistribution tl_distrib = new OutputDistribution(DistributionType.TL);
         tl_distrib.init();
-
-        cutoff = getConfiguration().getBoolean("output.cutoff.enabled");
-        cutoffAge = new float[getNSpecies()];
-        int cpt = 0;
-        if (cutoff) {
-            for (int iSpec : this.getFocalIndex()) {
-                cutoffAge[cpt++] = getConfiguration().getFloat("output.cutoff.age.sp" + iSpec);
-            }
-        }
 
         if (getConfiguration().getBoolean("output.abundance.netcdf.enabled")) {
             outputs.add(new AbundanceOutput_Netcdf(rank));
@@ -188,7 +157,6 @@ public class OutputManager extends SimulationLinker {
         }
 
         if (getConfiguration().getBoolean("output.diet.composition.netcdf.enabled")) {
-            getSimulation().requestPreyRecord();
             outputs.add(new DietOutput_Netcdf(rank));
         }
 
@@ -199,14 +167,12 @@ public class OutputManager extends SimulationLinker {
         }
 
         if (getConfiguration().getBoolean("output.diet.composition.byage.netcdf.enabled")) {
-            getSimulation().requestPreyRecord();
             for (int i = 0; i < getNSpecies(); i++) {
                 outputs.add(new DietDistribOutput_Netcdf(rank, getSpecies(i), ageDistrib));
             }
         }
 
         if (getConfiguration().getBoolean("output.diet.composition.bysize.netcdf.enabled")) {
-            getSimulation().requestPreyRecord();
             for (int i = 0; i < getNSpecies(); i++) {
                 outputs.add(new DietDistribOutput_Netcdf(rank, getSpecies(i), sizeDistrib));
             }
@@ -233,23 +199,50 @@ public class OutputManager extends SimulationLinker {
         }
 
         if (getConfiguration().getBoolean("output.diet.pressure.netcdf.enabled")) {
-            getSimulation().requestPreyRecord();
             outputs.add(new PredatorPressureOutput_Netcdf(rank));
         }
 
         /*
          * Instantiate indicators
          */
-        if (getConfiguration().getBoolean("output.spatialabundance.enabled")) {
+        if (getConfiguration().getBoolean("output.spatial.abundance.enabled")) {
             outputs.add(new SpatialAbundanceOutput(rank));
         }
 
-        if (getConfiguration().getBoolean("output.spatialbiomass.enabled")) {
+        if (getConfiguration().getBoolean("output.spatial.biomass.enabled")) {
             outputs.add(new SpatialBiomassOutput(rank));
         }
 
-        if (getConfiguration().getBoolean("output.spatialsize.enabled")) {
+        if (getConfiguration().getBoolean("output.spatial.size.enabled")) {
             outputs.add(new SpatialSizeOutput(rank));
+        }
+
+        if (getConfiguration().getBoolean("output.spatial.enet.enabled")) {
+            outputs.add(new SpatialEnetOutput(rank));
+        }
+
+        if (getConfiguration().getBoolean("output.spatial.enet.larvae.enabled")) {
+            outputs.add(new SpatialEnetOutputlarvae(rank));
+        }
+
+        if (getConfiguration().getBoolean("output.spatial.enet.juv.enabled")) {
+            outputs.add(new SpatialEnetOutputjuv(rank));
+        }
+
+        if (getConfiguration().getBoolean("output.spatial.mstarv.enabled")) {
+            outputs.add(new SpatialMortaStarvOutput(rank));
+        }
+
+        if (getConfiguration().getBoolean("output.spatial.mpred.enabled")) {
+            outputs.add(new SpatialMortaPredOutput(rank));
+        }
+
+        if (getConfiguration().getBoolean("output.spatial.dg.enabled")) {
+            outputs.add(new SpatialdGOutput(rank));
+        }
+
+        if (getConfiguration().getBoolean("output.spatial.egg.enabled")) {
+            outputs.add(new SpatialEggOutput(rank));
         }
 
         if (getConfiguration().getBoolean("output.spatial.yield.biomass.enabled")) {
@@ -268,17 +261,40 @@ public class OutputManager extends SimulationLinker {
         if (getConfiguration().getBoolean("output.spatialsizespecies.enabled")) {
             outputs.add(new SpatialSizeSpeciesOutput(rank, sizeDistrib));
         }
+
         if (getConfiguration().getBoolean("output.spatialagespecies.enabled")) {
             outputs.add(new SpatialSizeSpeciesOutput(rank, ageDistrib));
         }
-        // Fisheries output
-        if (getConfiguration().isFisheryEnabled() && getConfiguration().getBoolean("output.fishery.enabled")) {
-            outputs.add(new FisheryOutput(rank));
+
+        if (getConfiguration().isEconomyEnabled()) {
+            if (getConfiguration().getBoolean("output.fishing.accessible.biomass")) {
+                outputs.add(new FishingAccessBiomassOutput(rank));
+            }
+
+            if (getConfiguration().getBoolean("output.fishing.harvested.biomass")) {
+                outputs.add(new FishingHarvestedBiomassDistribOutput(rank));
+            }
         }
+
+        // Fisheries output
+        if (getConfiguration().isFisheryEnabled()) {
+            if (getConfiguration().getBoolean("output.fishery.enabled")) {
+                outputs.add(new FisheryOutput(rank));
+            }
+
+            if (getConfiguration().getBoolean("output.fishery.byage.enabled")) {
+                outputs.add(new FisheryOutputDistrib(rank, ageDistrib));
+            }
+
+            if (getConfiguration().getBoolean("output.fishery.bysize.enabled")) {
+                outputs.add(new FisheryOutputDistrib(rank, sizeDistrib));
+            }
+        }
+
         // Biomass
         if (getConfiguration().getBoolean("output.biomass.enabled")) {
             outputs.add(new SpeciesOutput(rank, null, "biomass",
-                    "Mean biomass (tons), " + (cutoff ? "excluding" : "including") + " first ages specified in input",
+                    "Mean biomass (tons), " + (getConfiguration().isCutoffEnabled() ? "excluding" : "including") + " first ages specified in input",
                     (school) -> school.getInstantaneousBiomass()));
         }
         if (getConfiguration().getBoolean("output.biomass.bysize.enabled")) {
@@ -294,7 +310,7 @@ public class OutputManager extends SimulationLinker {
         if (getConfiguration().getBoolean("output.abundance.enabled")) {
             outputs.add(
                     new SpeciesOutput(rank, null, "abundance",
-                            "Mean abundance (number of fish), " + (cutoff ? "excluding" : "including")
+                            "Mean abundance (number of fish), " + (getConfiguration().isCutoffEnabled() ? "excluding" : "including")
                                     + " first ages specified in input",
                             (school) -> school.getInstantaneousAbundance()));
         }
@@ -303,10 +319,37 @@ public class OutputManager extends SimulationLinker {
             outputs.add(new AbundanceOutput_age1(rank, "Bioen", "AbundAge1"));
         }
 
+        if (getConfiguration().getBoolean("output.meanWeight.byAge.enabled")) {
+            outputs.add(new WeightedDistribOutput(rank, "Indicators", "meanWeight", "Mean Weight of fish (kg)",
+                    school -> (school.getWeight() * 1e3), school -> school.getInstantaneousAbundance(), ageDistrib));
+        }
+
+        if (getConfiguration().getBoolean("output.meanWeight.bySize.enabled")) {
+            outputs.add(new WeightedDistribOutput(rank, "Indicators", "meanWeight", "Mean Weight of fish (kg)",
+                    school -> (school.getWeight() * 1e3), school -> school.getInstantaneousAbundance(), sizeDistrib));
+        }
+
+        if (getConfiguration().getBoolean("output.meanWeight.byWeight.enabled")) {
+            outputs.add(new WeightedDistribOutput(rank, "Indicators", "meanWeight", "Mean Weight of fish (kg)",
+                    school -> (school.getWeight() * 1e3), school -> school.getInstantaneousAbundance(), weightDistrib));
+        }
+
         if (getConfiguration().getBoolean("output.abundance.bysize.enabled")) {
             outputs.add(new DistribOutput(rank, "Indicators", "abundance",
                     "Distribution of fish abundance (number of fish)", school -> school.getInstantaneousAbundance(),
                     sizeDistrib));
+        }
+
+        if (getConfiguration().getBoolean("output.abundance.byweight.enabled")) {
+            outputs.add(new DistribOutput(rank, "Indicators", "abundance",
+                    "Distribution of fish abundance (number of fish)", school -> school.getInstantaneousAbundance(),
+                    weightDistrib));
+        }
+
+        if (getConfiguration().getBoolean("output.biomass.byweight.enabled")) {
+            outputs.add(new DistribOutput(rank, "Indicators", "biomass",
+                    "Distribution of fish biomass (tons)", school -> school.getInstantaneousBiomass(),
+                    weightDistrib));
         }
 
         if (getConfiguration().getBoolean("output.abundance.byage.enabled")) {
@@ -381,18 +424,20 @@ public class OutputManager extends SimulationLinker {
         if (getConfiguration().getBoolean("output.size.enabled")) {
             outputs.add(new WeightedSpeciesOutput(rank, "SizeIndicators", "meanSize",
                     "Mean size of fish species in cm, weighted by fish numbers, and "
-                            + (cutoff ? "excluding" : "including") + " first ages specified in input",
-                    school -> school.getAge() >= cutoffAge[school.getSpeciesIndex()], school -> school.getLength(),
-                    school -> school.getInstantaneousAbundance()));
+                            + (getConfiguration().isCutoffEnabled() ? "excluding" : "including")
+                            + " first ages specified in input",
+                    school -> (school.getAge() >= getConfiguration().getCutoffAge()[school.getSpeciesIndex()])
+                            & (school.getLength() >= getConfiguration().getCutoffLength()[school.getSpeciesIndex()]),
+                    school -> school.getLength(), school -> school.getInstantaneousAbundance()));
         }
 
         // Size
         if (getConfiguration().getBoolean("output.weight.enabled")) {
             outputs.add(new WeightedSpeciesOutput(rank, "SizeIndicators", "meanWeight",
                     "Mean weight of fish species in kilogram, weighted by fish numbers, and "
-                            + (cutoff ? "excluding" : "including") + " first ages specified in input",
-                    school -> school.getAge() >= cutoffAge[school.getSpeciesIndex()],
-                    school -> 1E-3 * school.getWeight(), school -> school.getInstantaneousAbundance()));
+                            + (getConfiguration().isCutoffEnabled() ? "excluding" : "including") + " first ages specified in input",
+                    school -> (school.getAge() >= getConfiguration().getCutoffAge()[school.getSpeciesIndex()]) & (school.getLength() >= getConfiguration().getCutoffLength()[school.getSpeciesIndex()]),
+                    school -> 1E3 * school.getWeight(), school -> school.getInstantaneousAbundance()));
         }
 
         if (getConfiguration().getBoolean("output.size.catch.enabled")) {
@@ -402,47 +447,57 @@ public class OutputManager extends SimulationLinker {
         }
 
         if (getConfiguration().getBoolean("output.yield.abundance.bySize.enabled")) {
-            outputs.add(new DistribOutput(rank, "Indicators", "yieldN",
+            outputs.add(new DistribOutput(rank, "SizeIndicators", "yieldN",
                     "Distribution of cumulative catch (number of fish per time step of saving)",
                     school -> school.getNdead(MortalityCause.FISHING), sizeDistrib, false));
         }
 
         if (getConfiguration().getBoolean("output.yield.biomass.bySize.enabled")) {
-            outputs.add(new DistribOutput(rank, "Indicators", "yield",
+            outputs.add(new DistribOutput(rank, "SizeIndicators", "yield",
                     "Distribution of cumulative catch (tonne per time step of saving)",
                     school -> school.abd2biom(school.getNdead(MortalityCause.FISHING)), sizeDistrib, false));
         }
 
+        if (getConfiguration().getBoolean("output.yield.abundance.byWeight.enabled")) {
+            outputs.add(new DistribOutput(rank, "Indicators", "yieldN",
+                    "Distribution of cumulative catch (number of fish per time step of saving)",
+                    school -> school.getNdead(MortalityCause.FISHING), weightDistrib, false));
+        }
+
+        if (getConfiguration().getBoolean("output.yield.biomass.byWeight.enabled")) {
+            outputs.add(new DistribOutput(rank, "Indicators", "yield",
+                    "Distribution of cumulative catch (tonne per time step of saving)",
+                    school -> school.abd2biom(school.getNdead(MortalityCause.FISHING)), weightDistrib, false));
+        }
+
         if (getConfiguration().getBoolean("output.meanSize.byAge.enabled")) {
-            outputs.add(new WeightedDistribOutput(rank, "Indicators", "meanSize", "Mean size of fish (centimeter)",
+            outputs.add(new WeightedDistribOutput(rank, "AgeIndicators", "meanSize", "Mean size of fish (centimeter)",
                     school -> school.getLength(), school -> school.getInstantaneousAbundance(), ageDistrib));
         }
 
         // Age
         if (getConfiguration().getBoolean("output.yield.abundance.byAge.enabled")) {
-            outputs.add(new DistribOutput(rank, "Indicators", "yieldN",
+            outputs.add(new DistribOutput(rank, "AgeIndicators", "yieldN",
                     "Distribution of cumulative catch (number of fish per time step of saving)",
                     school -> school.getNdead(MortalityCause.FISHING), ageDistrib, false));
         }
 
         if (getConfiguration().getBoolean("output.yield.biomass.byAge.enabled")) {
-            outputs.add(new DistribOutput(rank, "Indicators", "yield",
+            outputs.add(new DistribOutput(rank, "AgeIndicators", "yield",
                     "Distribution of cumulative catch (tonne per time step of saving)",
                     school -> school.abd2biom(school.getNdead(MortalityCause.FISHING)), ageDistrib, false));
         }
 
         // TL
         if (getConfiguration().getBoolean("output.tl.enabled")) {
-            getSimulation().requestPreyRecord();
             outputs.add(new WeightedSpeciesOutput(rank, "Trophic", "meanTL",
                     "Mean Trophic Level of fish species, weighted by fish biomass, and "
-                            + (cutoff ? "excluding" : "including") + " first ages specified in input",
-                    school -> school.getAge() >= cutoffAge[school.getSpeciesIndex()],
+                            + (getConfiguration().isCutoffEnabled() ? "excluding" : "including") + " first ages specified in input",
+                    school -> (school.getAge() >= getConfiguration().getCutoffAge()[school.getSpeciesIndex()]) & (school.getLength() >= getConfiguration().getCutoffLength()[school.getSpeciesIndex()]),
                     school -> school.getTrophicLevel(), school -> school.getInstantaneousBiomass()));
         }
 
         if (getConfiguration().getBoolean("output.tl.catch.enabled")) {
-            getSimulation().requestPreyRecord();
             outputs.add(new WeightedSpeciesOutput(rank, "Trophic", "meanTLCatch",
                     "Mean Trophic Level of fish species, weighted by fish catch, and including first ages specified in input",
                     school -> school.getTrophicLevel(),
@@ -455,39 +510,33 @@ public class OutputManager extends SimulationLinker {
         }
 
         if (getConfiguration().getBoolean("output.meanTL.bySize.enabled")) {
-            getSimulation().requestPreyRecord();
             outputs.add(new WeightedDistribOutput(rank, "Trophic", "meanTL", "Mean trophic level of fish species",
                     school -> school.getTrophicLevel(), school -> school.getInstantaneousBiomass(), sizeDistrib));
         }
 
         if (getConfiguration().getBoolean("output.meanTL.byAge.enabled")) {
-            getSimulation().requestPreyRecord();
             outputs.add(new WeightedDistribOutput(rank, "Trophic", "meanTL", "Mean trophic level of fish species",
                     school -> school.getTrophicLevel(), school -> school.getInstantaneousBiomass(), ageDistrib));
         }
 
         // Predation
         if (getConfiguration().getBoolean("output.diet.composition.enabled")) {
-            getSimulation().requestPreyRecord();
             outputs.add(new DietOutput(rank));
         }
 
         if (getConfiguration().getBoolean("output.diet.composition.byage.enabled")) {
-            getSimulation().requestPreyRecord();
             for (int i = 0; i < getNSpecies(); i++) {
                 outputs.add(new DietDistribOutput(rank, getSpecies(i), ageDistrib));
             }
         }
 
         if (getConfiguration().getBoolean("output.diet.composition.bysize.enabled")) {
-            getSimulation().requestPreyRecord();
             for (int i = 0; i < getNSpecies(); i++) {
                 outputs.add(new DietDistribOutput(rank, getSpecies(i), sizeDistrib));
             }
         }
 
         if (getConfiguration().getBoolean("output.diet.pressure.enabled")) {
-            getSimulation().requestPreyRecord();
             outputs.add(new PredatorPressureOutput(rank));
         }
 
@@ -496,14 +545,12 @@ public class OutputManager extends SimulationLinker {
         }
 
         if (getConfiguration().getBoolean("output.diet.pressure.byage.enabled")) {
-            getSimulation().requestPreyRecord();
             for (int i = 0; i < getNSpecies(); i++) {
                 outputs.add(new PredatorPressureDistribOutput(rank, getSpecies(i), ageDistrib));
             }
         }
 
         if (getConfiguration().getBoolean("output.diet.pressure.bysize.enabled")) {
-            getSimulation().requestPreyRecord();
             for (int i = 0; i < getNSpecies(); i++) {
                 outputs.add(new PredatorPressureDistribOutput(rank, getSpecies(i), sizeDistrib));
             }
@@ -514,20 +561,26 @@ public class OutputManager extends SimulationLinker {
                     "Predation success rate per species", school -> school.getPredSuccessRate(), nschool -> 1.d));
         }
 
+        // Adding saving of age at death.
+        if (getConfiguration().getBoolean("output.age.at.death.enabled")) {
+            for (int i = 0; i < getNSpecies(); i++) {
+                outputs.add(new AgeAtDeathOutput(rank, getSpecies(i)));
+            }
+        }
+
         // Spatialized
         if (getConfiguration().getBoolean("output.spatial.enabled")) {
             outputs.add(new SpatialOutput(rank));
         }
 
         if (getConfiguration().getBoolean("output.spatial.ltl.enabled")) {
-            getSimulation().requestPreyRecord();
             outputs.add(new ResourceOutput(rank));
         }
 
         // Debugging outputs
         if (getConfiguration().getBoolean("output.ssb.enabled", NO_WARNING)) {
             outputs.add(new SpeciesOutput(rank, null, "SSB", "Spawning Stock Biomass (tonne)",
-                    school -> school.getSpecies().isSexuallyMature(school) ? school.getInstantaneousBiomass() : 0.d));
+                    school -> school.isSexuallyMature() ? school.getInstantaneousBiomass() : 0.d));
         }
 
         if (getConfiguration().getBoolean("output.nschool.enabled", NO_WARNING)) {
@@ -554,12 +607,23 @@ public class OutputManager extends SimulationLinker {
             outputs.add(new NDeadSchoolDistribOutput(rank, sizeDistrib));
         }
 
+        if (getConfiguration().getBoolean("output.individual.enabled", NO_WARNING)) {
+            ModularSchoolSetSnapshot modOutput = new ModularSchoolSetSnapshot(rank);
+            outputs.add(modOutput);
+        }
+
         if (getConfiguration().isBioenEnabled()) {
 
-            if (getConfiguration().getBoolean("output.bioen.mature.size.enabled", NO_WARNING)) {
-                outputs.add(new WeightedSpeciesOutput(rank, "Bioen", "sizeMature", "Size at maturity (centimeter)",
-                        school -> school.isMature(), school -> school.getSizeMat(),
-                        school -> school.getInstantaneousAbundance()));
+            if (getConfiguration().getBoolean("output.fecondity.bysize.enabled", NO_WARNING)) {
+                outputs.add(new DistribOutput(rank, "SizeIndicators", "fecondity",
+                        "Number of eggs by species and by size class",
+                        school -> school.getNEggs(), sizeDistrib, false));
+            }
+
+            if (getConfiguration().getBoolean("output.fecondity.byage.enabled", NO_WARNING)) {
+                outputs.add(new DistribOutput(rank, "AgeIndicators", "fecondity",
+                        "Number of eggs by species and by size class",
+                        school -> school.getNEggs(), ageDistrib, false));
             }
 
             if (getConfiguration().getBoolean("output.bioen.mature.age.enabled", NO_WARNING)) {
@@ -571,9 +635,8 @@ public class OutputManager extends SimulationLinker {
             // Correct the output of bioen ingestion
             if (getConfiguration().getBoolean("output.bioen.ingest.enabled", NO_WARNING)) {
                 outputs.add(new WeightedSpeciesOutput(rank, "Bioen", "ingestion", "Ingestion rate (grams.grams^-alpha)",
-                        (school -> (school.getAgeDt() >= school.getSpecies().getThresAge())),
-                        school -> school.getIngestion() / school.getInstantaneousAbundance() * 1e6f
-                                / (Math.pow(school.getWeight() * 1e6f, school.getBetaBioen())),
+                        (school -> (school.getAgeDt() >= school.getSpecies().getFirstFeedingAgeDt())),
+                        school -> school.getIngestion() * 1e6f / (Math.pow(school.getWeight() * 1e6f, school.getBetaBioen())),
                         school -> school.getInstantaneousAbundance()));
             }
 
@@ -602,9 +665,9 @@ public class OutputManager extends SimulationLinker {
                 outputs.add(new BioenSizeInfOutput(rank));
             }
 
-            if (getConfiguration().getBoolean("output.bioen.kappa.enabled", NO_WARNING)) {
-                outputs.add(new WeightedSpeciesOutput(rank, "Bioen", "kappa", "Kappa (rate [0-1])",
-                        school -> school.getKappa(), school -> school.getInstantaneousAbundance()));
+            if (getConfiguration().getBoolean("output.bioen.rho.enabled", NO_WARNING)) {
+                outputs.add(new WeightedSpeciesOutput(rank, "Bioen", "rho", "Rho (rate [0-1])",
+                        school -> school.getRho(), school -> school.getInstantaneousAbundance()));
             }
 
             // Alaia's outputs in the new format
@@ -613,7 +676,7 @@ public class OutputManager extends SimulationLinker {
                         "Mean ingestion per g.g^-beta.y-1 of fish (centimeter)",
                         school -> (school.getIngestion() * 1e6f
                                 / Math.pow(school.getWeight() * 1e6f, school.getBetaBioen()) * ndtPerYear),
-                        school -> school.getInstantaneousAbundance(), ageDistrib));
+                        school -> school.getInstantaneousAbundance(), ageDistrib, false));
             }
 
             // Alaia's outputs in the new format
@@ -622,54 +685,70 @@ public class OutputManager extends SimulationLinker {
                         "Mean ingestion per g.g^-beta.y-1 of fish (centimeter)",
                         school -> (school.getIngestion() * 1e6f
                                 / Math.pow(school.getWeight() * 1e6f, school.getBetaBioen()) * ndtPerYear),
-                        school -> school.getInstantaneousAbundance(), sizeDistrib));
+                        school -> school.getInstantaneousAbundance(), sizeDistrib, false));
             }
 
             // Alaia's outputs in the new format
-            if (getConfiguration().getBoolean("output.kappa.byAge.enabled")) {
-                outputs.add(new WeightedDistribOutput(rank, "BioenIndicators", "meanKappaDistribBy",
-                        "Mean kappa of fish", school -> (school.getKappa()),
+            if (getConfiguration().getBoolean("output.rho.byAge.enabled")) {
+                outputs.add(new WeightedDistribOutput(rank, "BioenIndicators", "meanRhoDistribBy",
+                        "Mean rho of fish", school -> (school.getRho()),
                         school -> school.getInstantaneousAbundance(), ageDistrib));
             }
 
             // Alaia's outputs in the new format
-            if (getConfiguration().getBoolean("output.kappa.bySize.enabled")) {
-                outputs.add(new WeightedDistribOutput(rank, "BioenIndicators", "meanKappaDistribBy",
-                        "Mean kappa of fish", school -> (school.getKappa()),
+            if (getConfiguration().getBoolean("output.rho.bySize.enabled")) {
+                outputs.add(new WeightedDistribOutput(rank, "BioenIndicators", "meanRho",
+                        "Mean rho of fish", school -> (school.getRho()),
                         school -> school.getInstantaneousAbundance(), sizeDistrib));
             }
 
             // Alaia's outputs in the new format
             if (getConfiguration().getBoolean("output.enet.byAge.enabled")) {
-                outputs.add(new WeightedDistribOutput(rank, "BioenIndicators", "meanEnetDistribBy",
+                outputs.add(new WeightedDistribOutput(rank, "BioenIndicators", "meanEnet",
                         "Mean Enet per g.g^-beta.y-1 of fish", school -> ((school.getENet() * 1e6f
                                 / Math.pow(school.getWeight() * 1e6f, school.getBetaBioen()) * ndtPerYear)),
-                        school -> school.getInstantaneousAbundance(), ageDistrib));
+                        school -> school.getInstantaneousAbundance(), ageDistrib, false));
             }
 
             // Alaia's outputs in the new format
             if (getConfiguration().getBoolean("output.enet.bySize.enabled")) {
-                outputs.add(new WeightedDistribOutput(rank, "BioenIndicators", "meanEnetDistribBy",
+                outputs.add(new WeightedDistribOutput(rank, "BioenIndicators", "meanEnet",
                         "Mean Enet per g.g^-beta.y-1 of fish", school -> ((school.getENet() * 1e6f
                                 / Math.pow(school.getWeight() * 1e6f, school.getBetaBioen()) * ndtPerYear)),
-                        school -> school.getInstantaneousAbundance(), sizeDistrib));
+                        school -> school.getInstantaneousAbundance(), sizeDistrib, false));
             }
 
             // Alaia's outputs in the new format
             if (getConfiguration().getBoolean("output.maintenance.byAge.enabled")) {
-                outputs.add(new WeightedDistribOutput(rank, "BioenIndicators", "meanMaintDistribBy",
+                outputs.add(new WeightedDistribOutput(rank, "BioenIndicators", "meanMaint",
                         "Mean maintenance per g.g^-beta.y-1 of fish",
                         school -> ((school.getEMaint() * 1e6f
                                 / Math.pow(school.getWeight() * 1e6f, school.getBetaBioen()) * ndtPerYear)),
-                        school -> school.getInstantaneousAbundance(), ageDistrib));
+                        school -> school.getInstantaneousAbundance(), ageDistrib, false));
             }
 
             if (getConfiguration().getBoolean("output.maintenance.bySize.enabled")) {
-                outputs.add(new WeightedDistribOutput(rank, "BioenIndicators", "meanMaintDistribBy",
+                outputs.add(new WeightedDistribOutput(rank, "BioenIndicators", "meanMaint",
                         "Mean maintenance per g.g^-beta.y-1 of fish",
                         school -> ((school.getEMaint() * 1e6f
                                 / Math.pow(school.getWeight() * 1e6f, school.getBetaBioen()) * ndtPerYear)),
-                        school -> school.getInstantaneousAbundance(), sizeDistrib));
+                        school -> school.getInstantaneousAbundance(), sizeDistrib, false));
+            }
+
+            if (getConfiguration().getBoolean("output.meanSomaticWeight.byAge.enabled")) {
+                outputs.add(new WeightedDistribOutput(rank, "BioenIndicators", "meanSomaticWeight",
+                        "Mean somatic weight of fish (centimeter)",
+                        school -> (school.getWeight()),
+                        school -> school.getInstantaneousAbundance(), ageDistrib)
+                );
+            }
+
+            if (getConfiguration().getBoolean("output.meanGonadWeight.byAge.enabled")) {
+                outputs.add(new WeightedDistribOutput(rank, "BioenIndicators", "meanGonadWeight",
+                        "Mean gonad weight of fish per gram of individual (centimeter) by ",
+                        school -> (school.getGonadWeight() / (school.getWeight())),
+                        school -> school.getInstantaneousAbundance(), ageDistrib)
+                );
             }
 
         }
@@ -679,6 +758,16 @@ public class OutputManager extends SimulationLinker {
         if (this.getConfiguration().isGeneticEnabled()) {
             if (getConfiguration().getBoolean("output.evolvingtraits.enabled")) {
                 outputs.add(new VariableTraitOutput(rank));
+            }
+
+            if (getConfiguration().getBoolean("output.meanTraits.newborn.enabled")) {
+                outputs.add(new MeanGenotypeOutput(rank, "meanTraitsNewborn", (school -> 1),
+                        (school -> school.getAgeDt() == 0), (schoolset -> schoolset.getNewBorns()), "Mean traits of child schools"));
+            }
+
+            if (getConfiguration().getBoolean("output.meanTraits.parents.enabled")) {
+                outputs.add(new MeanGenotypeOutput(rank, "meanTraitsParents", (school -> school.getNEggs()),
+                        (school -> school.isMature()), (schoolset -> schoolset.getAliveSchools()), "Mean traits of parent schools, ponderated by number of eggs"));
             }
         }
 
@@ -690,23 +779,6 @@ public class OutputManager extends SimulationLinker {
             indicator.reset();
         });
 
-        // Initialize the restart maker
-        restartFrequency = Integer.MAX_VALUE;
-        if (!getConfiguration().isNull("output.restart.recordfrequency.ndt")) {
-            restartFrequency = getConfiguration().getInt("output.restart.recordfrequency.ndt");
-        }
-
-        writeRestart = true;
-        if (!getConfiguration().isNull("output.restart.enabled")) {
-            writeRestart = getConfiguration().getBoolean("output.restart.enabled");
-        } else {
-            warning("Could not find parameter 'output.restart.enabled'. Osmose assumes it is true and a NetCDF restart file will be created at the end of the simulation (or more, depending on parameters 'simulation.restart.recordfrequency.ndt' and 'simulation.restart.spinup').");
-        }
-
-        spinupRestart = 0;
-        if (!getConfiguration().isNull("output.restart.spinup")) {
-            spinupRestart = getConfiguration().getInt("output.restart.spinup") - 1;
-        }
     }
 
     public void close() {
@@ -732,18 +804,6 @@ public class OutputManager extends SimulationLinker {
                     indicator.reset();
                 }
             });
-        }
-    }
-
-    public void writeRestart(int iStepSimu) {
-        // Create a restart file
-        boolean isTimeToWrite = writeRestart;
-        isTimeToWrite &= (getSimulation().getYear() >= spinupRestart);
-        isTimeToWrite &= ((iStepSimu + 1) % restartFrequency == 0);
-        isTimeToWrite |= (iStepSimu >= (getConfiguration().getNStep() - 1));
-
-        if (isTimeToWrite) {
-            snapshot.makeSnapshot(iStepSimu);
         }
     }
 }

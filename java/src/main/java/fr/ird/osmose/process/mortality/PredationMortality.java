@@ -1,10 +1,10 @@
-/* 
- * 
+/*
+ *
  * OSMOSE (Object-oriented Simulator of Marine Ecosystems)
  * http://www.osmose-model.org
- * 
+ *
  * Copyright (C) IRD (Institut de Recherche pour le Développement) 2009-2020
- * 
+ *
  * Osmose is a computer program whose purpose is to simulate fish
  * populations and their interactions with their biotic and abiotic environment.
  * OSMOSE is a spatial, multispecies and individual-based model which assumes
@@ -15,7 +15,7 @@
  * processes of fish life cycle (growth, explicit predation, additional and
  * starvation mortalities, reproduction and migration) and fishing mortalities
  * (Shin and Cury 2001, 2004).
- * 
+ *
  * Contributor(s):
  * Yunne SHIN (yunne.shin@ird.fr),
  * Morgane TRAVERS (morgane.travers@ifremer.fr)
@@ -23,20 +23,20 @@
  * Philippe VERLEY (philippe.verley@ird.fr)
  * Laure VELEZ (laure.velez@ird.fr)
  * Nicolas Barrier (nicolas.barrier@ird.fr)
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation (version 3 of the License). Full description
  * is provided on the LICENSE file.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
- * 
+ *
  */
 package fr.ird.osmose.process.mortality;
 
@@ -45,8 +45,7 @@ import fr.ird.osmose.Configuration;
 import fr.ird.osmose.IAggregation;
 import fr.ird.osmose.School;
 import fr.ird.osmose.stage.ClassGetter;
-import fr.ird.osmose.stage.IStage;
-import fr.ird.osmose.stage.PredPreyStage;
+import fr.ird.osmose.stage.SchoolStage;
 import fr.ird.osmose.util.AccessibilityManager;
 import fr.ird.osmose.util.Matrix;
 import java.util.List;
@@ -69,9 +68,11 @@ public class PredationMortality extends AbstractMortality {
     /*
      * Feeding stages
      */
-    private IStage predPreyStage;
+    private SchoolStage predPreyStage;
 
     private AccessibilityManager predationAccess;
+
+    Matrix accessibilityMatrix;
 
     public PredationMortality(int rank) {
         super(rank);
@@ -121,11 +122,25 @@ public class PredationMortality extends AbstractMortality {
             if (!getConfiguration().isBioenEnabled()) {
                 predationRate[cpt] = getConfiguration().getDouble("predation.ingestion.rate.max.sp" + fileSpeciesIndex);
             }
+
+            // Check that the predator/prey ratios are properly set
+            for (int k = 0; k < predPreySizesMin[cpt].length; k++) {
+                if (predPreySizesMax[cpt][k] > predPreySizesMin[cpt][k]) {
+                    String message = String.format("Parameter %s and %s must be reordered for index %d",
+                            "predation.predPrey.sizeRatio.max.sp" + fileSpeciesIndex,
+                            "predation.predPrey.sizeRatio.max.sp" + fileSpeciesIndex, k);
+                    warning(message);
+                    double temp = predPreySizesMax[cpt][k];
+                    predPreySizesMax[cpt][k] = predPreySizesMin[cpt][k];
+                    predPreySizesMin[cpt][k] = temp;
+                }
+            }
+
             cpt++;
         }
 
         // Feeding stages (i.e. classes for Lmin/LMax ratios
-        predPreyStage = new PredPreyStage();
+        predPreyStage = new SchoolStage("predation.predPrey.stage");
         predPreyStage.init();
 
     }
@@ -146,7 +161,7 @@ public class PredationMortality extends AbstractMortality {
         double[] preyUpon = new double[preys.size()];
         double cumPreyUpon = 0.d;
         // egg do not predate
-        if (predator.getAgeDt() > 0) {
+        if (predator.getAgeDt() >= predator.getFirstFeedingAgeDt()) {
             // Compute accessible biomass
             // 1. from preys
             double[] accessibleBiomass = new double[preys.size()];
@@ -207,7 +222,6 @@ public class PredationMortality extends AbstractMortality {
      * @return
      */
     public float computePredSuccessRate(double biomassToPredate, double preyedBiomass) {
-
         // Compute the predation success rate
         return Math.min((float) (preyedBiomass / biomassToPredate), 1.f);
     }
@@ -244,6 +258,10 @@ public class PredationMortality extends AbstractMortality {
         return predationRate[predator.getSpeciesIndex()] / getConfiguration().getNStepYear();
     }
 
+    public void setMatrix(int year, int season) {
+        accessibilityMatrix = predationAccess.getMatrix(year, season);
+    }
+
     /**
      * Get the accessibility of a list of preys for a given predator. Zero means
      * that the prey is not accessible to this predator. Accessibility ranges from
@@ -255,7 +273,6 @@ public class PredationMortality extends AbstractMortality {
      */
     public double[] getAccessibility(IAggregation predator, List<IAggregation> preys) {
 
-        Matrix accessibilityMatrix = predationAccess.getMatrix();
         int iAccessPred = accessibilityMatrix.getIndexPred(predator);
 
         // Number of predators species. Used to offeset resource percentage index
@@ -269,20 +286,21 @@ public class PredationMortality extends AbstractMortality {
         double[] percentResource = getPercentResource(predator);
 
         for (int iPrey = 0; iPrey < preys.size(); iPrey++) {
-            int iSpecPrey = preys.get(iPrey).getSpeciesIndex(); // get species index with offset
             IAggregation prey = (IAggregation) preys.get(iPrey);
-            int iAccessPrey = accessibilityMatrix.getIndexPrey(prey);
             // The prey is an other school
             if (preys.get(iPrey) instanceof AbstractSchool) {
                 if (prey.equals(predator)) {
                     continue;
                 }
                 if (prey.getLength() >= preySizeMin && prey.getLength() < preySizeMax) {
+                    int iAccessPrey = accessibilityMatrix.getIndexPrey(prey);
                     accessibility[iPrey] = accessibilityMatrix.getValue(iAccessPrey, iAccessPred);
                 } else {
                     accessibility[iPrey] = 0.d; // no need to do it since initialization already set it to zero
                 }
             } else {
+                int iAccessPrey = accessibilityMatrix.getIndexPrey(prey);
+                int iSpecPrey = preys.get(iPrey).getSpeciesIndex(); // get species index with offset
                 // The prey is a resource group
                 accessibility[iPrey] = accessibilityMatrix.getValue(iAccessPrey, iAccessPred)
                         * percentResource[iSpecPrey - nSpecies];

@@ -65,6 +65,9 @@ public interface IAggregation extends IMarineOrganism {
      * @return the biomass in tonne.
      */
     public double getBiomass();
+    
+    /** Get the first feeding age. */
+    public int getFirstFeedingAgeDt();
 
     /**
      * The instantaneous biomass of the aggregation during the time step. The

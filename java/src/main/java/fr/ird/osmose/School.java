@@ -1,10 +1,10 @@
-/* 
- * 
+/*
+ *
  * OSMOSE (Object-oriented Simulator of Marine Ecosystems)
  * http://www.osmose-model.org
- * 
+ *
  * Copyright (C) IRD (Institut de Recherche pour le Développement) 2009-2020
- * 
+ *
  * Osmose is a computer program whose purpose is to simulate fish
  * populations and their interactions with their biotic and abiotic environment.
  * OSMOSE is a spatial, multispecies and individual-based model which assumes
@@ -15,7 +15,7 @@
  * processes of fish life cycle (growth, explicit predation, additional and
  * starvation mortalities, reproduction and migration) and fishing mortalities
  * (Shin and Cury 2001, 2004).
- * 
+ *
  * Contributor(s):
  * Yunne SHIN (yunne.shin@ird.fr),
  * Morgane TRAVERS (morgane.travers@ifremer.fr)
@@ -23,20 +23,20 @@
  * Philippe VERLEY (philippe.verley@ird.fr)
  * Laure VELEZ (laure.velez@ird.fr)
  * Nicolas Barrier (nicolas.barrier@ird.fr)
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation (version 3 of the License). Full description
  * is provided on the LICENSE file.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
- * 
+ *
  */
 package fr.ird.osmose;
 
@@ -44,6 +44,8 @@ import fr.ird.osmose.process.genet.Genotype;
 import fr.ird.osmose.process.mortality.MortalityCause;
 import fr.ird.osmose.util.GridPoint;
 import java.util.HashMap;
+
+import ucar.ma2.ArrayDouble;
 import ucar.ma2.ArrayFloat;
 
 /**
@@ -125,10 +127,7 @@ public class School extends AbstractSchool {
      * Age of the fish expressed in number of time step.
      */
     private int ageDt;
-    /**
-     * Age of the fish in year.
-     */
-    private float age;
+
     /**
      * Length of the fish in centimetre.
      */
@@ -154,15 +153,11 @@ public class School extends AbstractSchool {
     private double e_maint;    // energy used for maintenance.
     private double e_net;      // net energy (gross - maintenance)
     private double ingestion;   // total ingestion
-    private double kappa;    // kappa value
-    double ingestionTot = 0; // sum of all the food ingested during life of the 
+    private double rho;    // rho value
+    double ingestionTot = 0; // sum of all the food ingested during life of the
     // school
 
-    /**
-     * Mortality rates associated with the bioen module.
-     */
-    private double mort_oxy_rate = 0;
-    private double mort_starv_rate = 0;
+
 
     // Initialisation of maturity variables.
     // by default the school is imature.
@@ -171,6 +166,7 @@ public class School extends AbstractSchool {
     private boolean isMature = false;
 
     private double e_net_faced; // mean net energy faced during life
+    private double nEggs;  // number of eggs that is released by the school
 
 ///////////////
 // Constructors
@@ -246,12 +242,12 @@ public class School extends AbstractSchool {
         this.species = species;
         this.length = length;
         this.ageDt = ageDt;
-        this.age = ageDt / (float) getConfiguration().getNStepYear();
         out = false;
         preys = new HashMap<>();
         starvationRate = 0.d;
         fishedBiomass = new double[getConfiguration().getNFishery()];
         discardedBiomass = new double[getConfiguration().getNFishery()];
+        this.accessibleBiomassToFishery = new double[getConfiguration().getNFishery()];
 
     }
 
@@ -269,6 +265,7 @@ public class School extends AbstractSchool {
         biomass = abundance * (weight);
         // Rest number of dead fish
         reset(nDead);
+        reset(ageDeath);
         // Reset diet variables
         preys.clear();
         preyedBiomass = 0.d;
@@ -281,8 +278,20 @@ public class School extends AbstractSchool {
         // reset ingestion at beginning of time step;
         ingestion = 0.d;
         // reset fished biomass
-        reset(fishedBiomass);
+        reset(this.fishedBiomass);
         reset(this.discardedBiomass);
+        reset(this.accessibleBiomassToFishery);
+        nEggs = 0;
+    }
+
+    /** Increment the number of eggs */
+    public void incrementNeggs(double nEgg) {
+        this.nEggs += nEgg;
+    }
+
+    /** Get the number of eggs */
+    public double getNEggs() {
+        return this.nEggs;
     }
 
     /**
@@ -362,6 +371,7 @@ public class School extends AbstractSchool {
      */
     public void setNdead(MortalityCause cause, double nDead) {
         this.nDead[cause.index] = nDead;
+        this.ageDeath[cause.index] += nDead * this.getAge();
 
         double factor = 1;
         if (this.getInstantaneousAbundance() != 0) {
@@ -378,6 +388,7 @@ public class School extends AbstractSchool {
     public void incrementNdead(MortalityCause cause, double nDead) {
 
         this.nDead[cause.index] += nDead;
+        this.ageDeath[cause.index] += nDead * this.getAge();
         double factor = 1;
 
         if (this.getInstantaneousAbundance() != 0) {
@@ -452,6 +463,17 @@ public class School extends AbstractSchool {
     }
 
     /**
+     * Checks whether the school will die of ageing. Since the ageing mortality
+     * is updated before reproduction (where age is incremented), the school will
+     * die of ageing if it's age after increment exceeds lifespan - 1.
+     *
+     * @return whether the school is alive or not
+     */
+    public boolean diesAging() {
+        return (ageDt > species.getLifespanDt() - 2);
+    }
+
+    /**
      * Returns a string representation of the school (species, cohort and
      * location).
      *
@@ -492,7 +514,7 @@ public class School extends AbstractSchool {
 
     @Override
     public float getAge() {
-        return age;
+        return ageDt / (float) getConfiguration().getNStepYear();
     }
 
     /**
@@ -500,7 +522,6 @@ public class School extends AbstractSchool {
      */
     public void incrementAge() {
         ageDt += 1;
-        age = ageDt / (float) getConfiguration().getNStepYear();
     }
 
     /**
@@ -559,7 +580,7 @@ public class School extends AbstractSchool {
 
     @Override
     public void updateBiomAndAbd() {
-        instantaneousAbundance = (abundance - eggRetained) - sum(nDead);
+        instantaneousAbundance = (abundance - eggRetained) - sum(nDead) + nDead[MortalityCause.AGING.index];
         if (instantaneousAbundance < 1.d) {
             instantaneousAbundance = 0.d;
         }
@@ -574,7 +595,7 @@ public class School extends AbstractSchool {
         return this.ingestion;
     }
 
-    // Calculate the total ingestion of food during life of the school 
+    // Calculate the total ingestion of food during life of the school
     public double getIngestionTot() {
         return this.ingestionTot;
     }
@@ -738,10 +759,10 @@ public class School extends AbstractSchool {
     }
 
     /**
-     * Gets the value of kappa
+     * Gets the value of rho
      */
-    public double getKappa() {
-        return this.kappa;
+    public double getRho() {
+        return this.rho;
     }
 
     /**
@@ -750,44 +771,10 @@ public class School extends AbstractSchool {
      *
      * @return
      */
-    public void setKappa(double value) {
-        this.kappa = value;
+    public void setRho(double value) {
+        this.rho = value;
     }
-
-    /**
-     * Gets the value of maintenance energy (ingestion x phiT, equation 5).
-     */
-    public double getOxyMort() {
-        return this.mort_oxy_rate;
-    }
-
-    /**
-     * Returns the net energy, which is the difference between gross and
-     * maintenance energy.
-     *
-     * @return
-     */
-    public void setOxyMort(double value) {
-        this.mort_oxy_rate = value;
-    }
-
-    /**
-     * Gets the value of maintenance energy (ingestion x phiT, equation 5).
-     */
-    public double getStarvMort() {
-        return this.mort_starv_rate;
-    }
-
-    /**
-     * Returns the net energy, which is the difference between gross and
-     * maintenance energy.
-     *
-     * @param value
-     * @return
-     */
-    public void setStarvMort(double value) {
-        this.mort_starv_rate = value;
-    }
+    
 
     public void incrementEnet(double d) {
         this.e_net += d;
@@ -816,6 +803,11 @@ public class School extends AbstractSchool {
         return this.getGenotype().existsTrait(key);
     }
 
+    public double getgenet_value(String key) throws Exception {
+        return this.getGenotype().getgenet_value(key);
+    }
+
+
     @Override
     public String getSpeciesName() {
         return this.species.getName();
@@ -827,8 +819,13 @@ public class School extends AbstractSchool {
      *
      * @return True if larva, False if adult
      */
-    public boolean isLarva() {
-        return (this.getAgeDt() < this.getSpecies().getThresAge());
+    public boolean isEgg() {
+        return (this.getAgeDt() < this.getSpecies().getFirstFeedingAgeDt());
+    }
+
+    /** Starvation enabled if species is older than first feeding age. */
+    public boolean isStarvationEnabled() {
+        return this.getSpecies().isStarvationEnabled(this);
     }
 
     /**
@@ -841,9 +838,6 @@ public class School extends AbstractSchool {
      */
     public void restartGenotype(int rank, int index, ArrayFloat.D4 genArray, ArrayFloat.D2 envNoise) {
 
-        // Instanciate (i.e. init arrays) genotype for the current school
-        this.instance_genotype(rank);
-
         // Sets the genotype values from NetCDF files
         int ntrait = this.getGenotype().getNEvolvingTraits();
         for (int itrait = 0; itrait < ntrait; itrait++) {
@@ -853,10 +847,12 @@ public class School extends AbstractSchool {
                 double val0 = genArray.get(index, itrait, iloc, 0);
                 double val1 = genArray.get(index, itrait, iloc, 1);
                 this.getGenotype().setLocusVal(itrait, iloc, val0, val1);
+                this.getGenotype().restartTrait(itrait);
 
                 // Sets the value for the environmental noise
                 double envnoise = envNoise.get(index, itrait);
                 this.getGenotype().setEnvNoise(itrait, envnoise);
+                this.getGenotype().restartTrait(itrait);
             }
         }
     }
@@ -874,6 +870,16 @@ public class School extends AbstractSchool {
     @Override
     public int getFileSpeciesIndex() {
         return this.species.getFileSpeciesIndex();
+    }
+
+    @Override
+    public int getFirstFeedingAgeDt() {
+        return this.species.getFirstFeedingAgeDt();
+    }
+
+    @Override
+    public boolean isSexuallyMature() {
+        return this.getSpecies().isSexuallyMature(this);
     }
 
 }

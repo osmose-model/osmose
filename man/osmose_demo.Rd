@@ -16,7 +16,7 @@ A list containing the configuration file to use (config_file) for running the co
 and the output directory to use when reading data.
 }
 \description{
-Thins function
+Run demo
 }
 \note{
 So far, only one configuration is propose ("eec_4.3.0")

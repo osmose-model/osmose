@@ -1,10 +1,10 @@
-/* 
- * 
+/*
+ *
  * OSMOSE (Object-oriented Simulator of Marine Ecosystems)
  * http://www.osmose-model.org
- * 
+ *
  * Copyright (C) IRD (Institut de Recherche pour le Développement) 2009-2020
- * 
+ *
  * Osmose is a computer program whose purpose is to simulate fish
  * populations and their interactions with their biotic and abiotic environment.
  * OSMOSE is a spatial, multispecies and individual-based model which assumes
@@ -15,7 +15,7 @@
  * processes of fish life cycle (growth, explicit predation, additional and
  * starvation mortalities, reproduction and migration) and fishing mortalities
  * (Shin and Cury 2001, 2004).
- * 
+ *
  * Contributor(s):
  * Yunne SHIN (yunne.shin@ird.fr),
  * Morgane TRAVERS (morgane.travers@ifremer.fr)
@@ -23,31 +23,39 @@
  * Philippe VERLEY (philippe.verley@ird.fr)
  * Laure VELEZ (laure.velez@ird.fr)
  * Nicolas Barrier (nicolas.barrier@ird.fr)
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation (version 3 of the License). Full description
  * is provided on the LICENSE file.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
- * 
+ *
  */
 
 package fr.ird.osmose.util;
 
+import fr.ird.osmose.Configuration;
 import fr.ird.osmose.School;
 import fr.ird.osmose.Species;
+import fr.ird.osmose.util.io.ForcingFile;
+import fr.ird.osmose.util.io.ForcingFileCaching;
+
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import ucar.ma2.InvalidRangeException;
-import ucar.nc2.NetcdfFile;
+
 
 /**
  * This class handles a set of spatial maps for a given species. No matter the
@@ -86,6 +94,8 @@ public class MapSet extends OsmoseLinker {
      */
     protected final String prefix;
 
+    protected boolean checkMaps;
+
     /**
      * Sufix of the maps. Can be "sp" or "bkg".
      */
@@ -96,39 +106,44 @@ public class MapSet extends OsmoseLinker {
      */
     protected final int iSpecies;
     protected final int iSpeciesFile;
-    
+
     /**
      * Array of map indexes for every age class and simulation time step.
-     * int[N_AGE_CLASSES][N_STEP_SIMU]
+     * int[lifeSpan][N_STEP_SIMU]
      */
     protected int[][] indexMaps;
-    
+
     /**
      * List of the maps.
      */
     protected GridMap[] maps;
-    
+
+    private final boolean removeDuplicate;
+
     /**
      * List of the pathnames of the CSV files.
      */
     protected String[] mapFile;
 
     public MapSet(int iSpeciesFile, int iSpecies, String prefix) {
-        this(iSpeciesFile, iSpecies, prefix, "sp");
+        this(iSpeciesFile, iSpecies, prefix, "map");
     }
 
     public MapSet(int iSpeciesFile, int iSpecies, String prefix, String suffix) {
+        this(iSpeciesFile, iSpecies, prefix, suffix, true);
+    }
+
+    public MapSet(int iSpeciesFile, int iSpecies, String prefix, String suffix, boolean removeDuplicate) {
         this.iSpeciesFile = iSpeciesFile;
         this.iSpecies = iSpecies;
         this.prefix = prefix;
         this.suffix = suffix;
+        this.removeDuplicate = removeDuplicate;
     }
 
     public void init() throws IOException, InvalidRangeException {
-
         // Load the maps
         loadMaps();
-
     }
 
     public int getNMap() {
@@ -168,6 +183,8 @@ public class MapSet extends OsmoseLinker {
 
     public void loadMaps() throws IOException, InvalidRangeException {
 
+        this.checkMaps = getConfiguration().getBoolean("movement.checks.enabled");
+
         // Initialisation of the indexMaps array (valid for both NetCDF and CSV maps
         int nSteps = Math.max(getConfiguration().getNStep(), getConfiguration().getNStepYear());
         int lifespan = getSpecies(iSpecies).getLifespanDt();
@@ -181,13 +198,16 @@ public class MapSet extends OsmoseLinker {
 
         // If the movement.map.spX exists, maps are initialised by using NetCDF
         // else, classic definitions of maps.
-        String key = prefix + ".map." + suffix + iSpeciesFile;
-        if (!getConfiguration().isNull(key)) {
-            info("Reding NetCDF file " + getConfiguration().getFile(key));
-            loadMapsNc();
+        String key = prefix + ".netcdf.enabled";
+        if (getConfiguration().getBoolean(key)) {
+            this.loadMapsNcMaps();
             // Check the map indexation
             if (!checkMapIndexation()) {
                 error("Missing map indexation for species " + getSpecies(iSpecies).getName() + " in map series '" + prefix + ".map*'. Please refer to prior warning messages for details.", null);
+            }
+
+            if(this.removeDuplicate) {
+                eliminateTwinMapNC();
             }
 
         } else {
@@ -198,98 +218,13 @@ public class MapSet extends OsmoseLinker {
             }
 
             // Get rid of redundant map definitions
-            eliminateTwinMap();
-        }
-
-    }
-
-    /**
-     * Method to initialize MapSets from NetCDF file.
-     *
-     * @author Nicolas Barrier
-     * @throws java.io.IOException
-     * @throws ucar.ma2.InvalidRangeException
-     */
-    public void loadMapsNc() throws IOException, InvalidRangeException {
-
-        String key = prefix + ".map." + suffix + iSpeciesFile;
-        String ncFile = getConfiguration().getFile(key);
-
-        // Open the NetCDF file
-        NetcdfFile nc = NetcdfFile.open(ncFile);
-
-        // Counts the number of maps associated with the current species
-        int nmapmax = nc.findDimension("m").getLength();
-
-        // Initialize the total number of grid maps 
-        maps = new GridMap[nmapmax];
-
-        // Loop over all the Maps defined in the NetCDF.
-        for (int i = 0; i < nmapmax; i++) {
-
-            // Reads the GridMap by using NetCDF
-            maps[i] = new GridMap();
-            maps[i].read(nc, i);
-
-            // If the map is set to 0 everywhere
-            if (maps[i].count() == 0) {
-                // add a warning here.
-                maps[i] = null;
-            }
-
-            // Reads the NetCDF variables agemin and agemax
-            // if unset, ageMin/age<ax should be set equal to -1
-            int ageMin = nc.findVariable("agemin").read(new int[]{i}, new int[]{1}).getInt(0);
-            int ageMax = nc.findVariable("agemax").read(new int[]{i}, new int[]{1}).getInt(0);
-
-            // If ageMin is unset in the NetCDF files (values of -1),
-            // default values are set.
-            if (ageMin == -1) {
-                ageMin = 0;
-            }
-            if (ageMax == -1) {
-                ageMax = getSpecies(iSpecies).getLifespanDt() / getConfiguration().getNStepYear();
-            }
-
-            ageMin *= getConfiguration().getNStepYear();
-            ageMax *= getConfiguration().getNStepYear();
-            ageMax = Math.min(ageMax, getSpecies(iSpecies).getLifespanDt());
-
-            // extracts the tempSeason array, with 0 if map should be use for current season and 1 if should be useed
-            byte[] tempSeason = (byte[]) nc.findVariable("season").read(new int[]{i, 0}, new int[]{1, getConfiguration().getNStepYear()}).copyTo1DJavaArray();
-
-            //  number of years
-            int nyear = (int) Math.ceil(getConfiguration().getNStep() / (float) getConfiguration().getNStepYear());
-
-            // Extracts the yearmin and yearmax
-            int yearMin = nc.findVariable("yearmin").read(new int[]{i}, new int[]{1}).getInt(0);
-            int yearMax = nc.findVariable("yearmax").read(new int[]{i}, new int[]{1}).getInt(0);
-            if (yearMax == -1) {
-                yearMax = nyear;
-            }
-            yearMax = Math.min(yearMax, nyear);
-            yearMin = Math.max(yearMin, 0);
-
-            int nStepYear = getConfiguration().getNStepYear();
-            for (int iAge = ageMin; iAge < ageMax; iAge++) {
-                for (int iYear = yearMin; iYear < yearMax; iYear++) {
-                    int index = 0;    // index of the current season season in which we are
-                    for (int iSeason : tempSeason) {  // loop over all the seasons
-                        if (iSeason == 1) {
-                            int iStep = iYear * nStepYear + index;
-                            indexMaps[iAge][iStep] = i;
-                        }
-                        index++;
-                    }
-                }
-
+            if(this.removeDuplicate) {
+                eliminateTwinMap();
             }
         }
-
-        nc.close();
     }
 
-    public void loadMapsCsv() {
+    public void loadMapsCsv() throws FileNotFoundException {
 
         int nmapmax = getConfiguration().findKeys(prefix + ".species.map*").size();
 
@@ -312,47 +247,50 @@ public class MapSet extends OsmoseLinker {
             imap++;
         }
 
-        maps = new GridMap[mapNumber.size()];
+        HashMap<Integer, GridMap> tempMaps = new HashMap<>();
         mapFile = new String[mapNumber.size()];
+
+        List<String> mapFileList = new ArrayList<>();
+        List<Integer> mapIndexList = new ArrayList<>();
 
         // Load the maps
         for (int n = 0; n < mapNumber.size(); n++) {
             imap = mapNumber.get(n);
+
             /*
              * read age min and age max concerned by this map
              */
             int ageMin = (int) Math.round(getConfiguration().getFloat(prefix + ".initialAge" + ".map" + imap) * getConfiguration().getNStepYear());
             int ageMax = (int) Math.round(getConfiguration().getFloat(prefix + ".lastAge" + ".map" + imap) * getConfiguration().getNStepYear());
-            ageMax = Math.min(ageMax, getSpecies(iSpecies).getLifespanDt());
-            
+            ageMax = Math.min(ageMax, getSpecies(iSpecies).getLifespanDt() - 1);
+
             /*
              * read the time steps over the year concerned by this map
              */
             StepParameters seasonParam = new StepParameters(prefix, "map" + imap);
             int[] mapSeason = seasonParam.getSeasons();
-            
+
             /*
              * Read year min and max concerned by this map
              */
-            YearParameters yearParam = new YearParameters(prefix, "map" + imap);            
+            YearParameters yearParam = new YearParameters(prefix, "map" + imap);
             int[] mapYears = yearParam.getYears();
-                                    
+
             /*
              * Assign number of maps to numMap array
              */
             int nStepYear = getConfiguration().getNStepYear();
-            for (int iAge = ageMin; iAge < ageMax; iAge++) {
+            for (int iAge = ageMin; iAge <= ageMax; iAge++) {
                 for (int iYear : mapYears) {
                     for (int iSeason : mapSeason) {
                         int iStep = iYear * nStepYear + iSeason;
                         if (iStep < indexMaps[iAge].length) {
-                            indexMaps[iAge][iYear * nStepYear + iSeason] = n;
-                        } else {
-                            break;
+                            indexMaps[iAge][iStep] = n;
                         }
                     }
                 }
             }
+
             /*
              * read the name of the CSV file and load the map. If name = "null"
              * it means there is no map defined at these age-class and time-step
@@ -360,11 +298,30 @@ public class MapSet extends OsmoseLinker {
             if (!getConfiguration().isNull(prefix + ".file" + ".map" + imap)) {
                 String csvFile = getConfiguration().getFile(prefix + ".file" + ".map" + imap);
                 mapFile[n] = csvFile;
-                maps[n] = new GridMap(csvFile);
+                tempMaps.put(n, new GridMap(csvFile));
+                mapFileList.add(csvFile);
             } else {
-                maps[n] = null;
+                mapFile[n] = null;
+                tempMaps.put(n, null);
+                mapFileList.add("null");
             }
+
+            mapIndexList.add(null);
+
         }
+
+        int nMaps = mapIndexList.size();
+        maps = new GridMap[nMaps];
+        for (int i = 0; i <nMaps; i++) {
+            maps[i] = tempMaps.get(i);
+        }
+
+        if(this.checkMaps) {
+            this.writeMovementsChecks(mapFileList, mapIndexList);
+        }
+
+        tempMaps.clear();
+
     }
 
     private boolean checkMapIndexation() {
@@ -414,6 +371,222 @@ public class MapSet extends OsmoseLinker {
                 indexMaps[iAge][iStep] = mapIndexNoTwin[indexMap];
             }
         }
+    }
+
+    /**
+     * This function eliminates twins in the list of maps
+     */
+    private void eliminateTwinMapNC() {
+
+        int[] mapIndexNoTwin = new int[maps.length];
+        for (int k = 0; k < maps.length; k++) {
+            GridMap mapK = maps[k];
+            mapIndexNoTwin[k] = k;
+            if (null != mapK) {
+                for (int l = k - 1; l >= 0; l--) {
+                    GridMap mapL = maps[l];
+                    if ((mapL != null) && mapK.equals(mapL)) {
+                        mapIndexNoTwin[k] = mapIndexNoTwin[l];
+                        // Delete twin maps
+                        maps[k] = null;
+                        break;
+                    }
+                }
+            }
+        }
+
+        for (int iAge = 0; iAge < indexMaps.length; iAge++) {
+            for (int iStep = 0; iStep < indexMaps[iAge].length; iStep++) {
+                int indexMap = indexMaps[iAge][iStep];
+                indexMaps[iAge][iStep] = mapIndexNoTwin[indexMap];
+            }
+        }
+    }
+
+    /**
+     * Method to initialize MapSets from NetCDF file.
+     *
+     * @author Nicolas Barrier
+     * @throws java.io.IOException
+     * @throws ucar.ma2.InvalidRangeException
+     */
+    public void loadMapsNcMaps() throws IOException, InvalidRangeException {
+
+        // Load config + nstepyear + nsteps
+        Configuration cfg = getConfiguration();
+        int dt = cfg.getNStepYear();
+
+        // Load the file prefix with names that are of type. movemement.map.species.mapX
+        int nmapmax = getConfiguration().findKeys(prefix + ".species.map*").size();
+        List<Integer> mapNumber = new ArrayList<>();
+        List<String> mapNcFiles = new ArrayList<>();
+        List<Integer> mapNcSteps = new ArrayList<>();
+
+        int imap = 0;
+
+        // Retrieve the index of the maps for this species
+        // There might be several maps for one species, based on size.
+        for (int n = 0; n < nmapmax; n++) {
+            while (!getConfiguration().canFind(prefix + ".species" + ".map" + imap)) {
+                imap++;
+            }
+            String key = prefix + ".species" + ".map" + imap;
+            Species species = getSpecies(getConfiguration().getString(key));
+            if (null != species) {
+                if (species.getSpeciesIndex() == iSpecies) {
+                    mapNumber.add(imap);
+                }
+            }
+            imap++;
+        }
+
+        // One map per timestep and per age number
+        HashMap<Integer, GridMap> tempMaps = new HashMap<>(); // dimension = [nMaps][ntime]
+        int iii = 0;
+
+        for (Integer im : mapNumber) {
+
+            // Loop over the map indexes for the species.
+            // note that it can contains two maps (for two size classes for instance)
+            String ncFilePattern = cfg.getFile(prefix + ".file." + suffix + im);
+            String varName = cfg.getString(prefix + ".variable." + suffix + im);
+            // Recovery of the number of time steps per year in the file
+            int ncPerYear = getConfiguration().getInt(prefix + ".nsteps.year." + suffix + im);
+
+            int ageMin = (int) Math.round(getConfiguration().getDouble(prefix + ".initialAge." + suffix + im) * dt);
+            int ageMax = (int) Math.round(getConfiguration().getDouble(prefix + ".lastAge." + suffix + im) * dt);
+            ageMax = Math.min(ageMax, getSpecies(iSpecies).getLifespanDt() - 1);
+
+            ForcingFile forcingFile = new ForcingFile(varName, ncFilePattern, ncPerYear, 0, 1, ForcingFileCaching.ALL);
+            forcingFile.init();
+
+            // Reading fish movements for the given file.
+            // the dimensions are nTimeNc.
+            HashMap<Integer, double[][][]> values = forcingFile.getCachedVariable();
+
+            // Loop over all the values of fish movements (keys = ncStep in file)
+            for(int iStepNc : values.keySet()) {
+
+                // We add the map that corresponds to iStepNc file
+                // if GridMap is only 0s, then assume null
+                GridMap gridMap = new GridMap(values.get(iStepNc)[0]);
+                if(gridMap.count() == 0) {
+                    gridMap = null;
+                }
+
+                tempMaps.put(iii, gridMap);
+
+                // now we create the indexMaps by looping over all age classes and
+                // all time-steps.
+                // If nStepNc match the one for the current map,
+                for (int iAge = ageMin; iAge <= ageMax; iAge++) {
+                    for (int iStep = 0; iStep < getConfiguration().getNStep(); iStep++) {
+                        int fileNcStep = forcingFile.getNcStep(iStep);
+                        if(fileNcStep == iStepNc) {
+                            indexMaps[iAge][iStep] = iii;
+                        }
+                    }
+                }
+
+                iii++;
+
+            }
+        } // end of loop on map number
+
+        int nMaps = tempMaps.size();
+        maps = new GridMap[nMaps];
+        for(int i = 0; i < nMaps; i++) {
+            maps[i] = tempMaps.get(i);
+        }
+
+        tempMaps.clear();
+
+        if(this.checkMaps) {
+            this.writeMovementsChecks(mapNcFiles, mapNcSteps);
+        }
+
+    }  // end of method
+
+
+    /**
+     * Method that allows to write in an ASCII file the association between the
+     * time-step, the species age, the file that is being used and the time-step of
+     * the NetCDF file. It allows to check whether the movements maps are properly configured.
+     */
+    public void writeMovementsChecks(List<String>mapNcFiles, List<Integer>mapNcSteps) throws FileNotFoundException {
+
+        PrintWriter prw;
+
+        // Create parent directory
+        File file = new File(getFilename());
+        file.getParentFile().mkdirs();
+        try {
+            // Init stream
+            prw = new PrintWriter(file);
+        } catch (FileNotFoundException ex) {
+            error("Failed to create output file " + file.getAbsolutePath(), ex);
+            throw (ex);
+        }
+
+        String separator = getConfiguration().getOutputSeparator();
+        String[] headers = {"Age (dt)", "Time Step", "File", "Netcdf Index"};
+
+        // Write headers
+        for (int i = 0; i < headers.length - 1; i++) {
+            prw.print(headers[i]);
+            prw.print(separator);
+        }
+
+        prw.print(headers[headers.length - 1]);
+        prw.println();
+
+        for (int a = 0; a < this.getSpecies(this.iSpecies).getLifespanDt(); a++) {
+
+            for (int i = 0; i < this.getConfiguration().getNStep(); i++) {
+
+                int index = indexMaps[a][i];
+                String fileName = mapNcFiles.get(index);
+                Integer ncStep = mapNcSteps.get(index);
+
+                prw.print(a);
+                prw.print(separator);
+
+                prw.print(i);
+                prw.print(separator);
+
+                prw.print(fileName);
+                prw.print(separator);
+
+                prw.print(ncStep);
+                prw.print(separator);
+
+                prw.println();
+            }
+        }
+
+        prw.close();
 
     }
+
+    final String getFilename() {
+        File path = new File(getConfiguration().getOutputPathname());
+        StringBuilder filename = new StringBuilder(path.getAbsolutePath());
+        filename.append(File.separatorChar);
+        String subfolder = "movement_checks";
+        String speciesName = getSpecies(this.iSpecies).getName();
+        filename.append(subfolder).append(File.separatorChar);
+        filename.append(getConfiguration().getString("output.file.prefix"));
+        filename.append("_").append("movement_checks_").append(speciesName);
+        filename.append(".csv");
+        return filename.toString();
+    }
+
+    public String[] getFileNames() {
+        return this.mapFile;
+    }
+
+    public int[][] getIndexMap() {
+        return this.indexMaps;
+    }
+
 }

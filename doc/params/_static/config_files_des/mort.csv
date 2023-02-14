@@ -1,0 +1,5 @@
+mortality.algorithm;Mortality algorithm (stochastic or iterative)
+mortality.subdt;Number of mortality time-step within one model time-step
+;
+mortality.out.rate.spX;Annual mortality rate for schools that are temporarily outside the simulated domain.
+mortality.starvation.rate.max.spX;Maximum mortality rate due to starvation (year-1)
