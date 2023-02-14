@@ -32,6 +32,12 @@ where the ratio :math:`\dfrac{\gamma(s(j), s(i)) B(i,t)}{P(j, t)}` represents th
 
    N(i, t+\Delta t) = N(i, t) (1 - \sum_j \dfrac{\gamma(s(j), s(i))}{P(j,t)} I(j,t)
 
+
+.. figure:: _static/repfonct_bioen.*
+    :align: center
+
+    Scheme for the functional response
+
 Organisms face a trade-off between mortality and foraging activity :cite:`mangel2003environment`
 because more active foraging implies a higher exposure to predation, more unfavorable 
 condition encounters (e.g. diseases) and/or increased oxidative stress. Assuming that 
