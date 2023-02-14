@@ -3,7 +3,7 @@
 ## Osmose 4.3.3
 
 ### New features
-
+- **The `m0` and `m1` parameters have been swapped. `m0` is now the intercept of the reaction norm, `m1` is the slope**
 - Correct the outputs by class (weight, TL) in order to include $[0, L_0[$ and $[L_{N-1}, \infty[$ classes
 - Adding a weight distribution for the outputs (abundance by weight class)
 - Adding outputs for the economic module (accessible and harvested biomass distribution).
