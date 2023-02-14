@@ -88,8 +88,14 @@ run_osmose = function(input, parameters = NULL, output = NULL, log = "osmose.log
   # Update to provide by release executables
   if (is.null(osmose)) {
     if (!is.null(version)) {
-      osmose_name = sprintf("osmose_%s.jar", version)
-      lib = cacheManager("lib")
+      if(.compareVersion(version, "4.3.2") >= 0) {
+        osmose_name = sprintf("osmose_%s-jar-with-dependencies.jar", version)
+      } else if((.compareVersion(version, "4.3.0") >= 0) & (.compareVersion(version, "4.3.0") >= 0)) {
+        osmose_name = sprintf("osmose-%s-jar-with-dependencies.jar", version)
+      } else {
+        osmose_name = sprintf("osmose_%s.jar", version)
+        lib = cacheManager("lib")
+      }
       osmose = shQuote(cacheManager(osmose_name))
     } else {
        osmose_name = sprintf("osmose_%s-jar-with-dependencies.jar", package_version)
