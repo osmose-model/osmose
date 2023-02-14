@@ -100,3 +100,21 @@ the diagram has been generated, type:
 ```
 plantuml -tsvg doc/_static/puml/osmose-full.puml
 ```
+
+## Acknowledgements
+
+<div align="center">
+<img src="https://osmose-model.org/wp-content/uploads/2020/10/logo_ird.png" height=60pt style="margin-right: 30px;">
+<img src="https://osmose-model.org/wp-content/uploads/2020/10/logo-marbec-1024x549.png" height=60pt>
+</div>
+<br>
+<div align="center">
+<img src="https://osmose-model.org/wp-content/uploads/2020/10/h2020.png" height=50pt style="margin-right: 20px;">
+<img src="https://osmose-model.org/wp-content/uploads/2020/10/belmont-forum-logos-partenaires-removebg-preview.png" height=60pt>
+</div>
+<br>
+
+<div align="center">
+<img src="https://osmose-model.org/wp-content/uploads/2020/10/biodiversa-logos-partenaires-removebg-preview.png" height=70pt style="margin-right: 30px;">
+<img src="https://osmose-model.org/wp-content/uploads/2020/11/Institut_francais_de_recherche_pour_lexploitation_de_la_mer_logo.svg_-1024x190.png" height=30pt>
+</div>
