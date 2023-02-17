@@ -71,7 +71,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = u'OSMOSE'
-author = u'Nicolas Barrier, Yunne-Jai Shin, Philippe Verley, Morgane Travers, Laure Velez, Ricardo Oliveros-Ramos, Arnaud Grüss, Alaia Morell, Hanna Schenk'
+author = u'Nicolas Barrier, Philippe Verley, Bruno Ernande, Arnaud Grüss, Alaia Morell, Ricardo Oliveros-Ramos, Hanna Schenk, Morgane Travers-Trolet, Laure Velez, Yunne-Jai Shin'
 
 copyright = '%s, %s' %(date.today().strftime("%Y-%m-%d"), author)
 
