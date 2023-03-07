@@ -88,13 +88,10 @@ public class SpatialYieldNOutput extends AbstractSpatialOutput {
                             continue;
                         }
 
-                        if(!school.isAlive()) {
-                            continue;
-                        }
-
                         if (!school.isUnlocated()) {
                             data[iSpec][j][i] += school.getNdead(MortalityCause.FISHING);
                         }
+
                     }
                 }
             }
