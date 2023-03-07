@@ -443,31 +443,31 @@ public class OutputManager extends SimulationLinker {
         if (getConfiguration().getBoolean("output.size.catch.enabled")) {
             outputs.add(new WeightedSpeciesOutput(rank, "SizeIndicators", "meanSizeCatch",
                     "Mean size of fish species in cm, weighted by fish numbers in the catches, and including first ages specified in input.",
-                    school -> school.getLength(), school -> school.getNdead(MortalityCause.FISHING)));
+                    school -> school.getLength(), school -> school.getNdead(MortalityCause.FISHING), false));
         }
 
         if (getConfiguration().getBoolean("output.yield.abundance.bySize.enabled")) {
             outputs.add(new DistribOutput(rank, "SizeIndicators", "yieldN",
                     "Distribution of cumulative catch (number of fish per time step of saving)",
-                    school -> school.getNdead(MortalityCause.FISHING), sizeDistrib, false));
+                    school -> school.getNdead(MortalityCause.FISHING), sizeDistrib, false, false));
         }
 
         if (getConfiguration().getBoolean("output.yield.biomass.bySize.enabled")) {
             outputs.add(new DistribOutput(rank, "SizeIndicators", "yield",
                     "Distribution of cumulative catch (tonne per time step of saving)",
-                    school -> school.abd2biom(school.getNdead(MortalityCause.FISHING)), sizeDistrib, false));
+                    school -> school.abd2biom(school.getNdead(MortalityCause.FISHING)), sizeDistrib, false, false));
         }
 
         if (getConfiguration().getBoolean("output.yield.abundance.byWeight.enabled")) {
             outputs.add(new DistribOutput(rank, "Indicators", "yieldN",
                     "Distribution of cumulative catch (number of fish per time step of saving)",
-                    school -> school.getNdead(MortalityCause.FISHING), weightDistrib, false));
+                    school -> school.getNdead(MortalityCause.FISHING), weightDistrib, false, false));
         }
 
         if (getConfiguration().getBoolean("output.yield.biomass.byWeight.enabled")) {
             outputs.add(new DistribOutput(rank, "Indicators", "yield",
                     "Distribution of cumulative catch (tonne per time step of saving)",
-                    school -> school.abd2biom(school.getNdead(MortalityCause.FISHING)), weightDistrib, false));
+                    school -> school.abd2biom(school.getNdead(MortalityCause.FISHING)), weightDistrib, false, false));
         }
 
         if (getConfiguration().getBoolean("output.meanSize.byAge.enabled")) {
