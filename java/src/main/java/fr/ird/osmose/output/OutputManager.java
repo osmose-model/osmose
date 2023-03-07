@@ -411,13 +411,13 @@ public class OutputManager extends SimulationLinker {
         if (getConfiguration().getBoolean("output.yield.biomass.enabled")) {
             outputs.add(new SpeciesOutput(rank, null, "yield",
                     "cumulative catch (tons per time step of saving). ex: if time step of saving is the year, then annual catches are saved",
-                    school -> school.abd2biom(school.getNdead(MortalityCause.FISHING)), false));
+                    school -> school.abd2biom(school.getNdead(MortalityCause.FISHING)), false, false));
         }
 
         if (getConfiguration().getBoolean("output.yield.abundance.enabled")) {
             outputs.add(new SpeciesOutput(rank, null, "yieldN",
                     "cumulative catch (number of fish caught per time step of saving). ex: if time step of saving is the year, then annual catches in fish numbers are saved",
-                    school -> school.getNdead(MortalityCause.FISHING), false));
+                    school -> school.getNdead(MortalityCause.FISHING), false, false));
         }
 
         // Size
