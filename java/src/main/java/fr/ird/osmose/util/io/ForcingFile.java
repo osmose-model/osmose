@@ -324,6 +324,7 @@ public class ForcingFile extends OsmoseLinker {
 
         int nlayer;
         double[][][] output = null;
+        boolean singleCell = this.getConfiguration().getBoolean("grid.single.cell.enabled", false);
 
         // String ncFile = getConfiguration().getFile("species.file.sp" + index);
         try (NetcdfFile nc = NetcdfDatasets.openDataset(ncFile)) {
@@ -334,7 +335,10 @@ public class ForcingFile extends OsmoseLinker {
             Array ncArray;
             if (ncVariable.getShape().length == 3) {
                 nlayer = 1;
-                ncArray = ncVariable.read(new int[] { iStep, 0, 0 }, new int[] { 1, ny, nx }).reduce();
+                ncArray = ncVariable.read(new int[] { iStep, 0, 0 }, new int[] { 1, ny, nx });
+                if(!singleCell) {
+                    ncArray = ncArray.reduce();
+                }
                 Index ncindex = ncArray.getIndex();
                 output = new double[1][ny][nx];
                 for (Cell cell : getGrid().getCells()) {
@@ -348,7 +352,10 @@ public class ForcingFile extends OsmoseLinker {
                 }
             } else if (ncVariable.getShape().length == 4) {
                 nlayer = ncVariable.getShape()[1];
-                ncArray = ncVariable.read(new int[] { iStep, 0, 0, 0 }, new int[] { 1, nlayer, ny, nx }).reduce();
+                ncArray = ncVariable.read(new int[] { iStep, 0, 0, 0 }, new int[] { 1, nlayer, ny, nx });
+                if(!singleCell) {
+                    ncArray = ncArray.reduce();
+                }
                 Index ncindex = ncArray.getIndex();
                 output = new double[nlayer][ny][nx];
                 for (Cell cell : getGrid().getCells()) {
