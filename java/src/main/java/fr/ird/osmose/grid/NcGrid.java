@@ -125,12 +125,21 @@ public class NcGrid extends AbstractGrid {
         Array arrLat = null;
         Array arrMask = null;
 
+        boolean singleCell = this.getConfiguration().getBoolean("grid.single.cell.enabled", false);
         NetcdfFile ncGrid = openNetcdfFile(gridFile);
 
         try {
-            arrLon = ncGrid.findVariable(strLon).read().reduce();
-            arrLat = ncGrid.findVariable(strLat).read().reduce();
-            arrMask = ncGrid.findVariable(strMask).read().reduce();
+            arrLon = ncGrid.findVariable(strLon).read();
+            arrLat = ncGrid.findVariable(strLat).read();
+            arrMask = ncGrid.findVariable(strMask).read();
+
+            if(!singleCell) {
+                arrLon = arrLon.reduce();
+                arrLat = arrLat.reduce();
+                arrMask = arrMask.reduce();
+            }
+
+
         } catch (IOException ex) {
             Logger.getLogger(NcGrid.class.getName()).log(Level.SEVERE, null, ex);
         }
