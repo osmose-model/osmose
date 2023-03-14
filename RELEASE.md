@@ -1,5 +1,11 @@
 # OSMOSE Release Notes
 
+## Osmose 4.3.4
+
+### Bug fixes
+
+- In spatial outputs (`SpatialAbundanceOutput.java` for instance), only cut-off ages were working, not cut-off length. This has been corrected.
+
 ## Osmose 4.3.3
 
 ### New features
