@@ -5,6 +5,7 @@
 ### Bug fixes
 
 - In spatial outputs (`SpatialAbundanceOutput.java` for instance), only cut-off ages were working, not cut-off length. This has been corrected.
+- Correction in MPA initialization when using restart files. In some cases, the `isUpToDate` variable of the `setMPA` method was always `true`, therefore the fishing effort was never modified. Besides, MPA index were expected to start from 0 onward. Now any index can work, as for species.
 
 ## Osmose 4.3.3
 
