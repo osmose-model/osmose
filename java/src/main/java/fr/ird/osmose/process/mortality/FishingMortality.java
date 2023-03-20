@@ -126,7 +126,9 @@ public class FishingMortality extends AbstractMortality {
         mpas = new ArrayList<>(nMPA);
         int[] mpaIndex = getConfiguration().findKeys("mpa.file.mpa*").stream().mapToInt(rgKey -> Integer.valueOf(rgKey.substring(rgKey.lastIndexOf(".mpa") + 4))).sorted().toArray();
         for (int iMPA : mpaIndex) {
-            mpas.add(new MPA(getRank(), iMPA));
+            if (!getConfiguration().isNull("mpa.file.mpa" + iMPA)) {
+                mpas.add(new MPA(getRank(), iMPA));
+            }
         }
 
 
