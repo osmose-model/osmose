@@ -1,23 +1,6 @@
 {
-    "publication_date": "2023-02-14",
-    "version": "4.3.3",
-    "related_identifiers": [
-        {
-            "scheme": "url",
-            "identifier": "https://github.com/osmose-model/osmose/tree/4.3.3",
-            "relation": "isSupplementTo"
-        },
-        {
-            "scheme": "doi",
-            "identifier": "10.5281/zenodo.7628348",
-            "relation": "isVersionOf"
-        }
-    ],
-    "description": "OSMOSE: Modelling Marine Exploited Ecosystems",
-    "license": "other-open",
     "title": "Object-oriented Simulator of Marine ecOSystEms (OSMOSE)",
     "notes": "If you use this software, please cite it as below.",
-    "upload_type": "software",
     "creators": [
         {
             "orcid": "0000-0002-1693-4719",
@@ -60,7 +43,6 @@
             "name": "Shin, Yunne-Jai"
         }
     ],
-    "access_right": "open",
     "communities": [
         {
             "identifier": "osmose"
