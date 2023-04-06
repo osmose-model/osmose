@@ -53,10 +53,10 @@ jobs:
                 ${{ runner.os }}-
       
       - name: Update libraries
-        run: sudo apt update
+        run: sudo apt update -yq
 
       - name: Install NCD4
-        run: sudo apt install libnetcdf-dev
+        run: sudo apt install libnetcdf-dev -yq
 
       - name: Compile Java code
         run:  |
