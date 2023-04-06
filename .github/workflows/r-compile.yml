@@ -22,7 +22,7 @@ jobs:
         uses: r-lib/actions/setup-r@v2
       
       - name: Update apt
-        run:  sudo apt udpdate -yq
+        run:  sudo apt update -yq
 
       - name: Install NetCDF and Latex
         run:  sudo apt install -yq libnetcdf-dev texlive-latex-base texlive-fonts-recommended texlive-fonts-extra
