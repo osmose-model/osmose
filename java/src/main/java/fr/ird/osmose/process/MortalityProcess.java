@@ -583,20 +583,23 @@ public class MortalityProcess extends AbstractProcess {
                     break;
                 case PREDATION:
                     // Predation mortality
-                    IAggregation predator = listPred.get(seqPred[i]); // recover one predator (background or focal
-                                                        // species)
+                    IAggregation predator = listPred.get(seqPred[i]); // recover one predator (background or focal species)
                     double[] predatorAccessibility = predator.getAccessibility();
+
                     List<IAggregation> subpreys = new ArrayList<>();
+                    List<Double> subaccess = new ArrayList<>();
                     for(int ipr = 0; ipr < predatorAccessibility.length; ipr++) {
                         if(predatorAccessibility[ipr] > 0) {
-                            subpreys.add(preys.get(i));
+                            subpreys.add(preys.get(ipr));
+                            subaccess.add(predatorAccessibility[ipr]);
                         }
                     }
 
+                    double[] subaccessArray = subaccess.stream().mapToDouble(v -> v).toArray();
+
                     // compute predation from predator to all the possible preys
                     // preyUpon is the total biomass easten by predator
-                    double[] preyUpon = predationMortality.computePredation(predator, subpreys,
-                            predatorAccessibility, subdt);
+                    double[] preyUpon = predationMortality.computePredation(predator, subpreys, subaccessArray, subdt);
                     for (int ipr = 0; ipr < subpreys.size(); ipr++) {
                         if (preyUpon[ipr] > 0) {
                             // Loop over all the preys. If they are eaten by the predator,
