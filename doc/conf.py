@@ -52,7 +52,7 @@ plantuml_output_format = 'svg_img'
 plantuml_latex_output_format = 'pdf'
 
 mermaid_pdfcrop = 'pdfcrop'
-#mermaid_output_format = 'png'
+mermaid_output_format = 'png'
 
 bibtex_bibfiles = ['_static/biblio.bib']
 bibtex_reference_style = 'author_year'
