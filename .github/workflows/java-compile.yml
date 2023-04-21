@@ -20,7 +20,7 @@ jobs:
 
       # extracts the list of lfs file identifiers
       - name: Create LFS file list
-        run: git lfs ls-files -l | cut -d' ' -f1 | sort > .lfs-assets-id
+        run: "git lfs ls-files -l | cut -d' ' -f1 | sort > .lfs-assets-id"
 
       # restore the LFS cache
       - name: Restore LFS cache
@@ -51,8 +51,15 @@ jobs:
                 ${{ runner.os }}-build-${{ env.cache-name }}-
                 ${{ runner.os }}-build-
                 ${{ runner.os }}-
+      
+      - name: Update libraries
+        run: sudo apt update -yq
+
+      - name: Install NCD4
+        run: sudo apt install libnetcdf-dev -yq
 
       - name: Compile Java code
         run:  |
             mvn build-helper:remove-project-artifact
-            mvn -B package -DskipTests=true
+            mvn -B package -DskipTests=false
+      
