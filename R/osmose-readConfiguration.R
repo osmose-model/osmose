@@ -292,7 +292,8 @@ read.cal = function(conf, sp) {
   if(length(file)>1) stop(msg)
   if(is.null(file)) return(NULL)
   
-  file = file.path(attr(file, "path"), file)
+  if(!is.null(attr(file, "path"))) file = file.path(attr(file, "path"), file)
+  if(!file.exists(file)) stop(sprintf("File '%s' not found.", file))
   periods = c("year", "quarter", "month", "week","period")
   out = read.csv(file, check.names = FALSE)
   must = names(out)[names(out) %in% periods]
@@ -340,7 +341,7 @@ read.cal = function(conf, sp) {
   }
   
   ix = .time.conv(ndtcal, ndt, nrow(mat), T)
-  bins = c(length_classes - dbin, length_classes[length(length_classes)] + dbin)
+  bins = c(length_classes, length_classes[length(length_classes)] + dbin)
   bins = pmax(0, bins)
   
   isize = pmax(bins, .getPar(this, "egg.size")) 
@@ -404,7 +405,7 @@ read.cal = function(conf, sp) {
   Linf = .getPar(this, "species.Linf")
   
   marks = length_classes[seq_len(Lmax)]
-  bins = c(marks - dbin, marks[length(marks)] + dbin)
+  bins = c(marks, marks[length(marks)] + dbin)
   bins = pmax(0, bins)
   
   newmat = newmat[, seq_len(Lmax)]
