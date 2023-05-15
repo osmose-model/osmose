@@ -25,8 +25,8 @@ set_par = function(x, value=NULL, scale=1, lower=NULL, upper=NULL, delta=0, digi
     fac = 10^ceiling(digits)
     val = floor(fac*val) + xround
     val = val/fac
-    if(!is.null(lower)) val = pmin(val, lower)
-    if(!is.null(upper)) val = pmax(val, upper)
+    if(!is.null(lower)) val = pmin(val, lower, na.rm=TRUE)
+    if(!is.null(upper)) val = pmax(val, upper, na.rm=TRUE)
   }
   val = relist(val)
   attr(val, "skeleton") = NULL
@@ -39,6 +39,10 @@ transform_par = function(x, FUN, ...) {
   FUN = match.fun(FUN)
   x = as.relistable(x)
   val = FUN(unlist(x))
+  if(any(!is.finite(val))) {
+    val[which(val == Inf)] = 999
+    val[which(val == -Inf)] = -999
+  }
   val = relist(val)
   nm = names(val)
   nm = gsub(nm, pattern="\\.sp", replacement=sprintf(".%s.sp", nmfun))
