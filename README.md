@@ -2,7 +2,7 @@
   <img src="http://documentation.osmose-model.org/_images/logo-osmose.svg">
 </div>
 
-OSMOSE: Modelling Marine Exploited Ecosystems
+OSMOSE: Modelling Exploited Marine Ecosystems
 =============================================
 
 [![CRAN_Status_Badge](https://www.r-pkg.org/badges/version/osmose)](https://cran.r-project.org/package=osmose)

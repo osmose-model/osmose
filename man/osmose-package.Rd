@@ -4,7 +4,7 @@
 \name{osmose-package}
 \alias{osmose-package}
 \alias{osmose}
-\title{OSMOSE: Modelling Marine Exploited Ecosystems}
+\title{OSMOSE: Modelling Exploited Marine Ecosystems}
 \description{
 \if{html}{\figure{sticker_osmose.png}{options: align='right' alt='logo' width='150'}}
 }

@@ -37,7 +37,7 @@
 
 # osmose package: Modelling Marine Exploited Ecosystems
 
-#' OSMOSE: Modelling Marine Exploited Ecosystems
+#' OSMOSE: Modelling Exploited Marine Ecosystems
 #' 
 #' \if{html}{\figure{sticker_osmose.png}{options: align='right' alt='logo' width='150'}}
 #' 
