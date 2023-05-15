@@ -49,12 +49,12 @@
   version = suppressWarnings(as.numeric(version))
 
   # Check if version has a valid form
-  if(any(is.na(version)) | length(version) > 3 | any(version < 0, na.rm = TRUE)) {
-    stop("Version must be of the form X, X.Y or X.Y.Z")
+  if(any(is.na(version)) | length(version) > 4 | any(version < 0, na.rm = TRUE)) {
+    stop("Version must be of the form X, X.Y, X.Y.Z, X.Y.Z.W")
   }
 
   # Complete version with zeros if its length is less than 3
-  version = as.integer(c(version, rep(0, 3 - length(version))))
+  version = as.integer(c(version, rep(0, 4 - length(version))))
 
   return(version)
 }
@@ -97,11 +97,11 @@
 
 # get a parameter from a name chain
 # .getPar = function(x, ..., keep.att=FALSE) {
-# 
+#
 #   chain = unlist(list(...))
 #   if(is.list(x))
 #     x = do.call(.getPar, list(x = x[[chain[1]]], chain[-1]))
-# 
+#
 #   return(.guessType(x, keep.att = keep.att))
 # }
 
@@ -151,7 +151,7 @@
   if(length(files)>0) {
     sp  = lapply(sapply(files, FUN=.strsplit2v, sep[1],
                         USE.NAMES=FALSE)[2,], FUN=.strsplit2v, sep[2])
-    ind = sapply(sp, length)!=2 
+    ind = sapply(sp, length)!=2
     sp[ind] = NULL
     sp = do.call(cbind, sp)[2,]
     out = as.list(tapply(files[!ind], INDEX=sp, FUN=identity))
@@ -391,10 +391,10 @@
     }
 
     output = lapply(output, FUN = .trim_matrix)
-    
+
     names(output) = slices
 
-    
+
   } else {
     output = NULL
   }
@@ -456,7 +456,7 @@
 
     nc = try(nc_open(file.path(path, files[1])))
     if(inherits(nc, "try-error")) return(NULL)
-    
+
     x = ncvar_get(nc, varid=varid) # assumes only one variable in the file
     att = ncatt_get(nc, varid, attname="species_names")
     if(att$hasatt) {
@@ -655,32 +655,32 @@ osmose2R.v4r0 = function (path=NULL, species.names=NULL, conf=NULL, ...) {
   outputData = .add_surveys(x=outputData$yieldByFishery, out=outputData, type="yield", conf=conf)
 
   if(!is.null(conf)) {
-    
+
     outputData = .calculate_size_residuals_byage(outputData, conf)
     outputData = .calculate_mort_residuals_byage(outputData, conf)
-    
+
     outputData = .aggregate_catch_byclass(outputData, conf, "size", "abundance")
     outputData = .aggregate_catch_byclass(outputData, conf, "size", "biomass")
     outputData = .aggregate_catch_byclass(outputData, conf, "age", "abundance")
     outputData = .aggregate_catch_byclass(outputData, conf, "age", "biomass")
-    
+
     outputData = .aggregate_catch_bytime(outputData, conf, type="yield")
     outputData = .aggregate_catch_byyear(outputData, conf, type="yield")
-    
+
     start = get_par(conf, "simulation.time.start")
     if(is.null(start)) start = 0
     ndt   = get_par(conf, "simulation.time.ndtPerYear")/get_par(conf, "output.recordfrequency.ndt")
     nyear = get_par(conf, "simulation.time.nyear") - get_par(conf, "output.start.year")
     step0 = get_par(conf, "output.step0.include")
     times = start + seq(from=1-step0, to=nyear*ndt)/ndt
-    
+
     spp = c(get_species(conf, type="focal"), get_species(conf, type="background"))
-    
+
     model = get_par(conf, "output.file.prefix")
     simus = get_par(conf, "simulation.nsimulation")
     nsp = length(spp)
     T = nyear*ndt
-    
+
   } else {
     model = NULL
     simus = NULL
@@ -690,7 +690,7 @@ osmose2R.v4r0 = function (path=NULL, species.names=NULL, conf=NULL, ...) {
     spp   = NULL
     nsp   = NULL
   }
-  
+
   model = list(version = "4", model = model, simus = simus, times = times,
                T = T, start = start, nsp = nsp, lspecies = spp)
 
@@ -917,7 +917,7 @@ configureCalibration = function(L1) {
 }
 
 .add_surveys = function(x, out, type, conf) {
-  
+
   if(is.null(x)) return(out)
   if(all(sapply(x, is.null))) return(out)
   if(length(x) == 0) return(out)
@@ -964,4 +964,3 @@ configureCalibration = function(L1) {
 
   return(out)
 }
-
