@@ -105,7 +105,7 @@ public class FishingGear extends AbstractMortality {
 
         // set-up the name of the fishery
         name = cfg.getString("fisheries.name.fsh" + fileFisheryIndex).replaceAll("_", "").replaceAll("-", "");
-        if (!this.getName().matches("^[a-zA-Z0-9]*$")) {
+        if (!this.getName().matches("^[a-zA-Z0-9\\.-_]*$")) {
             error("Fishery name must contain alphanumeric characters only. Please rename " + this.getName(), null);
         }
 
