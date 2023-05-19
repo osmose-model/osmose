@@ -19,10 +19,7 @@ The calibration of the reference calibration, which is explained in details in t
     cwd = os.getcwd()
 
     fpath = "calib/_static/democalib.R"
-
-    with open(fpath) as f:
-        with open(os.devnull, "w") as DEVNULL:
-            subprocess.call(["Rscript", fpath])
+    subprocess.call(["Rscript", fpath], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
 
 .. toctree::
      :maxdepth: 1

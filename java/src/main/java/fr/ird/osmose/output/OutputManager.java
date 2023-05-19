@@ -57,11 +57,8 @@ import fr.ird.osmose.output.netcdf.AbundanceOutput_Netcdf;
 import fr.ird.osmose.output.netcdf.YieldDistribOutput_Netcdf;
 import fr.ird.osmose.output.netcdf.YieldNOutput_Netcdf;
 import fr.ird.osmose.output.netcdf.YieldOutput_Netcdf;
-import fr.ird.osmose.output.distribution.AbstractDistribution;
-import fr.ird.osmose.output.distribution.AgeDistribution;
-import fr.ird.osmose.output.distribution.SizeDistribution;
-import fr.ird.osmose.output.distribution.WeightDistribution;
-import fr.ird.osmose.output.distribution.TLDistribution;
+import fr.ird.osmose.output.distribution.DistributionType;
+import fr.ird.osmose.output.distribution.OutputDistribution;
 import fr.ird.osmose.util.io.IOTools;
 import fr.ird.osmose.util.SimulationLinker;
 import java.util.ArrayList;
@@ -90,18 +87,6 @@ public class OutputManager extends SimulationLinker {
     // List of the indicators
     final private List<IOutput> outputs;
 
-    /**
-     * Whether first age class is discarded or not from output.
-     */
-    private boolean cutoff;
-    /**
-     * Threshold age (year) for age class zero. This parameter allows to discard
-     * schools younger that this threshold in the calculation of the indicators when
-     * parameter <i>output.cutoff.enabled</i> is set to {@code true}. Parameter
-     * <i>output.cutoff.age.sp#</i>
-     */
-    private float[] cutoffAge;
-
     private final static boolean NO_WARNING = false;
 
     public OutputManager(int rank) {
@@ -116,29 +101,20 @@ public class OutputManager extends SimulationLinker {
         /*
          * Delete existing outputs from previous simulation
          */
-        if (!getSimulation().isRestart()) {
+        if (!getConfiguration().isRestart()) {
             // Delete previous simulation of the same name
             String pattern = getConfiguration().getString("output.file.prefix") + "*_Simu" + rank + "*";
             IOTools.deleteRecursively(getConfiguration().getOutputPathname(), pattern);
         }
 
-        AbstractDistribution sizeDistrib = new SizeDistribution();
+        OutputDistribution sizeDistrib = new OutputDistribution(DistributionType.SIZE);
         sizeDistrib.init();
-        AbstractDistribution ageDistrib = new AgeDistribution();
+        OutputDistribution ageDistrib = new OutputDistribution(DistributionType.AGE);
         ageDistrib.init();
-        AbstractDistribution weightDistrib = new WeightDistribution();
+        OutputDistribution weightDistrib = new OutputDistribution(DistributionType.WEIGHT);
         weightDistrib.init();
-        AbstractDistribution tl_distrib = new TLDistribution();
+        OutputDistribution tl_distrib = new OutputDistribution(DistributionType.TL);
         tl_distrib.init();
-
-        cutoff = getConfiguration().getBoolean("output.cutoff.enabled");
-        cutoffAge = new float[getNSpecies()];
-        int cpt = 0;
-        if (cutoff) {
-            for (int iSpec : this.getFocalIndex()) {
-                cutoffAge[cpt++] = getConfiguration().getFloat("output.cutoff.age.sp" + iSpec);
-            }
-        }
 
         if (getConfiguration().getBoolean("output.abundance.netcdf.enabled")) {
             outputs.add(new AbundanceOutput_Netcdf(rank));
@@ -181,7 +157,6 @@ public class OutputManager extends SimulationLinker {
         }
 
         if (getConfiguration().getBoolean("output.diet.composition.netcdf.enabled")) {
-            getSimulation().requestPreyRecord();
             outputs.add(new DietOutput_Netcdf(rank));
         }
 
@@ -192,14 +167,12 @@ public class OutputManager extends SimulationLinker {
         }
 
         if (getConfiguration().getBoolean("output.diet.composition.byage.netcdf.enabled")) {
-            getSimulation().requestPreyRecord();
             for (int i = 0; i < getNSpecies(); i++) {
                 outputs.add(new DietDistribOutput_Netcdf(rank, getSpecies(i), ageDistrib));
             }
         }
 
         if (getConfiguration().getBoolean("output.diet.composition.bysize.netcdf.enabled")) {
-            getSimulation().requestPreyRecord();
             for (int i = 0; i < getNSpecies(); i++) {
                 outputs.add(new DietDistribOutput_Netcdf(rank, getSpecies(i), sizeDistrib));
             }
@@ -226,50 +199,49 @@ public class OutputManager extends SimulationLinker {
         }
 
         if (getConfiguration().getBoolean("output.diet.pressure.netcdf.enabled")) {
-            getSimulation().requestPreyRecord();
             outputs.add(new PredatorPressureOutput_Netcdf(rank));
         }
 
         /*
          * Instantiate indicators
          */
-        if (getConfiguration().getBoolean("output.spatialabundance.enabled")) {
+        if (getConfiguration().getBoolean("output.spatial.abundance.enabled")) {
             outputs.add(new SpatialAbundanceOutput(rank));
         }
 
-        if (getConfiguration().getBoolean("output.spatialbiomass.enabled")) {
+        if (getConfiguration().getBoolean("output.spatial.biomass.enabled")) {
             outputs.add(new SpatialBiomassOutput(rank));
         }
 
-        if (getConfiguration().getBoolean("output.spatialsize.enabled")) {
+        if (getConfiguration().getBoolean("output.spatial.size.enabled")) {
             outputs.add(new SpatialSizeOutput(rank));
         }
 
-        if (getConfiguration().getBoolean("output.spatialenet.enabled")) {
+        if (getConfiguration().getBoolean("output.spatial.enet.enabled")) {
             outputs.add(new SpatialEnetOutput(rank));
         }
 
-        if (getConfiguration().getBoolean("output.spatialenetlarvae.enabled")) {
+        if (getConfiguration().getBoolean("output.spatial.enet.larvae.enabled")) {
             outputs.add(new SpatialEnetOutputlarvae(rank));
         }
 
-        if (getConfiguration().getBoolean("output.spatialenetjuv.enabled")) {
+        if (getConfiguration().getBoolean("output.spatial.enet.juv.enabled")) {
             outputs.add(new SpatialEnetOutputjuv(rank));
         }
 
-        if (getConfiguration().getBoolean("output.spatialMstarv.enabled")) {
+        if (getConfiguration().getBoolean("output.spatial.mstarv.enabled")) {
             outputs.add(new SpatialMortaStarvOutput(rank));
         }
 
-        if (getConfiguration().getBoolean("output.spatialMpred.enabled")) {
+        if (getConfiguration().getBoolean("output.spatial.mpred.enabled")) {
             outputs.add(new SpatialMortaPredOutput(rank));
         }
 
-        if (getConfiguration().getBoolean("output.spatialdg.enabled")) {
+        if (getConfiguration().getBoolean("output.spatial.dg.enabled")) {
             outputs.add(new SpatialdGOutput(rank));
         }
 
-        if (getConfiguration().getBoolean("output.spatialegg.enabled")) {
+        if (getConfiguration().getBoolean("output.spatial.egg.enabled")) {
             outputs.add(new SpatialEggOutput(rank));
         }
 
@@ -294,22 +266,35 @@ public class OutputManager extends SimulationLinker {
             outputs.add(new SpatialSizeSpeciesOutput(rank, ageDistrib));
         }
 
-        if(getConfiguration().getBoolean("output.fishing.accessible.biomass")){
-            outputs.add(new FishingAccessBiomassOutput(rank));
-        }
+        if (getConfiguration().isEconomyEnabled()) {
+            if (getConfiguration().getBoolean("output.fishing.accessible.biomass")) {
+                outputs.add(new FishingAccessBiomassOutput(rank));
+            }
 
-        if(getConfiguration().getBoolean("output.fishing.harvested.biomass")){
-            outputs.add(new FishingHarvestedBiomassDistribOutput(rank));
+            if (getConfiguration().getBoolean("output.fishing.harvested.biomass")) {
+                outputs.add(new FishingHarvestedBiomassDistribOutput(rank));
+            }
         }
 
         // Fisheries output
-        if (getConfiguration().isFisheryEnabled() && getConfiguration().getBoolean("output.fishery.enabled")) {
-            outputs.add(new FisheryOutput(rank));
+        if (getConfiguration().isFisheryEnabled()) {
+            if (getConfiguration().getBoolean("output.fishery.enabled")) {
+                outputs.add(new FisheryOutput(rank));
+            }
+
+            if (getConfiguration().getBoolean("output.fishery.byage.enabled")) {
+                outputs.add(new FisheryOutputDistrib(rank, ageDistrib));
+            }
+
+            if (getConfiguration().getBoolean("output.fishery.bysize.enabled")) {
+                outputs.add(new FisheryOutputDistrib(rank, sizeDistrib));
+            }
         }
+
         // Biomass
         if (getConfiguration().getBoolean("output.biomass.enabled")) {
             outputs.add(new SpeciesOutput(rank, null, "biomass",
-                    "Mean biomass (tons), " + (cutoff ? "excluding" : "including") + " first ages specified in input",
+                    "Mean biomass (tons), " + (getConfiguration().isCutoffEnabled() ? "excluding" : "including") + " first ages specified in input",
                     (school) -> school.getInstantaneousBiomass()));
         }
         if (getConfiguration().getBoolean("output.biomass.bysize.enabled")) {
@@ -325,7 +310,7 @@ public class OutputManager extends SimulationLinker {
         if (getConfiguration().getBoolean("output.abundance.enabled")) {
             outputs.add(
                     new SpeciesOutput(rank, null, "abundance",
-                            "Mean abundance (number of fish), " + (cutoff ? "excluding" : "including")
+                            "Mean abundance (number of fish), " + (getConfiguration().isCutoffEnabled() ? "excluding" : "including")
                                     + " first ages specified in input",
                             (school) -> school.getInstantaneousAbundance()));
         }
@@ -439,17 +424,19 @@ public class OutputManager extends SimulationLinker {
         if (getConfiguration().getBoolean("output.size.enabled")) {
             outputs.add(new WeightedSpeciesOutput(rank, "SizeIndicators", "meanSize",
                     "Mean size of fish species in cm, weighted by fish numbers, and "
-                            + (cutoff ? "excluding" : "including") + " first ages specified in input",
-                    school -> school.getAge() >= cutoffAge[school.getSpeciesIndex()], school -> school.getLength(),
-                    school -> school.getInstantaneousAbundance()));
+                            + (getConfiguration().isCutoffEnabled() ? "excluding" : "including")
+                            + " first ages specified in input",
+                    school -> (school.getAge() >= getConfiguration().getCutoffAge()[school.getSpeciesIndex()])
+                            & (school.getLength() >= getConfiguration().getCutoffLength()[school.getSpeciesIndex()]),
+                    school -> school.getLength(), school -> school.getInstantaneousAbundance()));
         }
 
         // Size
         if (getConfiguration().getBoolean("output.weight.enabled")) {
             outputs.add(new WeightedSpeciesOutput(rank, "SizeIndicators", "meanWeight",
                     "Mean weight of fish species in kilogram, weighted by fish numbers, and "
-                            + (cutoff ? "excluding" : "including") + " first ages specified in input",
-                    school -> school.getAge() >= cutoffAge[school.getSpeciesIndex()],
+                            + (getConfiguration().isCutoffEnabled() ? "excluding" : "including") + " first ages specified in input",
+                    school -> (school.getAge() >= getConfiguration().getCutoffAge()[school.getSpeciesIndex()]) & (school.getLength() >= getConfiguration().getCutoffLength()[school.getSpeciesIndex()]),
                     school -> 1E3 * school.getWeight(), school -> school.getInstantaneousAbundance()));
         }
 
@@ -503,16 +490,14 @@ public class OutputManager extends SimulationLinker {
 
         // TL
         if (getConfiguration().getBoolean("output.tl.enabled")) {
-            getSimulation().requestPreyRecord();
             outputs.add(new WeightedSpeciesOutput(rank, "Trophic", "meanTL",
                     "Mean Trophic Level of fish species, weighted by fish biomass, and "
-                            + (cutoff ? "excluding" : "including") + " first ages specified in input",
-                    school -> school.getAge() >= cutoffAge[school.getSpeciesIndex()],
+                            + (getConfiguration().isCutoffEnabled() ? "excluding" : "including") + " first ages specified in input",
+                    school -> (school.getAge() >= getConfiguration().getCutoffAge()[school.getSpeciesIndex()]) & (school.getLength() >= getConfiguration().getCutoffLength()[school.getSpeciesIndex()]),
                     school -> school.getTrophicLevel(), school -> school.getInstantaneousBiomass()));
         }
 
         if (getConfiguration().getBoolean("output.tl.catch.enabled")) {
-            getSimulation().requestPreyRecord();
             outputs.add(new WeightedSpeciesOutput(rank, "Trophic", "meanTLCatch",
                     "Mean Trophic Level of fish species, weighted by fish catch, and including first ages specified in input",
                     school -> school.getTrophicLevel(),
@@ -525,39 +510,33 @@ public class OutputManager extends SimulationLinker {
         }
 
         if (getConfiguration().getBoolean("output.meanTL.bySize.enabled")) {
-            getSimulation().requestPreyRecord();
             outputs.add(new WeightedDistribOutput(rank, "Trophic", "meanTL", "Mean trophic level of fish species",
                     school -> school.getTrophicLevel(), school -> school.getInstantaneousBiomass(), sizeDistrib));
         }
 
         if (getConfiguration().getBoolean("output.meanTL.byAge.enabled")) {
-            getSimulation().requestPreyRecord();
             outputs.add(new WeightedDistribOutput(rank, "Trophic", "meanTL", "Mean trophic level of fish species",
                     school -> school.getTrophicLevel(), school -> school.getInstantaneousBiomass(), ageDistrib));
         }
 
         // Predation
         if (getConfiguration().getBoolean("output.diet.composition.enabled")) {
-            getSimulation().requestPreyRecord();
             outputs.add(new DietOutput(rank));
         }
 
         if (getConfiguration().getBoolean("output.diet.composition.byage.enabled")) {
-            getSimulation().requestPreyRecord();
             for (int i = 0; i < getNSpecies(); i++) {
                 outputs.add(new DietDistribOutput(rank, getSpecies(i), ageDistrib));
             }
         }
 
         if (getConfiguration().getBoolean("output.diet.composition.bysize.enabled")) {
-            getSimulation().requestPreyRecord();
             for (int i = 0; i < getNSpecies(); i++) {
                 outputs.add(new DietDistribOutput(rank, getSpecies(i), sizeDistrib));
             }
         }
 
         if (getConfiguration().getBoolean("output.diet.pressure.enabled")) {
-            getSimulation().requestPreyRecord();
             outputs.add(new PredatorPressureOutput(rank));
         }
 
@@ -566,14 +545,12 @@ public class OutputManager extends SimulationLinker {
         }
 
         if (getConfiguration().getBoolean("output.diet.pressure.byage.enabled")) {
-            getSimulation().requestPreyRecord();
             for (int i = 0; i < getNSpecies(); i++) {
                 outputs.add(new PredatorPressureDistribOutput(rank, getSpecies(i), ageDistrib));
             }
         }
 
         if (getConfiguration().getBoolean("output.diet.pressure.bysize.enabled")) {
-            getSimulation().requestPreyRecord();
             for (int i = 0; i < getNSpecies(); i++) {
                 outputs.add(new PredatorPressureDistribOutput(rank, getSpecies(i), sizeDistrib));
             }
@@ -597,7 +574,6 @@ public class OutputManager extends SimulationLinker {
         }
 
         if (getConfiguration().getBoolean("output.spatial.ltl.enabled")) {
-            getSimulation().requestPreyRecord();
             outputs.add(new ResourceOutput(rank));
         }
 
@@ -689,9 +665,9 @@ public class OutputManager extends SimulationLinker {
                 outputs.add(new BioenSizeInfOutput(rank));
             }
 
-            if (getConfiguration().getBoolean("output.bioen.kappa.enabled", NO_WARNING)) {
-                outputs.add(new WeightedSpeciesOutput(rank, "Bioen", "kappa", "Kappa (rate [0-1])",
-                        school -> school.getKappa(), school -> school.getInstantaneousAbundance()));
+            if (getConfiguration().getBoolean("output.bioen.rho.enabled", NO_WARNING)) {
+                outputs.add(new WeightedSpeciesOutput(rank, "Bioen", "rho", "Rho (rate [0-1])",
+                        school -> school.getRho(), school -> school.getInstantaneousAbundance()));
             }
 
             // Alaia's outputs in the new format
@@ -713,16 +689,16 @@ public class OutputManager extends SimulationLinker {
             }
 
             // Alaia's outputs in the new format
-            if (getConfiguration().getBoolean("output.kappa.byAge.enabled")) {
-                outputs.add(new WeightedDistribOutput(rank, "BioenIndicators", "meanKappaDistribBy",
-                        "Mean kappa of fish", school -> (school.getKappa()),
+            if (getConfiguration().getBoolean("output.rho.byAge.enabled")) {
+                outputs.add(new WeightedDistribOutput(rank, "BioenIndicators", "meanRhoDistribBy",
+                        "Mean rho of fish", school -> (school.getRho()),
                         school -> school.getInstantaneousAbundance(), ageDistrib));
             }
 
             // Alaia's outputs in the new format
-            if (getConfiguration().getBoolean("output.kappa.bySize.enabled")) {
-                outputs.add(new WeightedDistribOutput(rank, "BioenIndicators", "meanKappa",
-                        "Mean kappa of fish", school -> (school.getKappa()),
+            if (getConfiguration().getBoolean("output.rho.bySize.enabled")) {
+                outputs.add(new WeightedDistribOutput(rank, "BioenIndicators", "meanRho",
+                        "Mean rho of fish", school -> (school.getRho()),
                         school -> school.getInstantaneousAbundance(), sizeDistrib));
             }
 
@@ -782,6 +758,16 @@ public class OutputManager extends SimulationLinker {
         if (this.getConfiguration().isGeneticEnabled()) {
             if (getConfiguration().getBoolean("output.evolvingtraits.enabled")) {
                 outputs.add(new VariableTraitOutput(rank));
+            }
+
+            if (getConfiguration().getBoolean("output.meanTraits.newborn.enabled")) {
+                outputs.add(new MeanGenotypeOutput(rank, "meanTraitsNewborn", (school -> 1),
+                        (school -> school.getAgeDt() == 0), (schoolset -> schoolset.getNewBorns()), "Mean traits of child schools"));
+            }
+
+            if (getConfiguration().getBoolean("output.meanTraits.parents.enabled")) {
+                outputs.add(new MeanGenotypeOutput(rank, "meanTraitsParents", (school -> school.getNEggs()),
+                        (school -> school.isMature()), (schoolset -> schoolset.getAliveSchools()), "Mean traits of parent schools, ponderated by number of eggs"));
             }
         }
 

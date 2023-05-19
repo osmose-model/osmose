@@ -1,10 +1,10 @@
-/* 
- * 
+/*
+ *
  * OSMOSE (Object-oriented Simulator of Marine Ecosystems)
  * http://www.osmose-model.org
- * 
+ *
  * Copyright (C) IRD (Institut de Recherche pour le Développement) 2009-2020
- * 
+ *
  * Osmose is a computer program whose purpose is to simulate fish
  * populations and their interactions with their biotic and abiotic environment.
  * OSMOSE is a spatial, multispecies and individual-based model which assumes
@@ -15,7 +15,7 @@
  * processes of fish life cycle (growth, explicit predation, additional and
  * starvation mortalities, reproduction and migration) and fishing mortalities
  * (Shin and Cury 2001, 2004).
- * 
+ *
  * Contributor(s):
  * Yunne SHIN (yunne.shin@ird.fr),
  * Morgane TRAVERS (morgane.travers@ifremer.fr)
@@ -23,20 +23,20 @@
  * Philippe VERLEY (philippe.verley@ird.fr)
  * Laure VELEZ (laure.velez@ird.fr)
  * Nicolas Barrier (nicolas.barrier@ird.fr)
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation (version 3 of the License). Full description
  * is provided on the LICENSE file.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
- * 
+ *
  */
 
 package fr.ird.osmose.util;
@@ -48,6 +48,7 @@ import java.util.ArrayList;
 import java.util.List;
 import ucar.nc2.NetcdfFile;
 import ucar.nc2.Variable;
+import ucar.nc2.dataset.NetcdfDatasets;
 
 /**
  *
@@ -119,7 +120,7 @@ public class FileManager extends OsmoseLinker {
                 listFiles.add(f);
             }
         }
-        
+
         // Extract the file list as array of string
         Object[] tempObj = listFiles.stream().sorted().toArray();
         fileNames = new String[tempObj.length];
@@ -141,7 +142,7 @@ public class FileManager extends OsmoseLinker {
                 error("Error reading file " + ncFile, new FileNotFoundException("NetCDF file " + ncFile + " does not exist."));
             }
 
-            try (NetcdfFile nc = NetcdfFile.open(ncFile)) {
+            try (NetcdfFile nc = NetcdfDatasets.openDataset(ncFile)) {
                 Variable variable = nc.findVariable(this.varname);
                 int[] shape = variable.getShape();
                 // check time length
@@ -156,9 +157,9 @@ public class FileManager extends OsmoseLinker {
 
     }
 
-    /** Init the file mapping and step mapping for all the simulation steps. 
-     * 
-     * @throws IOException 
+    /** Init the file mapping and step mapping for all the simulation steps.
+     *
+     * @throws IOException
      */
     public void initTimeMapping() throws IOException {
 
@@ -184,10 +185,10 @@ public class FileManager extends OsmoseLinker {
         }
     }
 
-    /** Get the file to read at the given time step. 
-     * 
+    /** Get the file to read at the given time step.
+     *
      * @param iStepSimu
-     * @return 
+     * @return
      */
     public String getFile(int iStepSimu) {
         int iStepNc = iStepSimu % timeLength;
@@ -196,9 +197,9 @@ public class FileManager extends OsmoseLinker {
     }
 
     /** Get the step to read at the given step.
-     * 
+     *
      * @param iStepSimu
-     * @return 
+     * @return
      */
     public int getStep(int iStepSimu) {
         int iStepNc = iStepSimu % timeLength;

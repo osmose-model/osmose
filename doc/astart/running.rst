@@ -11,13 +11,10 @@ To run the test configuration, launch :samp:`R` and type the following:
 
     import os
     import subprocess
-    cwd = os.getcwd()   
+    cwd = os.getcwd()
 
     fpath = "astart/_static/run_testconf.R"
-
-    with open(fpath) as f:
-        with open(os.devnull, "w") as DEVNULL:
-            subprocess.call(["Rscript", fpath])
+    subprocess.call(["Rscript", fpath], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
 
 You should obtain the following figure:
 

@@ -1,3 +1,5 @@
+.. include:: <s5defs.txt>
+.. role:: red
 .. |os| replace:: OSMOSE
 .. |jos| replace:: OSMOSE Java
 .. |dat| replace:: Datarmor

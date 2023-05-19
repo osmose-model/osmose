@@ -44,8 +44,8 @@ package fr.ird.osmose.output.netcdf;
 import fr.ird.osmose.Cell;
 import fr.ird.osmose.School;
 import fr.ird.osmose.background.BackgroundSchool;
-import fr.ird.osmose.stage.DietOutputStage;
-import fr.ird.osmose.stage.IStage;
+import fr.ird.osmose.stage.SchoolStage;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -71,7 +71,7 @@ public class BiomassDietStageOutput_Netcdf extends AbstractOutput_Netcdf {
      */
     private double[][] biomassStage;
 
-    private IStage dietOutputStage;
+    private SchoolStage dietOutputStage;
 
     public BiomassDietStageOutput_Netcdf(int rank) {
         super(rank);
@@ -80,7 +80,7 @@ public class BiomassDietStageOutput_Netcdf extends AbstractOutput_Netcdf {
     @Override
     public void init() {
 
-        dietOutputStage = new DietOutputStage();
+        dietOutputStage = new SchoolStage("output.diet.stage");
         dietOutputStage.init();
 
         nColumns = 0;
@@ -206,15 +206,15 @@ public class BiomassDietStageOutput_Netcdf extends AbstractOutput_Netcdf {
     @Override
     void init_nc_dims_coords() {
 
-        Dimension classDim = getNc().addDimension(null, "class_prey", nColumns);
+        Dimension classDim = getBNc().addDimension("class_prey", nColumns);
 
-        getNc().addVariable(null, "class_prey", DataType.FLOAT, "class_prey");
+        Variable.Builder<?> varBuilder = getBNc().addVariable("class_prey", DataType.FLOAT, "class_prey");
         this.setDims(new ArrayList<>(Arrays.asList(getTimeDim(), classDim)));
 
         int nSpec = getNSpecies() + getNBkgSpecies() + getNRscSpecies();
         int k = 0;
         for (int iSpec = 0; iSpec < nSpec; iSpec++) {
-            String name = getSpecies(iSpec).getName();
+            String name = getISpecies(iSpec).getName();
             float[] threshold = dietOutputStage.getThresholds(iSpec);
             int nStage = dietOutputStage.getNStage(iSpec);
             String outname;
@@ -229,8 +229,7 @@ public class BiomassDietStageOutput_Netcdf extends AbstractOutput_Netcdf {
                     }
                 }
                 String attrname = String.format("%d", k);
-                Variable var = this.getNc().findVariable("class_prey");
-                var.addAttribute(new Attribute(attrname, outname));
+                varBuilder.addAttribute(new Attribute(attrname, outname));
                 k++;
             }
         }

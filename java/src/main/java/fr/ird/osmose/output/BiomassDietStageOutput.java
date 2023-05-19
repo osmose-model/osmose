@@ -42,8 +42,7 @@
 package fr.ird.osmose.output;
 
 import fr.ird.osmose.Cell;
-import fr.ird.osmose.stage.DietOutputStage;
-import fr.ird.osmose.stage.IStage;
+import fr.ird.osmose.stage.SchoolStage;
 
 /**
  *
@@ -57,7 +56,7 @@ public class BiomassDietStageOutput extends AbstractOutput {
      */
     private double[][] biomassStage;
 
-    private IStage dietOutputStage;
+    private SchoolStage dietOutputStage;
 
     public BiomassDietStageOutput(int rank) {
         super(rank, "Trophic", "biomassPredPreyIni");
@@ -66,7 +65,7 @@ public class BiomassDietStageOutput extends AbstractOutput {
     @Override
     public void init() {
 
-        dietOutputStage = new DietOutputStage();
+        dietOutputStage = new SchoolStage("output.diet.stage");
         dietOutputStage.init();
 
         nColumns = 0;
@@ -78,8 +77,6 @@ public class BiomassDietStageOutput extends AbstractOutput {
             nColumns += dietOutputStage.getNStage(cpt);
         }
 
-        nColumns += getConfiguration().getNRscSpecies();
-
         super.init();
     }
 
@@ -89,31 +86,8 @@ public class BiomassDietStageOutput extends AbstractOutput {
     }
 
     @Override
-    String[] getHeaders() {
-
-        int nAll = this.getNBkgSpecies() + this.getNSpecies() + this.getNRscSpecies();
-
-        int k = 0;
-        String[] headers = new String[nColumns];
-        for (int cpt = 0; cpt < nAll; cpt++) {
-            String name = getISpecies(cpt).getName();
-            float[] threshold = dietOutputStage.getThresholds(cpt);
-            int nStage = dietOutputStage.getNStage(cpt);
-            for (int s = 0; s < nStage; s++) {
-                if (nStage == 1) {
-                    headers[k] = name;    // Name predators
-                } else {
-                    if (s == 0) {
-                        headers[k] = name + " < " + threshold[s];    // Name predators
-                    } else {
-                        headers[k] = name + " >=" + threshold[s - 1];    // Name predators
-                    }
-                }
-                k++;
-            }
-        } // end of species loop
-
-        return headers;
+    public String[] getHeaders() {
+       return dietOutputStage.getHeaders(true);
     }
 
     @Override

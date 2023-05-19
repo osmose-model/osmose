@@ -1,7 +1,7 @@
 Reading Osmose parameters
 +++++++++++++++++++++++++++++
 
-The loading of Osmose parameters is achieved by using the :samp:`read_osmose` function with an :samp:`input` argument providing the path of the 
+The loading of Osmose parameters is achieved by using the :samp:`read_osmose` function with an :samp:`input` argument providing the path of the
 main configuration file.
 
 .. literalinclude:: _static/param_loading.R
@@ -22,12 +22,10 @@ Furthermore, some parameters can be plotted for a given species. This is done as
 
     import os
     import subprocess
-    cwd = os.getcwd()   
+    cwd = os.getcwd()
 
     fpath = "rosmose/_static/param_loading.R"
-    with open(fpath) as f:
-        with open(os.devnull, "w") as DEVNULL:
-            subprocess.call(["Rscript", fpath], stdout=DEVNULL, stderr=DEVNULL)
+    subprocess.call(["Rscript", fpath], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
 
 
 .. figure:: _static/species.png

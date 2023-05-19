@@ -152,12 +152,35 @@ public class GridMap extends OsmoseLinker {
      * @return
      */
     public float count() {
+        return this.count(false);
+    }
+
+    /**
+     * Sums the matrix over space
+     *
+     * @author Nicolas Barrier
+     * @return
+     */
+    public float count(boolean exclude_zeros) {
 
         float output = 0;
-        for (int j = 0; j < getGrid().get_ny(); j++) {
-            for (int i = 0; i < getGrid().get_nx(); i++) {
-                if (!Float.isNaN(matrix[j][i])) {
-                    output += matrix[j][i];
+
+        if (!exclude_zeros) {
+            // exclude only NaN values
+            for (int j = 0; j < getGrid().get_ny(); j++) {
+                for (int i = 0; i < getGrid().get_nx(); i++) {
+                    if (!getGrid().getCell(i, j).isLand()) {
+                        output += matrix[j][i];
+                    }
+                }
+            }
+        } else {
+            // Exclude NaN values and also 0 values
+            for (int j = 0; j < getGrid().get_ny(); j++) {
+                for (int i = 0; i < getGrid().get_nx(); i++) {
+                    if (!getGrid().getCell(i, j).isLand() & (matrix[j][i] != 0)) {
+                        output += matrix[j][i];
+                    }
                 }
             }
         }
@@ -215,13 +238,10 @@ public class GridMap extends OsmoseLinker {
 
         // Extracts the FillValue attribute
         double fillValue = -99;
-        if (!nc.findVariable(varname).getAttributes().isEmpty()) {
+        if (!nc.findVariable(varname).attributes().isEmpty()) {
             // Loop over all the attributes to define a size.
-            for (int k = 0; k < nc.findVariable(varname).getAttributes().size(); k++) {
-                if(nc.findVariable(varname).getAttributes().get(k).getFullName().toLowerCase().equals("_fillvalue")) {
-                    fillValue = nc.findVariable(varname).getAttributes().get(k).getNumericValue().doubleValue();
-                    break;
-                }
+            if(nc.findVariable(varname).attributes().hasAttribute("_FillValue")) {
+                fillValue = nc.findVariable(varname).attributes().findAttribute("_FillValue").getNumericValue().doubleValue();
             }
         }
 
@@ -246,13 +266,10 @@ public class GridMap extends OsmoseLinker {
 
         // Extracts the FillValue attribute
         double fillValue = -99;
-        if (!nc.findVariable(varname).getAttributes().isEmpty()) {
-            // Loop over all the attributes to define a fill value.
-            for (int k = 0; k < nc.findVariable(varname).getAttributes().size(); k++) {
-                if(nc.findVariable(varname).getAttributes().get(k).getFullName().toLowerCase().equals("_fillvalue")) {
-                    fillValue = nc.findVariable(varname).getAttributes().get(k).getNumericValue().doubleValue();
-                    break;
-                }
+        if (!nc.findVariable(varname).attributes().isEmpty()) {
+            // Loop over all the attributes to define a size.
+            if(nc.findVariable(varname).attributes().hasAttribute("_FillValue")) {
+                fillValue = nc.findVariable(varname).attributes().findAttribute("_FillValue").getNumericValue().doubleValue();
             }
         }
 

@@ -128,9 +128,11 @@ public abstract class AbstractSchool extends GridPoint implements IAggregation {
 
     protected double[] discardedBiomass;
 
+    protected double[] accessibleBiomassToFishery;
+
     public abstract double getEMaint();
     public abstract double getENet();
-    public abstract double getKappa();
+    public abstract double getRho();
     public abstract double getIngestion();
     public abstract float getGonadWeight();
     public abstract double getIngestionTot();
@@ -223,6 +225,10 @@ public abstract class AbstractSchool extends GridPoint implements IAggregation {
         this.discardedBiomass[fisheryIndex] += fishedBiomass;
     }
 
+    public void incrementAccessibleBiomass(int fisheryIndex, double fishedBiomass) {
+        this.accessibleBiomassToFishery[fisheryIndex] += fishedBiomass;
+    }
+
     /**
      * Returns a list of the prey records at current time step.
      *
@@ -250,6 +256,16 @@ public abstract class AbstractSchool extends GridPoint implements IAggregation {
      */
     public double getDiscardedBiomass(int fisheryIndex) {
         return discardedBiomass[fisheryIndex];
+    }
+
+    /**
+     * Gets the biomass of the school discarded by a given fishery.
+     *
+     * @param fisheryIndex, the fishery index
+     * @return the fished biomass in tons
+     */
+    public double getAccessibleBiomass(int fisheryIndex) {
+        return accessibleBiomassToFishery[fisheryIndex];
     }
 
     /**

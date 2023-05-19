@@ -180,9 +180,9 @@ public class MortalityProcess extends AbstractProcess {
         }
 
         // Possibility to use a seed in the definition of mortality algorithm
-        String key = "stochastic.mortality.seed";
-        if (getConfiguration().canFind(key)) {
-            random = new XSRandom(getConfiguration().getLong(key));
+        String key = "stochastic.mortality.randomseed.fixed";
+        if (getConfiguration().getBoolean(key, false)) {
+            random = new XSRandom(getRank());
         } else {
             random = new XSRandom(System.nanoTime());
         }
@@ -507,6 +507,12 @@ public class MortalityProcess extends AbstractProcess {
         causes.remove(MortalityCause.DISCARDS);
         causes.remove(MortalityCause.AGING);
 
+        // If no bioen, remove the FORAGING mortality cause.
+        // Allows full comparison with old Osmose versions.
+        if(!getConfiguration().isBioenEnabled()) {
+            causes.remove(MortalityCause.FORAGING);
+        }
+
         // add all the fisheries in the cause list
         if (fishingMortalityEnabled && fisheryEnabled) {
             // every fishery accounts as an independant fishing mortality source
@@ -578,7 +584,7 @@ public class MortalityProcess extends AbstractProcess {
                 case PREDATION:
                     // Predation mortality
                     IAggregation predator = listPred.get(seqPred[i]); // recover one predator (background or focal
-                                                                      // species)
+                                                        // species)
                     // compute predation from predator to all the possible preys
                     // preyUpon is the total biomass easten by predator
                     double[] preyUpon = predationMortality.computePredation(predator, preys,
@@ -904,6 +910,8 @@ public class MortalityProcess extends AbstractProcess {
                 double sel = gear.getSelectivity(index, school);
                 double incrementBiom = school.getInstantaneousBiomass() * sel;
                 this.getSimulation().getEconomicModule().incrementAccessibleBiomass(iFishery, school, incrementBiom);
+                school.incrementAccessibleBiomass(iFishery, incrementBiom);
+
             }
         }
     }

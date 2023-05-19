@@ -1,0 +1,13 @@
+Variable ;  Description ; Type ; Units
+name ; Species name ; string ;
+index ; Species index. ; int, :math:`\in [N_{species}, N_{species} + N_{bkgspecies}] - 1` ;
+fileindex ; index of the species in the ; int, :math:`>0` ;
+age ; Age array ; [float] ; years
+ageDt ; Age array ; [int] ; time-step
+c; allometric factor ;  float ;
+bPower; allometric power ; float  float;
+classProportion ; Proportion of biomass attributed to each size-class ; float[] ; %
+length ; Length array ; float[] ; cm
+nClass ; Number of size-classes ; int, :math:`>1`;
+trophicLevel ; Array of trophic level ; float[] ;
+timeSeries ; Time series of proportion of biomass attributed to each size-class ;  ;

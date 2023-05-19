@@ -1,0 +1,9 @@
+Variable ;  Description ; Units
+accessMax ; Maximum value for resource accessibility ; 0.99
+accessibilityCoeff ; Fraction of the resource biomass available to the fish ; [0, 1]
+fileindex ; Species index in the configuration file ;
+index ; Resource species index ;
+name ; Resource species name ;
+sizeMax ; Maximum size of the plankton size ; Cm
+sizeMin ; Maximum size of the plankton size ; Cm
+trophicLevel ; Trophic level ;

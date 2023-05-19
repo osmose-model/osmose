@@ -1,0 +1,6 @@
+Variable ; Description  ; Type ; Units
+;;;
+c1;Array of asymptote of energy mobilization dose-response function to dissolved oxygen saturation;float[];
+c2;Array of slope of energy mobilization dose-response function to dissolved oxygen saturation;float[];
+o2_input;Oxygen dataset;``PhysicalData``;
+isFO2Activated;True if the oxygen function should be used in the ingestion formula;bool, default is true;

@@ -68,8 +68,6 @@ public class BackgroundSpecies extends OsmoseLinker implements ISpecies {
 
     private final Proportion proportion;
 
-    private double multiplier;
-    
     /**
      * Index of the species. [0 : number of background - 1]
      */
@@ -112,7 +110,7 @@ public class BackgroundSpecies extends OsmoseLinker implements ISpecies {
     private double betaBioen;
 
     private double[][] biomass;
-    
+
     /**
      * Constructor of background species.
      *
@@ -140,7 +138,7 @@ public class BackgroundSpecies extends OsmoseLinker implements ISpecies {
         }
 
         // Initialization of parameters
-        name = cfg.getString("species.name.sp" + fileindex);
+        name = cfg.getString("species.name.sp" + fileindex).replaceAll("_", "").replaceAll("-", "");
 
         nClass = cfg.getInt("species.nclass.sp" + fileindex);
 
@@ -226,9 +224,9 @@ public class BackgroundSpecies extends OsmoseLinker implements ISpecies {
             message = String.format("Both %s and %s parameters are defined. Choose only one.\n", keyMulLog, keyMul);
             error(message, new Exception());
         }
-        
-        multiplier = 1.d;
-        
+
+        double multiplier = 1.d;
+
         if (!getConfiguration().isNull(keyMulLog)) {
             multiplier = Math.exp(getConfiguration().getFloat("species.multiplier.log.sp" + fileindex));
             warning("Biomass for background group " + fileindex + " will be multiplied by " + multiplier
@@ -240,7 +238,7 @@ public class BackgroundSpecies extends OsmoseLinker implements ISpecies {
                     + " accordingly to parameter "
                     + getConfiguration().printParameter("species.multiplier.sp" + fileindex));
         }
-  
+
         // Reading the biomass time-series. So far, it is a yearly time-series
         // to see if we update that to any kind of time-series
         String keyVal = "species.biomass.sp" + fileindex;

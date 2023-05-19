@@ -22,6 +22,8 @@
 import os
 import re
 from datetime import date
+import sphinx_rtd_theme
+from glob import glob
 
 # -- General configuration ------------------------------------------------
 
@@ -41,10 +43,19 @@ extensions = ['sphinx.ext.todo',
     'IPython.sphinxext.ipython_directive',
     'IPython.sphinxext.ipython_console_highlighting',
     'matplotlib.sphinxext.plot_directive',
-
+    'sphinxcontrib.mermaid',
+    'sphinx_rtd_theme',
 ]
 
+plantuml = 'plantuml'
+plantuml_output_format = 'svg_img'
+plantuml_latex_output_format = 'pdf'
+
+mermaid_pdfcrop = 'pdfcrop'
+mermaid_output_format = 'png'
+
 bibtex_bibfiles = ['_static/biblio.bib']
+bibtex_reference_style = 'author_year'
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
@@ -60,7 +71,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = u'OSMOSE'
-author = u'Nicolas Barrier, Yunne-Jai Shin, Philippe Verley, Morgane Travers, Laure Velez, Ricardo Oliveros-Ramos, Arnaud Grüss, Alaia Morell, Hanna Schenk'
+author = u'Nicolas Barrier, Philippe Verley, Bruno Ernande, Arnaud Grüss, Alaia Morell, Ricardo Oliveros-Ramos, Hanna Schenk, Morgane Travers-Trolet, Laure Velez, Yunne-Jai Shin'
 
 copyright = '%s, %s' %(date.today().strftime("%Y-%m-%d"), author)
 
@@ -87,17 +98,17 @@ todo_emit_warnings = True
 #
 # This is also used if you do content translation via gettext catalogs.
 # Usually you set "language" from the command line for these cases.
-language = None
+#language = "en"
 
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
 # This patterns also effect to html_static_path and html_extra_path
-exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store', 'alias.rst', 'index_private.rst', 'index_public.rst']
+exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store', 'alias.rst', 'index_private.rst', 'index_public.rst', 'calib.rst', 'misc.rst']
+exclude_patterns += glob(os.path.join('calib', '*rst'))
+exclude_patterns += glob(os.path.join('misc', '*rst'))
 
 # The name of the Pygments (syntax highlighting) style to use.
 pygments_style = 'sphinx'
-
-bibtex_bibfiles = ['_static/biblio.bib']
 
 # If true, `todo` and `todoList` produce output, else they produce nothing.
 todo_include_todos = True
@@ -117,9 +128,7 @@ numfig = True
 # use sections as a reference for figures: X.1, X.2 with X the section
 numfig_secnum_depth = (1)
 
-import sphinx_rtd_theme
 html_theme = "sphinx_rtd_theme"
-html_theme_path = [sphinx_rtd_theme.get_html_theme_path()]
 
 # Theme options are theme-specific and customize the look and feel of a theme
 # further.  For a list of options available for each theme, see the
@@ -131,6 +140,7 @@ html_theme_path = [sphinx_rtd_theme.get_html_theme_path()]
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
 html_static_path = ['_static']
+html_css_files = ['css/hacks.css']
 
 #html_context = {
 #        'css_files': [
@@ -138,6 +148,8 @@ html_static_path = ['_static']
 #            ],
 #        }
 
+def setup(app):
+   app.add_css_file('theme_overrides.css')
 
 # -- Options for HTMLHelp output ------------------------------------------
 
@@ -168,11 +180,10 @@ latex_elements = {
 # Grouping the document tree into LaTeX files. List of tuples
 # (source start file, target name, title,
 #  author, documentclass [howto, manual, or own class]).
-latexauthor = '\\\\'.join(author.split(','))
+latexauthor = '\\and'.join(author.split(','))
 
 latex_documents = [
-    (master_doc, 'OSMOSE.tex', u'OSMOSE Documentation',
-     u'Yunne-Jai Shin \\and Philippe Verley \\and Morgane Travers \\and Laure Velez \\and Ricardo Oliveros-Ramos \\and Arnaud Gruss \\and Nicolas Barrier \\and Alaia Morell \\and Hanna Schenk', 'manual'),
+    (master_doc, 'OSMOSE.tex', u'OSMOSE Documentation', latexauthor, 'manual'),
 ]
 
 
