@@ -33,11 +33,7 @@ public class BackgroundProcess extends AbstractProcess {
         nSchools = new int[this.getNBkgSpecies()];
         cpt = 0;
         for (int iSpeciesFile : getBackgroundIndex()) {
-            // if (this.getConfiguration().isNull("simulation.nschool.sp" + iSpeciesFile)) {
-            //     nSchools[cpt] = -999;
-            // } else {
-                nSchools[cpt] = this.getConfiguration().getInt("simulation.nschool.sp" + iSpeciesFile);
-            // }
+            nSchools[cpt] = this.getConfiguration().getInt("simulation.nschool.sp" + iSpeciesFile);
             cpt++;
         }
 
@@ -131,6 +127,9 @@ public class BackgroundProcess extends AbstractProcess {
 
             // recover the distribution map for the given time-step
             GridMap map = mapDistribution[iSpecies].getGridMap(iClass, iStepSimu);
+
+            // TODO: add the old implementation of background species, i.e.
+            // for consistency with Ambre's configuration
 
         }
     }
