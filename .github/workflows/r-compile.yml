@@ -24,7 +24,6 @@ jobs:
       - name: Update apt
         run:  sudo apt update -yq
 
-
       - name: Install NetCDF and Latex
         run:  sudo apt install -yq libnetcdf-dev texlive-latex-base texlive-fonts-recommended texlive-fonts-extra
 
