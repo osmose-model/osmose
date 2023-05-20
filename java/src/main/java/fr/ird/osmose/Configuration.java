@@ -615,7 +615,7 @@ public class Configuration extends OLogger {
         }
 
         // Fisheries
-        boolean fisheryEnabled = getBoolean("fisheries.enabled");
+        boolean fisheryEnabled = getBoolean("process.multispecies.fisheries.enabled");
         this.isEconomyEnabled = getBoolean("economy.enabled");
 
         // true if fishingMortality is enabled or not (v3 or v4)

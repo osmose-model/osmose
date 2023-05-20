@@ -11,7 +11,7 @@ output.mortality.perSpecies.byage.enabled = TRUE
 output.restart.enabled = FALSE
 output.fishing.accessible.biomass = FALSE
 output.fishing.harvested.biomass  = FALSE
-output.fishery.enabled = FALSE
+output.fisheries.enabled = FALSE
 
 output.biomass.bysize.enabled = FALSE
 output.biomass.byage.enabled = FALSE

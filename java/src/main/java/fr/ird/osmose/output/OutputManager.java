@@ -278,15 +278,15 @@ public class OutputManager extends SimulationLinker {
 
         // Fisheries output
         if (getConfiguration().isFisheryEnabled()) {
-            if (getConfiguration().getBoolean("output.fishery.enabled")) {
+            if (getConfiguration().getBoolean("output.fisheries.enabled")) {
                 outputs.add(new FisheryOutput(rank));
             }
 
-            if (getConfiguration().getBoolean("output.fishery.byage.enabled")) {
+            if (getConfiguration().getBoolean("output.fisheries.byage.enabled")) {
                 outputs.add(new FisheryOutputDistrib(rank, ageDistrib));
             }
 
-            if (getConfiguration().getBoolean("output.fishery.bysize.enabled")) {
+            if (getConfiguration().getBoolean("output.fisheries.bysize.enabled")) {
                 outputs.add(new FisheryOutputDistrib(rank, sizeDistrib));
             }
         }
