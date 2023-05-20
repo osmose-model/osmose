@@ -1,5 +1,14 @@
 # OSMOSE Release Notes
 
+## Osmose 4.3.4
+
+### New features
+
+- Renaming of output fisheries parameters (`output.fishery.*` to `output.fisheries.*`).
+- Multispecies fisheries are activated using `process.multispecies.fisheries.enabled` (replaces fisheries.enabled).
+
+### Bug fixes
+
 ## Osmose 4.3.3
 
 ### New features

@@ -513,5 +513,28 @@ public class Releases {
                 } // end of bioen condition
             } // end of updatePara
         }, // end of Release(4.3.3)
+        
+        new Release("4.3.4") {
+            @Override
+            void updateParameters() {
+              
+                Configuration cfg = this.getConfiguration();
+
+                // update parameter names
+                if(cfg.canFind("fisheries.enabled")) {
+                    updateKey("fisheries.enabled", "process.multispecies.fisheries.enabled");
+                }
+                if(cfg.canFind("output.fishery.enabled")) {
+                    updateKey("output.fishery.enabled", "output.fisheries.enabled");
+                }
+                if(cfg.canFind("output.fishery.byage.enabled")) {
+                    updateKey("output.fishery.byage.enabled", "output.fisheries.byage.enabled");
+                }
+                if(cfg.canFind("output.fishery.bysize.enabled")) {
+                    updateKey("output.fishery.bysize.enabled", "output.fisheries.bysize.enabled");
+                }
+                
+            }
+        },
     }; // end of ALL array
 } // end of class
