@@ -1,17 +1,14 @@
 Package: osmose
 Type: Package
-Title: Object Oriented Simulator of Marine Ecosystems
-Version: 4.3.3.0008
-#Date: 2020-06-17
+Title: OSMOSE: Modelling Exploited Marine Ecosystems
+Version: 4.3.4.9001
+Date: 2023-05-20
 Authors@R: 
-    c(person(given = "Yunne-Jai",
-             family = "Shin",
-             role = "aut",
-             comment = c(ORCID = "0000-0002-7259-9265")),
-      person(given = "Travers",
-             family = "Morgane",
-             role = "aut",
-             comment = c(ORCID = "0000-0003-1493-662X")),
+    c(person(given = "Nicolas",
+             family = "Barrier",
+             role = "cre",
+             comment = c(ORCID = "0000-0002-1693-4719"),
+             email = "nicolas.barrier@ird.fr"),
       person(given = "Verley",
              family = "Philippe",
              role = "aut",
@@ -20,20 +17,35 @@ Authors@R:
              family = "Oliveros-Ramos",
              role = "aut",
              comment = c(ORCID = "0000-0002-8069-2101")),
-      person(given = "Laure",
-             family = "Velez",
-             role = "aut"),
-      person(given = "Nicolas",
-             family = "Barrier",
-             role = "cre",
-             comment = c(ORCID = "0000-0002-1693-4719"),
-             email = "nicolas.barrier@ird.fr"),
+      person(given = "Bruno",
+             family = "Ernande",
+             role = "ctb",
+             comment = c(ORCID = "0000-0002-0727-5774")),       
       person(given = "Criscely",
              family = "Lujan",
-             role = "ctb"),
+             role = "ctb",
+             comment = c(ORCID = "0000-0003-2658-7340")),
       person(given = "Wencheng",
              family = "Lau-Medrano",
-             role = "ctb"))
+             role = "ctb",
+             comment = c(ORCID = "0000-0002-7979-9710")),
+      person(given = "Alaia",
+             family = "Morell",
+             role = "ctb",
+             comment = c(ORCID = "0000-0003-3719-4462")),         
+      person(given = "Travers",
+             family = "Morgane",
+             role = "aut",
+             comment = c(ORCID = "0000-0003-1493-662X")),
+      person(given = "Laure",
+             family = "Velez",
+             role = "aut",
+             comment = c(ORCID = "0000-0001-9555-6770")),
+      person(given = "Yunne-Jai",
+             family = "Shin",
+             role = "aut",
+             comment = c(ORCID = "0000-0002-7259-9265"))       
+             )
 Description: The multispecies and individual-based model (IBM) 'OSMOSE'
   (Shin and Curry (2001) <doi:10.1016/S0990-7440(01)01106-8> and Shin and Curry 
   (2004) <doi:10.1139/f03-154>) focuses on fish species. This model assumes 
