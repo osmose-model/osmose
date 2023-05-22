@@ -1,5 +1,6 @@
 
 .set_param_user = function(allfiles, conf) {
+  
   guess_file = allfiles["guess"] 
   min_file = allfiles["min"]
   max_file = allfiles["max"]
@@ -10,6 +11,8 @@
   pars = get_par(conf, "osmose.user", as.is=TRUE)
   pars = get_par(pars, "osmose.user.larval.deviate.log", invert=TRUE, as.is = TRUE)
   pars = get_par(pars, "osmose.user.selectivity.delta75.fsh", invert=TRUE, as.is = TRUE)
+  
+  if(is.null(pars)) return(invisible(NULL))
   
   write_osmose(pars, file=guess_file, append = TRUE)
   write_osmose(set_par(pars, scale=0.8), file=min_file, append = TRUE)
