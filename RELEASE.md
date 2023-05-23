@@ -1,6 +1,6 @@
 # OSMOSE Release Notes
 
-## Osmose 4.3.4
+## Osmose 4.4.0
 
 ### New features
 
