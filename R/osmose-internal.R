@@ -672,6 +672,7 @@ osmose2R.v4r0 = function (path=NULL, species.names=NULL, conf=NULL, ...) {
     ndt   = get_par(conf, "simulation.time.ndtPerYear")/get_par(conf, "output.recordfrequency.ndt")
     nyear = get_par(conf, "simulation.time.nyear") - get_par(conf, "output.start.year")
     step0 = get_par(conf, "output.step0.include")
+    if(is.null(step0)) step0 = 0
     times = start + seq(from=1-step0, to=nyear*ndt)/ndt
 
     spp = c(get_species(conf, type="focal"), get_species(conf, type="background"))
