@@ -197,6 +197,8 @@
     
     # make difference for each one: l50, l75
     pars = get_par(this, "fisheries.selectivity.l50", as.is=TRUE)
+    msg = sprintf("Parameter 'fisheries.selectivity.l50' not found for fishery '%s'. Age selectivity is NOT supported with multispecies fisheries.", nmf[i])
+    if(is.null(pars)) stop(msg)
     L50 = as.numeric(unlist(pars))
     write_osmose(pars, file=guess_file, append = TRUE)
     write_osmose(set_par(pars, floor(0.5*L50)), file=min_file, append = TRUE)
