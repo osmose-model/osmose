@@ -41,6 +41,8 @@
   M = x$mortalityByAge
   
   if(is.null(L)|is.null(M)) return(x)
+  if(length(L)==0|length(M)==0) return(x)
+  
   spp = names(L)
   ndt = get_par(conf, "simulation.time.ndtPerYear")/get_par(conf, "output.recordfrequency.ndt$")
   
