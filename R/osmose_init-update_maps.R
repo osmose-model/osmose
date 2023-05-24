@@ -51,6 +51,8 @@ update_maps = function(input, output, conf, sep = ",", na.strings = -99, test=FA
   out = NULL
   nmap = 0
   for(i in seq_along(allsp)) {
+    msg = sprintf("Processing species '%s'", allsp[i])
+    message(msg)
     ind = names(smap)[unlist(smap)==allsp[i]]
     mat = data.frame(sp=unlist(mcon[ind]),
                      min=unlist(mcon[gsub(ind, pattern="species", replacement = minkey)]),
