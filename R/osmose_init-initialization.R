@@ -294,7 +294,7 @@ init_firstyear = function(input, file, parameters = NULL, output = NULL,
 }
 
 
-init_sofia = function(input, file=NULL, test=FALSE, ...) {
+init_sofia = function(input, file=NULL, test=FALSE, sp=NULL, ...) {
   
   # ow = options("warn")
   # options(warn=1)
@@ -309,6 +309,11 @@ init_sofia = function(input, file=NULL, test=FALSE, ...) {
   spind = gsub(names(spind)[which(spind)], pattern="species.type.sp", replacement = "") 
   spnames = .getPar(conf, "species.name")[sprintf("species.name.sp%s", spind)]
   spind = sort(as.numeric(spind))
+  
+  if(!is.null(sp)) {
+    spind = intersect(sp, spind)
+    if(length(spind)==0) stop("Species codes are not valid.")
+  }
   
   out = vector("list", nsp)
   names(out) = spnames
