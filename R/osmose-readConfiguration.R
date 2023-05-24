@@ -446,7 +446,7 @@ read.biomass = function(conf, sp) {
   T = ndt*conf$simulation.time.nyear
   biofile = .getPar(this, "observed.biomass.file")
   if(is.null(biofile)) {
-    message(sprintf("Observed biomass has not been provided for species %d.", sp))
+    message(sprintf("Observed biomass has not been provided for species %d, using 'observed.biomass.guess' instead.", sp))
     return(NULL)
   }
     
