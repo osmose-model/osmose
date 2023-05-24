@@ -514,8 +514,10 @@
 .getTimeIndex = function(x) {
   y = as.numeric(rownames(x)) 
   y = y %% 1
+  y1 = min(y[y!=0])
+  if(y[1]==0) y[1] = 1e-6
   y[y==0] = 1
-  y = y/y[1]
+  y = y/y1
   y = round(y, 0)
   return(y)
 }
