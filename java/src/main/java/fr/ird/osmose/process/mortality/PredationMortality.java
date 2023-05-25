@@ -273,6 +273,8 @@ public class PredationMortality extends AbstractMortality {
      */
     public double[] getAccessibility(IAggregation predator, List<IAggregation> preys) {
 
+        predator.resetAccessiblePreyIndex();
+
         int iAccessPred = accessibilityMatrix.getIndexPred(predator);
 
         // Number of predators species. Used to offeset resource percentage index
@@ -295,6 +297,7 @@ public class PredationMortality extends AbstractMortality {
                 if (prey.getLength() >= preySizeMin && prey.getLength() < preySizeMax) {
                     int iAccessPrey = accessibilityMatrix.getIndexPrey(prey);
                     accessibility[iPrey] = accessibilityMatrix.getValue(iAccessPrey, iAccessPred);
+                    predator.addAccessiblePreyIndex(iPrey);
                 } else {
                     accessibility[iPrey] = 0.d; // no need to do it since initialization already set it to zero
                 }
@@ -304,6 +307,9 @@ public class PredationMortality extends AbstractMortality {
                 // The prey is a resource group
                 accessibility[iPrey] = accessibilityMatrix.getValue(iAccessPrey, iAccessPred)
                         * percentResource[iSpecPrey - nSpecies];
+                if(accessibility[iPrey] > 0) {
+                    predator.addAccessiblePreyIndex(iPrey);
+                }
             }
         }
         return accessibility;
