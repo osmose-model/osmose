@@ -55,6 +55,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
+import ucar.nc2.Attribute;
 import ucar.nc2.NetcdfFile;
 import ucar.nc2.dataset.NetcdfDatasets;
 
@@ -165,8 +166,14 @@ public class Simulation extends OsmoseLinker {
             i_step_simu = 0;
             try {
                 NetcdfFile nc = NetcdfDatasets.openDataset(ncfile);
-                i_step_simu = Integer.valueOf(nc.findGlobalAttribute("step").getStringValue()) + 1;
-                info("Restarting simulation from year {0} step {1}", new Object[] { this.getYear(),  this.getIndexTimeYear()});
+                Attribute ncAttribute = nc.findGlobalAttribute("step");
+                if (ncAttribute != null) {
+                    i_step_simu = Integer.valueOf(ncAttribute.getStringValue()) + 1;
+                    info("Restarting simulation from year {0} step {1}",
+                            new Object[] { this.getYear(), this.getIndexTimeYear() });
+                } else {
+                    error("The restart file is missing a 'step' global attribute", new Exception());
+                }
             } catch (IOException ex) {
                 error("Failed to open restart file " + ncfile, ex);
             }
