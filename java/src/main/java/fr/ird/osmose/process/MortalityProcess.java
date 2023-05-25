@@ -588,7 +588,7 @@ public class MortalityProcess extends AbstractProcess {
 
                     List<IAggregation> subpreys = new ArrayList<>();
                     List<Double> subaccess = new ArrayList<>();
-                    for(int ipr = 0; ipr < predatorAccessibility.length; ipr++) {
+                    for(int ipr : predator.getAccessiblePreyIndex()) {
                         if(predatorAccessibility[ipr] > 0) {
                             subpreys.add(preys.get(ipr));
                             subaccess.add(predatorAccessibility[ipr]);
