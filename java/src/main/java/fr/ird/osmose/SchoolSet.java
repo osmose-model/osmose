@@ -118,7 +118,7 @@ public class SchoolSet extends OsmoseLinker {
      */
     public void add(School school) {
         schoolset.add(school);
-        schoolset.sort(schoolComparator);
+        // schoolset.sort(schoolComparator);
     }
 
     public void addReproductionSchool(School school) {
@@ -127,7 +127,7 @@ public class SchoolSet extends OsmoseLinker {
 
     public void mergeSchoolSets() {
         schoolset.addAll(newSchoolset);
-        schoolset.sort(schoolComparator);
+        // schoolset.sort(schoolComparator);
         newSchoolset.clear();
     }
 
