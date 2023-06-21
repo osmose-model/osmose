@@ -612,6 +612,10 @@ public class OutputManager extends SimulationLinker {
             outputs.add(modOutput);
         }
 
+        if (getConfiguration().getBoolean("output.cpu.performance.enabled", NO_WARNING)) {
+            outputs.add(new PerformanceOutput(rank, null, "cpuPerformance"));
+        }
+
         if (getConfiguration().isBioenEnabled()) {
 
             if (getConfiguration().getBoolean("output.fecondity.bysize.enabled", NO_WARNING)) {
