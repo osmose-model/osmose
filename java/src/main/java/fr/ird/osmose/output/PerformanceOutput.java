@@ -76,8 +76,8 @@ public class PerformanceOutput extends AbstractOutput {
         freePhysicalMemorySize += osBean.getFreePhysicalMemorySize();
         freeSwapSpaceSize += osBean.getFreeSwapSpaceSize();
         processCpuLoad += osBean.getProcessCpuLoad();
-        freeSwapSpaceSize += osBean.getProcessCpuTime();
         systemCpuLoad += osBean.getSystemCpuLoad();
+        processCpuTime += osBean.getProcessCpuTime();
         totalPhysicalMemorySize += osBean.getTotalPhysicalMemorySize();
 
 
@@ -89,7 +89,7 @@ public class PerformanceOutput extends AbstractOutput {
         double nsteps = getRecordFrequency();
         double[] output = new double[] { stepComputationTime / nsteps, stepMemoryUsage / nsteps,
                 committedVirtualMemorySize / nsteps, freePhysicalMemorySize / nsteps, freeSwapSpaceSize / nsteps,
-                processCpuLoad / nsteps, freeSwapSpaceSize / nsteps, systemCpuLoad / nsteps,
+                processCpuLoad / nsteps, processCpuTime / nsteps, systemCpuLoad / nsteps,
                 totalPhysicalMemorySize / nsteps };
         writeVariable(time, output);
 
@@ -106,7 +106,7 @@ public class PerformanceOutput extends AbstractOutput {
 
         String[] headers = new String[] { "stepComputationTime (seconds)", "stepMemoryUsage (MB)",
             "committedVirtualMemorySize", "freePhysicalMemorySize", "freeSwapSpaceSize",
-            "processCpuLoad", "freeSwapSpaceSize", "systemCpuLoad",
+            "processCpuLoad", "processCpuTime", "systemCpuLoad",
             "totalPhysicalMemorySize" };
 
         return headers;
