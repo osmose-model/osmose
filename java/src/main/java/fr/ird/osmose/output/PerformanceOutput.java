@@ -11,6 +11,8 @@ public class PerformanceOutput extends AbstractOutput {
     // Computation time for one time step
     private double stepComputationTime;
 
+    private double numberOfSchools;
+
     // Memory usage for one time-step (in MB)
     private double stepMemoryUsage;
 
@@ -62,6 +64,7 @@ public class PerformanceOutput extends AbstractOutput {
         processCpuTime = 0;
         systemCpuLoad = 0;
         totalPhysicalMemorySize = 0;
+        numberOfSchools = 0;
     }
 
     @Override
@@ -79,18 +82,18 @@ public class PerformanceOutput extends AbstractOutput {
         systemCpuLoad += osBean.getSystemCpuLoad();
         processCpuTime += osBean.getProcessCpuTime();
         totalPhysicalMemorySize += osBean.getTotalPhysicalMemorySize();
-
+        numberOfSchools += getSimulation().getSchoolSet().getSchools().size();
 
     }
 
     @Override
     public void write(float time) {
 
-        double nsteps = getRecordFrequency();
-        double[] output = new double[] { stepComputationTime / nsteps, stepMemoryUsage / nsteps,
-                committedVirtualMemorySize / nsteps, freePhysicalMemorySize / nsteps, freeSwapSpaceSize / nsteps,
-                processCpuLoad / nsteps, processCpuTime / nsteps, systemCpuLoad / nsteps,
-                totalPhysicalMemorySize / nsteps };
+        double nSteps = getRecordFrequency();
+        double[] output = new double[] { stepComputationTime / nSteps, stepMemoryUsage / nSteps,
+                committedVirtualMemorySize / nSteps, freePhysicalMemorySize / nSteps, freeSwapSpaceSize / nSteps,
+                processCpuLoad / nSteps, processCpuTime / nSteps, systemCpuLoad / nSteps,
+                totalPhysicalMemorySize / nSteps, numberOfSchools / nSteps };
         writeVariable(time, output);
 
     }
@@ -107,7 +110,7 @@ public class PerformanceOutput extends AbstractOutput {
         String[] headers = new String[] { "stepComputationTime (seconds)", "stepMemoryUsage (MB)",
             "committedVirtualMemorySize", "freePhysicalMemorySize", "freeSwapSpaceSize",
             "processCpuLoad", "processCpuTime", "systemCpuLoad",
-            "totalPhysicalMemorySize" };
+            "totalPhysicalMemorySize", "numberOfSchools" };
 
         return headers;
     }
