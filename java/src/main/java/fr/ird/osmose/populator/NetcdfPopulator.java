@@ -135,17 +135,10 @@ public class NetcdfPopulator extends AbstractPopulator {
 
             for (int s = 0; s < nSchool; s++) {
 
-                School school = new School(
-                        getSpecies(ispecies[s]),
-                        x[s],
-                        y[s],
-                        abundance[s],
-                        length[s],
-                        weight[s],
-                        Math.round(age[s] * getConfiguration().getNStepYear()),
-                        trophiclevel[s]);
-                school.instance_genotype(this.getRank());
+                School school = new School(getSpecies(ispecies[s]), x[s], y[s], abundance[s], length[s], weight[s],
+                        Math.round(age[s] * getConfiguration().getNStepYear()), trophiclevel[s]);
                 if (useGenetic) {
+                    school.instance_genotype(this.getRank());
                     school.restartGenotype(this.getRank(), s, genotype, traitNoise);
                 }
                 if(useBioen) {
