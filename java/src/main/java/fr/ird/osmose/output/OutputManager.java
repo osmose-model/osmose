@@ -387,12 +387,12 @@ public class OutputManager extends SimulationLinker {
                 || getConfiguration().getBoolean("output.mortality.additional.byAge.enabled")) {
             outputs.add(new DistribOutput(rank, "Indicators", "additionalMortality",
                     "Distribution of additional mortality biomass (tonne of fish dead from unexplicited cause per time step of saving)",
-                    school -> school.abd2biom(school.getNdead(MortalityCause.ADDITIONAL)), sizeDistrib));
+                    school -> school.abd2biomDeadSchools(school.getNdead(MortalityCause.ADDITIONAL)), sizeDistrib));
         }
         if (getConfiguration().getBoolean("output.mortality.additional.byAge.enabled")) {
             outputs.add(new DistribOutput(rank, "Indicators", "additionalMortality",
                     "Distribution of additional mortality biomass (tonne of fish dead from unexplicited cause per time step of saving)",
-                    school -> school.abd2biom(school.getNdead(MortalityCause.ADDITIONAL)), ageDistrib));
+                    school -> school.abd2biomDeadSchools(school.getNdead(MortalityCause.ADDITIONAL)), ageDistrib));
         }
 
         if (getConfiguration().getBoolean("output.mortality.additionalN.bySize.enabled")) {
@@ -411,7 +411,7 @@ public class OutputManager extends SimulationLinker {
         if (getConfiguration().getBoolean("output.yield.biomass.enabled")) {
             outputs.add(new SpeciesOutput(rank, null, "yield",
                     "cumulative catch (tons per time step of saving). ex: if time step of saving is the year, then annual catches are saved",
-                    school -> school.abd2biom(school.getNdead(MortalityCause.FISHING)), false));
+                    school -> school.abd2biomDeadSchools(school.getNdead(MortalityCause.FISHING)), false));
         }
 
         if (getConfiguration().getBoolean("output.yield.abundance.enabled")) {
@@ -455,7 +455,7 @@ public class OutputManager extends SimulationLinker {
         if (getConfiguration().getBoolean("output.yield.biomass.bySize.enabled")) {
             outputs.add(new DistribOutput(rank, "SizeIndicators", "yield",
                     "Distribution of cumulative catch (tonne per time step of saving)",
-                    school -> school.abd2biom(school.getNdead(MortalityCause.FISHING)), sizeDistrib, false));
+                    school -> school.abd2biomDeadSchools(school.getNdead(MortalityCause.FISHING)), sizeDistrib, false));
         }
 
         if (getConfiguration().getBoolean("output.yield.abundance.byWeight.enabled")) {
@@ -467,7 +467,7 @@ public class OutputManager extends SimulationLinker {
         if (getConfiguration().getBoolean("output.yield.biomass.byWeight.enabled")) {
             outputs.add(new DistribOutput(rank, "Indicators", "yield",
                     "Distribution of cumulative catch (tonne per time step of saving)",
-                    school -> school.abd2biom(school.getNdead(MortalityCause.FISHING)), weightDistrib, false));
+                    school -> school.abd2biomDeadSchools(school.getNdead(MortalityCause.FISHING)), weightDistrib, false));
         }
 
         if (getConfiguration().getBoolean("output.meanSize.byAge.enabled")) {
@@ -485,7 +485,7 @@ public class OutputManager extends SimulationLinker {
         if (getConfiguration().getBoolean("output.yield.biomass.byAge.enabled")) {
             outputs.add(new DistribOutput(rank, "AgeIndicators", "yield",
                     "Distribution of cumulative catch (tonne per time step of saving)",
-                    school -> school.abd2biom(school.getNdead(MortalityCause.FISHING)), ageDistrib, false));
+                    school -> school.abd2biomDeadSchools(school.getNdead(MortalityCause.FISHING)), ageDistrib, false));
         }
 
         // TL
@@ -501,7 +501,7 @@ public class OutputManager extends SimulationLinker {
             outputs.add(new WeightedSpeciesOutput(rank, "Trophic", "meanTLCatch",
                     "Mean Trophic Level of fish species, weighted by fish catch, and including first ages specified in input",
                     school -> school.getTrophicLevel(),
-                    school -> school.abd2biom(school.getNdead(MortalityCause.FISHING))));
+                    school -> school.abd2biomDeadSchools(school.getNdead(MortalityCause.FISHING))));
         }
 
         if (getConfiguration().getBoolean("output.biomass.bytl.enabled")) {
