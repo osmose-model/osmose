@@ -94,7 +94,7 @@ public class SpatialYieldOutput extends AbstractSpatialOutput {
                         }
 
                         if (!school.isUnlocated()) {
-                            data[iSpec][j][i] += school.abd2biom(school.getNdead(MortalityCause.FISHING));
+                            data[iSpec][j][i] += school.abd2biomDeadSchools(school.getNdead(MortalityCause.FISHING));
                         }
                     }
                 }
