@@ -1,11 +1,5 @@
 # OSMOSE Release Notes
 
-## Osmose 4.3.4
-
-### Bug fix
-
-- Correct a bug in mortality biomass outputs. The dead biomass was computed by using the weight of schools at the end of the time-step, i.e. after the growth of remaining fish was applied. A `initialWeight` attribute has been added to schools for getting the weight at the beginning of the time-step, which is used for dead biomass computation.
-
 ## Osmose 4.3.3
 
 ### New features

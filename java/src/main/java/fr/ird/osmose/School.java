@@ -104,12 +104,6 @@ public class School extends AbstractSchool {
     private float weight;
 
     /**
-     * Weight at the beginning of the time-step. Used in order to
-     * ensure that the proper dead biomass is returned
-     * */
-    private float initialWeight;
-
-    /**
      * Weight of gonads of the fish in tonne.
      */
     private float gonadWeight;
@@ -288,10 +282,6 @@ public class School extends AbstractSchool {
         reset(this.discardedBiomass);
         reset(this.accessibleBiomassToFishery);
         nEggs = 0;
-
-        // set the weight of the school at the beginning of the time-step
-        initialWeight = weight;
-
     }
 
     /** Increment the number of eggs */
@@ -784,7 +774,7 @@ public class School extends AbstractSchool {
     public void setRho(double value) {
         this.rho = value;
     }
-
+    
 
     public void incrementEnet(double d) {
         this.e_net += d;
@@ -890,11 +880,6 @@ public class School extends AbstractSchool {
     @Override
     public boolean isSexuallyMature() {
         return this.getSpecies().isSexuallyMature(this);
-    }
-
-    @Override
-    public double abd2biomDeadSchools(double abundance) {
-        return abundance * initialWeight;
     }
 
 }

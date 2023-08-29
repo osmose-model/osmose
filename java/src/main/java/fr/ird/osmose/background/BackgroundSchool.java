@@ -272,9 +272,4 @@ public class BackgroundSchool extends AbstractSchool {
         return 0;
     }
 
-    @Override
-    public double abd2biomDeadSchools(double abundance) {
-        return abundance * this.getWeight();
-    }
-
 }
