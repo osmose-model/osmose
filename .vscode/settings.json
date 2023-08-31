@@ -4,8 +4,8 @@
     "java.format.settings.url": ".vscode/eclipse-formatter.xml",
     "diffEditor.ignoreTrimWhitespace": true,
     "files.trimTrailingWhitespace": true,
-    "esbonio.sphinx.buildDir": "doc/_build",
-    "esbonio.sphinx.confDir": "doc",
+    "esbonio.sphinx.confDir": "${workspaceRoot}/doc",
+    "esbonio.sphinx.buildDir": "${confDir}/_build",
     "esbonio.server.excludedModules": [
         "os",
     ],
