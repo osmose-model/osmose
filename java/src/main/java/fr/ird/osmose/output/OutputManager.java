@@ -632,6 +632,12 @@ public class OutputManager extends SimulationLinker {
                         school -> school.getInstantaneousAbundance()));
             }
 
+            if (getConfiguration().getBoolean("output.bioen.mature.size.enabled", NO_WARNING)) {
+                outputs.add(new WeightedSpeciesOutput(rank, "Bioen", "sizeMature", "Size at maturity (cm)",
+                        school -> school.isMature(), school -> school.getSizeMat(),
+                        school -> school.getInstantaneousAbundance()));
+            }
+
             // Correct the output of bioen ingestion
             if (getConfiguration().getBoolean("output.bioen.ingest.enabled", NO_WARNING)) {
                 outputs.add(new WeightedSpeciesOutput(rank, "Bioen", "ingestion", "Ingestion rate (grams.grams^-alpha)",
