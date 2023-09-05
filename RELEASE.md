@@ -1,5 +1,11 @@
 # OSMOSE Release Notes
 
+## Osmose 4.3.4
+
+### New features
+
+- Add the bioen output of size at maturity.
+
 ## Osmose 4.3.3
 
 ### New features
