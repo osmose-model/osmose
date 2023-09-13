@@ -47,7 +47,7 @@ import fr.ird.osmose.process.mortality.additional.AnnualAdditionalMortality;
 import fr.ird.osmose.process.mortality.additional.ByDtByClassAdditionalMortality;
 import fr.ird.osmose.process.mortality.additional.ByDtLarvaMortality;
 import fr.ird.osmose.process.mortality.additional.ByDtAdditionalMortality;
-import fr.ird.osmose.process.mortality.additional.ConstantLarvaMortality;
+import fr.ird.osmose.process.mortality.additional.AnnualLarvaMortality;
 import fr.ird.osmose.util.GridMap;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -87,7 +87,7 @@ public class AdditionalMortality extends AbstractMortality {
             debug("Larva Additional Mortality scenario for " + species.getName() + " set to " + scenarioLarva.toString());
             switch (scenarioLarva) {
                 case CONSTANT:
-                    larvaAdditionalMortality[cpt] = new ConstantLarvaMortality(rank, species);
+                    larvaAdditionalMortality[cpt] = new AnnualLarvaMortality(rank, species);
                     break;
                 case BY_DT:
                     larvaAdditionalMortality[cpt] = new ByDtLarvaMortality(rank, species);
@@ -224,7 +224,7 @@ public class AdditionalMortality extends AbstractMortality {
         if (scenarios.isEmpty()) {
             StringBuilder msg = new StringBuilder();
             msg.append("Set a Larva Additional Mortality scenario among ");
-            msg.append(Arrays.toString(Scenario.values()));
+            msg.append(Arrays.toString(ScenarioLarva.values()));
             error("No Larva Additional Mortality scenario has been defined for species " + fileSpeciesIndex, new NullPointerException(msg.toString()));
         }
 

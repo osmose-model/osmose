@@ -1,10 +1,10 @@
-/* 
- * 
+/*
+ *
  * OSMOSE (Object-oriented Simulator of Marine Ecosystems)
  * http://www.osmose-model.org
- * 
+ *
  * Copyright (C) IRD (Institut de Recherche pour le Développement) 2009-2020
- * 
+ *
  * Osmose is a computer program whose purpose is to simulate fish
  * populations and their interactions with their biotic and abiotic environment.
  * OSMOSE is a spatial, multispecies and individual-based model which assumes
@@ -15,7 +15,7 @@
  * processes of fish life cycle (growth, explicit predation, additional and
  * starvation mortalities, reproduction and migration) and fishing mortalities
  * (Shin and Cury 2001, 2004).
- * 
+ *
  * Contributor(s):
  * Yunne SHIN (yunne.shin@ird.fr),
  * Morgane TRAVERS (morgane.travers@ifremer.fr)
@@ -23,20 +23,20 @@
  * Philippe VERLEY (philippe.verley@ird.fr)
  * Laure VELEZ (laure.velez@ird.fr)
  * Nicolas Barrier (nicolas.barrier@ird.fr)
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation (version 3 of the License). Full description
  * is provided on the LICENSE file.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
- * 
+ *
  */
 
 package fr.ird.osmose.process;
@@ -57,6 +57,7 @@ import fr.ird.osmose.process.mortality.OutMortality;
 import fr.ird.osmose.process.mortality.ForagingMortality;
 import fr.ird.osmose.process.mortality.PredationMortality;
 import fr.ird.osmose.process.mortality.StarvationMortality;
+import fr.ird.osmose.process.mortality.fishing.AbstractFishingMortality;
 import fr.ird.osmose.process.mortality.FishingGear;
 import fr.ird.osmose.resource.Resource;
 import fr.ird.osmose.util.AccessibilityManager;
@@ -104,10 +105,6 @@ public class MortalityProcess extends AbstractProcess {
      * Private instance of the predation mortality
      */
     private PredationMortality predationMortality;
-    /*
-     * Private instance of fishery mortality
-     */
-    private FishingGear[] fisheriesMortality;
     /**
      * Private instance of bioenergetic starvation mortality
      */
@@ -127,6 +124,10 @@ public class MortalityProcess extends AbstractProcess {
      * Whether the Osmose v4 fishery implementation is enabled
      */
     private boolean fisheryEnabled = false;
+
+    /** Whether the Fishing Economy is activated or not **/
+    private boolean economyEnabled = false;
+
     /**
      * Number of fisheries
      */
@@ -140,14 +141,28 @@ public class MortalityProcess extends AbstractProcess {
      * Should only be 1 so far, still problems to fix.
      */
     private int subdt;
-    
+
     private boolean fishingMortalityEnabled;
     private boolean initCatchDiscards = true;
-    
+
+    private interface ParallelManager {
+        public void computeMortality();
+    }
+
+    ParallelManager parallelManager;
+
     /*
      * The set of resource aggregations
      */
     private HashMap<Integer, List<Resource>> resourcesSet;
+
+    private FishingGear[] fisheriesMortality;
+
+    private interface IAccessibleBiomass {
+        void initAccessibleBiomass();
+    }
+
+    IAccessibleBiomass accessBiomass;
 
     public MortalityProcess(int rank) {
         super(rank);
@@ -156,16 +171,24 @@ public class MortalityProcess extends AbstractProcess {
     @Override
     public void init() {
 
+        // get the number of processors that can be used
+        int nCPU = Math.max(1, getConfiguration().getNCpu() / getConfiguration().getNSimulation());
+        if(nCPU > 1) {
+            parallelManager = () -> this.computeMortalityParallel();
+        } else {
+            parallelManager = () -> this.computeMortalitySequential();
+        }
+
         // Possibility to use a seed in the definition of mortality algorithm
-        String key = "stochastic.mortality.seed";
-        if (getConfiguration().canFind(key)) {
-            random = new XSRandom(getConfiguration().getLong(key));
+        String key = "stochastic.mortality.randomseed.fixed";
+        if (getConfiguration().getBoolean(key, false)) {
+            random = new XSRandom(getRank());
         } else {
             random = new XSRandom(System.nanoTime());
         }
 
         fisheryEnabled = getConfiguration().isFisheryEnabled();
-        nfishery = getConfiguration().getNFishery();
+        economyEnabled = getConfiguration().isEconomyEnabled();
 
         additionalMortality = new AdditionalMortality(getRank());
         additionalMortality.init();
@@ -192,38 +215,22 @@ public class MortalityProcess extends AbstractProcess {
             warning("Did not find parameter 'mortality.subdt' for stochastic mortality algorithm. Osmose set it to {0}.",
                     subdt);
         }
-        
+
         fishingMortalityEnabled = getConfiguration().isFishingMortalityEnabled();
 
         // If fishing mortality is enabled (default), activate the fishing mortality
         if (fishingMortalityEnabled) {
+
             // fishery (Osmose 4) vs fishing mortality (Osmose 3)
             if (fisheryEnabled) {
-
-                fisheriesMortality = new FishingGear[nfishery];
-
-                // Recovers the index of fisheries
-                int[] fisheryIndex = this.getConfiguration().findKeys("fisheries.name.fsh*").stream()
-                        .mapToInt(rgKey -> Integer.valueOf(rgKey.substring(rgKey.lastIndexOf(".fsh") + 4))).sorted()
-                        .toArray();
-
-                if (fisheryIndex.length != nfishery) {
-                    String message = "The number of fishery is not consistant with the number of fisheries name.";
-                    error(message, new Exception());
-                }
-
-                int cpt = 0;
-                for (int index : fisheryIndex) {
-                    fisheriesMortality[cpt] = new FishingGear(getRank(), index);
-                    fisheriesMortality[cpt].init();
-                    cpt++;
-                }
 
                 fisheryCatchability = new AccessibilityManager(getRank(), "fisheries.catchability", "cat", null);
                 fisheryCatchability.init();
 
                 fisheryDiscards = new AccessibilityManager(getRank(), "fisheries.discards", "dis", null);
                 fisheryDiscards.init();
+
+                this.initFishingGear();
 
             } else {
                 fishingMortality = new FishingMortality(getRank());
@@ -254,6 +261,13 @@ public class MortalityProcess extends AbstractProcess {
             starvationMortality = new StarvationMortality(getRank());
             starvationMortality.init();
         }
+
+        if (fisheryEnabled) {
+            accessBiomass = () -> this.initAccessibleBiomassFishery();
+        } else {
+            accessBiomass = () -> this.initAccessibleBiomassNoFishery();
+        }
+
     }
 
     @Override
@@ -263,7 +277,7 @@ public class MortalityProcess extends AbstractProcess {
         if (fishingMortalityEnabled && (!fisheryEnabled)) {
             fishingMortality.setMPA();
         }
-        
+
         // Init the accessibility matrix
         // done at the beginning of time-step
         int year = getSimulation().getYear();
@@ -271,7 +285,7 @@ public class MortalityProcess extends AbstractProcess {
         int iStep = this.getSimulation().getIndexTimeSimu();
         int iStepPrevious = iStep - 1;
         predationMortality.setMatrix(year, season);
-        
+
         if (fishingMortalityEnabled && fisheryEnabled) {
 
             if (initCatchDiscards || (this.fisheryCatchability.getMatrixIndex(iStep) != this.fisheryCatchability
@@ -293,7 +307,7 @@ public class MortalityProcess extends AbstractProcess {
             initCatchDiscards = false;
 
         }
-        
+
         // Assess accessibility for this time step
         for (Cell cell : getGrid().getOceanCells()) {
             List<School> schools = getSchoolSet().getSchools(cell);
@@ -334,6 +348,13 @@ public class MortalityProcess extends AbstractProcess {
 
         } // end of cell loop
 
+        // Init the total accessible biomass used for eco. module. Accessible biomass at
+        // the beginning of the time-step.
+        // Also reset the total harvested biomass.
+        if (this.economyEnabled) {
+            this.initAccessibleBiomass();
+        }
+
         int iStepSimu = getSimulation().getIndexTimeSimu();
         int nSpecies = this.getNSpecies();
         int nBkg = this.getNBkgSpecies();
@@ -361,25 +382,9 @@ public class MortalityProcess extends AbstractProcess {
             }
         }
 
-        int[] ncellBatch = dispatchCells();
-        int nbatch = ncellBatch.length;
-        for (int idt = 0; idt < subdt; idt++) {
-            if (fishingMortalityEnabled && (!fisheryEnabled)) {
-                fishingMortality.assessFishableBiomass();
-            }
-            CountDownLatch doneSignal = new CountDownLatch(nbatch);
-            int iStart = 0, iEnd = 0;
-            for (int ibatch = 0; ibatch < nbatch; ibatch++) {
-                iEnd += ncellBatch[ibatch];
-                new Thread(new MortalityWorker(iStart, iEnd, doneSignal)).start();
-                iStart += ncellBatch[ibatch];
-            }
-            try {
-                doneSignal.await();
-            } catch (InterruptedException ex) {
-                error("Multithread mortality process terminated unexpectedly.", ex);
-            }
-        }
+        // Call the computation of mortality either in parallel
+        // or in sequential mode.
+        parallelManager.computeMortality();
 
         // Update starvation mortality rate and trophic level
         for (School school : getSchoolSet().getSchools()) {
@@ -406,6 +411,46 @@ public class MortalityProcess extends AbstractProcess {
             double nDead = school.getInstantaneousAbundance() * (1 - Math.exp(-outsideMortality.getRate(school)));
             if (nDead > 0.d) {
                 school.setNdead(MortalityCause.OUT, nDead);
+            }
+        }
+    }
+
+    private void computeMortalityParallel() {
+        int[] ncellBatch = dispatchCells();
+        int nbatch = ncellBatch.length;
+        for (int idt = 0; idt < subdt; idt++) {
+            if (fishingMortalityEnabled && (!fisheryEnabled)) {
+                fishingMortality.assessFishableBiomass();
+            }
+            CountDownLatch doneSignal = new CountDownLatch(nbatch);
+            int iStart = 0, iEnd = 0;
+            for (int ibatch = 0; ibatch < nbatch; ibatch++) {
+                iEnd += ncellBatch[ibatch];
+                new Thread(new MortalityWorker(iStart, iEnd, doneSignal)).start();
+                iStart += ncellBatch[ibatch];
+            }
+            try {
+                doneSignal.await();
+            } catch (InterruptedException ex) {
+                error("Multithread mortality process terminated unexpectedly.", ex);
+            }
+        }
+    }
+
+    private void computeMortalitySequential() {
+
+        for (int idt = 0; idt < subdt; idt++) {
+            if (fishingMortalityEnabled && (!fisheryEnabled)) {
+                fishingMortality.assessFishableBiomass();
+            }
+
+            List<Cell> cells = getGrid().getOceanCells();
+            for (Cell cell : cells) {
+                try {
+                    computeMortality(subdt, cell);
+                } catch (Exception ex) {
+                    Logger.getLogger(MortalityProcess.class.getName()).log(Level.SEVERE, null, ex);
+                }
             }
         }
     }
@@ -465,6 +510,12 @@ public class MortalityProcess extends AbstractProcess {
         causes.remove(MortalityCause.DISCARDS);
         causes.remove(MortalityCause.AGING);
 
+        // If no bioen, remove the FORAGING mortality cause.
+        // Allows full comparison with old Osmose versions.
+        if(!getConfiguration().isBioenEnabled()) {
+            causes.remove(MortalityCause.FORAGING);
+        }
+
         // add all the fisheries in the cause list
         if (fishingMortalityEnabled && fisheryEnabled) {
             // every fishery accounts as an independant fishing mortality source
@@ -476,9 +527,8 @@ public class MortalityProcess extends AbstractProcess {
         }
 
         MortalityCause[] mortalityCauses = causes.toArray(new MortalityCause[causes.size()]);
-                
+
         if (fishingMortalityEnabled && fisheryEnabled) {
-            
             // distinct random fishery sequences for every school
             Integer[] singleSeqFishery = new Integer[nfishery];
             for (int i = 0; i < nfishery; i++) {
@@ -534,7 +584,7 @@ public class MortalityProcess extends AbstractProcess {
                 case PREDATION:
                     // Predation mortality
                     IAggregation predator = listPred.get(seqPred[i]); // recover one predator (background or focal
-                                                                      // species)
+                                                        // species)
                     // compute predation from predator to all the possible preys
                     // preyUpon is the total biomass easten by predator
                     double[] preyUpon = predationMortality.computePredation(predator, preys,
@@ -590,45 +640,44 @@ public class MortalityProcess extends AbstractProcess {
                     }
                     break;
                 case FISHING:
-                    if(!fishingMortalityEnabled) { 
+                    if(!fishingMortalityEnabled) {
                         break;
                     }
+
                     // Osmose 4 fishery mortality
-                    if (fisheryEnabled) {
-                        
-                        // get the school that corresponds to this new index
-                        AbstractSchool fishedSchool = listPred.get(seqFish[i]);
+                        if (fisheryEnabled) {
 
-                        // determine the index of the fishery to read.
-                        // at first call, indexFishery[i] is always 0.
-                        // it means that the first column of the seqFishery must be read
-                        // here, we work on i instead of seqFish[i], since it does not matter much
-                        int iFishery = seqFishery[i][indexFishery[i]];
-                        indexFishery[i]++;
-                        
-                        double F = fisheriesMortality[iFishery].getRate(fishedSchool) / subdt;
-                        
-                        if(F == 0) {
-                            continue;
-                        }
-                        
-                        nDead = fishedSchool.getInstantaneousAbundance() * (1.d - Math.exp(-F));
+                            AbstractSchool fishedSchool = listPred.get(seqFish[i]);
 
-                        // Percentage values of discarded fish. The remaining go to fishery.
-                        double discardRate = fisheriesMortality[iFishery].getDiscardRate(fishedSchool);
-                        double nFished = (1 - discardRate) * nDead;
-                        double nDiscared = discardRate * nDead;
+                            // determine the index of the fishery to read.
+                            // here, we use [i] and not seq[i] because it does not matter much
+                            int iFishery = seqFishery[i][indexFishery[i]];
+                            FishingGear gear = fisheriesMortality[iFishery];
+                            double F = gear.getRate(fishedSchool) / subdt;
+                            nDead = fishedSchool.getInstantaneousAbundance() * (1.d - Math.exp(-F));
 
-                        fishedSchool.fishedBy(iFishery, fishedSchool.abd2biom(nFished));
-                        fishedSchool.discardedBy(iFishery, fishedSchool.abd2biom(nDiscared));
 
-                        fishedSchool.incrementNdead(MortalityCause.FISHING, nFished);
-                        fishedSchool.incrementNdead(MortalityCause.DISCARDS, nDiscared);
+                            // Percentage values of discarded fish. The remaining go to fishery.
+                            double discardRate = gear.getDiscardRate(fishedSchool);
+                            double nFished = (1 - discardRate) * nDead;
+                            double nDiscared = discardRate * nDead;
 
-                        // make sure a different fishery is called every time
-                        // it is just a trick since we do not have case FISHERY1,
-                        // case FISHERY2, etc. like the other mortality sources.
-       
+                            if (economyEnabled) {
+                                // store the harvested biomass by size class by species for fishing gear.
+                                getSimulation().getEconomicModule().incrementHarvestedBiomass(iFishery, fishedSchool, nDead);
+                            }
+
+                            fishedSchool.fishedBy(iFishery, fishedSchool.abd2biom(nFished));
+                            fishedSchool.discardedBy(iFishery, fishedSchool.abd2biom(nDiscared));
+
+                            fishedSchool.incrementNdead(MortalityCause.FISHING, nFished);
+                            fishedSchool.incrementNdead(MortalityCause.DISCARDS, nDiscared);
+
+                            // make sure a different fishery is called every time
+                            // it is just a trick since we do not have case FISHERY1,
+                            // case FISHERY2, etc. like the other mortality sources.
+                            indexFishery[i]++;
+
                     } else {
 
                         // Possibility to fish background species?????
@@ -641,13 +690,19 @@ public class MortalityProcess extends AbstractProcess {
 
                         // Osmose 3 fishing Mortality
                         switch (fishingMortality.getType(school.getSpeciesIndex())) {
-                        case RATE:
-                            double F = fishingMortality.getRate(school) / subdt;
-                            nDead = school.getInstantaneousAbundance() * (1.d - Math.exp(-F));
-                            break;
-                        case CATCHES:
-                            nDead = school.biom2abd(fishingMortality.getCatches(school) / subdt);
-                            break;
+                            case RATE:
+                                double F = fishingMortality.getRate(school) / subdt;
+                                nDead = school.getInstantaneousAbundance() * (1.d - Math.exp(-F));
+                                break;
+                            case CATCHES:
+                                nDead = school.biom2abd(fishingMortality.getCatches(school) / subdt);
+                                break;
+                        }
+
+                        if (economyEnabled && nDead != 0) {
+                            int iFishery = school.getSpeciesIndex();
+                            // store the harvested biomass by size class by species for fishing gear.
+                            getSimulation().getEconomicModule().incrementHarvestedBiomass(iFishery, school, nDead);
                         }
 
                         school.incrementNdead(MortalityCause.FISHING, nDead);
@@ -656,7 +711,7 @@ public class MortalityProcess extends AbstractProcess {
                     break;
                 default:
                     break;
-                } // end of switch (cause
+            } // end of switch (cause
             } // end of mort cause loop
         } // end of school loop species loop
     } // end of function
@@ -834,4 +889,69 @@ public class MortalityProcess extends AbstractProcess {
     private List<BackgroundSchool> getBackgroundSchool(Cell cell) {
         return this.getBkgSchoolSet().getBackgroundSchool(cell);
     }
+
+    // public FishingMortality getFishingMortality(int index) {
+    //     return this.fishingMortality[
+    // }
+
+    public void initAccessibleBiomass() {
+        this.getSimulation().getEconomicModule().clearAccessibleBiomass();
+        accessBiomass.initAccessibleBiomass();
+    }
+
+    private void initAccessibleBiomassFishery() {
+        int index = this.getSimulation().getIndexTimeSimu();
+        // Loop over all the schools
+        for (School school : this.getSchoolSet().getAliveSchools()) {
+            // Loop over all the fisheries.
+            for (int iFishery = 0; iFishery < getConfiguration().getNFishery(); iFishery++) {
+
+                FishingGear gear = fisheriesMortality[iFishery];
+                double sel = gear.getSelectivity(index, school);
+                double incrementBiom = school.getInstantaneousBiomass() * sel;
+                this.getSimulation().getEconomicModule().incrementAccessibleBiomass(iFishery, school, incrementBiom);
+                school.incrementAccessibleBiomass(iFishery, incrementBiom);
+
+            }
+        }
+    }
+
+    private void initAccessibleBiomassNoFishery() {
+        // int index = this.getSimulation().getIndexTimeSimu();
+        // Loop over all the schools
+        for (School school : this.getSchoolSet().getAliveSchools()) {
+            // Loop over all the fisheries.
+            int iSpecies = school.getSpeciesIndex();
+            AbstractFishingMortality fishingMortality = this.fishingMortality.getFishingMortality(iSpecies);
+            if (!school.isUnlocated() && fishingMortality.isFishable(school)) {
+                double incrementBiom = school.getInstantaneousBiomass();
+                this.getSimulation().getEconomicModule().incrementAccessibleBiomass(iSpecies, school, incrementBiom);
+            }
+        }
+    }
+
+    private void initFishingGear() {
+
+        this.nfishery = getConfiguration().getNFishery();
+
+        fisheriesMortality = new FishingGear[nfishery];
+
+        // Recovers the index of fisheries
+        int[] fisheryIndex = this.getConfiguration().findKeys("fisheries.name.fsh*").stream()
+                .mapToInt(rgKey -> Integer.valueOf(rgKey.substring(rgKey.lastIndexOf(".fsh") + 4))).sorted().toArray();
+
+        if (fisheryIndex.length != nfishery) {
+            String message = "The number of fishery is not consistant with the number of fisheries name.";
+            error(message, new Exception());
+        }
+
+        int cpt = 0;
+        for (int index : fisheryIndex) {
+            fisheriesMortality[cpt] = new FishingGear(getRank(), index);
+            fisheriesMortality[cpt].init();
+            cpt++;
+        }
+    }
+
+
 }

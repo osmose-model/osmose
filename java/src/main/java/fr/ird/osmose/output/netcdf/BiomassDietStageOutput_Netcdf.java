@@ -1,10 +1,10 @@
-/* 
- * 
+/*
+ *
  * OSMOSE (Object-oriented Simulator of Marine Ecosystems)
  * http://www.osmose-model.org
- * 
+ *
  * Copyright (C) IRD (Institut de Recherche pour le Développement) 2009-2020
- * 
+ *
  * Osmose is a computer program whose purpose is to simulate fish
  * populations and their interactions with their biotic and abiotic environment.
  * OSMOSE is a spatial, multispecies and individual-based model which assumes
@@ -15,7 +15,7 @@
  * processes of fish life cycle (growth, explicit predation, additional and
  * starvation mortalities, reproduction and migration) and fishing mortalities
  * (Shin and Cury 2001, 2004).
- * 
+ *
  * Contributor(s):
  * Yunne SHIN (yunne.shin@ird.fr),
  * Morgane TRAVERS (morgane.travers@ifremer.fr)
@@ -23,20 +23,20 @@
  * Philippe VERLEY (philippe.verley@ird.fr)
  * Laure VELEZ (laure.velez@ird.fr)
  * Nicolas Barrier (nicolas.barrier@ird.fr)
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation (version 3 of the License). Full description
  * is provided on the LICENSE file.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
- * 
+ *
  */
 
 package fr.ird.osmose.output.netcdf;
@@ -44,8 +44,8 @@ package fr.ird.osmose.output.netcdf;
 import fr.ird.osmose.Cell;
 import fr.ird.osmose.School;
 import fr.ird.osmose.background.BackgroundSchool;
-import fr.ird.osmose.stage.DietOutputStage;
-import fr.ird.osmose.stage.IStage;
+import fr.ird.osmose.stage.SchoolStage;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -71,7 +71,7 @@ public class BiomassDietStageOutput_Netcdf extends AbstractOutput_Netcdf {
      */
     private double[][] biomassStage;
 
-    private IStage dietOutputStage;
+    private SchoolStage dietOutputStage;
 
     public BiomassDietStageOutput_Netcdf(int rank) {
         super(rank);
@@ -80,7 +80,7 @@ public class BiomassDietStageOutput_Netcdf extends AbstractOutput_Netcdf {
     @Override
     public void init() {
 
-        dietOutputStage = new DietOutputStage();
+        dietOutputStage = new SchoolStage("output.diet.stage");
         dietOutputStage.init();
 
         nColumns = 0;
@@ -112,17 +112,17 @@ public class BiomassDietStageOutput_Netcdf extends AbstractOutput_Netcdf {
 
     @Override
     public void initStep() {
-        
+
         // Init step for all the focal schools
         for (School school : getSchoolSet().getPresentSchools()) {
             biomassStage[school.getSpeciesIndex()][dietOutputStage.getStage(school)] += school.getBiomass();
         }
-        
+
         // Init step for all the background schools
         for (BackgroundSchool school : this.getBkgSchoolSet().getAllSchools()) {
             biomassStage[school.getSpeciesIndex()][dietOutputStage.getStage(school)] += school.getBiomass();
         }
-        
+
         int nBkg = getNBkgSpecies();
         int nSpec = getNSpecies();
         int nRsc = getConfiguration().getNRscSpecies();
@@ -141,7 +141,7 @@ public class BiomassDietStageOutput_Netcdf extends AbstractOutput_Netcdf {
         for (int iSpec = 0; iSpec < nSpec; iSpec++) {
             biomassStage[cpt++] = new double[dietOutputStage.getNStage(iSpec)];
         }
-        
+
         for (int i = 0; i < getConfiguration().getNRscSpecies(); i++) {
             // we consider just 1 stage per resource group
             biomassStage[cpt++] = new double[1];
@@ -206,15 +206,15 @@ public class BiomassDietStageOutput_Netcdf extends AbstractOutput_Netcdf {
     @Override
     void init_nc_dims_coords() {
 
-        Dimension classDim = getNc().addDimension(null, "class_prey", nColumns);
-        
-        getNc().addVariable(null, "class_prey", DataType.FLOAT, "class_prey");
+        Dimension classDim = getBNc().addDimension("class_prey", nColumns);
+
+        Variable.Builder<?> varBuilder = getBNc().addVariable("class_prey", DataType.FLOAT, "class_prey");
         this.setDims(new ArrayList<>(Arrays.asList(getTimeDim(), classDim)));
-        
+
         int nSpec = getNSpecies() + getNBkgSpecies() + getNRscSpecies();
         int k = 0;
         for (int iSpec = 0; iSpec < nSpec; iSpec++) {
-            String name = getSpecies(iSpec).getName();
+            String name = getISpecies(iSpec).getName();
             float[] threshold = dietOutputStage.getThresholds(iSpec);
             int nStage = dietOutputStage.getNStage(iSpec);
             String outname;
@@ -229,8 +229,7 @@ public class BiomassDietStageOutput_Netcdf extends AbstractOutput_Netcdf {
                     }
                 }
                 String attrname = String.format("%d", k);
-                Variable var = this.getNc().findVariable("class_prey");
-                var.addAttribute(new Attribute(attrname, outname));
+                varBuilder.addAttribute(new Attribute(attrname, outname));
                 k++;
             }
         }

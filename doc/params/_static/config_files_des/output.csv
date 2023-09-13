@@ -1,0 +1,79 @@
+output.abundance.byage.enabled;True if abundance by age must be saved
+output.abundance.enable;True if abundance output must be saved
+output.abundance.bysize.enabled;True if abundance by size must be saved
+
+output.biomass.enabled;True if biomass output must be saved
+output.biomass.bysize.enabled;True if biomass by size must be saved
+output.biomass.byage.enabled;True if biomass by age must be saved
+output.biomass.byTL.enabled;True if biomass by trophic level must be saved
+
+output.cutoff.enabled;True if age class 0 (i.e. larvae) must be saved => see output.cutoff.age parameters
+
+output.diet.composition.enabled;True if the diet composition must be saved
+output.diet.composition.byAge.enabled;True if the diet composition by age must be saved
+output.diet.composition.bySize.enabled;True if the diet composition by size must be saved
+
+output.diet.pressure.enabled;True if the predation pressure must be saved
+output.diet.pressure.byAge.enabled;True if the predation pressure by age must be saved
+output.diet.pressure.bySize.enabled;True if the predation pressure by size must be saved
+
+output.diet.stage.structure;Structure of the diet and predator pressure matrices ('age' or 'size') => see output.diet.stage.threshold. params
+output.file.prefix;Simulation prefix (should contain only letters)
+
+output.meanSize.byAge.enabled;True if the mean size by age must be saved
+output.meanTL.bySize.enabled;True if the mean trophic level by size must be saved
+output.meanTL.byAge.enabled;True if the mean trophic level by age must be saved
+
+output.mortality.enabled;True if mortality output must be saved
+output.mortality.perSpecies.byAge.enabled;True if mortality by size must be saved
+output.mortality.perSpecies.bySize.enabled;True if mortality by age must be saved
+
+output.ndeadschool.enabled;True if the number of dead schools should be saved
+output.ndeadschool.byage.enabled;True if the number of dead schools per age should be saved
+output.ndeadschool.bysize.enabled;True if the number of dead schools per size should be saved
+
+output.nschool.enabled;True if the number of school should be saved
+output.nschool.byage.enabled;True if the number of school per age should be saved
+output.nschool.bysize.enabled;True if the number of school per size should be saved
+
+output.recordfrequency.ndt;Output frequency
+output.restart.recordfrequency.ndt; Restart output frequency
+output.restart.enabled;Whether a restart file should be saved.
+output.restart.spinup;Number of years before writing restart files
+
+output.size.enabled;True if size output must be saved
+output.size.catch.enabled;True if size catch output must be saved
+
+output.spatial.enabled;True if spatial outputs must be saved
+output.spatial.ltl.enabled;True of spatial outputs of biotic resource must be saved.
+
+output.ssb.enabled; True if spawning stock biomass should be saved
+output.start.year;First year of data output (0 by default)
+output.step0.include;True if the first time step should be saved.
+
+output.TL.catch.enabled;True if the catch trophic level must be saved
+output.TL.enabled;True if the trophic level must be saved
+
+output.yield.biomass.enabled;True if yield biomass output must be saved
+output.yield.perSpecies.byAge.enabled;True if yield biomass by size must be saved
+output.yield.perSpecies.bySize.enabled;True if yield biomass by age must be saved
+
+output.yield.abundance.enabled;True if yield abundance output must be saved
+output.yieldN.bySize.enabled;True if yield abundance by size must be saved
+output.yieldN.byAge.enabled;True if yield abundance by age must be saved
+
+output.dir.path;Output path
+output.csv.separator;CSV separator (COMA, SEMICOLON, EQUALS, COLON, TAB)
+
+output.distrib.bySize.min;Size distribution minimum common to all species
+output.distrib.bySize.max;Size distribution maximum common to all species
+output.distrib.bySize.incr;Size distribution increment common to all species
+
+output.distrib.byAge.min;Age distribution minimum common to all species
+output.distrib.byAge.max;Age distribution maximum common to all species
+output.distrib.byAge.incr;Age distribution increment common to all species
+
+output.mortality.perSpecies.bysize.enabled;True if mortality per species and per size should be saved
+output.mortality.perSpecies.byage.enabled;True if mortality per species and per age should be saved
+
+

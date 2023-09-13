@@ -178,7 +178,7 @@ plot.osmose.biomass = function(x, ts = TRUE, type = 1, species = NULL,
                                factor = 1e-3, xlim = NULL, ylim = NULL, 
                                col = NULL, alpha = NULL, border = NULL, 
                                lty = 1, lwd = 1,  axes = TRUE, legend = TRUE, 
-                               units = "tonnes", ...){
+                               units = "tonnes", zero=FALSE, ...){
   
   # Run the plot
   osmosePlots2D(x = x, species = species, speciesNames = speciesNames, 
@@ -188,7 +188,7 @@ plot.osmose.biomass = function(x, ts = TRUE, type = 1, species = NULL,
                 horizontal = horizontal, conf = conf, factor = factor,
                 xlim = xlim, ylim = ylim, col = col, alpha = alpha, 
                 border = border, lty = lty, lwd = lwd, axes = axes, 
-                legend = legend, units = units, ...)
+                legend = legend, units = units, zero=zero, ...)
   
   return(invisible())
 }

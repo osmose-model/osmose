@@ -1,10 +1,10 @@
-/* 
- * 
+/*
+ *
  * OSMOSE (Object-oriented Simulator of Marine Ecosystems)
  * http://www.osmose-model.org
- * 
+ *
  * Copyright (C) IRD (Institut de Recherche pour le Développement) 2009-2020
- * 
+ *
  * Osmose is a computer program whose purpose is to simulate fish
  * populations and their interactions with their biotic and abiotic environment.
  * OSMOSE is a spatial, multispecies and individual-based model which assumes
@@ -15,7 +15,7 @@
  * processes of fish life cycle (growth, explicit predation, additional and
  * starvation mortalities, reproduction and migration) and fishing mortalities
  * (Shin and Cury 2001, 2004).
- * 
+ *
  * Contributor(s):
  * Yunne SHIN (yunne.shin@ird.fr),
  * Morgane TRAVERS (morgane.travers@ifremer.fr)
@@ -23,20 +23,20 @@
  * Philippe VERLEY (philippe.verley@ird.fr)
  * Laure VELEZ (laure.velez@ird.fr)
  * Nicolas Barrier (nicolas.barrier@ird.fr)
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation (version 3 of the License). Full description
  * is provided on the LICENSE file.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
- * 
+ *
  */
 
 package fr.ird.osmose.process.bioen;
@@ -60,15 +60,15 @@ import java.util.List;
  * guarantee egg release.
  */
 public class BioenReproductionProcess extends ReproductionProcess {
-    
+
     private WeightedRandomDraft<School> weight_rand;
-    
+
     /** Time step when genotype transmission should be activated */
     private int dateGenoTransmission;
 
     public BioenReproductionProcess(int rank) {
         super(rank);
-        weight_rand = new WeightedRandomDraft<>();
+        weight_rand = new WeightedRandomDraft<>(rank);
     }
 
     @Override
@@ -87,13 +87,13 @@ public class BioenReproductionProcess extends ReproductionProcess {
 
     @Override
     public void run() {
-        
+
         int nSpecies = this.getNSpecies();
-        
+
         // spawning stock biomass per species for seeding period
         double[] SSB = new double[nSpecies];
-    
-        // loop over all the schools to compute 
+
+        // loop over all the schools to compute
         for (School school : getSchoolSet().getSchools()) {
 
             int i = school.getSpeciesIndex();
@@ -102,19 +102,20 @@ public class BioenReproductionProcess extends ReproductionProcess {
             }
             // increment age
             school.incrementAge();
+
         }
 
         // loop over the species to lay cohort at age class 0
         for (int cpt = 0; cpt < this.getNSpecies(); cpt++) {
-            
+
             // Recover the species object and all the schools of the given species
             Species species = getSpecies(cpt);
-            
+
             List<School> schoolset = getSchoolSet().getSchools(species);
-            
+
             // reinit the map objects of random generator
             weight_rand.reset();
-            
+
             // compute nomber of eggs to be released
             double season = getSeason(getSimulation().getIndexTimeSimu(), species);
 
@@ -143,24 +144,33 @@ public class BioenReproductionProcess extends ReproductionProcess {
                     // recovers the weight of the gonad that is lost for reproduction.
                     // in this case, the gonad weight times the season variable.
                     float wEgg = school.getGonadWeight() * (float) season;
-                  
+
+                    // If number of released eggs is 0, does nothing
+                    if(wEgg <= 0) {
+                        continue;
+                    }
+
                     // the wEgg content is removed from the gonad
                     school.incrementGonadWeight(-wEgg);
-                    
+
                     // the number of eggs is equal to the total gonad weight that is gone
                     // divided by the egg weight.
                     // barrier.n: change in conversion from tone to gram
                     // since EggWeight is in g.
                     double nEgg = wEgg * this.getSexRatio(cpt) / species.getEggWeight() * 1000000 * school.getInstantaneousAbundance();
                     negg_tot += nEgg;
+
+                    school.incrementNeggs(nEgg);
+
                     weight_rand.add(nEgg, school);
-                }  // end of loop over the school that belong to species i    
-                
+
+                }  // end of loop over the school that belong to species i
+
                 boolean transmitGenotype = (this.getSimulation().getIndexTimeSimu() >= this.dateGenoTransmission) ? true : false;
                 this.create_reproduction_schools(cpt, negg_tot, transmitGenotype, weight_rand);
-                
+
             }  // end of SSB statement
-            
+
         }  // end of species loop
     }
 
@@ -189,7 +199,7 @@ public class BioenReproductionProcess extends ReproductionProcess {
             } else {
                 school0.getGenotype().init_genotype();
             }
-            getSchoolSet().add(school0);
+            getSchoolSet().addReproductionSchool(school0);
         } else if (nEgg >= nSchool) {
 
             for (int s = 0; s < nSchool; s++) {
@@ -200,10 +210,9 @@ public class BioenReproductionProcess extends ReproductionProcess {
                     School parent_b = rand_draft.next();
                     school0.getGenotype().transmit_genotype(parent_a.getGenotype(), parent_b.getGenotype());
                 } else {
-
                     school0.getGenotype().init_genotype();
                 }
-                getSchoolSet().add(school0);
+                getSchoolSet().addReproductionSchool(school0);
             }
 
         } // end of test on nEgg

@@ -44,6 +44,8 @@ package fr.ird.osmose.process.mortality.additional;
 import fr.ird.osmose.School;
 import fr.ird.osmose.Species;
 import fr.ird.osmose.process.mortality.AbstractMortalitySpecies;
+import fr.ird.osmose.util.timeseries.ByRegimeTimeSeries;
+import fr.ird.osmose.util.timeseries.SeasonTimeSeries;
 
 /**
  * Annual additional mortality rate.
@@ -53,7 +55,7 @@ import fr.ird.osmose.process.mortality.AbstractMortalitySpecies;
 public class AnnualAdditionalMortality extends AbstractMortalitySpecies {
 
     // Additional mortality rate expressed in [time_step^-1]
-    private double instantaneousD;
+    private double[] mortRate;
 
     public AnnualAdditionalMortality(int rank, Species species) {
         super(rank, species);
@@ -61,14 +63,43 @@ public class AnnualAdditionalMortality extends AbstractMortalitySpecies {
 
     @Override
     public void init() {
+        
         int nStepYear = getConfiguration().getNStepYear();
-        int iSpec = getFileSpeciesIndex();
-        instantaneousD = getConfiguration().getDouble("mortality.additional.rate.sp" + iSpec) / nStepYear;
-       
+        // reading base mortality rate
+        String keyShift = String.format("mortality.additional.rate.shift.sp%d", getFileSpeciesIndex());
+        String keyVal = String.format("mortality.additional.rate.sp%d", getFileSpeciesIndex());
+        ByRegimeTimeSeries mortRateSeries = new ByRegimeTimeSeries(keyShift, keyVal);
+        mortRateSeries.init();
+        double[] mortRateBase = mortRateSeries.getValues();
+
+        // reading multiplier
+        double multiplier;
+        if (getConfiguration().isNull("mortality.additional.rate.multiplier.sp" + getFileSpeciesIndex())) {
+            multiplier = 1;
+        } else {
+            multiplier = getConfiguration()
+                    .getDouble("mortality.additional.rate.multiplier.sp" + getFileSpeciesIndex());
+        }
+
+        // reading season
+        SeasonTimeSeries season = new SeasonTimeSeries("mortality.additional.rate.seasonality",
+                "sp" + getFileSpeciesIndex());
+        season.init();
+        double[] seasonValues = season.getValues();
+
+        // computing final mortality rate
+        mortRate = new double[getConfiguration().getNStep()];
+        for (int i = 0; i < getConfiguration().getNStep(); i++) {
+            mortRate[i] = multiplier * mortRateBase[i] * seasonValues[i] / nStepYear;
+        }
     }
 
     @Override
     public double getRate(School school) {
-        return instantaneousD;
+        return mortRate[getSimulation().getIndexTimeSimu()];
+    }
+    
+    public double[] getRates() { 
+        return mortRate;   
     }
 }

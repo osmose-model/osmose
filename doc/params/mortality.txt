@@ -1,0 +1,26 @@
+Mortality algorithm
+---------------------------------------------
+
+:samp:`mortality.algorithm` defines the choice of the mortality algorithm (either 'stochastic' or 'iterative')
+
+:samp:`mortality.subdt` is the number of mortality time-steps within one Osmose time step.
+
+Stochastic algorithm
+#######################
+
+Main features of the stochastic algorithm are:
+
+- Every cause of mortality (predation, natural, fishing, starvation) competes with each other. The subdt in the mortality process ensures that the random order of the mortality sources within a cell does not bias the mortality outcome.
+- Stochasticity and competition within the predation process, meaning that the loop over the schools as preys or predators is random and what has been preyed upon by a predator is not available anymore to the other predators that come later in the loop.
+- Asynchronous updating of school biomass (it means biomass are updated on the fly).
+
+Iterative algorithm
+###########################
+
+Main features of the iterative algorithm:
+
+- It is assumed that every cause is independant and concomitant
+- No stochasticity neither competition within predation process: every predator sees preys as they are at the beginning of the time-step.
+- Synchronous updating of school biomass (it means biomass are updated at the end of the mortality process)
+
+By default Osmose will use the stochastic algorithm and this parameter should not be changed unless one knows exactly what he/she is doing. Detailed information on the mortality algorithm is available `here <http://www.osmose-model.org/documentation/changes-osmose-3-osmose-3-update-1#toc-2>`_

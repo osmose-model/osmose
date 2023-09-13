@@ -1,0 +1,16 @@
+
+Introduction
+----------------------
+
+In order to run the Osmose model, a lot of parameters have to be defined. The parameters are related to the definition 
+of the spatial domain (grid definition), to the external forcings (plankton
+concentration), and to species.
+
+These files can be difficult to build. As a starting point, the user is invited to visit the `Web Service <www.config.osmose-model.org>`_, which is a 
+bridge beetween the `FishBase database <http://www.fishbase.org>`_ and Osmose configuration files.
+It allows the user to download configuration files for multiple ecosystems.
+
+
+.. developped by Arnaud Grüss (Rosenstiel School of Marine and Atmospheric Science/University of Miami, Miami, Florida, USA), 
+.. Maria L.D. Palomares (Sea Around Us, University of British Columbia, Vancouver, Canada), Jorrit Poelen (independent consultant, Oakland, California, USA), Josephine R. Barile, 
+.. Casey Aldemita, Shelumiel R. Ortiz (Quantitative Aquatics, Inc., Bay, Laguna, Philippines). This web service allows to generate Osmose input files for different ecosystems by using the FishBase data base.

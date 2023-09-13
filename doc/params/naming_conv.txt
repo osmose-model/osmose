@@ -1,0 +1,54 @@
+Naming convention
+---------------------------------------------
+
+Using consistent names throughout the configuration makes the reading and the understanding of the configuration files easy. A good name should instantly give information about the meaning and the function of a parameter. In Osmose we chose to name the parameter following a **descending hierarchical pattern**. The name is divided in several tokens, separated by dots. The left token carries the broader meaning and the following tokens narrow down the definition of the parameter. Let's have a look at a few examples:
+
+.. code-block:: bash
+    
+    mortality.fishing.rate
+    mortality.fishing.recruitment.age
+    mortality.starvation.rate
+    mortality.starvation.larva.rate
+
+All these parameters deal with the mortality in the model. Some with fishing mortality, some other with starvation mortality. Within the starvation mortality, we need to define the mortality rate for larvae and for the other schools, etc. That is the way most parameter names have been built in Osmose.
+
+When a parameter needs to be defined at species level, it will always show like **.sp0, .sp1, sp2, ..**
+
+.. code-block:: bash
+    
+    mortality.fishing.rate.sp0
+    mortality.fishing.rate.sp1
+
+In the following sections, such parameters will be referred as
+
+.. code-block:: bash
+    
+    mortality.fishing.rate.sp#
+
+You must remember that, in this case, the :samp:`#` is meant for any integer ranging from zero to maximum number of species minus one.
+
+A parameter name that ends up with **.file** will always designate a file name, and **.path** a path name, either absolute of relative.
+
+.. code-block:: bash
+    
+    predation.accessibility.file
+    output.dir.path
+
+When the parameter is a file that need be defined for every species it will look like **.file.sp#**
+
+.. code-block:: bash
+    
+    mortality.fishing.season.distrib.file.sp0
+
+Parameters referring to plankton will look like **.plk#**
+
+.. code-block:: bash
+    
+    plankton.name.plk#
+
+Parameters referring to distribution maps will always look like **.map#**, and parameters referring to 
+marine protected areas will always look like **.mpa#**
+
+Keyword **.season** always means that the corresponding parameter deals with seasonal cycles.
+
+The **.enabled** token means that the parameter is a switch that activate or deactivate the process that it designates.

@@ -78,12 +78,13 @@ public class FisheryPeriod extends OsmoseLinker {
                 
         // Init the number of seasons;
         key = String.format("fisheries.period.number.fsh%d", this.fileFisheryIndex);
+
         this.nPeriods = this.getConfiguration().getInt(key);
         
         // Init the season offset (in fraction of years)
         key = String.format("fisheries.period.start.fsh%d", this.fileFisheryIndex);
         this.periodOffset = this.getConfiguration().getDouble(key);
-        
+
         // Gets the season offset in number of time steps
         int ioff = (int) (periodOffset * nStepYear);
         
@@ -129,10 +130,10 @@ public class FisheryPeriod extends OsmoseLinker {
         
         if(useLog) { 
             for (int i = 0; i < fishingSeason.length; i++) {
-                if(fishingSeason[i] > 0) {
-                    String message = String.format("Fishing period mortality rate exponent for fishery %d is positive", this.fileFisheryIndex);
-                    error(message, new IllegalArgumentException());
-                }
+                //if(fishingSeason[i] > 0) {
+                //    String message = String.format("Fishing period mortality rate exponent for fishery %d is positive", this.fileFisheryIndex);
+                //    error(message, new IllegalArgumentException());
+                //}
                 fishingSeason[i] = Math.exp(fishingSeason[i]);
             }
         }

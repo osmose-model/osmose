@@ -1,0 +1,15 @@
+Migration mortality
+--------------------------
+
+The :samp:`mortality.out.rate.sp#` parameter is the annual mortality rate for species that move out of the simulated area, :math:`M_{out}`. 
+When a school moves out, none of the usual processes apply (predation, growth, fishing, natural mortality, growth, starvation). 
+
+The :math:`M_{out}` mortality rate comprises all sources of mortality outside the simulated area. 
+It applies as long as the school is located out of the simulated 
+area (see the parameter 'movement.map0.file' for detailled explanations on how 
+to set up migration periods for a given school). 
+The :math:`M_{out}` parameters is such that, at a given time step: 
+
+.. math:: 
+
+    N_{dead_{out}}(t) = N(t) \times \left(1 - e^{\frac{-M_{out}}{NDtPerYear}}\right)

@@ -1,0 +1,162 @@
+Fishing parameters
+---------------------------------------------
+
+:samp:`mortality.fishing.type` defines whether fishing mortality is inputted as fishing rates or catches. Catches in the following sections must always be provided as tonnes. 
+
+.. warning::
+
+    This parameter implies that Osmose does not accept fishing mortality rates for some species and catches for other species. For a given configuration it one or the other.
+
+:samp:`mortality.fishing.recruitment.age.sp#` and :samp:`mortality.fishing.recruitment.size.sp#` are the age (in year) 
+or size (in centimetre) of recruitment into the fisheries. OSMOSE will first look for a recruitment age parameter. 
+If this parameter is not found or the value of this parameter is set to :samp:`null`, OSMOSE will look for a recruitment size. 
+If neither a recruitment age nor a recruitment size is found, a recruitment age of zero year is assumed and the user 
+will be notified by a warning message. These parameters are ignored in the case of *Fishing mortality by dt and by age/size class* (see below).
+
+Osmose offers several degrees of refinement for inputting the fishing mortality: constant, seasonal, interannual and interannual with age or size class. Depending on the available information for each species of the configuration, one must choose the best way to input it. Each species can be parameterized independently from an other. For instance fishing mortality for species zero is a constant annual rate and fishing mortality for species three is provided as a time series per size class.
+
+Constant annual rate/catches by species
+############################################
+
+Constant annual rate by species
+++++++++++++++++++++++++++++++++++++++
+
+:samp:`mortality.fishing.rate.sp#` is the annual mortality rate due to fishing, :math:`F`, such as:
+
+.. math::
+    
+    N_{dead_{fishing}}(t) = N(t) * (1 - exp^{(-F/n_{steps{_year}})})
+
+:samp:`mortality.fishing.catches.sp#` is the annual catches in tonnes. It is converted into biomass by divising by the mean fish weight.
+
+Annual rates/catches with seasonality file per species
+#############################################################
+Same parameters as 'Constant annual rate/catches' (:samp:`mortality.fishing.rate.sp#` or  :samp:`mortality.fishing.catches.sp#`), 
+plus a seasonality file.
+The :samp:`mortality.fishing.season.distrib.file.sp#` is the file path of the fishing seasonality file. 
+This controls how the fishing mortality is applied over the year.
+Here is an example of the CSV file:
+
+.. _table_paros_seasondist:
+.. table:: Example of seasonal fishing distribution
+
+    .. csv-table::
+        :delim: ;
+        :header: Time, Fishing coefficient
+        :widths: 50, 50
+        
+        0.0;0.04759049
+        0.041666668;0.04759049
+        0.083333336;0.038992207
+        0.125;0.038992207
+        0.16666667;0.042391527
+        0.20833333;0.042391527
+        0.25;0.041991603
+        0.29166666;0.041991603
+        0.33333334;0.050389927
+        0.375;0.050389927
+        0.41666666;0.048890226
+        0.45833334;0.048890226
+        0.5;0.038392324
+        0.5416667;0.038392324
+        0.5833333;0.038692262
+        0.625;0.038692262
+        0.6666667;0.04589083
+        0.7083333;0.04589083
+        0.75;0.04139173
+        0.7916667;0.04139173
+        0.8333333;0.039592084
+        0.875;0.039592084
+        0.9166667;0.025794841
+        0.9583333;0.025794841
+
+One line per time step. The first column defines time, expressed in year. The second column defines the fraction of the :math:`F` mortality rate to apply at a given time step. 
+
+.. warning:: 
+
+    The sum of the season factors over a year should sum to one, and the number of time steps in the CSV file must be equal to the provided in
+    the :samp:`simulation.time.ndtPerYear` parameter.
+
+
+Annual rates with seasonality file per species
+################################################
+
+The user provides time series of annual rates/catches and a seasonality file (:samp:`mortality.fishing.rate.byYear.file.sp#` or :samp:`mortality.fishing.catches.byYear.file.sp#`).
+
+Here is an example of the CSV file, for catches:
+
+.. _table_paros_fish_ydist:
+.. table:: Example of annual fishing distribution
+    :align:center
+
+    .. csv-table::
+        :delim: ;
+        :header: Year, Catches
+        :widths: 50, 50
+        
+        0;300
+        1;320
+        2;320
+        3;300
+        4;250
+        5;280
+        6;300
+        ...;...
+
+If the number of years is smaller than the number of simulated years, Osmose will loop over the series. If the number of years exceed the duration of the simulation, Osmose will ignore the exceeding years.
+
+The seasonality file must be provided the same way as described in 'Annual rates/catches with seasonality file per species', i.e. by using the :samp:`mortality.fishing.season.distrib.file.sp#` parameter.
+
+Fishing mortality by dt, by age/size class
+############################################
+
+The finest way of inputting fishing mortality. Here, the user provides time series of fishing mortality rates or catches per age/size class.
+
+
+By age
+++++++++++
+
+Fishing mortality by age is set by filling the :samp:`mortality.fishing.rate.byDt.byAge.file.sp#` or :samp:`mortality.fishing.catches.byDt.byAge.file.sp#` parameters.
+
+Here is an example of the CSV file, for catches by age class:
+
+.. _table_paros_fish_dt_age_dist:
+.. table:: Example of fishing distribution by age and by time-step.
+
+    .. csv-table::
+        :delim: ;
+        :header-rows: 1
+        
+
+        Time step / Age;0;1;2;3;4
+        0;0;0;5;8;8
+        1;0;0;5;8;7
+        2;0;0;4;7;6
+        3;0;0;4;7;7
+
+The age classes (year) are automatically scanned by Osmose. In this case there are 5 classes: :samp:`[0 1[`, :samp:`[1 2[`, :samp:`[2 3[`, :samp:`[3 4[` and :samp:`[4 lifespan[`. The value of the time step does not matter, Osmose assumes there is one line per time step. 
+
+The number of time steps in the CSV file must be a multiple of the number of time steps per year. 
+If the time series is shorter than the duration of the simulation, Osmose will loop over it. If the time series is longer than the duration of the simulation, Osmose will ignore the exceeding steps.
+
+By size
+++++++++++
+
+Fishing mortality by size is set by filling the :samp:`mortality.fishing.rate.byDt.bySize.file.sp#` or :samp:`mortality.fishing.catches.byDt.bySize.file.sp#` parameters.
+
+Same as fishing mortality by age class. In the first line of the CSV file, one must define the size classes (centimetre):
+
+.. _table_paros_fish_dt_size_dist:
+.. table:: Example of fishing distribution by age and by time-step.
+
+    .. csv-table::
+        :delim: ;
+        :header-rows: 1
+
+        Time step / Length;0;5;10;20;40
+        0;0;0;5;8;8
+        1;0;0;5;8;7
+        2;0;0;4;7;6
+        3;0;0;4;7;7
+
+The five classes for this species are :samp:`[0cm 5cm[`, :samp:`[5cm 10cm[`, :samp:`[10cm 20cm[`, :samp:`[20cm 40cm[` and :samp:`[40cm Linf[`.

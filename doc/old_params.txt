@@ -1,0 +1,31 @@
+.. _param_sec:
+
+Description of input files and parameters
+************************************************
+
+In this section, the input files (format and naming conventions) and the Osmose parameters are described in detail.
+
+
+.. A JAVA application is also in developpment to assist the user in the creation of Osmose configuration files (see the `Generic Configuration Manager <https://sourcesup.renater.fr/genconfman/>`_ webpage)
+
+.. toctree::
+    :maxdepth: 1
+    
+    params/gruss.rst
+    params/format.rst
+    params/naming_conv.rst
+    params/main.rst
+    params/species.rst
+    params/popinit.rst
+    params/movement.rst
+    params/mortality.rst
+    params/predation.rst
+    params/fishing.rst
+    params/mpa.rst
+    params/mnat.rst
+    params/migration.rst
+    params/reprod.rst
+    params/influx.rst
+    params/grid.rst
+    params/ltl.rst
+    params/listofparam.rst

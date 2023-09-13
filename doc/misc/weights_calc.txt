@@ -1,0 +1,11 @@
+.. _weight_cal:
+
+Weights calculation
+++++++++++++++++++++++++++++++++
+
+**TO BE WRITTEN (RICARDO?)**
+
+.. math::
+
+    W = \frac{1}{CV^2}
+

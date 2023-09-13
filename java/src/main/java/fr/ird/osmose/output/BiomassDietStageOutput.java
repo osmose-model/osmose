@@ -1,10 +1,10 @@
-/* 
- * 
+/*
+ *
  * OSMOSE (Object-oriented Simulator of Marine Ecosystems)
  * http://www.osmose-model.org
- * 
+ *
  * Copyright (C) IRD (Institut de Recherche pour le Développement) 2009-2020
- * 
+ *
  * Osmose is a computer program whose purpose is to simulate fish
  * populations and their interactions with their biotic and abiotic environment.
  * OSMOSE is a spatial, multispecies and individual-based model which assumes
@@ -15,7 +15,7 @@
  * processes of fish life cycle (growth, explicit predation, additional and
  * starvation mortalities, reproduction and migration) and fishing mortalities
  * (Shin and Cury 2001, 2004).
- * 
+ *
  * Contributor(s):
  * Yunne SHIN (yunne.shin@ird.fr),
  * Morgane TRAVERS (morgane.travers@ifremer.fr)
@@ -23,27 +23,26 @@
  * Philippe VERLEY (philippe.verley@ird.fr)
  * Laure VELEZ (laure.velez@ird.fr)
  * Nicolas Barrier (nicolas.barrier@ird.fr)
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation (version 3 of the License). Full description
  * is provided on the LICENSE file.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
- * 
+ *
  */
 
 package fr.ird.osmose.output;
 
 import fr.ird.osmose.Cell;
-import fr.ird.osmose.stage.DietOutputStage;
-import fr.ird.osmose.stage.IStage;
+import fr.ird.osmose.stage.SchoolStage;
 
 /**
  *
@@ -57,7 +56,7 @@ public class BiomassDietStageOutput extends AbstractOutput {
      */
     private double[][] biomassStage;
 
-    private IStage dietOutputStage;
+    private SchoolStage dietOutputStage;
 
     public BiomassDietStageOutput(int rank) {
         super(rank, "Trophic", "biomassPredPreyIni");
@@ -66,19 +65,17 @@ public class BiomassDietStageOutput extends AbstractOutput {
     @Override
     public void init() {
 
-        dietOutputStage = new DietOutputStage();
+        dietOutputStage = new SchoolStage("output.diet.stage");
         dietOutputStage.init();
 
         nColumns = 0;
 
         int nAll = this.getNBkgSpecies() + this.getNSpecies() + this.getNRscSpecies();
-        
+
         // Sum-up diet stages
         for (int cpt = 0; cpt < nAll; cpt++) {
             nColumns += dietOutputStage.getNStage(cpt);
         }
-
-        nColumns += getConfiguration().getNRscSpecies();
 
         super.init();
     }
@@ -89,31 +86,8 @@ public class BiomassDietStageOutput extends AbstractOutput {
     }
 
     @Override
-    String[] getHeaders() {
-
-        int nAll = this.getNBkgSpecies() + this.getNSpecies() + this.getNRscSpecies();
-
-        int k = 0;
-        String[] headers = new String[nColumns];
-        for (int cpt = 0; cpt < nAll; cpt++) {
-            String name = getISpecies(cpt).getName();
-            float[] threshold = dietOutputStage.getThresholds(cpt);
-            int nStage = dietOutputStage.getNStage(cpt);
-            for (int s = 0; s < nStage; s++) {
-                if (nStage == 1) {
-                    headers[k] = name;    // Name predators
-                } else {
-                    if (s == 0) {
-                        headers[k] = name + " < " + threshold[s];    // Name predators
-                    } else {
-                        headers[k] = name + " >=" + threshold[s - 1];    // Name predators
-                    }
-                }
-                k++;
-            }  
-        } // end of species loop
-
-        return headers;
+    public String[] getHeaders() {
+       return dietOutputStage.getHeaders(true);
     }
 
     @Override
@@ -137,13 +111,13 @@ public class BiomassDietStageOutput extends AbstractOutput {
 
     @Override
     public void reset() {
-        
+
         int nSpecies = this.getNSpecies();
         int nBkg = this.getNBkgSpecies();
         int nRsc = this.getNRscSpecies();
         int nAll = nSpecies + nBkg + nRsc;
         biomassStage = new double[nAll][];
-        
+
         for (int cpt = 0; cpt < nAll; cpt++) {
             biomassStage[cpt] = new double[dietOutputStage.getNStage(cpt)];
         }
@@ -168,7 +142,7 @@ public class BiomassDietStageOutput extends AbstractOutput {
 
     /**
      * Gets the total biomass of the resource groups over the grid.
-     * Note that the index in the argument is offseted, since 
+     * Note that the index in the argument is offseted, since
      * resource forcing starts with background species.
      * @return the cumulated biomass over the domain in tonne
      */

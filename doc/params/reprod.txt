@@ -1,0 +1,42 @@
+Reproduction
+--------------------------
+
+At the end of each time step, the numbers of eggs spawned by a species is calculated as follow:
+
+.. math::
+
+    N_{Egg} = sexRatio \times \alpha \times season \times (SSB \times 10^6)
+
+with :math:`sexRatio` defined by the parameter :samp:`species.sexratio.sp#`, :math:`\alpha` is the annual number of eggs per gram of mature female defined by the parameter :samp:`species.relativefecundity.sp#`, 
+:math:`season` defined by the parameter :samp:`reproduction.season.file.sp#` and :math:`SSB` the Spawning Stock Biomass. :math:`SSB` is 
+calculated as the sum of the biomass of the schools that reached sexual 
+maturity (defined by the parameter :samp:`species.maturity.size.sp#`). As :math:`SSB` is expressed in tons and alpha in grams of mature female, SSB is multiplied by :math:`10^6`.
+
+:samp:`reproduction.season.file.sp#` is the path of a CSV 
+file that contains a time series of the season factor:
+
+.. _table_paros_reprod:
+.. table:: Example of seasonal fishing distribution
+
+     .. csv-table::
+        :delim: ;
+        :widths: 50, 50
+        :header-rows: 1
+
+        Time step; seasonality
+        0;0.03
+        1;0.03
+        2;0.025
+        3;0.025
+        4;0.03
+
+One line per time step. The first column defines time, expressed in year. 
+The second column define the fraction of eggs to be spawned by at each 
+time step. OSMOSE will also be able to read an interannual CSV file with as many season 
+factors as the number of time steps of the simulation. 
+
+.. warning:: 
+
+    The sum of the season factors over a year should sum to one (**even though OSMOSE will not check**, which somehow allows you to mimic interannual variability when CSV file is interannual).
+
+If Osmose does not find any seasonality file, uniform spawning throughout the year is assumed.

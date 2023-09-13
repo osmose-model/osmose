@@ -315,43 +315,65 @@ public class Osmose extends OLogger {
             getLogger().setLevel(Level.SEVERE);
         }
 
-        simulation = new Simulation[configuration.getNSimulation()];
-        for (int i = 0; i < configuration.getNSimulation(); i++) {
-            simulation[i] = new Simulation(i);
-        }
-
+        this.initSimulation();
+        
         // Loop over the number of replica
         long begin = System.currentTimeMillis();
         int nProcs = Math.min(configuration.getNCpu(), configuration.getNSimulation());
-        int nBatch = (int) Math.ceil((float) configuration.getNSimulation() / nProcs);
-        int rank = 0;
-        for (int iBatch = 0; iBatch < nBatch; iBatch++) {
-            int nworker = Math.min(nProcs, configuration.getNSimulation() - rank);
-            CountDownLatch doneSignal = new CountDownLatch(nworker);
-            Worker[] workers = new Worker[nworker];
-            for (int iworker = 0; iworker < nworker; iworker++) {
-                workers[iworker] = new Worker(rank, doneSignal);
-                rank++;
+        
+        if (nProcs == 1) {
+
+            // If nProcs is 1, run the simulations on a single thread.
+            for (int rank = 0; rank < configuration.getNSimulation(); rank++) {
+                info("Simulation {0} started...", rank);
+                simulation[rank].init();
+                simulation[rank].run();
+                int time = (int) ((System.currentTimeMillis() - begin) / 1000);
+                info("Simulation {0} completed (time ellapsed: {1} seconds)", new Object[] { rank, time });
+                simulation[rank].destroy();
+                simulation[rank] = null;
             }
-            for (int iworker = 0; iworker < nworker; iworker++) {
-                new Thread(workers[iworker]).start();
-            }
-            try {
-                doneSignal.await();
-            } catch (InterruptedException ex) {
-                error("Simulation " + rank + " terminated unexpectedly.", ex);
-            }
-            for (int iworker = 0; iworker < nworker; iworker++) {
-                simulation[iBatch * nProcs + iworker] = null;
+
+        } else {
+
+            int nBatch = (int) Math.ceil((float) configuration.getNSimulation() / nProcs);
+            int rank = 0;
+            for (int iBatch = 0; iBatch < nBatch; iBatch++) {
+                int nworker = Math.min(nProcs, configuration.getNSimulation() - rank);
+                CountDownLatch doneSignal = new CountDownLatch(nworker);
+                Worker[] workers = new Worker[nworker];
+                for (int iworker = 0; iworker < nworker; iworker++) {
+                    workers[iworker] = new Worker(rank, doneSignal);
+                    rank++;
+                }
+                for (int iworker = 0; iworker < nworker; iworker++) {
+                    new Thread(workers[iworker]).start();
+                }
+                try {
+                    doneSignal.await();
+                } catch (InterruptedException ex) {
+                    error("Simulation " + rank + " terminated unexpectedly.", ex);
+                }
+                for (int iworker = 0; iworker < nworker; iworker++) {
+                    simulation[iBatch * nProcs + iworker] = null;
+                }
             }
         }
+        
         getLogger().setLevel(lvl);
         if (configuration.getNSimulation() > 1) {
             int time = (int) ((System.currentTimeMillis() - begin) / 1000);
             info("All simulations completed (time ellapsed:  {0} seconds)", time);
         }
     }
-
+    
+    public void initSimulation() {
+        simulation = new Simulation[configuration.getNSimulation()];
+        for (int i = 0; i < configuration.getNSimulation(); i++) {
+            simulation[i] = new Simulation(i);
+        }
+    }
+    
     /**
      * Inner class that initializes and runs one simulation in a dedicated thread.
      * It informs the {@link java.util.concurrent.CountDownLatch} when the

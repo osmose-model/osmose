@@ -1,0 +1,146 @@
+Summary
+--------------------------------------
+
+Run parameters
+####################################################
+
+.. _table_paros_run:
+.. table:: Run parameters
+    :widths: 2, 10
+    
+    .. csv-table::
+            :header: Parameter, Description
+            :delim: ;
+            :file: _static/config_files_des/run.csv
+
+Output parameters
+####################################################
+
+.. _table_paros_out:
+.. table:: General output parameters
+    :widths: 2, 10
+    
+    .. csv-table::
+            :header: Parameter, Description
+            :delim: ;
+            :file: _static/config_files_des/output.csv
+
+Grid parameters
+####################################################
+
+.. _table_paros_grid:
+.. table:: Grid parameters
+    :widths: 2, 10
+    
+    .. csv-table::
+            :header: Parameter, Description
+            :delim: ;
+            :file: _static/config_files_des/grid.csv
+
+Population parameters
+####################################################
+
+.. _table_parpop_grid:
+.. table:: Population parameters
+    :widths: 2, 10
+    
+    .. csv-table::
+            :header: Parameter, Description
+            :delim: ;
+            :file: _static/config_files_des/population.csv
+
+Biotic ressource parameters
+####################################################
+
+.. _table_paros_ltlgen:
+.. table:: General biotic ressource parameters
+    :widths: 2, 10
+    
+    .. csv-table::
+            :header: Parameter, Description
+            :delim: ;
+            :file: _static/config_files_des/ltlgen.csv
+
+.. _table_paros_ltlspe:
+.. table:: Specific biotic ressource parameters
+    
+    .. csv-table::
+            :header: Parameter, Description
+            :delim: ;
+            :file: _static/config_files_des/ltlspe.csv
+
+Mortality parameters
+####################################################
+
+.. _table_paros_mgen:
+.. table:: General mortality parameters
+    :widths: 2, 10
+    
+    .. csv-table::
+            :header: Parameter, Description
+            :delim: ;
+            :file: _static/config_files_des/mort.csv
+
+.. _table_paros_mnat:
+.. table:: Natural mortality parameters
+    :widths: 2, 10
+    
+    .. csv-table::
+            :header: Parameter, Description
+            :delim: ;
+            :file: _static/config_files_des/naturalmort.csv
+
+.. _table_paros_mfis:
+.. table:: Fishing mortality parameters
+    :widths: 2, 5
+    
+    .. csv-table::
+            :header: Parameter, Description
+            :delim: ;
+            :file: _static/config_files_des/fishingmort.csv
+
+
+Species parameters
+####################################################
+
+.. _table_paros_spe:
+.. table:: Specific focal species parameters
+ :widths: 2, 10
+ 
+ .. csv-table::
+         :header: Parameter, Description
+         :delim: ;
+         :file: _static/config_files_des/species.csv
+
+Predation parameters
+####################################################
+
+.. _table_paros_pred:
+.. table:: Predation parameters
+    :widths: 2, 10
+    
+    .. csv-table::
+            :header: Parameter, Description
+            :delim: ;
+            :file: _static/config_files_des/predation.csv
+
+Movement parameters
+####################################################
+
+.. _table_paros_mov:
+.. table:: Movement parameters
+    :widths: 2, 10
+    
+    .. csv-table::
+            :header: Parameter, Description
+            :delim: ;
+            :file: _static/config_files_des/movement.csv
+
+.. _table_paros_map:
+.. table:: Map parameters
+    :widths: 2, 10
+    
+    .. csv-table::
+            :header: Parameter, Description
+            :delim: ;
+            :file: _static/config_files_des/map.csv

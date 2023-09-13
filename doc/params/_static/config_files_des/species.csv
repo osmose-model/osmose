@@ -1,0 +1,24 @@
+species.name.sp#;Name of the focal specie. **Do not use space or any special character.**
+
+species.lifespan.sp#;Lifespan of the species expressed in years. Lifespan =1 year means that the species will live one year. Lifespan = 5 years means that the species will live 5 years. The age of the schools is such that 0 <= age < lifespan. For example, if lifespan = 1 year, age will vary from zero included to 1 excluded ([0, 1[). If lifespan = 5 years, age will vary from zero included to 5 excluded ([0, 5[)
+
+species.maturity.age.sp#;Age at sexual maturity (in years) of focal functional group #
+species.maturity.size.sp#;Size at sexual maturity (in cm) of focal functional group #
+
+species.relativefecundity.sp#;Annual number of eggs per gram of mature female (in eggs.g-1) for focal functional group
+species.sexratio.sp#;Proportion of females for focal functional group #
+
+species.k.sp#;Von Bertalanffy instantaneous growth rate at small size (in year-1) of focal functional group #
+species.linf.sp#;Von Bertalanffy maximum size (size at infinity, in cm) of focal functional group #
+species.t0.sp#;Von Bertalanffy theoretical age of zero length (in years) of focal functional group #
+species.vonbertalanffy.threshold.age.sp#;Threshold age (in years) below which a linear growth model is used to calculate mean length increase for focal functional group #
+
+species.length2weight.allometric.power.sp#;Exponent of the allometric length-weight relationship of focal functional group #
+species.length2weight.condition.factor.sp#;Constant of proportionality of the allometric length-weight relationship of focal functional group #
+
+species.egg.size.sp#;Size (in cm) of the eggs of focal functional group #
+species.egg.weight.sp#;Weight (in g) of the eggs of focal functional group #
+
+species.lmax.sp#;Species maximum length (in cm). Default is infinity.
+
+species.delta.lmax.factor.sp#;Maximum  growth rate factor (default=2)

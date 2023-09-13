@@ -1,0 +1,18 @@
+#!/bin/csh
+#PBS -l walltime=24:00:00
+#PBS -l mem=1g
+
+cd $PBS_O_WORKDIR
+echo $HOST
+pbsnodes $HOST
+
+# load the R libraries
+source /usr/share/Modules/3.2.10/init/csh
+module load R
+module load nco
+
+# set the path of the osmose/calibrar libraries
+setenv R_LIBS /home1/datahome/nbarrier/libs/R/lib
+
+# Run R in parallel mode.
+time R --vanilla < calibrate_SEQ.R >& ea.out

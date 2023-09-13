@@ -1,0 +1,10 @@
+grid.java.classname;Java class used to define the Osmose grid
+grid.mask.file;CSV file with the land-sea mask (land = -99, sea = 0)
+
+grid.ncolumn;Number of longitudes
+grid.nline;Number of latitudes
+
+grid.upleft.lat;Latitude of the upper left grid corner
+grid.lowright.lat;Latitude of the lower right grid corner
+grid.upleft.lon;Longitude of the upper left grid corner
+grid.lowright.lon;Longitude of the lower right grid corner

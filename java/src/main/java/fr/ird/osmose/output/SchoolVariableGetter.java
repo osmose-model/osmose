@@ -41,7 +41,7 @@
 
 package fr.ird.osmose.output;
 
-import fr.ird.osmose.School;
+import fr.ird.osmose.AbstractSchool;
 
 /**
  *
@@ -49,6 +49,6 @@ import fr.ird.osmose.School;
  */
 public interface SchoolVariableGetter {
     
-    public double getVariable(School school);
+    public double getVariable(AbstractSchool school);
     
 }

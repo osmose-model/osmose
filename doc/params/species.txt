@@ -1,0 +1,38 @@
+Species parameters
+---------------------------------------------
+
+This section describes the species specific parameters of the Osmose configuration.
+
+:samp:`species.egg.size.sp#`: Size of eggs in centimeter
+
+:samp:`species.egg.weight.sp#` : Weight of eggs in gram
+
+:samp:`species.K.sp#`, 
+:samp:`species.lInf.sp#` and :samp:`species.t0.sp#` are Von Bertalanffy growth parameters. The von Bertalanffy growth model only applies for schools older than a threshold age defined by the parameter :samp:`species.vonbertalanffy.threshold.age.sp#`
+
+.. math:: 
+    
+    length =l_{\infty} * (1 - exp^{-K \times (age - t_0)})
+
+:samp:`species.vonbertalanffy.threshold.age.sp#`:
+Threshold age (year) for applying the von Bertalanffy growth model. Below that threshold,growth is assumed to be linear.
+
+:samp:`species.length2weight.allometric.power.sp#`
+and :samp:`species.length2weight.condition.factor.sp#` are allometric parameters such as 
+
+.. math::
+
+    W = c \times L^b
+
+where the :math:`c` parameter is a 'condition.factor', and :math:`b` the 'allometric.power'.
+
+:samp:`species.lifespan.sp#` is the lifespan of the species expressed in years. Lifespan =1 year means that the species will live one year. Lifespan = 5 years means that the species will live 5 years.
+The age of the schools is such that 0 <= age < lifespan. For example, if lifespan = 1 year, age will vary from zero included to 1 excluded ([0, 1[). If lifespan = 5 years, age will vary from zero included to 5 excluded ([0, 5[)
+
+:samp:`species.maturity.size.sp#` is the size at maturity, in centimeter
+
+:samp:`species.name.sp#` is the name of the species. **Do not use space or any special character.**
+
+:samp:`species.relativefecundity.sp#` is the number of eggs per gram of mature female
+
+:samp:`species.sexratio.sp#` is the ratio of female in the population, ranging from zero to one.

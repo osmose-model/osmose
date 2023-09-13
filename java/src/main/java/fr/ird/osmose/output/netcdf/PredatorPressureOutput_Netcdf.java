@@ -1,10 +1,10 @@
-/* 
- * 
+/*
+ *
  * OSMOSE (Object-oriented Simulator of Marine Ecosystems)
  * http://www.osmose-model.org
- * 
+ *
  * Copyright (C) IRD (Institut de Recherche pour le Développement) 2009-2020
- * 
+ *
  * Osmose is a computer program whose purpose is to simulate fish
  * populations and their interactions with their biotic and abiotic environment.
  * OSMOSE is a spatial, multispecies and individual-based model which assumes
@@ -15,7 +15,7 @@
  * processes of fish life cycle (growth, explicit predation, additional and
  * starvation mortalities, reproduction and migration) and fishing mortalities
  * (Shin and Cury 2001, 2004).
- * 
+ *
  * Contributor(s):
  * Yunne SHIN (yunne.shin@ird.fr),
  * Morgane TRAVERS (morgane.travers@ifremer.fr)
@@ -23,28 +23,27 @@
  * Philippe VERLEY (philippe.verley@ird.fr)
  * Laure VELEZ (laure.velez@ird.fr)
  * Nicolas Barrier (nicolas.barrier@ird.fr)
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation (version 3 of the License). Full description
  * is provided on the LICENSE file.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
- * 
+ *
  */
 
 package fr.ird.osmose.output.netcdf;
 
 import fr.ird.osmose.School;
 import fr.ird.osmose.Prey;
-import fr.ird.osmose.stage.DietOutputStage;
-import fr.ird.osmose.stage.IStage;
+import fr.ird.osmose.stage.SchoolStage;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -69,7 +68,7 @@ public class PredatorPressureOutput_Netcdf extends AbstractOutput_Netcdf {
     //
     private double[][][][] predatorPressure;
     // Diet output stage
-    private IStage dietOutputStage;
+    private SchoolStage dietOutputStage;
     private int nPreys;
     private int nPred;
 
@@ -147,7 +146,7 @@ public class PredatorPressureOutput_Netcdf extends AbstractOutput_Netcdf {
 
                 ipred++;
 
-            }  // end of pred stage 
+            }  // end of pred stage
         }  // end of pred species
 
         try {
@@ -158,7 +157,7 @@ public class PredatorPressureOutput_Netcdf extends AbstractOutput_Netcdf {
         } catch (IOException | InvalidRangeException ex) {
             Logger.getLogger(DietOutput_Netcdf.class.getName()).log(Level.SEVERE, null, ex);
         }
-        
+
         this.incrementIndex();
 
     }
@@ -167,7 +166,7 @@ public class PredatorPressureOutput_Netcdf extends AbstractOutput_Netcdf {
     public void init() {
 
         // Init diet output stage
-        dietOutputStage = new DietOutputStage();
+        dietOutputStage = new SchoolStage("output.diet.stage");
         dietOutputStage.init();
         super.init();
 
@@ -235,11 +234,11 @@ public class PredatorPressureOutput_Netcdf extends AbstractOutput_Netcdf {
             }
         }
 
-        Dimension predDim = getNc().addDimension(null, "pred_index", this.nPred);
-        Variable predvar = getNc().addVariable(null, "pred_index", DataType.INT, predDim.getFullName());
+        Dimension predDim = getBNc().addDimension("pred_index", this.nPred);
+        Variable.Builder<?> predvarBuilder = getBNc().addVariable("pred_index", DataType.INT, predDim.getName());
         int cpt = 0;
         for (String name : listPred) {
-            predvar.addAttribute(new Attribute(String.format("pred_index%d", cpt), name));
+            predvarBuilder.addAttribute(new Attribute(String.format("pred_index%d", cpt), name));
             cpt++;
         }
 
@@ -248,11 +247,11 @@ public class PredatorPressureOutput_Netcdf extends AbstractOutput_Netcdf {
             this.nPreys++;
         }
 
-        Dimension preyDim = getNc().addDimension(null, "prey_index", this.nPreys);
-        Variable preyvar = getNc().addVariable(null, "prey_index", DataType.INT, preyDim.getFullName());
+        Dimension preyDim = getBNc().addDimension("prey_index", this.nPreys);
+        Variable.Builder<?> preyvarBuilder = getBNc().addVariable("prey_index", DataType.INT, preyDim.getName());
         cpt = 0;
         for (String name : listPrey) {
-            preyvar.addAttribute(new Attribute(String.format("prey_index%d", cpt), name));
+            preyvarBuilder.addAttribute(new Attribute(String.format("prey_index%d", cpt), name));
             cpt++;
         }
 
@@ -261,7 +260,7 @@ public class PredatorPressureOutput_Netcdf extends AbstractOutput_Netcdf {
     }
 
     @Override
-    public void write_nc_coords() { 
+    public void write_nc_coords() {
     }
-    
+
 }

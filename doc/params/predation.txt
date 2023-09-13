@@ -1,0 +1,66 @@
+.. _predation:
+
+Predation
+---------------------------------------------
+
+The :samp:`predation.accessibility.file` is the CSV file containing the accessibility matrix for every 
+species and stages (if stages are defined, see the parameters :samp:`predation.accessibility.stage.threshold.sp#` 
+and :samp:`predation.accessibility.stage.structure`). This matrix must not be used to define diet preferences but rather to take into account 
+for a difference of positions in the water column (meaning some schools might evolve around the same geographical area but never meet because they do not occur at the same depth).
+
+.. _table_paros_acessfile:
+.. table:: Example of a CSV predation  accessibility file.
+
+    .. csv-table::
+        :delim: ;
+
+        Prey / Predator;euphausiids;cephalopods < 0.22 year;cephalopods > 0.22 year
+        euphausiids;0.8;0.8;0.8
+        cephalopods < 0.22 year;0.0;0.0;0.0
+        cephalopods > 0.22 year;0.0;0.0;0.8
+
+Each line of the matrix corresponds to a prey (including plankton groups), and each column to 
+a predator. The file must be understood as follow: euphausiids (line 1) are accessible to all 
+the predators (columns) by 80%; cephalopods < 0.22 (line 2) are not accessible to any predator; 
+and cephalopods > 0.22 (line 3) are not accessible to euphausiids and cephalopods <= 0.22 but are accessible by 80% to cephalopods > 0.22.
+
+.. warning::
+
+    **The order of the rows and columns must follow the indexing of the species and stages 
+    (e.g., species0; species1; species2 stage0; species2 stage1; species3).**
+
+
+
+:samp:`predation.accessibility.stage.structure` defines the Metrics to define the predation/prey size ratio stages (either age or size).
+
+:samp:`predation.accessibility.stage.threshold.sp#` is the thresholds array between accessibility stages, expressed either in years or in centimeters. One threshold value means that two accessibility stages are defined for this species: younge and older than the threshhold. Two threshold values mean that three stages are defined. If value is set to null, then stages are not defined.
+
+
+:samp:`predation.predPrey.stage.structure` defines the netrics to define the predation/prey size ratio stages, either age or size.
+
+:samp:`predation.predPrey.stage.threshold.sp#` defines the stages for predation/prey size ratios. It controls how many predator/prey size ratios will be defined for each species. If the value of this parameter is set to null, then no stage is defined for predator/prey size ratios.
+
+:samp:`predation.predPrey.sizeRatio.max.sp#` is the array of maximum predator prey size ratio for the different stages of each species. A maximum predator/prey size ratio = 5 means that the largest prey for a fish of this species will be 5 times smaller the fish: :math:`L_{max_{prey}} = \dfrac{L_{pred}}{50}`
+
+:samp:`predation.predPrey.sizeRatio.min.sp#` is the array of minimum predator/prey size ratio for the different stages of each species. 
+A minimum predator/prey size ratio = 500 means that the smallest prey for a fish of 
+this species will be 500 times smaller than the fish: :math:`L_{min_{prey}} = \dfrac{L_{pred}}{500}`
+
+:samp:`predation.ingestion.rate.max.sp#` is the maximum ingestion rate for each species, expressed in grams of food per gram of fish and per year. It means that, at a given time step, a school will be able to predate at maximum (biomass of the school * max ingestion rate / number of time step in one year).
+
+:samp:`predation.efficiency.critical.sp#` is the critical predation efficiency. 
+Predation success for a school is defined as the ratio of is 
+the biomass preyed over the maximum biomass that can potentially be 
+preyed (and the maximum biomass that can be preyed is defined as 
+biomass of the school * max ingestion rate / number of time step in one year). This critical predation efficiency 
+parameter defines the threshold of the predation success. If predation success is smaller than the critical 
+predation efficiency, the starvation process will be applied to the school and the fish will not grow. Conversely if the predation 
+success is bigger than the critical predation efficiency, the starvation process will not occur for the school and the fish will grow.
+
+
+
+
+
+
+
+

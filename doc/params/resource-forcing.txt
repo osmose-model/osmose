@@ -1,0 +1,59 @@
+Biotic ressources
+---------------------------------
+
+Biotic resources such as phytoplankton and zooplankton are not explicitly modelled in Osmose but are essential to take into account are they constitute the base of the trophic chain. They are considered as an input of the model, spatially explicit and varying with time.
+
+First one must define the LTL groups that are included in the configuration. In a second time, Osmose needs to know how the LTL data will be delivered.
+
+Plankton groups
+#################
+
+:samp:`plankton.accessibility2fish.plk#` is the fraction of the plankton biomass that are accessible to the fish, ranging from zero to one. This parameter accounts for many biological processes that are not explicitly represented in Osmose and basically says that only a small fraction of the plankton in the water column is effectively available to the fish for preying upon. Plankton accessibility is generally completely unknown and, just like larval mortality, it should be estimated in the calibration process.
+
+:samp:`plankton.conversion2tons.plk#` is the factor for converting biomass from plankton unit (as provided in the LTL input file) to wet weight in :math:`ton/km^2` (e.g. :math:`mmolN/m^2` to :math:`tonne/km^2`)
+
+:samp:`plankton.name.plk#` is the name of the plankton group.
+
+:samp:`plankton.size.max.plk#` and :samp:`plankton.size.min.plk#` are the minimum and maximum size of the organisms in the plankton group, in centimeters.
+
+:samp:`plankton.TL.plk#` is the trophic level of the plankton group.
+
+The :samp:`plankton.multiplier.plk#` is used for multiplying plankton biomass, in order to run different scenarios of plankton forcing in relation to a reference state (plankton.multiplier.plk0 = 1 by default for the reference state). For instance :samp:`plankton.multiplier.plk0=2` means that Osmose will multiply by two the biomass of the plankton group zero of the LTL dataset.
+
+
+
+
+
+
+
+
+LTL dataset
+#############
+
+OSMOSE expects the LTL dataset to be spatially explicit and varying with time. The plankton biomass must be provided as time series (with same time step than OSMOSE configuration) on the OSMOSE grid, in a NetCDF file (cf. :numref:`ltl_form`).
+
+The :samp:`ltl.java.classname` parameter indicates which Java class in Osmose should handle the reading of the LTL dataset. :samp:`LTLFastForcing` is the default plugin. 
+
+.. danger:: 
+
+    Do not change the default value of the :samp:`ltl.java.classname` parameter.
+
+:samp:`ltl.netcdf.file` is the path of the NetCDF file that stores the plankton biomass for every LTL group. Here is an example of the NetCDF header for the OSMOSE default configuration:
+
+:samp:`ltl.nstep` is the number of time steps in the LTL dataset file. The parameter must be a multiple of the number of time step per year. OSMOSE will loop over the LTL data through time.
+
+Constant LTL values
+####################
+
+LTL variables can be initialized by providing a total biomass in ton through the 
+:samp:`plankton.biomass.total.plk#` parameter. Note that this value is the *total* biomass within
+the domain. The value within a cell is recovered by dividing by the total number of ocean cells.
+
+.. danger::
+
+    **The constant LTL groups must be defined last, after the other LTL groups whose biomass is provided in the NetCDF file**
+
+.. LTL dataset usually comes from the output of biogeochemical models, such as NPZD, PISCES, ECO3M, 
+.. BFM, etc. OSMOSE provides a few plugins to read directly the LTL data from 
+.. the output of biogeochemical models. These plugins have been added on the go and might reveal some flaws 
+.. under scrutiny. It is recommended to provide the LTL data in the pre-defined OSMOSE format instead (as explained above). They do exist though and we mention them briefly.

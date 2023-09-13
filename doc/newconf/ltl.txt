@@ -1,0 +1,34 @@
+.. _ltl_form:
+
+Recovering LTL forcings
+***********************************
+
+**In the new version of Osmose, only one format of input files can be used.**
+
+- LTL variables should be on a regular grid
+- LTL variables should be 3D, with dimensions :samp:`(time, y, x)`
+- There is one variable per LTL species
+- The names should be consistent with the configuration files (:samp:`plankton.name.plk#` parameters)
+
+It is the user who is in charge to interpolate the raw forcing files (provided by biogeochemical models)
+into the Osmose grid (cf. :numref:`geo`). The user has to consider whether data should be vertically and/or horizontally averaged or integrated.
+
+The structure of a sample LTL forcing file is provided below:
+
+.. code-block:: none
+
+    netcdf corr_eco3m_gog44_conversion_factor {
+    dimensions:
+        longitude = 40 ;
+        latitude = 26 ;
+        time = 240 ;
+    variables:
+        double longitude(longitude) ;
+        double latitude(latitude) ;
+        int time(time) ;
+        float CILC(time, latitude, longitude) ;
+        float COPC(time, latitude, longitude) ;
+        float HNFC(time, latitude, longitude) ;
+        float PHYSN(time, latitude, longitude) ;
+        float PHYLN(time, latitude, longitude) ;
+    }

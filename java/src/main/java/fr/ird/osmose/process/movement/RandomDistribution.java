@@ -1,10 +1,10 @@
-/* 
- * 
+/*
+ *
  * OSMOSE (Object-oriented Simulator of Marine Ecosystems)
  * http://www.osmose-model.org
- * 
+ *
  * Copyright (C) IRD (Institut de Recherche pour le Développement) 2009-2020
- * 
+ *
  * Osmose is a computer program whose purpose is to simulate fish
  * populations and their interactions with their biotic and abiotic environment.
  * OSMOSE is a spatial, multispecies and individual-based model which assumes
@@ -15,7 +15,7 @@
  * processes of fish life cycle (growth, explicit predation, additional and
  * starvation mortalities, reproduction and migration) and fishing mortalities
  * (Shin and Cury 2001, 2004).
- * 
+ *
  * Contributor(s):
  * Yunne SHIN (yunne.shin@ird.fr),
  * Morgane TRAVERS (morgane.travers@ifremer.fr)
@@ -23,20 +23,20 @@
  * Philippe VERLEY (philippe.verley@ird.fr)
  * Laure VELEZ (laure.velez@ird.fr)
  * Nicolas Barrier (nicolas.barrier@ird.fr)
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation (version 3 of the License). Full description
  * is provided on the LICENSE file.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
- * 
+ *
  */
 
 package fr.ird.osmose.process.movement;
@@ -46,16 +46,17 @@ import fr.ird.osmose.School;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Random;
 
 /**
  *
  * @author pverley
  */
-public class RandomDistribution extends AbstractDistribution {
+public class RandomDistribution extends AbstractSpatialDistribution {
 
     private final int iSpeciesFile;
     private final int iSpecies;
-    
+
     private int areaSize;
     private List<Cell> randomMap;
     /*
@@ -63,13 +64,32 @@ public class RandomDistribution extends AbstractDistribution {
      */
     private int range;
 
-    public RandomDistribution(int speciesFile, int species) {
+    private Random generator;
+
+    private int rank;
+
+    public RandomDistribution(int speciesFile, int species, int rank) {
         this.iSpeciesFile = speciesFile;
         this.iSpecies = species;
+        this.rank = rank;
     }
 
     @Override
     public void init() {
+
+        boolean fixedSeed = false;
+
+        if (!getConfiguration().isNull("movement.randomseed.fixed")) {
+            fixedSeed = getConfiguration().getBoolean("movement.randomseed.fixed");
+        }
+
+        if (fixedSeed) {
+            // seed of dimension [nSpecies]
+            long seed = iSpecies + rank * getNSpecies();
+            generator = new Random(seed);
+        } else {
+            generator = new Random();
+        }
 
         if (!getConfiguration().isNull("movement.distribution.ncell.sp" + iSpeciesFile)) {
             areaSize = getConfiguration().getInt("movement.distribution.ncell.sp" + iSpeciesFile);
@@ -78,7 +98,7 @@ public class RandomDistribution extends AbstractDistribution {
             warning("Could not find parameter movement.distribution.ncell.sp" + iSpeciesFile + ". Osmose assumes that schools of " + getSpecies(iSpecies).getName() + " are distrubuted over the whole domain.");
         }
         createRandomMap();
-        
+
         if (!getConfiguration().isNull("movement.randomwalk.range.sp" + iSpeciesFile)) {
             range = getConfiguration().getInt("movement.randomwalk.range.sp" + iSpeciesFile);
         } else {
@@ -99,7 +119,7 @@ public class RandomDistribution extends AbstractDistribution {
 
         int nbCasesDispos = getGrid().getNOceanCell();
 
-        if (areaSize > nbCasesDispos) {
+        if (areaSize >= nbCasesDispos) {
             /*
              * Whole grid
              */
@@ -122,11 +142,11 @@ public class RandomDistribution extends AbstractDistribution {
             boolean[][] alreadyChoosen = new boolean[getGrid().get_ny()][getGrid().get_nx()];
             //Cell[] tabCellsArea = new Cell[speciesAreasSizeTab[numSerie][iSpecies]];
             int i, j;
-            i = (int) Math.round(Math.random() * (getGrid().get_nx() - 1));
-            j = (int) Math.round(Math.random() * (getGrid().get_ny() - 1));
+            i = (int) Math.round(generator.nextDouble() * (getGrid().get_nx() - 1));
+            j = (int) Math.round(generator.nextDouble() * (getGrid().get_ny() - 1));
             while (getGrid().getCell(i, j).isLand()) {
-                i = (int) Math.round(Math.random() * (getGrid().get_nx() - 1));
-                j = (int) Math.round(Math.random() * (getGrid().get_ny() - 1));
+                i = (int) Math.round(generator.nextDouble() * (getGrid().get_nx() - 1));
+                j = (int) Math.round(generator.nextDouble() * (getGrid().get_ny() - 1));
             }
             randomMap.add(getGrid().getCell(i, j));
             alreadyChoosen[j][i] = true;
@@ -163,7 +183,7 @@ public class RandomDistribution extends AbstractDistribution {
      * @return a cell from the list of cells.
      */
     Cell randomDeal(List<Cell> cells) {
-        int index = (int) Math.round((cells.size() - 1) * Math.random());
+        int index = (int) Math.round((cells.size() - 1) * generator.nextDouble());
         return cells.get(index);
     }
 

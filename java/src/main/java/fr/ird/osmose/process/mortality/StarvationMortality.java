@@ -74,7 +74,7 @@ public class StarvationMortality extends AbstractMortality {
 
         // starvation rate only updated if the school did feed during
         // the current time step, i.e if not egg
-        if (school.isEgg()) {
+        if (!school.isStarvationEnabled()) {
             return 0.d;
         }
 

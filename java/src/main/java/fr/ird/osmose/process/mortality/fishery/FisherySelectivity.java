@@ -106,7 +106,6 @@ public class FisherySelectivity extends OsmoseLinker {
      * Determines which function should be used to compute the selectivity.
      */
     private interface SizeSelect {
-
         double getSelectivity(int index, AbstractSchool school);
     }
 

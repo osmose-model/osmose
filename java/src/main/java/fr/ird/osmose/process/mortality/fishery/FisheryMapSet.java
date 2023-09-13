@@ -1,10 +1,10 @@
-/* 
- * 
+/*
+ *
  * OSMOSE (Object-oriented Simulator of Marine Ecosystems)
  * http://www.osmose-model.org
- * 
+ *
  * Copyright (C) IRD (Institut de Recherche pour le Développement) 2009-2020
- * 
+ *
  * Osmose is a computer program whose purpose is to simulate fish
  * populations and their interactions with their biotic and abiotic environment.
  * OSMOSE is a spatial, multispecies and individual-based model which assumes
@@ -15,7 +15,7 @@
  * processes of fish life cycle (growth, explicit predation, additional and
  * starvation mortalities, reproduction and migration) and fishing mortalities
  * (Shin and Cury 2001, 2004).
- * 
+ *
  * Contributor(s):
  * Yunne SHIN (yunne.shin@ird.fr),
  * Morgane TRAVERS (morgane.travers@ifremer.fr)
@@ -23,20 +23,20 @@
  * Philippe VERLEY (philippe.verley@ird.fr)
  * Laure VELEZ (laure.velez@ird.fr)
  * Nicolas Barrier (nicolas.barrier@ird.fr)
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation (version 3 of the License). Full description
  * is provided on the LICENSE file.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
- * 
+ *
  */
 package fr.ird.osmose.process.mortality.fishery;
 
@@ -45,8 +45,14 @@ import fr.ird.osmose.Configuration;
 import fr.ird.osmose.util.GridMap;
 import fr.ird.osmose.util.OsmoseLinker;
 import fr.ird.osmose.util.YearParameters;
+import fr.ird.osmose.util.io.ForcingFile;
+import fr.ird.osmose.util.io.ForcingFileCaching;
+import ucar.ma2.InvalidRangeException;
 import fr.ird.osmose.util.StepParameters;
+
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -103,31 +109,52 @@ public class FisheryMapSet extends OsmoseLinker {
     /**
      * List of the maps.
      */
-    private GridMap[] maps;
+    protected GridMap[] maps;
 
     /**
      * List of the pathnames of the CSV files.
      */
     private String[] mapFile;
 
-    public FisheryMapSet(String fisheryName, String prefix, String suffix) {
+    private final boolean removeDuplicate;
+
+    public FisheryMapSet(String fisheryName, String prefix, String suffix, boolean removeDuplicate) {
         this.fisheryName = fisheryName;
         this.prefix = prefix;  // should be fishery.movement
         this.suffix = suffix;
+        this.removeDuplicate = removeDuplicate;
+    }
+
+    public FisheryMapSet(String fisheryName, String prefix, String suffix) {
+        this(fisheryName, prefix, suffix, true);
     }
 
     public void init() {
 
         // Load the maps
-        this.loadMaps();
+        String key = prefix + ".netcdf.enabled";
+        if (!getConfiguration().getBoolean(key)) {
+            this.loadMaps();
 
-        // Check the map indexation
-        if (!this.checkMapIndexation()) {
-            error("Missing map indexation for Fishery index " + fisheryName + " in map series '" + prefix + ".map*'. Please refer to prior warning messages for details.", null);
+            // Check the map indexation
+            if (!this.checkMapIndexation()) {
+                error("Missing map indexation for Fishery index " + fisheryName + " in map series '" + prefix
+                        + ".map*'. Please refer to prior warning messages for details.", null);
+            }
+
+            // Get rid of redundant map definitions
+            if(this.removeDuplicate) {
+                this.eliminateTwinMap();
+            }
+
+        } else {
+            try {
+                this.loadMapsNcMaps();
+            } catch (IOException | InvalidRangeException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
         }
-
-        // Get rid of redundant map definitions
-        this.eliminateTwinMap();
 
         // Normalize all maps
         this.normalizeAllMaps();
@@ -155,7 +182,7 @@ public class FisheryMapSet extends OsmoseLinker {
         Configuration cfg = this.getConfiguration();
 
         // Count the total number of fishery maps by looking for the
-        // number of "fishery.map.index.map#" parameters 
+        // number of "fisheries.movement.fiishery.map#" parameters
         String key;
 
         key = String.format("%s.%s.map*", prefix, suffix);
@@ -168,7 +195,7 @@ public class FisheryMapSet extends OsmoseLinker {
 
             key = String.format("%s.%s.map%d", prefix, suffix, imap);
 
-// This is done if the indexing of fishering maps start with one for instance
+            // This is done if the indexing of fishering maps start with one for instance
             while (cfg.isNull(key)) {
                 imap++;
                 key = String.format("%s.%s.map%d", prefix, suffix, imap);
@@ -187,7 +214,7 @@ public class FisheryMapSet extends OsmoseLinker {
         }  // end of nmapmax loop
 
         // Initialize NSTEP arrays of gridmaps, and initialize their index to -1
-        maps = new GridMap[mapNumber.size()];
+        HashMap<Integer, GridMap> tempMaps = new HashMap<>();
         mapFile = new String[mapNumber.size()];
         int nSteps = Math.max(cfg.getNStep(), cfg.getNStepYear());
         indexMaps = new int[nSteps];
@@ -235,13 +262,21 @@ public class FisheryMapSet extends OsmoseLinker {
             if (!cfg.isNull(prefix + ".file" + ".map" + imap)) {
                 String csvFile = cfg.getFile(prefix + ".file" + ".map" + imap);
                 mapFile[n] = csvFile;
-                maps[n] = new GridMap(csvFile);
+                tempMaps.put(n, new GridMap(csvFile));
             } else {
                 mapFile[n] = null;
-                maps[n] = null;
+                tempMaps.put(n, null);
             }
-
         } // end of loop on good map numbers
+
+        maps = new GridMap[tempMaps.size()];
+        for(int i = 0; i < tempMaps.size(); i++) {
+            maps[i] = tempMaps.get(i);
+        }
+
+        tempMaps.clear();
+
+
     }  // end of method
 
     /**
@@ -336,12 +371,12 @@ public class FisheryMapSet extends OsmoseLinker {
 
         // Loop over all the cells of the current grid.
         for (Cell cell : getGrid().getCells()) {
-            // If the cell is on water and if the value is ok, then 
+            // If the cell is on water and if the value is ok, then
             // the mean and surftot are updated.
 
             if ((!cell.isLand()) && (isValueOk(map.getValue(cell)))) {
-                mean += map.getValue(cell) * cell.getSurface();
-                surftot += cell.getSurface();
+                mean += map.getValue(cell); //* cell.getSurface();
+                surftot += 1; //cell.getSurface();
             }
         }
 
@@ -381,6 +416,82 @@ public class FisheryMapSet extends OsmoseLinker {
             spatialSelect = 0.0;
         }
         return spatialSelect;
+    }
+
+
+    /**
+     * Method to initialize MapSets from NetCDF file.
+     *
+     * @author Nicolas Barrier
+     * @throws java.io.IOException
+     * @throws ucar.ma2.InvalidRangeException
+     */
+    public void loadMapsNcMaps() throws IOException, InvalidRangeException {
+
+        // Load config + nstepyear + nsteps
+        Configuration cfg = getConfiguration();
+
+        // Load the file prefix with names that are of type. movemement.map.species.mapX
+        String key = String.format("%s.%s.map*", prefix, suffix);
+        int nmapmax = getConfiguration().findKeys(key).size();
+
+        List<Integer> mapNumber = new ArrayList<>();
+        int imap = 0;
+        // Retrieve the index of the maps for this species
+        for (int n = 0; n < nmapmax; n++) {
+            while (!getConfiguration().canFind(String.format("%s.%s.map%d", prefix, suffix, imap))) {
+                imap++;
+            }
+            key = String.format("%s.%s.map%d", prefix, suffix, imap);
+            String name = getConfiguration().getString(key);
+            if (name.equals(fisheryName)) {
+                mapNumber.add(imap);
+            }
+            imap++;
+        }
+
+        if(mapNumber.size() != 1) {
+            getLogger().warning("One map should be provided for fishery");
+        }
+
+        indexMaps = new int[this.getConfiguration().getNStep()];
+
+        // Recover the first map number.
+        imap = mapNumber.get(0);
+
+        String ncFilePattern = cfg.getFile(prefix + ".file.map" + imap);
+        String varName = cfg.getString(prefix + ".variable.map" + imap);
+        int ncPerYear = cfg.getInt(prefix + ".nsteps.year.map" + imap);
+
+        // Init a NetCDF file containing movements NetCDF forcings.
+        ForcingFile forcingFile = new ForcingFile(varName, ncFilePattern, ncPerYear, 0, 1, ForcingFileCaching.ALL);
+        forcingFile.init();
+
+        // Define the indexMaps based on NetCDF index
+        for(int iStep = 0; iStep < getConfiguration().getNStep(); iStep++) {
+            int iStepNc = forcingFile.getNcStep(iStep);
+            indexMaps[iStep] = iStepNc;
+        }
+
+        // One map per timestep
+        HashMap<Integer, GridMap> tempMaps = new HashMap<>(); // dimension = [ntimeNc]
+        HashMap<Integer, double[][][]> forcingValues = forcingFile.getCachedVariable();
+        for(int i : forcingValues.keySet()) {
+           double[][] values = forcingValues.get(i)[0];
+           tempMaps.put(i, new GridMap(values));
+        }
+
+        maps = new GridMap[tempMaps.size()];
+        for(int i = 0; i < tempMaps.size(); i++) {
+            maps[i] = tempMaps.get(i);
+        }
+
+        tempMaps.clear();
+
+    }  // end of method
+
+    public int[] getIndexMap() {
+        return this.indexMaps;
     }
 
 }

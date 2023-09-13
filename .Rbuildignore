@@ -27,3 +27,7 @@ cran-comments.md
 ^java/target$
 ^java/.classpath$
 ^java/.vscode$
+^osmose.Rcheck$
+^RELEASE.md$
+^.vscode$
+^.*ipynb.*$

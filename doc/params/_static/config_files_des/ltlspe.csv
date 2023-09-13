@@ -1,0 +1,10 @@
+plankton.name.plkX;Name of the biotic ressource (i.e. name in the NetCDF file)
+plankton.accessibility2fish.plkX;Accessibility to fish (if not defined from file)
+plankton.accessibility2fish.file.plkX;File containing the time series of accessibility (if not defined, constant values are used)
+plankton.conversion2tons.plkX;Factor to convert data into tonne/km2 
+plankton.size.min.plkX;Minimum size of the biotic resource
+plankton.size.max.plkX;Maximum size of the biotic resource
+
+plankton.multiplier.plkX;Data multiplier (if not defined, set to 1)
+plankton.TL.plkX;Trophc level of the biotic resource
+plankton.biomass.total.plkX;Total biomass if uniform distribution is used (in tonne)

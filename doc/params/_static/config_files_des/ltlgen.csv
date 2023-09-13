@@ -1,0 +1,3 @@
+ltl.java.classname;Java class used to process biotic resource
+ltl.netcdf.file;NetCDF file name
+ltl.nstep;Number of time step in the LTL time series inputed to Osmose (multiple of ndt). Osmose will loop over it (if necessary) until the end of the simulation.

@@ -1,0 +1,7 @@
+Variable ; Description  ; Type ; Units
+;;;
+zlayer;Index of the temperature/oxygen layer to read;int;
+sizeMaturity; Size at maturity ; float, set to :math:`\infty`; cm
+ageMaturity; Age at maturity ; float, set to :math:`\infty`; year
+eggSize ; Size of eggs ; float, set to :math:`\infty`;  cm
+beta_bioen;Scaling exponent of maximum ingestion rate and maintenance rate with body mass;float;
