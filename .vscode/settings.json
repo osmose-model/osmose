@@ -3,7 +3,7 @@
     "java.configuration.updateBuildConfiguration": "automatic",
     "java.format.settings.url": ".vscode/eclipse-formatter.xml",
     "C_Cpp.clang_format_style": "{BasedOnStyle: LLVM, UseTab: Never, IndentWidth: 4, TabWidth: 4,  AllowShortIfStatementsOnASingleLine: false, IndentCaseLabels: true, ColumnLimit: 0, NamespaceIndentation: All}",
-    "esbonio.sphinx.confDir": "${workspaceRoot}/doc",
+    "esbonio.sphinx.confDir": "${workspaceFolder}/doc",
     "esbonio.sphinx.buildDir": "${confDir}/_build",
     "esbonio.server.excludedModules": [
         "os",
