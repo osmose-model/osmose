@@ -31,14 +31,14 @@ jobs:
         id: r-dep
         uses: actions/cache@v2
         env:
-            cache-name: r-dep-modules-v2
+            cache-name: r-dep-modules-v3
         with:
             path: /home/runner/work/_temp/Library
             key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/DESCRIPTION') }}
 
       - name: Install Osmose dependencies
         if: steps.r-dep.outputs.cache-hit != 'true'
-        run: install.packages(c("rlist", "knitr", "rmarkdown", "stringr", "ncdf4", "mgcv", "ggplot2", "spam", "viridis", "fields", "R.utils", "calibrar"), repos="http://cran.us.r-project.org")
+        run: install.packages(c("Rcpp", "rlist", "knitr", "rmarkdown", "stringr", "ncdf4", "mgcv", "ggplot2", "spam", "viridis", "fields", "R.utils", "calibrar"), repos="http://cran.us.r-project.org")
         shell: Rscript {0}
 
       - name: Build Osmose without vignettes
