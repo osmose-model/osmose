@@ -6,6 +6,11 @@
 
 - Add the bioen output of size at maturity.
 
+### Bug fix
+
+- Correction of the `BiomassDietStageOutput.write` method. There was a bug in the indexing during the conversion from 2D to 1D.
+- In `SimulationStep`,  `movementProcess.run()` is now called before `indicators.initStep()`. This in order to make sure that the initial biomass is always less than the total predated biomass.
+
 ## Osmose 4.3.3
 
 ### New features

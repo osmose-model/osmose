@@ -52,6 +52,7 @@ import fr.ird.osmose.util.filter.PresentSchoolFilter;
 import fr.ird.osmose.util.filter.SpeciesFilter;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -93,6 +94,9 @@ public class SchoolSet extends OsmoseLinker {
      */
     private final boolean[] hasSpeciesChanged;
 
+    // Define a school comparator
+    Comparator<School> schoolComparator = (School sch1, School sch2) -> Double.compare(sch1.getLength(), sch2.getLength());
+
     SchoolSet() {
         schoolset = new FilteredSet<>();
         newSchoolset = new FilteredSet<>();
@@ -114,6 +118,7 @@ public class SchoolSet extends OsmoseLinker {
      */
     public void add(School school) {
         schoolset.add(school);
+        // schoolset.sort(schoolComparator);
     }
 
     public void addReproductionSchool(School school) {
@@ -122,6 +127,7 @@ public class SchoolSet extends OsmoseLinker {
 
     public void mergeSchoolSets() {
         schoolset.addAll(newSchoolset);
+        // schoolset.sort(schoolComparator);
         newSchoolset.clear();
     }
 
