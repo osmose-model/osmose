@@ -5,6 +5,8 @@
 ### New features
 
 - Add the bioen output of size at maturity.
+- Adding some patches to run Osmose on a single cell. This mode is activated by setting  ``grid.single.cell.enabled`` to ``True``. **This mode may be much slower than 2d simulations**
+- Adding computation performance outputs (``output.cpu.performance.enabled``)
 
 ### Bug fix
 
