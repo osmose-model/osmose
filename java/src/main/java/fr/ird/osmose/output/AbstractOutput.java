@@ -94,6 +94,13 @@ abstract public class AbstractOutput extends SimulationLinker implements IOutput
 
     FlushMethod flushMethod;
 
+    private interface SchoolSetMethod {
+        public Stream<School> getSchoolSet();
+    }
+
+    SchoolSetMethod schoolSetMethod;
+
+
 ///////////////
 // Constructors
 ///////////////
@@ -113,16 +120,28 @@ abstract public class AbstractOutput extends SimulationLinker implements IOutput
         if(getConfiguration().isFlushEnabled()) {
             flushMethod = (prw) -> prw.flush();
         } else {
-            flushMethod = (prw -> {});
+            flushMethod = (prw) -> {};
         }
         this.includeOnlyAlive = includeOnlyAlive;
+        if(this.includeOnlyAlive) {
+            schoolSetMethod = () -> getAliveOutputSchoolStream() ;
+        } else {
+            schoolSetMethod = () -> getAllOutputSchoolStream() ;
+        }
+    }
+
+    public Stream<School> getAllOutputSchoolStream() {
+        return this.getSchoolSet().getSchools().stream();
+    }
+
+    public Stream<School> getAliveOutputSchoolStream() {
+        return this.getSchoolSet().getAliveSchools().stream();
     }
 
     public Stream<School> getOutputSchoolStream() {
-        Stream<School> stream = this.includeOnlyAlive ? this.getSchoolSet().getAliveSchools().stream()
-                : this.getSchoolSet().getSchools().stream();
-        return stream;
+        return schoolSetMethod.getSchoolSet();
     }
+
 
 ////////////////////////////
 // Definition of the methods
