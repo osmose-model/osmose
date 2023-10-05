@@ -17,9 +17,19 @@ In order to use Osmose from the R package, you need to install the Osmose packag
 
 ### Install from GitHub
 
+It is possible to install the Osmose package using the ``install_github``
+function as follows:
 
+```R
+library(devtools)
+install_github("osmose-model/osmose/")
+```
 
+This will download the latest commit of the ``master`` branch and use it to compile the Osmose package.
 
+### Install from sources
+
+To install the
 
 
 
