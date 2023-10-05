@@ -71,7 +71,7 @@ Using all these parameters, schools for a given species are initialized as follo
 - Using length, computes the weight using allometric relationship. If age is 0, force weight to be equal to species `eggWeight`.
 - Compute the number of individuals to put in school $i$:  $A_{s, k, i} = \dfrac{B_{s, k} \times 10^6}{N_{s, k} \times W_{s, k, i}}$
 
-The steps are summarized in {numref}`init_biomass`
+The steps are summarized in {numref}`init-biomass`
 
 (init-biomass)=
 

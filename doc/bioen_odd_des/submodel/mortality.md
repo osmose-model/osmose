@@ -7,7 +7,7 @@ mortality caused by other schools, foraging mortality, starvation mortality, fis
 other natural mortalities (i.e. senescence, diseases, and non-explicitly modeled predators). Within each time step , the different mortality sources impact a school $i$
 in a random order so as to simulate the simultaneous nature of these processes.
 
-The mortality induced by predation emerges from the energy uptake process previously described (see {numref}`energy_uptake`) and thus is an
+The mortality induced by predation emerges from the energy uptake process previously described (see {numref}`energy-uptake`) and thus is an
 explicit stochastic size-dependent process depending on the spatial co-occurrence between predators
 and preys. The predation mortality experienced by school $i$  is simply the sum of biomass losses due to the ingestion
 of all predator schools $j$ present in the same grid cell $c(i, t)$ at time step $t$  and with adequate minimum and maximum predator to prey size ratios ($R_{min}(s(j))$
@@ -52,7 +52,7 @@ $$
 N(i, t+\Delta t) = N(i, t) e^{-M_f(i) \Delta t}
 $$
 
-Starvation occurs when an individual cannot cover its maintenance needs, i.e. when net energy is negative , even by drawing energy from its gonadic reserves, i.e. when  (see {numref}`new_tissue` for details). In this case, schools undergo a decrease in biomass equaling the energetic deficit after accounting for the energy reserves contained in the gonadic compartment:
+Starvation occurs when an individual cannot cover its maintenance needs, i.e. when net energy is negative , even by drawing energy from its gonadic reserves, i.e. when  (see {numref}`new-tissue` for details). In this case, schools undergo a decrease in biomass equaling the energetic deficit after accounting for the energy reserves contained in the gonadic compartment:
 
 $$
 B(i, t + \Delta t) = B(i, t) - N(i,t) \left( \|E_P(i,t)\| - \dfrac{g(i,t)}{\eta}\right) \text{ if $\eta E_P(i, t) < -g(i,t)$}

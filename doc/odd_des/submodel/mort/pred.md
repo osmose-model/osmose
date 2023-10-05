@@ -147,7 +147,7 @@ B_{avail} = \sum_{p=preys} A(pred, prey) \times B_{prey}
 $$
 
 where $B_{avail}$ is the total accessible biomass of preys, $A(pred, prey)$ is the accessibility coefficient of the predator over
-the given prey (cf. {numref}`predation_access`) and $B_{prey}$ is the biomass of the prey.
+the given prey (cf. {numref}`predation-access`) and $B_{prey}$ is the biomass of the prey.
 
 The total biomass that a predator can eat is also computed as follow:
 

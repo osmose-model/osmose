@@ -26,7 +26,7 @@ It provides the biomass (in tons) for the given size or age classes and must be 
 The values of the class intervals (first row) are automatically scanned by Osmose. If {samp}`flux.incoming.byDt.byAge.file.sp#` is provided,
 the corresponding length will be computed from age classes using the growth `ageToLength` method.
 Conversely, if {samp}`flux.incoming.byDt.bySize.file.sp#` is provided, the corresponding age will be computed using the `lengthToAge`
-method (cf. {numref}`mermaid_init_influx`).
+method (cf. {numref}`mermaid-init-influx`).
 
 (mermaid-init-influx)=
 
@@ -50,7 +50,7 @@ The state variable that is updated is the `Simulation.schoolSet` variable, to wh
 The number of schools created for each species and each size-class is controlled by
 the `simulation.nschool.sp#` (also used in the reproduction processes). If the abundance is less than the number
 of schools, one school of abundance $A$ is created. Else, $N_{school}$ of
-abundance $\dfrac{A}{N_{school}}$ are created (cf. {numref}`mermaid_influx`).
+abundance $\dfrac{A}{N_{school}}$ are created (cf. {numref}`mermaid-influx`).
 
 (mermaid-influx)=
 

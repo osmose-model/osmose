@@ -99,7 +99,7 @@ $$
 
 a standardizing constant insuring that $\psi_M(T_P) = 1$.
 
-The thermal responses of the bioenergetic fluxes is summarized in {numref}`fig_thermal_response`
+The thermal responses of the bioenergetic fluxes is summarized in {numref}`fig-thermal-response`
 
 (fig-thermal-response)=
 

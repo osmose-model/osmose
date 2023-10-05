@@ -39,7 +39,7 @@ At the beginning of the simulation, during the initialization process, the areas
 can live is initialized:
 
 - If `ncell` is not set or is equal to the total number of ocean cells, this areas is set equal to all the ocean cells of the domain.
-- Else, one cell is first randomly picked up in the whole domain, and the domain is extended from neighbours to neighbours until the number of cells reaches `ncell` (cf. {numref}`fig_random_dis`)
+- Else, one cell is first randomly picked up in the whole domain, and the domain is extended from neighbours to neighbours until the number of cells reaches `ncell` (cf. {numref}`fig-random-dis`)
 
 (fig-random-dis)=
 
