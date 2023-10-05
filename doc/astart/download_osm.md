@@ -2,11 +2,27 @@
 
 # Installing Osmose
 
-The Osmose model is provided as a combination of a Java numerical core (referred to as Osmose-Java), associated with an Osmose R package (referred to as Osmose-R). The code is stored in two GitHub directories, a public one ([https://github.com/osmose-model/osmose](https://github.com/osmose-model/osmose)) and a private one (for developers only, [https://github.com/osmose-model/osmose-private](https://github.com/osmose-model/osmose-private)). There are several ways to install the Osmose model.
+The Osmose model is provided as a combination of a Java numerical core (referred to as Osmose Java), associated with an Osmose R package (referred to as Osmose R). The code is available on a [GitHub repository](https://github.com/osmose-model/osmose).
 
-## CRAN
+## Osmose without R
 
-The Osmose version on the {samp}`master` branch of the public repository is consistent with the most recent version of the package that is submitted to the CRAN. To install this version, open a R session and type {samp}`install.packages("osmose")`
+In order to use Osmose without R, the only thing to do is to
+download the Java Osmose binary files.
+
+They are available on the [Releases](https://github.com/osmose-model/osmose/releases) web page of the Github repository. The Java executable files are named ``osmose-X.Y.Z-jar-with-dependencies.jar``, with ``X.Y.Z`` the Osmose version. These Java executables contain all the external Java libraries required by Osmose and.
+
+## Osmose from R
+
+In order to use Osmose from the R package, you need to install the Osmose package. This can be in several ways.
+
+### Install from GitHub
+
+
+
+
+
+
+
 
 ## Manual install
 
