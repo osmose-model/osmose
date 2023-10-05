@@ -134,7 +134,7 @@ todo_emit_warnings = True
 exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store', 'alias.md', 'index_private.md', 'index_public.md', 'calib.md', 'misc.md', 'README.md']
 exclude_patterns += glob(os.path.join('calib', '*md'))
 exclude_patterns += glob(os.path.join('misc', '*md'))
-exclude_patterns += glob(os.path.join('astart', '*md'))
+exclude_patterns += glob(os.path.join('astart', 'running.md'))
 exclude_patterns += glob(os.path.join('rosmose', '*md'))
 
 exclude_patterns += glob(os.path.join('odd_des', 'submodel', '_static', 'mermaid', '*md'))
@@ -165,6 +165,7 @@ numfig = True
 numfig_secnum_depth = (1)
 
 html_theme = "sphinx_rtd_theme"
+html_logo = os.path.join('_static', 'logo-osmose.svg')
 
 # Theme options are theme-specific and customize the look and feel of a theme
 # further.  For a list of options available for each theme, see the

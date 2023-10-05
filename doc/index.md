@@ -29,6 +29,21 @@ The Osmose model assumes opportunistic predation based on spatial co-occurrence 
 % It contains a full documentation of the |os| model and of the R packages dedicated to the model calibration and pre/post-processing.
 
 ```{toctree}
+:caption: 'User guide:'
+:maxdepth: 1
+:numbered: true
+
+astart/down_java.md
+astart/download_osm.md
+astart/download_nc.md
+astart/arch.md
+astart/calib_inst.md
+astart/compile_java.md
+astart/running.md
+
+```
+
+```{toctree}
 :caption: 'Contents:'
 :maxdepth: 1
 :numbered: true
@@ -36,7 +51,6 @@ The Osmose model assumes opportunistic predation based on spatial co-occurrence 
 odd_des.md
 bioen_odd_des.md
 evo_odd_des.md
-astart.md
 osmose.md
 osmose-econ.md
 rosmose.md
