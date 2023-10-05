@@ -7,9 +7,9 @@ You ran successfully the default configuration, you may have explored quickly th
     :maxdepth: 2
     :caption: Contents:
     
-    newconf/geo.rst
-    newconf/ltl.rst
-    newconf/grid.rst
+    newconf/geo.md
+    newconf/ltl.md
+    newconf/grid.md
 
 
 
