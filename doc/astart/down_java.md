@@ -34,7 +34,7 @@ To see how to set environment variables in Windows, click
 :::
 
 
-## Installing NetCDF library (Osmose >= 4.3)
+## Installing NetCDF library
 
 Since Osmose extensively uses NetCDF files, the NetCDF4 library
 need to be installed.
@@ -57,10 +57,10 @@ sudo apt-get install netcdf4
 
 ### Windows
 
-To install the library on a Windows system, first download and install the HDF5 library in
+To install the library on a Windows system, first download and install the HDF5 library from the
 [HDF5 website](https://www.hdfgroup.org/downloads/hdf5/).
 
-Then download and install the NetCDF library in
+Then download and install the NetCDF library from the
 [Unidata website](https://www.unidata.ucar.edu/software/netcdf/docs/winbin.html)
 
 :::{caution}

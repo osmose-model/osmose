@@ -70,7 +70,7 @@
 #' }
 #' @export
 run_osmose = function(input, parameters = NULL, output = NULL, log = "osmose.log",
-                      version = NULL, osmose = NULL, java = "java",
+                      version = "4.3.3", osmose = NULL, java = "java",
                       options = NULL, verbose = TRUE, clean = TRUE, force = FALSE){
 
   package_version = packageVersion("osmose")
@@ -89,7 +89,7 @@ run_osmose = function(input, parameters = NULL, output = NULL, log = "osmose.log
   if (is.null(osmose)) {
     if (!is.null(version)) {
       if(.compareVersion(version, "4.3.0") >= 0) {
-        osmose_name = sprintf("osmose_%s-jar-with-dependencies.jar", version)
+        osmose_name = sprintf("osmose-%s-jar-with-dependencies.jar", version)
       } else {
         osmose_name = sprintf("osmose_%s.jar", version)
         lib = cacheManager("lib")
