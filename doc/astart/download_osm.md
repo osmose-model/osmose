@@ -112,3 +112,22 @@ graph TD;
     id4 -->|yes| id5
 
 ```
+
+## Datarmor install
+
+In this section, the easiest way to install Osmose on the Datarmor HPC is described.
+
+From the Terminal, first load the necessary modules:
+
+```bash
+module load R/3.6.3-intel-cc-17.0.2.174
+module load nco
+```
+
+:::{warning}
+To use parallel R features, this specific R module is required
+:::
+
+:::{note}
+The ``nco`` module is needed to have access to the NetCDF library
+:::
