@@ -80,6 +80,7 @@ It is also recommended to install the RStudio GUI ([https://rstudio.com/](https:
 For those who do not intend to use the R package, skip this part
 :::
 
+(sec-install-libraries)=
 
 ## Installing R libraries
 

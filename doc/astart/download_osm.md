@@ -65,6 +65,8 @@ can be simply done by pulling changes from the remote folder.
 Note that the code must be reinstalled using the ``R CMD INSTALL osmose`` command anytime the sources are updated.
 :::
 
+(java-executable)=
+
 ## Java executable
 
 When installing the Osmose R package, no java executable is provided. The latter will be automatically downloaded by
@@ -74,7 +76,7 @@ The location where the executable files will be downloaded must be specified in 
 [this article](https://support.posit.co/hc/en-us/articles/360047157094-Managing-R-with-Rprofile-Renviron-Rprofile-site-Renviron-site-rsession-conf-and-repos-conf) for a description of ``.Renviron``
 file).
 
-Edit the ``.Renviron`` file and set the ``OSMOSE_DIR`` variable to the destination folder:
+Create or edit the ``.Renviron`` file and set the ``OSMOSE_DIR`` variable to the destination folder:
 
 ```bash
 OSMOSE_DIR=/home/barrier/Work/codes/osmose-executables
@@ -117,10 +119,13 @@ graph TD;
 
 In this section, the easiest way to install Osmose on the Datarmor HPC is described.
 
+### Set-up
+
 From the Terminal, first load the necessary modules:
 
 ```bash
 module load R/3.6.3-intel-cc-17.0.2.174
+module load java/openjdk-16.0.2
 module load nco
 ```
 
@@ -131,3 +136,71 @@ To use parallel R features, this specific R module is required
 :::{note}
 The ``nco`` module is needed to have access to the NetCDF library
 :::
+
+Edit the ``~/.Renviron`` file and define the ``R_LIBS_USER`` environment variables as follows:
+
+```bash
+R_LIBS_USER=/home1/datawork/nbarrier/libs/R/lib
+```
+
+It specifies the location where the R library will be insalled.
+
+:::{caution}
+
+When running a Job on Datarmor, you do not have access to the internet. Therefore, the Java executables cannot be downloaded as discussed in {numref}`java-executable`. Therefore, the ``OSMOSE_DIR`` environment variable is not required, since the Java code needs to be manually compiled, as discussed in {numref}`java-compile-datarmor`
+:::
+
+Next, install the required libraries as done in {numref}`sec-install-libraries`.
+
+### Cloning the code
+
+To clone the code, you will need to use the dedicated Conda environments. Create a `~/.condarc` file, which contains the following lines:
+
+```bash
+envs_dirs:
+  - /home1/datahome/nbarrier/softwares/anaconda3-envs
+  - /appli/conda-env
+  - /appli/conda-env/2.7
+  - /appli/conda-env/3.6
+channels:
+  - conda-forge
+  - defaults
+```
+
+When done, type the following:
+
+```bash
+. /appli/anaconda/latest/etc/profile.d/conda.sh
+```
+
+Then, type:
+```
+conda activate git
+```
+
+This will give you access to a Git executable configured with the LFS support.
+
+Finally, type the following:
+
+```
+git clone https://github.com/osmose-model/osmose.git
+```
+
+(java-compile-datarmor)=
+
+### Compiling the code
+
+To compile the code from Datarmor, you will to use the ``maven`` conda environment. To activate it:
+
+```
+. /appli/anaconda/latest/etc/profile.d/conda.sh
+conda activate maven
+```
+
+Then, go in the ``osmose`` folder and type:
+
+```
+mvn package
+```
+
+The Java executable file will be created on the ``inst/java/`` folder of the ``osmose`` directory.
