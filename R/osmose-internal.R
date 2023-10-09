@@ -317,26 +317,25 @@
 # @return A 3D array (time, species, replicates) or NULL if no file is found.
 .read_1D = function(files, path, ...) {
   # TO_DO: change for the unified approach! species as list
-  if(length(files)!=0) {
-    x = .readOsmoseCsv(file.path(path, files[1]), ...)
-    if(is.null(x)) return(NULL)
-    species = names(x)
-    times   = rownames(x)
-
-    output = array(dim=c(dim(x),length(files)))
-    output[,,1] = as.matrix(x)
-    if(length(files)>1) {
-      for(i in seq_along(files[-1])) {
-        x = .readOsmoseCsv(file.path(path, files[i+1]), ...)
-        output[,,i+1]= as.matrix(x)
-      }
+  if(length(files)==0) return(NULL)
+  
+  x = .readOsmoseCsv(file.path(path, files[1]), ...)
+  if(is.null(x)) return(NULL)
+  species = names(x)
+  times   = rownames(x)
+  
+  output = array(dim=c(dim(x),length(files)))
+  output[,,1] = as.matrix(x)
+  if(length(files)>1) {
+    for(i in seq_along(files[-1])) {
+      x = .readOsmoseCsv(file.path(path, files[i+1]), ...)
+      output[,,i+1]= as.matrix(x)
     }
-    rownames(output) = times
-    colnames(output) = species
-  } else {
-    output = NULL
   }
-
+  rownames(output) = times
+  colnames(output) = species
+  names(dimnames(output)) = c("time", "species", "replicates")
+  
   return(output)
 }
 
@@ -387,6 +386,7 @@
       dnames = dimnames(y)[1:3]
       dim(y) = dim(y)[-length(dim(y))]
       dimnames(y) = dnames
+      names(dimnames(y)) = c("time", "species", "replicates")
       output[[i]] = y #drop(y) no drop!
     }
 

@@ -126,7 +126,7 @@ run_osmose = function(input, parameters = NULL, output = NULL, log = "osmose.log
     output = .getPar(conf, "output.dir.path")
     input_dir = dirname(input)
     output = file.path(input_dir, output)
-  }else{
+  } else {
     # else, overwrites the Osmose output parameter
     if(.compareVersion(version, versionRef) < 0) {
       outDir = output

@@ -90,7 +90,8 @@ osmosePlots2D = function(x, species, speciesNames, start, end, initialYear, ts,
   if(end > dim(x)[1] | end < start) stop("Incorrect value for 'end' argument")
   
   # Subset x (colummns) by using start and end
-  x = x[seq(start, end), , ,drop = FALSE]
+  if(length(dim(x))==2) dim(x) = c(dim(x), 1)
+  x = x[seq(start, end), , , drop = FALSE]
   
   # Define default values for initialYear
   if(is.null(initialYear)) initialYear = 0

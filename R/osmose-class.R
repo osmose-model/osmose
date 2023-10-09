@@ -73,15 +73,20 @@ plot.osmose = function(x, what = "biomass", ...) {
 #' function).
 #' @param what Name of variable to extract. See Details.
 #' @param how How to return the object. Current options are "matrix" and "list".
-#' @param expected A logical parameter. If \code{TRUE}, the average over the 
+#' @param expected Logical. If \code{TRUE}, the average over the 
 #' last dimensions will be performed (only if the output is an array).
 #' @param no.error Return NULL instead of and error if variable not found.
+#' @param drop Logical. If \code{TRUE}, degenerated dimensions are droped.
+#' @param size A positive integer indicating how many replicate to sample, possibly at random.
+#' @param random Logical. If \code{TRUE}, \code{n} replicates are taken, after sampling. 
+#' @param replace should sampling be with replacement?
 #' @param ... Additional arguments of the function.
 #' @rdname get_var
 #' @method get_var osmose
 #' @export
 get_var.osmose = function(object, what, how = c("matrix", "list"), 
-                          expected = FALSE, no.error=FALSE, drop=TRUE, ...){
+                          expected = FALSE, no.error=FALSE, drop=TRUE, 
+                          size=NULL, random=FALSE, replace=FALSE, ...){
   
   # Argument verification of 'how' using partial matching
   how = match.arg(how)
@@ -99,10 +104,42 @@ get_var.osmose = function(object, what, how = c("matrix", "list"),
     stop(sprintf(msg, what)) 
   }
   
+  if(!is.null(size)) {
+    
+    if(length(size)>1) stop("Size for sampling replicates must be an integer.")
+
+    if(is.array(out)) nrep = tail(dim(out), 1)
+    if(is.list(out)) nrep = tail(dim(out[[1]]), 1)
+
+    .get_sample = function(x, ind) {
+      oclass = class(x)
+      if(length(dim(x))==2) x = x[, ind, drop=FALSE]
+      if(length(dim(x))==3) x = x[, , ind, drop=FALSE]
+      if(length(dim(x))==4) x = x[, , , ind, drop=FALSE]
+      class(x) = oclass
+      return(x)
+    }
+    
+    if(isTRUE(random)) {
+      ind = sample(x=nrep, size=size, replace=replace)
+    } else {
+      if(size>nrep) {
+        warning("Size is greter than number of replicates, returning all.")
+        size = nrep
+      }
+      ind = seq_len(size)  
+    }
+       
+    if(is.array(out)) out = .get_sample(out, ind)
+    if(is.list(out))  out = lapply(out, FUN=.get_sample, ind=ind)
+    
+  }
+  
   .expected = function(x, drop) {
     out = apply(x, c(1, 2), mean, na.rm = TRUE)
     if(isTRUE(drop)) out = drop(out)
     if(is.null(dim(out))) names(out) = NULL
+    class(out) = class(x)
     return(out)
   }
     

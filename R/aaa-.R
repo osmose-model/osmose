@@ -42,7 +42,7 @@ NULL
 NULL
 #' @importFrom stats median sd quantile setNames dlnorm dnorm qnorm
 NULL
-#' @importFrom utils read.csv read.table write.table tail write.csv head packageVersion read.csv2 type.convert relist as.relistable
+#' @importFrom utils read.csv read.table write.table tail write.csv head packageVersion read.csv2 type.convert relist as.relistable tail head
 NULL
 #' @importFrom R.utils getRelativePath
 NULL
