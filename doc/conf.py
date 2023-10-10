@@ -134,7 +134,6 @@ todo_emit_warnings = True
 exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store', 'alias.md', 'index_private.md', 'index_public.md', 'calib.md', 'misc.md', 'README.md']
 exclude_patterns += glob(os.path.join('calib', '*md'))
 exclude_patterns += glob(os.path.join('misc', '*md'))
-exclude_patterns += glob(os.path.join('astart', 'running.md'))
 exclude_patterns += glob(os.path.join('rosmose', '*md'))
 
 exclude_patterns += glob(os.path.join('odd_des', 'submodel', '_static', 'mermaid', '*md'))
@@ -148,11 +147,6 @@ pygments_style = 'sphinx'
 
 # If true, `todo` and `todoList` produce output, else they produce nothing.
 todo_include_todos = True
-
-# Included at the beginning of every source file that is read.
-with open('alias.md', 'r') as pr:
-    rst_prolog = pr.read()
-
 
 # -- Options for HTML output ----------------------------------------------
 

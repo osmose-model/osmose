@@ -6,3 +6,12 @@
     color: hsl(0, 0%, 100%);
     font-weight: bold;
 }
+
+.rst-content .linenodiv pre,
+.rst-content div[class^=highlight] pre,
+.rst-content pre.literal-block {
+    font-family: SFMono-Regular, Menlo, Monaco, Consolas, Liberation Mono, Courier New, Courier, monospace;
+    font-size: 12px;
+    background-color: #ddf2ff;
+    line-height: 1.4
+}

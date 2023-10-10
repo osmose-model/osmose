@@ -1,21 +1,11 @@
-# Running the test configuration
+# Running Osmose
+
+Now that the R package is installed, let's try to run the model.
 
 To run the test configuration, launch {samp}`R` and type the following:
 
 ```{literalinclude} _static/run_testconf.R
 :language: R
-```
-
-```{eval-rst}
-.. ipython:: python
-    :suppress:
-
-    import os
-    import subprocess
-    cwd = os.getcwd()
-
-    fpath = "astart/_static/run_testconf.R"
-    subprocess.call(["Rscript", fpath], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
 ```
 
 You should obtain the following figure:
