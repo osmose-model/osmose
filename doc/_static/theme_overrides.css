@@ -1,3 +1,8 @@
 .tight-table td {
     white-space: normal !important;
 }
+
+.wy-side-nav-search>div.version {
+    color: hsl(0, 0%, 100%);
+    font-weight: bold;
+}
