@@ -1,6 +1,6 @@
 (odd-des)=
 
-# ODD description
+# Introduction
 
 The present section contains all the necessary information and guidelines to help understand the principles
 and assumptions of the OSMOSE model, apply it to a specific case study and run simulations for addressing
@@ -10,16 +10,3 @@ focuses on fish species and their trophic interactions ({cite}`Shin2001,Shin2004
 
 The model description in this section follows the ODD ("Overview", "Design concept" and "Details") protocol for describing
 individual- or agent-based models ({cite}`GRIMM20102760,GRIMM20102760,grimm2020`).
-
-```{toctree}
-:caption: 'Contents:'
-:maxdepth: 1
-
-odd_des/purpose.md
-odd_des/statevar.md
-odd_des/proc_sche.md
-odd_des/design_concepts.md
-odd_des/init.md
-odd_des/input.md
-odd_des/submodel.md
-```

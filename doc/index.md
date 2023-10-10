@@ -38,6 +38,21 @@ astart/download_osm.md
 astart/datarmor.md
 ```
 
+```{toctree}
+:caption: 'Osmose ODD description:'
+:maxdepth: 1
+:numbered: true
+
+odd_des.md
+odd_des/purpose.md
+odd_des/statevar.md
+odd_des/proc_sche.md
+odd_des/design_concepts.md
+odd_des/init.md
+odd_des/input.md
+odd_des/submodel.md
+```
+
 <!--
 astart/arch.md
 astart/calib_inst.md
@@ -47,11 +62,22 @@ astart/running.md
 -->
 
 ```{toctree}
+:caption: 'Bioen-Osmose ODD description:'
+:maxdepth: 1
+:numbered: true
+
+bioen_odd_des.md
+bioen_odd_des/design_concepts.md
+bioen_odd_des/statevar.md
+bioen_odd_des/submodel.md
+```
+
+
+```{toctree}
 :caption: 'Contents:'
 :maxdepth: 1
 :numbered: true
 
-odd_des.md
 bioen_odd_des.md
 evo_odd_des.md
 osmose.md

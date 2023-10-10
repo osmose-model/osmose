@@ -1,6 +1,6 @@
 (bioen-odd-des)=
 
-# BIOEN-OSMOSE ODD description
+# Introduction
 
 The present section contains all the necessary information and guidelines to help understand the principles
 and assumptions of the Bioenergetic version (BIOEN-OSMOSE) version of the OSMOSE model, apply it to a specific case study and run simulations for addressing
@@ -15,12 +15,3 @@ specific issues.
 % The model description in this section follows the ODD ("Overview", "Design concept" and "Details") protocol for describing
 
 % individual- or agent-based models (:cite:`GRIMM20102760,GRIMM20102760,grimm2020`).
-
-```{toctree}
-:caption: 'Contents:'
-:maxdepth: 1
-
-bioen_odd_des/design_concepts.md
-bioen_odd_des/statevar.md
-bioen_odd_des/submodel.md
-```
