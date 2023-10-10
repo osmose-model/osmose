@@ -35,12 +35,16 @@ The Osmose model assumes opportunistic predation based on spatial co-occurrence 
 
 astart/down_java.md
 astart/download_osm.md
+astart/datarmor.md
+```
+
+<!--
 astart/arch.md
 astart/calib_inst.md
 astart/compile_java.md
 astart/running.md
-
 ```
+-->
 
 ```{toctree}
 :caption: 'Contents:'
