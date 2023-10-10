@@ -29,6 +29,18 @@ $$
 N(i, t+\Delta t) = N(i, t) (1 - \sum_j \dfrac{\gamma(s(j), s(i))}{P(j,t)} I(j,t)
 $$
 
+```{eval-rst}
+.. ipython:: python
+    :suppress:
+
+    import os
+    import subprocess
+    cwd = os.getcwd()
+    print(cwd)
+    fpath = "bioen_odd_des/submodel/_static/plot_repfonct.py"
+    subprocess.call(["python", fpath])
+```
+
 :::{figure} _static/repfonct_bioen.*
 :align: center
 
