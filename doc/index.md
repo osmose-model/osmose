@@ -77,8 +77,6 @@ bioen_odd_des/submodel.md
 :caption: 'Contents:'
 :maxdepth: 1
 :numbered: true
-
-bioen_odd_des.md
 evo_odd_des.md
 osmose.md
 osmose-econ.md
