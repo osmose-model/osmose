@@ -48,6 +48,8 @@ import fr.ird.osmose.stage.ClassGetter;
 import fr.ird.osmose.stage.SchoolStage;
 import fr.ird.osmose.util.AccessibilityManager;
 import fr.ird.osmose.util.Matrix;
+
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -273,12 +275,14 @@ public class PredationMortality extends AbstractMortality {
      */
     public double[] getAccessibility(IAggregation predator, List<IAggregation> preys) {
 
+        predator.resetAccessiblePreyIndex();
+        List<Double> accessibility = new ArrayList<>();
+
         int iAccessPred = accessibilityMatrix.getIndexPred(predator);
 
         // Number of predators species. Used to offeset resource percentage index
         int nSpecies = this.getNSpecies() + this.getNBkgSpecies();
 
-        double[] accessibility = new double[preys.size()];
         int iSpecPred = predator.getSpeciesIndex();
         int iPredPreyStage = predPreyStage.getStage(predator);
         double preySizeMax = predator.getLength() / predPreySizesMax[iSpecPred][iPredPreyStage];
@@ -294,19 +298,28 @@ public class PredationMortality extends AbstractMortality {
                 }
                 if (prey.getLength() >= preySizeMin && prey.getLength() < preySizeMax) {
                     int iAccessPrey = accessibilityMatrix.getIndexPrey(prey);
-                    accessibility[iPrey] = accessibilityMatrix.getValue(iAccessPrey, iAccessPred);
-                } else {
-                    accessibility[iPrey] = 0.d; // no need to do it since initialization already set it to zero
+                    double tempAccess = accessibilityMatrix.getValue(iAccessPrey, iAccessPred);
+                    if (tempAccess > 0) {
+                        accessibility.add(tempAccess);
+                        predator.addAccessiblePreyIndex(iPrey);
+                    }
                 }
             } else {
                 int iAccessPrey = accessibilityMatrix.getIndexPrey(prey);
                 int iSpecPrey = preys.get(iPrey).getSpeciesIndex(); // get species index with offset
                 // The prey is a resource group
-                accessibility[iPrey] = accessibilityMatrix.getValue(iAccessPrey, iAccessPred)
+                double tempAccess = accessibilityMatrix.getValue(iAccessPrey, iAccessPred)
                         * percentResource[iSpecPrey - nSpecies];
+                if(tempAccess > 0) {
+                    predator.addAccessiblePreyIndex(iPrey);
+                    accessibility.add(tempAccess);
+                }
             }
         }
-        return accessibility;
+
+        double[] accessibilityArray = accessibility.stream().mapToDouble(v -> v).toArray();
+
+        return accessibilityArray;
     }
 
     @Override

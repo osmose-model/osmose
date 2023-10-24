@@ -179,11 +179,13 @@ public class MapDistribution extends AbstractSpatialDistribution {
                 }
                 indexCell = (int) Math.round((nCells - 1) * rd1.nextDouble());
                 proba = map.getValue(getGrid().getCell(indexCell));
-            } while (proba <= 0.d || proba < rd2.nextDouble() * maxProbaPresence[indexMap] || Double.isNaN(proba));
+            } while (proba <= 0.d || proba < rd2.nextDouble() * maxProbaPresence[indexMap] || Double.isNaN(proba) || getGrid().getCell(indexCell).isLand());
             school.moveToCell(getGrid().getCell(indexCell));
         } else {
             // Random move in adjacent cells contained in the map.
-            school.moveToCell(randomDeal(getAccessibleCells(school, map), rd3));
+            List<Cell> accessibleCells = getAccessibleCells(school, map);
+            Cell destinationCell = randomDeal(accessibleCells, rd3);
+            school.moveToCell(destinationCell);
         }
     }
 

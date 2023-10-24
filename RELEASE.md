@@ -5,6 +5,15 @@
 ### New features
 
 - Add the bioen output of size at maturity.
+- Adding some patches to run Osmose on a single cell. This mode is activated by setting  ``grid.single.cell.enabled`` to ``True``. **This mode may be much slower than 2d simulations**
+- Adding computation performance outputs (``output.cpu.performance.enabled``)
+
+### Bug fix
+
+- Correction of the `BiomassDietStageOutput.write` method. There was a bug in the indexing during the conversion from 2D to 1D.
+- In `SimulationStep`,  `movementProcess.run()` is now called before `indicators.initStep()`. This in order to make sure that the initial biomass is always less than the total predated biomass.
+- In spatial outputs (`SpatialAbundanceOutput.java` for instance), only cut-off ages were working, not cut-off length. This has been corrected.
+- Correction in MPA initialization when using restart files. In some cases, the `isUpToDate` variable of the `setMPA` method was always `true`, therefore the fishing effort was never modified. Besides, MPA index as defined in the configuration files (``.mpaXX``) were expected to start from 0 onward. Now any index can work, as for species.
 
 ## Osmose 4.3.3
 

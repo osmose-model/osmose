@@ -132,9 +132,11 @@ public class BiomassDietStageOutput extends AbstractOutput {
     public void write(float time) {
         double[] biomass = new double[nColumns];
         double nsteps = getRecordFrequency();
+        int cpt = 0;
         for (int k = 0; k < this.getNAllSpecies(); k++) {
             for (int s = 0; s < dietOutputStage.getNStage(k); s++) {
-                biomass[k] = biomassStage[k][s] / nsteps;
+                biomass[cpt] = biomassStage[k][s] / nsteps;
+                cpt += 1;
             }
         } // end of species loop
         writeVariable(time, biomass);

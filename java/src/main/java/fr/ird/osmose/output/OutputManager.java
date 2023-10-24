@@ -411,13 +411,13 @@ public class OutputManager extends SimulationLinker {
         if (getConfiguration().getBoolean("output.yield.biomass.enabled")) {
             outputs.add(new SpeciesOutput(rank, null, "yield",
                     "cumulative catch (tons per time step of saving). ex: if time step of saving is the year, then annual catches are saved",
-                    school -> school.abd2biom(school.getNdead(MortalityCause.FISHING)), false));
+                    school -> school.abd2biom(school.getNdead(MortalityCause.FISHING)), false, false));
         }
 
         if (getConfiguration().getBoolean("output.yield.abundance.enabled")) {
             outputs.add(new SpeciesOutput(rank, null, "yieldN",
                     "cumulative catch (number of fish caught per time step of saving). ex: if time step of saving is the year, then annual catches in fish numbers are saved",
-                    school -> school.getNdead(MortalityCause.FISHING), false));
+                    school -> school.getNdead(MortalityCause.FISHING), false, false));
         }
 
         // Size
@@ -443,31 +443,31 @@ public class OutputManager extends SimulationLinker {
         if (getConfiguration().getBoolean("output.size.catch.enabled")) {
             outputs.add(new WeightedSpeciesOutput(rank, "SizeIndicators", "meanSizeCatch",
                     "Mean size of fish species in cm, weighted by fish numbers in the catches, and including first ages specified in input.",
-                    school -> school.getLength(), school -> school.getNdead(MortalityCause.FISHING)));
+                    school -> school.getLength(), school -> school.getNdead(MortalityCause.FISHING), false));
         }
 
         if (getConfiguration().getBoolean("output.yield.abundance.bySize.enabled")) {
             outputs.add(new DistribOutput(rank, "SizeIndicators", "yieldN",
                     "Distribution of cumulative catch (number of fish per time step of saving)",
-                    school -> school.getNdead(MortalityCause.FISHING), sizeDistrib, false));
+                    school -> school.getNdead(MortalityCause.FISHING), sizeDistrib, false, false));
         }
 
         if (getConfiguration().getBoolean("output.yield.biomass.bySize.enabled")) {
             outputs.add(new DistribOutput(rank, "SizeIndicators", "yield",
                     "Distribution of cumulative catch (tonne per time step of saving)",
-                    school -> school.abd2biom(school.getNdead(MortalityCause.FISHING)), sizeDistrib, false));
+                    school -> school.abd2biom(school.getNdead(MortalityCause.FISHING)), sizeDistrib, false, false));
         }
 
         if (getConfiguration().getBoolean("output.yield.abundance.byWeight.enabled")) {
             outputs.add(new DistribOutput(rank, "Indicators", "yieldN",
                     "Distribution of cumulative catch (number of fish per time step of saving)",
-                    school -> school.getNdead(MortalityCause.FISHING), weightDistrib, false));
+                    school -> school.getNdead(MortalityCause.FISHING), weightDistrib, false, false));
         }
 
         if (getConfiguration().getBoolean("output.yield.biomass.byWeight.enabled")) {
             outputs.add(new DistribOutput(rank, "Indicators", "yield",
                     "Distribution of cumulative catch (tonne per time step of saving)",
-                    school -> school.abd2biom(school.getNdead(MortalityCause.FISHING)), weightDistrib, false));
+                    school -> school.abd2biom(school.getNdead(MortalityCause.FISHING)), weightDistrib, false, false));
         }
 
         if (getConfiguration().getBoolean("output.meanSize.byAge.enabled")) {
@@ -610,6 +610,10 @@ public class OutputManager extends SimulationLinker {
         if (getConfiguration().getBoolean("output.individual.enabled", NO_WARNING)) {
             ModularSchoolSetSnapshot modOutput = new ModularSchoolSetSnapshot(rank);
             outputs.add(modOutput);
+        }
+
+        if (getConfiguration().getBoolean("output.cpu.performance.enabled", NO_WARNING)) {
+            outputs.add(new PerformanceOutput(rank, null, "cpuPerformance"));
         }
 
         if (getConfiguration().isBioenEnabled()) {
