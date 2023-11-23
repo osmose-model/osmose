@@ -1,6 +1,6 @@
-(odd-des)=
+# Osmose ODD description
 
-# Introduction
+## Introduction
 
 The present section contains all the necessary information and guidelines to help understand the principles
 and assumptions of the OSMOSE model, apply it to a specific case study and run simulations for addressing
