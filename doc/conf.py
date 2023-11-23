@@ -45,7 +45,7 @@ extensions = ['sphinx.ext.todo',
     'matplotlib.sphinxext.plot_directive',
     'sphinxcontrib.mermaid',
     'sphinx_rtd_theme',
-    'myst_parser'
+    'myst_nb'
 ]
 
 plantuml = 'plantuml'
@@ -63,7 +63,7 @@ templates_path = ['_templates']
 
 # The suffix(es) of source filenames.
 # You can specify multiple suffix as a list of string:
-source_suffix = {'.md': 'markdown'}
+source_suffix = {'.md': 'myst-nb'}
 
 myst_enable_extensions = [
     "amsmath",
@@ -171,10 +171,10 @@ html_logo = os.path.join('_static', 'logo-osmose.svg')
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
 html_static_path = ['_static']
-html_css_files = ['theme_overrides.css']
+#html_css_files = ['theme_overrides.css']
 
-def setup(app):
-   app.add_css_file('theme_overrides.css')
+#def setup(app):
+#   app.add_css_file('theme_overrides.css')
 
 # -- Options for HTMLHelp output ------------------------------------------
 

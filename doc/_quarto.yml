@@ -1,0 +1,15 @@
+project:
+  type: book
+
+book:
+  title: "Osmose documentation"
+  author: "Norah Jones"
+  chapters:
+    - index.qmd
+    - astart.qmd
+
+bibliography: _static/biblio.bib
+
+format:
+  html:
+    theme: cosmo
