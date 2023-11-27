@@ -44,6 +44,8 @@ osmose_calibration_setup = function(input, osmose, name=NULL, data_path=NULL, ty
   file.copy(from=osmose, to=file.path(dir, nosmose))
   osmose = file.path("..", nosmose)
   
+  reltol = if(is.null(control$reltol)) 5e-5 else control$reltol
+  
   # Create dir and file names -----------------------------------------------
   
   control$dir = dir
@@ -127,12 +129,18 @@ osmose_calibration_setup = function(input, osmose, name=NULL, data_path=NULL, ty
     file.copy(from=ofile, to=control$dir, overwrite = TRUE)
   }
   
+  # read maximum number of phases
+  reltol = .set_reltol(read_osmose(allfiles["phase"]), reltol=reltol)
+  reltol = sprintf("reltol = %s", paste(reltol, collapse=", "))
+  
   # copy this files as hidden
   files = c("calibration.R", "calibrartest", "calibrarrc")
   for(ifile in files) {
     ofile = system.file(file.path("calibration", ifile), package="osmose")
     file.copy(from=ofile, to=file.path(control$dir, sprintf(".%s", ifile)), overwrite = TRUE)
   }
+  # add specific relative tolerance for this application.
+  cat(reltol, file=file.path(control$dir, sprintf(".%s", ifile)), append = TRUE)
   
   # copy files according to calibration type
   # run_model:
@@ -143,7 +151,7 @@ osmose_calibration_setup = function(input, osmose, name=NULL, data_path=NULL, ty
     message("A 'run_model.R' script was found, conserving it.\n")
   }
   
-  # output configuration file:
+  # output configuration file
   outtmp = sprintf("calibration/output-configuration_%s.osm", control$method)
   outputtmp = system.file(outtmp, package="osmose")
   file.copy(from=outputtmp, to=file.path(dir_master, "output-configuration.osm"), overwrite = TRUE)  

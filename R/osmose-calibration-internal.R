@@ -592,3 +592,16 @@
   }
   return(invisible(NULL))
 }
+
+.set_reltol = function(x, reltol) {
+  x = unlist(x)
+  nphase = max(x, na.rm=TRUE)
+  out = table(x)
+  nm = as.numeric(names(out))
+  ind = nm > 0
+  out = cumsum(out[ind])
+  if(length(out)!=nphase) stop("Incompatible phases configuration.")
+  npar = max(out)
+  mult = sapply(out, FUN=function(x) max(pretty(npar/x)))
+  return(pmin(reltol*mult, 1e-1))
+}

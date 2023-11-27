@@ -15,6 +15,7 @@ set_par = function(x, value=NULL, scale=1, lower=NULL, upper=NULL, delta=0, digi
   xround = ifelse(scale<=1, -1, +1)
   if(!is.null(lower)) xround = -1
   if(!is.null(upper)) xround = +1
+  if(digits==0) xround = 0
   x = as.relistable(x)
   val = unlist(x)
   if(!is.null(value)) {
