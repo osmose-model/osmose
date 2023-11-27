@@ -206,3 +206,46 @@ update_ltl = function(input, filename=NULL, absolute=TRUE) {
   return(invisible())
   
 }
+
+
+# Auxiliar functions ------------------------------------------------------
+
+
+.add_section = function(txt, file, append=TRUE, trailing=1) {
+  n = nchar(txt)
+  if(n > 69) txt = strtrim(txt, 69)
+  tt = paste(rep("-", 73-n-1), collapse="")
+  out = paste(c("\n#", txt, tt, rep("\n", trailing)), collapse=" ")
+  cat(out, file=file, append = TRUE)
+  return(invisible(out))
+}
+
+.add_comment = function(txt, file, append=TRUE, trailing=1) {
+  out = paste(c("\n#", txt, rep("\n", trailing)), collapse=" ")
+  cat(out, file=file, append = TRUE)
+  return(invisible(out))
+}
+
+.update_and_move_on = function(conf, file, par=NULL, 
+                               sp=NULL, fsh=NULL, invert=FALSE, linear=FALSE, align=TRUE, default=FALSE) {
+  out = list()
+  for(ipar in par) {
+    tmp = get_par(conf, par=ipar, sp=sp, fsh=fsh, invert=invert, linear=linear, as.is=TRUE)
+    if(length(tmp)==0) {
+      tmp = list(as.character(default))
+      names(tmp) = ipar
+    }
+    out = c(out, tmp)
+    conf = get_par(conf, par=ipar, sp=sp, fsh=fsh, invert = !invert)
+  }
+  if(length(out)==0) return(invisible(conf))
+  if(isTRUE(align)) {
+    n = max(nchar(names(out)), na.rm=TRUE)
+    names(out) = paste(names(out), strrep(" ", n-nchar(names(out))), sep="")
+  }
+  write_osmose(x=as.matrix(out), file=file, append=TRUE, col.names = FALSE, sep=" = ")
+  return(invisible(conf))
+  
+}
+
+
