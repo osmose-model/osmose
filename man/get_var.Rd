@@ -14,6 +14,9 @@
   expected = FALSE,
   no.error = FALSE,
   drop = TRUE,
+  size = NULL,
+  random = FALSE,
+  replace = FALSE,
   ...
 )
 
@@ -24,6 +27,9 @@
   expected = FALSE,
   no.error = FALSE,
   drop = TRUE,
+  size = NULL,
+  random = FALSE,
+  replace = FALSE,
   ...
 )
 
@@ -39,10 +45,18 @@ function).}
 
 \item{how}{How to return the object. Current options are "matrix" and "list".}
 
-\item{expected}{A logical parameter. If \code{TRUE}, the average over the 
+\item{expected}{Logical. If \code{TRUE}, the average over the 
 last dimensions will be performed (only if the output is an array).}
 
 \item{no.error}{Return NULL instead of and error if variable not found.}
+
+\item{drop}{Logical. If \code{TRUE}, degenerated dimensions are droped.}
+
+\item{size}{A positive integer indicating how many replicate to sample, possibly at random.}
+
+\item{random}{Logical. If \code{TRUE}, \code{n} replicates are taken, after sampling.}
+
+\item{replace}{should sampling be with replacement?}
 
 \item{...}{Additional arguments of the function.}
 }

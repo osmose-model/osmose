@@ -20,6 +20,7 @@ initialize_osmose(
   force = FALSE,
   run = TRUE,
   append = FALSE,
+  sp = NULL,
   ...
 )
 }
@@ -56,6 +57,8 @@ on the search path.}
 \item{run}{Do we have to run the model to produce the outputs or are already there?}
 
 \item{append}{To append or not the results to \code{file}}
+
+\item{sp}{Species to initialize. NULL by default, meaning all species.}
 
 \item{...}{Additional arguments, currently unused.}
 }
