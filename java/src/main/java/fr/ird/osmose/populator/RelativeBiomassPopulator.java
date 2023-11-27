@@ -87,6 +87,10 @@ public class RelativeBiomassPopulator extends AbstractPopulator {
 
     private int[] nSize;
 
+    private double[] gonadicIndex;
+
+    private boolean isBioenEnabled = false;
+
     private GrowthProcess growthProcess;
 
     public RelativeBiomassPopulator(int rank) {
@@ -110,6 +114,18 @@ public class RelativeBiomassPopulator extends AbstractPopulator {
             rand = new Random(seed);
         } else {
             rand = new Random();
+        }
+
+        if (cfg.isBioenEnabled()) {
+            this.isBioenEnabled = true;
+            // Recovers the r parameters for focal + background species
+            cpt = 0;
+            gonadicIndex = new double[nSpecies];
+            for (int i : getConfiguration().getFocalIndex()) {
+                String key = String.format("species.bioen.maturity.r.sp%d", i);
+                gonadicIndex[cpt] = this.getConfiguration().getDouble(key);
+                cpt++;
+            }
         }
 
         double[] lInf = new double[nSpecies];
@@ -286,6 +302,10 @@ public class RelativeBiomassPopulator extends AbstractPopulator {
 
         // In school constructor, weight is provided in g.
         School school0 = new School(species, nEgg, (float) length, (float) weight, (int) ageDt);
+        if(this.isBioenEnabled) {
+            float gonadWeight = (float) (weight * gonadicIndex[iSpecies]);
+            school0.incrementGonadWeight(gonadWeight);
+        }
 
         return school0;
 
