@@ -278,6 +278,7 @@ public class Simulation extends OsmoseLinker {
         while (i_step_simu < getConfiguration().getNStep()) {
 
             int year = getYear();
+            int spinupRestart = getConfiguration().getSpinupRestart();
 
             // Print progress in console at the beginning of the year
             if (getIndexTimeYear() == 0) {
@@ -288,8 +289,8 @@ public class Simulation extends OsmoseLinker {
             step.step(i_step_simu);
 
             // Create a restart file
-            if (getConfiguration().isWriteRestartEnabled() && (year >= getConfiguration().getSpinupRestart())
-                    && ((i_step_simu + 1) % getConfiguration().getRestartFrequency() == 0)) {
+            if (getConfiguration().isWriteRestartEnabled() && (i_step_simu >= (spinupRestart - 1))
+                    && ((i_step_simu - spinupRestart + 1) % getConfiguration().getRestartFrequency() == 0)) {
                 snapshot.makeSnapshot(i_step_simu);
             }
 

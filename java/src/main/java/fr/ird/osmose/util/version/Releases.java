@@ -533,6 +533,16 @@ public class Releases {
                 if(cfg.canFind("output.fishery.bysize.enabled")) {
                     updateKey("output.fishery.bysize.enabled", "output.fisheries.bysize.enabled");
                 }
+                // restart parameters
+                if(cfg.canFind("output.restart.enabled")) {
+                    updateKey("output.restart.enabled", "simulation.restart.enabled");
+                }
+                if(cfg.canFind("output.restart.spinup")) {
+                    updateKey("output.restart.spinup", "simulation.restart.spinup.nyear");
+                }
+                if(cfg.canFind("output.restart.recordFrequency.ndt")) {
+                    updateKey("output.restart.recordFrequency.ndt", "simulation.restart.recordFrequency.ndt");
+                }
                 
             }
         },

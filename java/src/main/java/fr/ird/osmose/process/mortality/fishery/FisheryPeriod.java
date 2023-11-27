@@ -88,7 +88,7 @@ public class FisheryPeriod extends OsmoseLinker {
         // Gets the season offset in number of time steps
         int ioff = (int) (periodOffset * nStepYear);
 
-        // Recovers the season duration (in number of time steps    )
+        // Recovers the season duration (in number of time steps)
         int seasonDuration = nStepYear / this.nPeriods;
 
         // 0 if no offset, else 1
@@ -148,8 +148,15 @@ public class FisheryPeriod extends OsmoseLinker {
                 int k = (fishIndex[i] + do_offset * this.nPeriods - do_offset) % this.nPeriods;
                 fisheryPeriod[i] = fishingSeason[k];
             }
-        } else if (fishingSeason.length - 1 == fishIndex[nStep - 1]) {
+        } else if (fishingSeason.length >= fishIndex[nStep - 1] + 1) {
             // In this case, values are provided for all years and all periods
+            // More can be provided, with a warning
+            if (fishingSeason.length > fishIndex[nStep - 1] + 1) {
+              String msg = String.format("More fishing period rates (%d) than needed (%d) have been provided for fsh%d, ignoring the last ones.", 
+              fishingSeason.length, fishIndex[nStep - 1] + 1, this.fileFisheryIndex);
+              warning(msg);
+            }
+            
             for (int i = 0; i < nStep; i++) {
                 int k = fishIndex[i];
                 fisheryPeriod[i] = fishingSeason[k];
