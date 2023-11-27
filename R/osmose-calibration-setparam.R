@@ -79,7 +79,7 @@
   write_osmose(pars, file=guess_file, append = TRUE)
   write_osmose(set_par(pars, scale=0.8, lower=0), file=min_file, append = TRUE)
   write_osmose(set_par(pars, scale=1.2, upper=7), file=max_file, append = TRUE)
-  write_osmose(set_par(pars, 1), file=phase_file, append = TRUE)
+  write_osmose(set_par(pars, -5), file=phase_file, append = TRUE)
   
   pars = get_par(conf, "mortality.additional.rate.sp", as.is=TRUE)
   pars = transform_par(pars, FUN=log10)

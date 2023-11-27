@@ -71,7 +71,7 @@ get_par = function(conf, par=NULL, sp=NULL, fsh=NULL, invert=FALSE, as.is=FALSE,
 #' @export
 get_species = function(x, type=NULL, code=FALSE, sp=NULL, nm=NULL) {
   
-  type = match.arg(type, choices = c("all", "focal", "background", "resources"))
+  type = match.arg(type, choices = c("all", "focal", "background", "resource"))
   
   if(!is.null(sp) & !is.null(nm)) stop("Only 'sp' or 'nm' must be provided.")
   
@@ -309,6 +309,8 @@ read.cal = function(conf, sp) {
   msg = sprintf("Catch-at-length size classes must be in increasing order, check %s's file.", spname)
   if(check) stop(msg)
   dbin = unique(diff(length_classes))
+  msg = sprintf("Catch-at-length size classes must be provided in regular size bins, check %s's file.", spname)
+  if(length(dbin)!=1) stop(msg)
   
   mat = as.matrix(out[, as.character(length_classes)])
 

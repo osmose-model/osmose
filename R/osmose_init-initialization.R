@@ -7,8 +7,6 @@ init_ncdf = function(input, file, parameters = NULL, output = NULL,
                      java = "java", options = NULL, verbose = TRUE, 
                      clean = TRUE, force = FALSE, run=TRUE, append=FALSE, ...) {
   
-  parameters = paste("-Poutput.restart.enabled=TRUE", parameters)
-  
   if(isTRUE(run)) {
     run_osmose(input=input, parameters=parameters, output=output, log=log,
                version=version, osmose=osmose, java=java,
@@ -139,8 +137,6 @@ init_alaia = function(input, file, parameters = NULL, output = NULL,
                      java = "java", options = NULL, verbose = TRUE, 
                      clean = TRUE, force = FALSE, run=TRUE, append=FALSE, ...) {
   
-  parameters = paste("-Poutput.restart.enabled=TRUE", parameters)
-  
   if(isTRUE(run)) {
     run_osmose(input=input, parameters=parameters, output=output, log=log,
                version=version, osmose=osmose, java=java,
@@ -189,8 +185,6 @@ init_firstyear = function(input, file, parameters = NULL, output = NULL,
                           log = "osmose.log", version = NULL, osmose = NULL, 
                           java = "java", options = NULL, verbose = TRUE, 
                           clean = TRUE, force = FALSE, run=TRUE, append=FALSE, ...) {
-  
-  parameters = paste("-Poutput.restart.enabled=TRUE", parameters)
   
   if(isTRUE(run)) {
     run_osmose(input=input, parameters=parameters, output=output, log=log,
@@ -399,7 +393,7 @@ init_sofia = function(input, file=NULL, test=FALSE, sp=NULL, ...) {
   
   ini = exp(-cumsum(c(0,Ma[-length(Ma)]/ndt)))
   inibio = 1e-6*sum(ini*weight)
-  R = ndt*bioguess/inibio
+  R = as.numeric(ndt)*(bioguess/inibio)
   ini = R*ini/sum(ini)
   
   if(bioguess==0) {
@@ -525,7 +519,7 @@ init_sofia = function(input, file=NULL, test=FALSE, sp=NULL, ...) {
     Fseason = yield_obs[1:ndt]/sum(yield_obs[1:ndt])
     ini = exp(-cumsum(c(0,Ma[-length(Ma)]/ndt)))
     inibio = 1e-6*sum(ini*weight)
-    R = ndt*bioguess/inibio
+    R = as.numeric(ndt)*(bioguess/inibio)
     xdist = R*ini/sum(ini)
     
     sim = list(R=R, Fguess=sum(yield_obs[1:ndt]/bioguess))
@@ -591,7 +585,7 @@ init_sofia = function(input, file=NULL, test=FALSE, sp=NULL, ...) {
     
   }
   
-  opt = calibrate(par=log(c(sim$R, sim$Fguess)), fn = .simF, method = "L-BFGS-B")
+  opt = calibrate(par=log(c(sim$R, sim$Fguess)), fn = .simF, method = "Rvmmin")
   
   output = c(.simF(opt$par, value=TRUE),  opt=list(opt))
   
@@ -635,11 +629,16 @@ llw = function(cv) 1/(2*cv^2)
   # begin test 
   
   # end test
-   
-  rel_dist = sim$dist/max(sim$dist, na.rm=TRUE)
+
+  min_school = pmax(ceiling(sim$nschool*0.025), 1L)
+  max_school = sim$nschool - min_school
+  rel_dist = sim$distB
+  rel_dist = rel_dist - min(rel_dist, na.rm=TRUE)
+  rel_dist = rel_dist/max(rel_dist, na.rm=TRUE)
   
-  nschool = pmax(ceiling(sim$nschool*rel_dist), 1)
+  nschool = pmax(ceiling(max_school*rel_dist), 1) + min_school
   nschool[is.na(nschool)] = 1
+  nschool = pmin(nschool, sim$nschool)
   
   out = c(round(bio_ini, 3), 
           paste(format(bio_rel, scientific = FALSE), collapse=", "), 
