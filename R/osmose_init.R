@@ -18,6 +18,12 @@ initialize_osmose = function(input, file, type="internannual", parameters = NULL
                              clean = TRUE, force = FALSE, run=TRUE, append=FALSE, sp=NULL,
                              ...) {
 
+  if(is.null(version)) version = packageVersion("osmose")
+  
+  restart_par = if(version >= "4.4.0") "-Psimulation.restart.enabled=TRUE" else "-Poutput.restart.enabled=TRUE"
+  
+  parameters = paste(restart_par, parameters)
+  
   input = suppressWarnings(normalizePath(input, mustWork=TRUE))
   
   if(missing(file)) {

@@ -75,6 +75,8 @@ run_osmose = function(input, parameters = NULL, output = NULL, log = "osmose.log
 
   package_version = packageVersion("osmose")
 
+  if(is.null(version)) version = as.character(package_version)
+  
   # Print message with version
   # if version argument is null, Java version is the same as the package version
   if (isTRUE(verbose)) {
