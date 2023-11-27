@@ -178,10 +178,15 @@ get_var.NULL = function(object, ...) {
 #' @method print osmose
 #' @export
 print.osmose = function(x, ...) {
-  cat(paste0("OSMOSE v.", x$model$version, "\n"))
-  cat("Model", sQuote(x$model$model),"\n\n")
-  cat(sprintf("%s species modeled (%s simulations):", x$model$nsp, x$model$simus))
-  cat(sprintf("\n\t[sp%s] %s", seq(0, x$model$nsp - 1), x$species), "\n")
+  cat("Model", sprintf("OSMOSE-%s (v%s)", 
+                       toupper(get_par(x$conf, "output.file.prefix")),
+                       get_par(x$conf, "osmose.version")),"\n\n")
+  cat(sprintf("Running model with %d replicates.\n\n", x$model$simus))
+  spp = get_species(x$config)
+  spp_code = get_species(x$config, code=TRUE)
+  cat(sprintf("%s species modeled:\n\n", length(spp)))
+  cat(paste(sprintf("[sp%s] %s", spp_code, spp), collapse=", "), "\n")
+  
   
   # Get dimension (no vector classes) or length (vector classes) for each level
   infoLevels = sapply(x, function(x) if(is.array(x)) dim(x) else length(x))
@@ -194,18 +199,14 @@ print.osmose = function(x, ...) {
   
   # # Add a mark (*) for those empty level's' names
   infoLevels = paste0(names(infoLevels), ifelse(infoLevels, " (*)", ""))
-  infoLevels = setdiff(infoLevels, c("model", "species", "config"))
+  infoLevels = setdiff(infoLevels, c("model", "species", "config", "elapsed"))
   # If length of level (of names) vector is odd, add an empty value
-  infoLevels = c(infoLevels, 
-                 if(length(infoLevels) %% 2 != 0) "---------" else NULL)
-  
-  # Sort vector (of names) as a 2 columns matrix
-  infoLevels = matrix(data = infoLevels, ncol = 2)
-  dimnames(infoLevels) = list(rep("", nrow(infoLevels)), rep("", ncol(infoLevels)))
-  
+ 
+  infoLevels = paste(infoLevels, collapse=", ")
+ 
   # Show available variables
-  cat("\nAvailable outputs:\n")
-  print(infoLevels)
+  cat(sprintf("\nAvailable outputs:\n %s\n", infoLevels))
+
   # cat("\n(*) Empty fields.\n")
 }
 
