@@ -57,7 +57,12 @@ get_par = function(conf, par=NULL, sp=NULL, fsh=NULL, invert=FALSE, as.is=FALSE,
   }
   
   if(length(out)==1) out = out[[1]]
-  if(isTRUE(unlist)) return(unlist(out))
+  
+  if(isTRUE(unlist)) {
+    # out = out[order(names(out))]
+    return(unlist(out))
+  }
+    
   return(out)
   
 }

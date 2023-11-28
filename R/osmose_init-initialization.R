@@ -586,13 +586,17 @@ init_sofia = function(input, file=NULL, test=FALSE, sp=NULL, ...) {
   }
   
   opt = calibrate(par=log(c(sim$R, sim$Fguess)), fn = .simF, method = "Rvmmin")
+
+  # opt = calibrate(par=log(c(sim$R, sim$Fguess)), fn = .simF, method = "Rvmmin",
+  #                 lower=c(0, -20), upper=c(log(),2))
   
   output = c(.simF(opt$par, value=TRUE),  opt=list(opt))
   
   isMature = size >= .getPar(this, "species.maturity.size")
-  eggs   = rowSums(1e6*fecundity[1:ndt]*t(t(output$pop)*isMature))
-  larvae = output$R*rF
-  Mlarval = mean(-log(larvae/eggs), na.rm=TRUE)
+  eggs   = sum(1e6*fecundity[1:ndt]*t(t(output$pop)*isMature), na.rm=TRUE)
+  
+  larvae = output$R
+  Mlarval = -log(larvae/eggs)
   
   output$larvalM = Mlarval
     
