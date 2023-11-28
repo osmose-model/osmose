@@ -13,15 +13,14 @@ marine ecosystems. It is an individual-based, spatially-explicit multispecies mo
 accounting for explicit trophic interactions. The main characteristics of the model are
 opportunistic predation based on size and spatial co-occurrence of predators and preys
 
-% and the spatial distribution of individuals is constrained by their physiological niche as
-
-% they avoid physiologically unfavorable environment.
+<!-- % and the spatial distribution of individuals is constrained by their physiological niche a
+% they avoid physiologically unfavorable environment. -->
 
 The aim of the model is to explore the
 functioning of marine trophic webs, notably in response
 to perturbations such as fishing or climate change.
 
-% The Osmose model assumes opportunistic predation based on spatial co-occurrence and size
+<!-- % The Osmose model assumes opportunistic predation based on spatial co-occurrence and size
 
 % adequacy between a predator and its prey (size-based opportunistic predation).
 
@@ -55,7 +54,7 @@ to perturbations such as fishing or climate change.
 
 % OSMOSE to various hydrodynamic and biogeochemical models, allowing to build end-to-end models
 
-% of marine ecosystems that explicit combined effects of climate and fishing on fish dynamics.
+% of marine ecosystems that explicit combined effects of climate and fishing on fish dynamics. -->
 
 ## Patterns
 

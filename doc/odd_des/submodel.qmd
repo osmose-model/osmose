@@ -13,7 +13,7 @@ submodel/growth.md
 submodel/reprod.md
 ```
 
-% .. table paramètres: notation math, nom code, description, unité
+<!-- % .. table paramètres: notation math, nom code, description, unité
 
 % Spatial distribution of schools
 
@@ -87,4 +87,4 @@ submodel/reprod.md
 
 % where SR is the female: male sex ratio of the HTL group;  the relative annual fecundity of the group (number of eggs spawned per gram of mature female per year);  the probability for the HTL group to spawn a given month relatively to the other months of the year (Table B1); and the spawning stock biomass of the group at time t. In the absence of information, we assumed no seasonality of reproduction for reef omnivores. The   parameters of all other HTL groups were estimated from the literature (Fig. B2 and Table B2). The eggs of all HTL groups are allocated a size of 1 mm, which appears to be a representative average estimate for marine fish species regardless of the body size of the adults (Cury and Pauly, 2000), and a weight of 0.0005386 g, considering eggs as spheres with water density.
 
-% It can be noted that, since the growth of schools is evaluated in relation to their predation efficiency, the number of eggs produced at each time step, which depends on biomass (Eq. B.3), also depends implicitly on the food intake of schools (Shin & Cury, 2001, 2004).
+% It can be noted that, since the growth of schools is evaluated in relation to their predation efficiency, the number of eggs produced at each time step, which depends on biomass (Eq. B.3), also depends implicitly on the food intake of schools (Shin & Cury, 2001, 2004). -->

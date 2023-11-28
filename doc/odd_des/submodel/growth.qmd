@@ -4,7 +4,9 @@ Individuals of a given school are assumed to grow in size and weight at a given 
 
 $$
 G(s, a) = M_{\Delta}(s, a) \times \frac{S_R(s, a) - C_{S_R}(s)} {1 - C_{S_R}(s)}\ if\ S_R(s, a) \ge C_{S_R}
+$$
 
+$$
 G(s, a) = 0\ if\ S_R(s, a) < C_{S_R}
 $$
 
@@ -48,9 +50,13 @@ When the {samp}`growth.java.classname.sp#` is equal to {samp}`fr.ird.osmose.proc
 
 $$
 L(a) = L_{egg}\ if\ a=0
+$$
 
+$$
 L(a) = L_{egg} + (L_{thres} - L_{egg}) \times \left(\frac{a}{a_{thres}}\right)\ if\ a>0\ \&\ a<a_{thres}
+$$
 
+$$
 L(a) = L_{\infty} \times \left(1 - \exp^{-K\left(age - t_0\right)} \right)\ else
 $$
 
@@ -85,7 +91,7 @@ Von Bertalanffy growth curve
 
 ```
 
-% The weight of school i at time t is evaluated from the allometric relationship:
+<!-- % The weight of school i at time t is evaluated from the allometric relationship:
 
 % .. math::
 
@@ -95,7 +101,7 @@ Von Bertalanffy growth curve
 
 %
 
-% where :math:`b` and :math:`C` are allometric parameters for the HTL group to which school i belongs.
+% where :math:`b` and :math:`C` are allometric parameters for the HTL group to which school i belongs. -->
 
 ## Gompertz growth
 
@@ -103,11 +109,17 @@ When the {samp}`growth.java.classname.sp#` is equal to {samp}`fr.ird.osmose.proc
 
 $$
 L(a) = L_{egg}\ if\ a=0
+$$
 
+$$
 L(a) = L_{start} \times exp^{K_e \times a}\ if\ a>0\ \& a<a_{exp}
+$$
 
+$$
 L(a) = L_{exp} + (L_{gom} - L_{exp}) \frac{a - a_{exp}}{a_{gom} - a_{exp}}\  if\ a>a_{exp}\ \&\ a<a_{gom}
+$$
 
+$$
 L(a) = L_{inf} \times exp^{-exp^{-K_g (a - t_g)}}\ else
 $$
 
@@ -115,7 +127,9 @@ with
 
 $$
 L_{exp} = L_{start} \times exp^{K_e \times a_{exp}}
+$$
 
+$$
 L_{gom} = L_{inf} \times exp^{-exp^{-K_g (a_{gom} - t_g)}}
 $$
 
