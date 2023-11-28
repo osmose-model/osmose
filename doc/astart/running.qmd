@@ -1,4 +1,4 @@
-## Running Osmose
+# Running Osmose
 
 Now that the R package is installed, let's try to run the model.
 

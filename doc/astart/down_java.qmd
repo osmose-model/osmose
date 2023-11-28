@@ -1,9 +1,9 @@
-## Download requirements
+# Download requirements
 
 In this section, the list of softwares and libraries that are required to use the full capabilities of the
 Osmose model are provided.
 
-### Download Java
+## Download Java
 
 Since Osmose numerical JAVA core is coded in JAVA, Java need to be installed. Beforehand, let us clarify some of the acronyms regarding the Java
 technologies.
@@ -30,12 +30,12 @@ To see how to set environment variables in Windows, click
 :::
 
 
-### Installing NetCDF library
+## Installing NetCDF library
 
 Since Osmose extensively uses NetCDF files, the NetCDF4 library
 need to be installed.
 
-#### Mac Os X
+### Mac Os X
 
 To install the library on a Mac Os system, open a Terminal and type:
 
@@ -43,7 +43,7 @@ To install the library on a Mac Os system, open a Terminal and type:
 sudo port install netcdf4
 ```
 
-#### Linux
+### Linux
 
 To install the library on a Linux system, open a Terminal and type:
 
@@ -51,7 +51,7 @@ To install the library on a Linux system, open a Terminal and type:
 sudo apt-get install netcdf4
 ```
 
-#### Windows
+### Windows
 
 To install the library on a Windows system, first download and install the HDF5 library from the
 [HDF5 website](https://www.hdfgroup.org/downloads/hdf5/).
@@ -64,7 +64,7 @@ Make sure that the NetCDF binaries are added to
 the ``PATH`` environment variable.
 :::
 
-### Download R
+## Download R
 
 The Osmose Java core is embedded in an Osmose R package, which allows to pre-process, calibrate, run and post-process Osmose outputs. Therefore, it is strongly advised to install R, in order to benefit from the features provided by the R package.
 
@@ -76,7 +76,7 @@ It is also recommended to install the RStudio GUI ([https://rstudio.com/](https:
 For those who do not intend to use the R package, skip this part
 :::
 
-### Installing R libraries {#sec-install-libraries}
+## Installing R libraries {#sec-install-libraries}
 
 In order to install the Osmose package, R libraries are required (check the ``DESCRIPTION`` file).
 These libraries can be installed from a R console by typing:
@@ -86,7 +86,7 @@ install.packages(c("calibrar", "knitr", "ncdf4", "rlist", "rmarkdown", "stringr"
 ```
 
 
-<!-- ### Defining the Osmose target directory
+<!-- ## Defining the Osmose target directory
 
 Since Osmose version 3.3.4, Java executables and demo configuration files have been moved out of the R build to meet CRAN requirements on size package. These files are now downloaded from the Internet and moved to a local directory.
 

@@ -1,6 +1,5 @@
 # User guide: basics
 
-{{< include astart/down_java.qmd >}}
-{{< include astart/download_osm.qmd >}}
-{{< include astart/datarmor.qmd >}}
-{{< include astart/running.qmd >}}
+## Introduction
+
+In this section, the Osmose install and running process is described. In addition, some basic principles in configuring Osmose are also provided.
