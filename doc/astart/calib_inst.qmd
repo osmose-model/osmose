@@ -4,4 +4,4 @@ The parameters of the Osmose model must be calibrated for each configuration. Th
 {samp}`calibrar` library.
 
 The library is stored in GitHub ([https://github.com/roliveros-ramos/calibrar.git](https://github.com/roliveros-ramos/calibrar.git)) and can be installed
-following the same methods as described in {numref}`osm-inst`, after changing the URL address.
+following the same methods as described in @sec-osm-inst, after changing the URL address.

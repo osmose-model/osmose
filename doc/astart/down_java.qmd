@@ -3,11 +3,6 @@
 In this section, the list of softwares and libraries that are required to use the full capabilities of the
 Osmose model are provided.
 
-```{contents} Table of Contents
-:local:
-:depth: 1
-```
-
 ### Download Java
 
 Since Osmose numerical JAVA core is coded in JAVA, Java need to be installed. Beforehand, let us clarify some of the acronyms regarding the Java
@@ -19,17 +14,18 @@ technologies.
 
 - ``JDK`` or ``SDK``: Java (or Software) Development Kit bound to the programmer. It provides a ``JRE``, a compiler, useful programs, examples and the source of the API (Application Programming Interface: some standard libraries). **A JDK is needed in order to modify the Osmose Java code**.
 
-We strongly advise to use the OpenJDK suite, which is available at https://jdk.java.net/ :
+We strongly advise to use the OpenJDK suite, which is available at [https://jdk.java.net/](https://jdk.java.net/) :
+
 - Download the archive file (``.tar.gz`` for ``.zip`` extension).
 - Extract the files in a dedicated folder.
 - Set the ``JAVA_HOME`` environment variable to the folder location.
 
-:::{tip}
+:::{.callout-tip}
 To see how to set environment variables in Windows, click
 [here](https://docs.oracle.com/en/database/oracle/machine-learning/oml4r/1.5.1/oread/creating-and-modifying-environment-variables-on-windows.html#GUID-DD6F9982-60D5-48F6-8270-A27EC53807D0). For Linux/Mac Os users, click [here](https://www.serverlab.ca/tutorials/linux/administration-linux/how-to-set-environment-variables-in-linux/)
 :::
 
-:::{danger}
+:::{.callout-important}
 **The OpenJDK version must be at least 8**
 :::
 
@@ -76,13 +72,11 @@ Download instructions for R are available for [Windows](https://cran.r-project.o
 
 It is also recommended to install the RStudio GUI ([https://rstudio.com/](https://rstudio.com/)).
 
-:::{note}
+:::{callout-note}
 For those who do not intend to use the R package, skip this part
 :::
 
-(sec-install-libraries)=
-
-### Installing R libraries
+### Installing R libraries {#sec-install-libraries}
 
 In order to install the Osmose package, R libraries are required (check the ``DESCRIPTION`` file).
 These libraries can be installed from a R console by typing:

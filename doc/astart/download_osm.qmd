@@ -1,6 +1,5 @@
-(osm-inst)=
 
-# Installing Osmose
+# Installing Osmose {#sec-osm-inst}
 
 The Osmose model is provided as a combination of a Java numerical core (referred to as Osmose Java), associated with an Osmose R package (referred to as Osmose R). The code is available on a [GitHub repository](https://github.com/osmose-model/osmose).
 
@@ -19,21 +18,21 @@ install_github("osmose-model/osmose/")
 
 This will download the latest commit of the ``master`` branch and use it to compile the Osmose package.
 
-:::{note}
+:::{.callout-note}
 The ``devtools`` package need to be installed
 :::
 
 ## Install from RStudio
 
-To install Osmose using RStudio, click on the {guilabel}`File --> New Project` menu and
-open the {guilabel}`Version Control --> Git` menu.
+To install Osmose using RStudio, click on the `File --> New Project` menu and
+open the `Version Control --> Git` menu.
 
-Set the package URL to https://github.com/osmose-model/osmose.
+Set the package URL to [https://github.com/osmose-model/osmose](https://github.com/osmose-model/osmose).
 
 When the project is opened, click on the
-{guilabel}`Build & Reload` button to install the package.
+`Build & Reload` button to install the package.
 
-:::{note}
+:::{.callout-note}
 The ``devtools`` package need to be installed.
 :::
 
@@ -51,18 +50,16 @@ When the code has been downloaded, it must be installed as follows:
 R CMD INSTALL osmose
 ```
 
-:::{tip}
+:::{.callout-tip}
 In the case of a manual install, we strongly advise to favor the ``git clone`` method. Indeed, update of the code
 can be simply done by pulling changes from the remote folder.
 :::
 
-:::{danger}
+:::{.callout-important}
 Note that the code must be reinstalled using the ``R CMD INSTALL osmose`` command anytime the sources are updated.
 :::
 
-(java-executable)=
-
-## Java executable
+## Java executable {#sec-java-executable}
 
 When installing the Osmose R package, no java executable is provided. The latter will be automatically downloaded by
 the R package when the ``run_osmose`` package function is called.
@@ -87,13 +84,16 @@ with ``X.Y.Z`` the Osmose version. These Java executables contain all the extern
 by Osmose.
 
 ```{mermaid}
+%%| label: fig-run-osmose-diagram
+%%| fig-cap: "Process for downloading Osmose Java executable when running Osmose from R"
+%%| fig-align: "center"
 graph TD;
     id0("run_osmose(vX.Y.Z) function called")
-    id1{Is OSMOSE_DIR defined?}
-    id2("Download executable for vX.Y.Z\n in temporary folder")
-    id3("Download executable for vX.Y.Z\n in OSMOSE_DIR folder")
+    id1([Is OSMOSE_DIR defined?])
+    id2("Download executable for vX.Y.Z<br>in temporary folder")
+    id3("Download executable for vX.Y.Z<br>in OSMOSE_DIR folder")
 
-    id4{Does executable for vX.Y.Z exist?}
+    id4([Does executable for vX.Y.Z exist?])
     id5(Use executable for vX.Y.Z)
     id0 --> id1
     id1 -->|no| id2

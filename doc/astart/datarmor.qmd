@@ -2,12 +2,6 @@
 
 In this section, the easiest way to install Osmose on the Datarmor HPC is described.
 
-```{contents} Table of Contents
-:local:
-:depth: 1
-```
-
-
 ## Loading the modules
 
 From the Terminal, first load the necessary modules:
@@ -18,11 +12,11 @@ module load java/openjdk-16.0.2
 module load nco
 ```
 
-:::{warning}
+:::{.callout-important}
 To use parallel R features, this specific R module is required
 :::
 
-:::{note}
+:::{.callout-note}
 The ``nco`` module is needed to have access to the NetCDF library
 :::
 
@@ -36,9 +30,9 @@ R_LIBS_USER=/home1/datawork/nbarrier/libs/R/lib
 
 It specifies the location where the R libraries will be insalled.
 
-:::{caution}
+:::{.callout-caution}
 
-When running a Job on Datarmor, you do not have access to the internet. Therefore, the Java executables cannot be downloaded as discussed in {numref}`java-executable`. Therefore, the ``OSMOSE_DIR`` environment variable is not required, since the Java code needs to be manually compiled, as discussed in {numref}`java-compile-datarmor`
+When running a Job on Datarmor, you do not have access to the internet. Therefore, the Java executables cannot be downloaded as discussed in @sec-java-executable. Therefore, the ``OSMOSE_DIR`` environment variable is not required, since the Java code needs to be manually compiled, as discussed in @sec-java-compile-datarmor
 :::
 
 
@@ -63,7 +57,7 @@ When done, type the following:
 source /appli/anaconda/latest/etc/profile.d/conda.csh
 ```
 
-:::{tip}
+:::{.callout-tip}
 To make Conda available permanently, you can add the `. /appli/anaconda/latest/etc/profile.d/conda.sh` line into the `~/.cshrc`
 file
 :::
@@ -84,9 +78,7 @@ Finally, type the following:
 git clone https://github.com/osmose-model/osmose.git
 ```
 
-(java-compile-datarmor)=
-
-## Compiling the code
+## Compiling the code {#sec-java-compile-datarmor}
 
 To compile the code from Datarmor, you will to use the ``maven`` conda environment. To activate it:
 
@@ -106,7 +98,7 @@ The Java executable file will be created on the ``inst/java/`` folder of the ``o
 
 When the Java code is compiled, you can install the Osmose R package.
 
-First, install the required libraries as explained in {numref}`sec-install-libraries`.
+First, install the required libraries as explained in @sec-install-libraries.
 
 Then, install the Osmose R package from the ``osmose`` folder:
 
