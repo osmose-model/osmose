@@ -1,8 +1,8 @@
-# Datarmor install
+## Datarmor install
 
 In this section, the easiest way to install Osmose on the Datarmor HPC is described.
 
-## Loading the modules
+### Loading the modules
 
 From the Terminal, first load the necessary modules:
 
@@ -20,7 +20,7 @@ To use parallel R features, this specific R module is required
 The ``nco`` module is needed to have access to the NetCDF library
 :::
 
-## Set-up environment variables
+### Set-up environment variables
 
 Edit the ``~/.Renviron`` file and define the ``R_LIBS_USER`` environment variables as follows:
 
@@ -36,7 +36,7 @@ When running a Job on Datarmor, you do not have access to the internet. Therefor
 :::
 
 
-## Setting up conda
+### Setting up conda
 
 To clone and compile the code, you will need to use the dedicated Conda environments. Create a `~/.condarc` file, which contains the following lines:
 
@@ -62,7 +62,7 @@ To make Conda available permanently, you can add the `. /appli/anaconda/latest/e
 file
 :::
 
-## Cloning the code
+### Cloning the code
 
 When Conda is set-up, activate the Git environment by typing:
 
@@ -78,7 +78,7 @@ Finally, type the following:
 git clone https://github.com/osmose-model/osmose.git
 ```
 
-## Compiling the code {#sec-java-compile-datarmor}
+### Compiling the code {#sec-java-compile-datarmor}
 
 To compile the code from Datarmor, you will to use the ``maven`` conda environment. To activate it:
 
@@ -94,7 +94,7 @@ mvn package
 
 The Java executable file will be created on the ``inst/java/`` folder of the ``osmose`` directory.
 
-## Installing the package
+### Installing the package
 
 When the Java code is compiled, you can install the Osmose R package.
 

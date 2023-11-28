@@ -1,0 +1,6 @@
+# User guide: basics
+
+{{< include astart/down_java.qmd >}}
+{{< include astart/download_osm.qmd >}}
+{{< include astart/datarmor.qmd >}}
+{{< include astart/running.qmd >}}

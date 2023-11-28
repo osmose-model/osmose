@@ -10,3 +10,11 @@ focuses on fish species and their trophic interactions ({cite}`Shin2001,Shin2004
 
 The model description in this section follows the ODD ("Overview", "Design concept" and "Details") protocol for describing
 individual- or agent-based models ({cite}`GRIMM20102760,GRIMM20102760,grimm2020`).
+
+{{< include odd_des/purpose.qmd >}}
+{{< include odd_des/statevar.qmd >}}
+{{< include odd_des/proc_sche.qmd >}}
+{{< include odd_des/design_concepts.qmd >}}
+{{< include odd_des/init.qmd >}}
+{{< include odd_des/input.qmd >}}
+{{< include odd_des/submodel.qmd >}}

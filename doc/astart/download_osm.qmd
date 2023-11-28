@@ -1,12 +1,12 @@
 
-# Installing Osmose {#sec-osm-inst}
+## Installing Osmose {#sec-osm-inst}
 
 The Osmose model is provided as a combination of a Java numerical core (referred to as Osmose Java), associated with an Osmose R package (referred to as Osmose R). The code is available on a [GitHub repository](https://github.com/osmose-model/osmose).
 
 It is strongly advised to install Osmose from the R, in order to have access to all the features provided
 by the package. There are several possibilities to install Osmose from the Git repository.
 
-## Install using ``devtools``
+### Install using ``devtools``
 
 It is possible to install the Osmose package using the ``install_github`` function of the ``devtools`` package.
 First, open a R session (by typing ``R`` from a Terminal or CMD prompt). In the R console, type:
@@ -22,7 +22,7 @@ This will download the latest commit of the ``master`` branch and use it to comp
 The ``devtools`` package need to be installed
 :::
 
-## Install from RStudio
+### Install from RStudio
 
 To install Osmose using RStudio, click on the `File --> New Project` menu and
 open the `Version Control --> Git` menu.
@@ -36,7 +36,7 @@ When the project is opened, click on the
 The ``devtools`` package need to be installed.
 :::
 
-## Install from source files
+### Install from source files
 
 To install the model from the source files, first download the code. You can either dowload it from the [Archive file](https://github.com/osmose-model/osmose/archive/refs/heads/master.zip) or via the ``git clone`` command, as follows:
 
@@ -59,7 +59,7 @@ can be simply done by pulling changes from the remote folder.
 Note that the code must be reinstalled using the ``R CMD INSTALL osmose`` command anytime the sources are updated.
 :::
 
-## Java executable {#sec-java-executable}
+### Java executable {#sec-java-executable}
 
 When installing the Osmose R package, no java executable is provided. The latter will be automatically downloaded by
 the R package when the ``run_osmose`` package function is called.

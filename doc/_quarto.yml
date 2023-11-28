@@ -6,22 +6,8 @@ book:
   author: "Norah Jones"
   chapters:
     - index.qmd
-    - part: "User guide: Basics"
-      chapters:
-        - astart/down_java.qmd
-        - astart/download_osm.qmd
-        - astart/datarmor.qmd
-        - astart/running.qmd
-    - part: odd_des.qmd
-      chapters:
-         - odd_des/purpose.qmd
-         - odd_des/statevar.qmd
-         - odd_des/proc_sche.qmd
-         - odd_des/design_concepts.qmd
-         - odd_des/init.qmd
-         - odd_des/input.qmd
-         - odd_des/submodel.qmd
-
+    - user_guide.qmd
+    - odd_des.qmd
 
   search: true
   repo-url: https://github.com/osmose-model/osmose/
@@ -31,8 +17,7 @@ book:
     style: "docked"
     logo: _static/logo-osmose.svg
   favicon: _static/logo-osmose.svg
-
-
+  page-navigation: true
 
 
 bibliography: _static/biblio.bib
@@ -44,9 +29,8 @@ jupyter: ir
 
 format:
   html:
-    number-sections: false
+    number-sections: true
     theme: cosmo
 
   pdf:
-    documentclass: scrbook
     fontfamily: libertinus
