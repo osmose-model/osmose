@@ -1,8 +1,50 @@
 # Running Osmose
 
-Now that the R package is installed, let's try to run the model.
+Now that the R package is installed, let's try to run the Osmose demo configuration.
 
+First, launch an `R` console and load the Osmose library:
+
+```{r}
+library(osmose)
+ls("package:osmose")
+```
+
+Now, call the `osmose_demo` function, which allows to copy the reference configuration into your working
+directory:
+
+```{r}
+demo = osmose_demo(path = "original-demo", config="eec_4.3.0")
+demo
+```
+
+If some parameters provided in the default configuration must be overwritten, an `extra_args` argument can be provided. It must have the following format:
+
+```{r}
+extra_args = "-Psimulation.time.nyear=15 -Poutput.recordfrequency.ndt=1"
+```
+
+Here, the `simulation.time.nyear` and `output.recordfrequency.ndt` have been modified. The updated folder can be corrected as follows:
+
+```{r}
+demo2 = osmose_demo(path = "modified-demo", config="eec_4.3.0", extra_args=extra_args)
+demo2
+```
+
+
+
+The `demo` object contains the location of the configuration file and extra arguments.
+
+Now, you can run the Osmose model as follows:
+
+```{r}
+run_osmose(demo$config_file, parameters=demo$extra_args, force=TRUE)
+```
+
+The first argument is the Osmose configuration file, the `parameters` argument allows to overrr
+
+<!--
 To run the test configuration, launch `R` and type the following:
+
 
 ```{literalinclude} _static/run_testconf.R
 :language: R
@@ -15,4 +57,4 @@ You should obtain the following figure:
 :width: 600 px
 
 Outputs of the reference configuration
-:::
+::: -->
