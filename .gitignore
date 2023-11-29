@@ -103,3 +103,4 @@ doc/index.synctex.gz
 doc/index.fls
 doc/index.fdb_latexmk
 doc/rename.sh
+doc/**/*_cache
