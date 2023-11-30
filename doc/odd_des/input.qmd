@@ -7,9 +7,9 @@ An Osmose configuration file is a text based file. The name of the file does not
 We call the main configuration file the file that is either listed in Osmose filePath.txt or given as a command line argument. The main configuration file can contain comments, blank lines and parameters. Here is how the Osmose configuration manager proceeds when it opens the main configuration file. It scans every line of the file looking for parameters. Some lines are automatically discarded:
 
 - empty lines (regardless of blank or tab characters).
-- lines that start with a punctuation character, one of {samp}`!"#$%&'()*+,-./:;<=>?@[\]^_`{|}~`
+- lines that start with a punctuation character, one of `!"#$%&'()*+,-./:;<=>?@[\]^_{|}~`
 
-For comments, it is recommended to start the line with {samp}`#` or {samp}`//`
+For comments, it is recommended to start the line with `#` or `//`
 
 A parameter is formed by the juxtaposition of three elements: **key**, **separator** and **value**.
 
