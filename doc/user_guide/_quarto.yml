@@ -1,0 +1,39 @@
+project:
+  type: book
+
+book:
+  title: "Osmose User Guide"
+  author: "Norah Jones"
+  chapters:
+    - index.qmd
+    - down_java.qmd
+    - download_osm.qmd
+    - datarmor.qmd
+    - running.qmd
+
+  search: true
+  repo-url: https://github.com/osmose-model/osmose/
+  repo-actions: [edit]
+  downloads: [pdf]
+  sidebar:
+    style: "docked"
+    logo: _static/logo-osmose.svg
+  favicon: _static/logo-osmose.svg
+  page-navigation: true
+  issue-url: "https://github.com/osmose-model/osmose/issues"
+
+
+bibliography: _static/biblio.bib
+
+execute:
+  cache: true
+
+jupyter: ir
+
+format:
+  html:
+    number-sections: true
+    theme: cosmo
+
+  pdf:
+    fontfamily: libertinus
