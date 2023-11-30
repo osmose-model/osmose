@@ -1,18 +1,5 @@
 # Submodels
 
-```{toctree}
-:caption: 'Contents:'
-:maxdepth: 1
-
-submodel/influx.md
-submodel/school-init.md
-submodel/ltl-update.md
-submodel/movement.md
-submodel/mort.md
-submodel/growth.md
-submodel/reprod.md
-```
-
 <!-- % .. table paramètres: notation math, nom code, description, unité
 
 % Spatial distribution of schools
