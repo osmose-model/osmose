@@ -10,6 +10,7 @@ book:
     - download_osm.qmd
     - datarmor.qmd
     - running.qmd
+    - input.qmd
 
   search: true
   repo-url: https://github.com/osmose-model/osmose/
