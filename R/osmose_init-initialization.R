@@ -341,6 +341,9 @@ init_sofia = function(input, file=NULL, test=FALSE, sp=NULL, ...) {
     pars[[iSpName]] = as.matrix(sim$osmose)
     out[[iSpName]] = sim
     
+    larv_msg = sprintf("Estimated Larval Mortality: %0.3f", sim$larvalM)
+    message(larv_msg)
+    
   }
   
   xoutput = list(par=pars, init=out)
@@ -465,9 +468,9 @@ init_sofia = function(input, file=NULL, test=FALSE, sp=NULL, ...) {
                 bins=list(age=age_bins, size=size_bins), harvested=harvested)
   
   isMature = size >= .getPar(this, "species.maturity.size")
-  eggs   = rowSums(1e6*fecundity[1:ndt]*t(t(output$pop)*isMature))
-  larvae = output$R*rF
-  Mlarval = mean(-log(larvae/eggs), na.rm=TRUE)
+  eggs   = sum(1e6*fecundity[1:ndt]*t(t(output$pop)*isMature), na.rm=TRUE)
+  larvae = output$R
+  Mlarval = -log(larvae/eggs)
   
   output$larvalM = Mlarval
   
