@@ -298,7 +298,7 @@ osmose_calibration_test = function(path, setup=NULL) {
   
   message("CALIBRATION TEST 2: Can we run a calibration in sequential mode (single-thread)?.\n\n")
   .args = c(arg0, "--test", "--ncores=1")
-  # source(script, local=TRUE)
+  source(script, local=TRUE)
   message("CALIBRATION TEST 2: PASSED! \n  Calibration is running in sequential mode.\n\n")
   message("This means all the files and inputs are in the right place.")
   
