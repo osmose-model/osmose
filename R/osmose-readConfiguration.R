@@ -163,7 +163,7 @@ get_surveys = function(x, code=FALSE, sr=NULL, nm=NULL) {
     return(isp)
   }
   
-  this = unlist(get_par(x, "surveys.name"))
+  this = unlist(get_par(x, "surveys.name", as.is=TRUE))
   xcode = gsub(names(this), pattern="surveys.name.sr", replacement = "")
   names(this) = NULL
   if(isTRUE(code)) return(xcode)

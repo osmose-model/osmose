@@ -139,11 +139,11 @@ get_var.osmose = function(object, what, how = c("matrix", "list"),
     out = apply(x, c(1, 2), mean, na.rm = TRUE)
     if(isTRUE(drop)) out = drop(out)
     if(is.null(dim(out))) names(out) = NULL
-    class(out) = class(x)
+    try(class(out) <- class(x), silent = TRUE)
     return(out)
   }
     
-  if(is.array(out) & isTRUE(expected)){
+  if(is.array(out) & isTRUE(expected)) {
     out = .expected(out, drop=drop)
   }
   
