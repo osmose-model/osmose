@@ -293,4 +293,9 @@ public class BackgroundSchool extends AbstractSchool {
         return this.classIndex;
     }
 
+    @Override
+    public boolean isOut() {
+        return false;
+    }
+
 }
