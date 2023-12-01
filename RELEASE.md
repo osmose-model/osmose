@@ -11,7 +11,6 @@
 
 ### Bug fixes
 - Correct a bug in `Surveys` and `OutputRegion`. When school was out of the domain, the code crashed. Fixed by assuming that outside schools are out of the survey region.
->>>>>>> a86901c3f7876dae19c1484d754fe15b4636f41e
 
 ## Osmose 4.3.3
 
