@@ -93,7 +93,7 @@ public class SpatialByClassOutput extends AbstractSpatialOutput {
         this.description = description;
         this.speciesIndex = indexSpecies;
         this.variableName = variableName;
-        this.distribution = new OutputDistribution("output.distribution", type, indexSpecies);
+        this.distribution = new OutputDistribution("output.distribution", type, speciesIndex);
         this.variable = variable;
         this.computeAverage = computeAverage;
         this.includeOnlyAlive = includeOnlyAlive;
@@ -237,7 +237,14 @@ public class SpatialByClassOutput extends AbstractSpatialOutput {
         StringBuilder filename = new StringBuilder(path.getAbsolutePath());
         filename.append(File.separatorChar);
         filename.append(getConfiguration().getString("output.file.prefix"));
-        filename.append("_spatialized").append(this.getVarName()).append("_Simu");
+        filename.append(File.separatorChar);
+        filename.append("Spatial");
+        filename.append(File.separatorChar);
+        filename.append("spatial_").append(variableName);
+        filename.append("by").append(distribution.getType());
+        filename.append("species-");
+        filename.append(getConfiguration().getSpecies(speciesIndex).getName());
+        filename.append("_Simu");
         filename.append(getRank());
         filename.append(".nc.part");
         return filename.toString();
