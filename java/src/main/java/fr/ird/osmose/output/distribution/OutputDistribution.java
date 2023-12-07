@@ -78,10 +78,14 @@ public class OutputDistribution extends OsmoseLinker {
     private final String key;
     private ClassGetter classGetter;
 
-    public OutputDistribution(DistributionType type, int indexSpecies) {
+    public OutputDistribution(String key, DistributionType type, int indexSpecies) {
         this.type = type;
         this.fileSpeciesIndex = indexSpecies;
-        this.key = "output.distrib";
+        this.key = key;
+    }
+
+    public OutputDistribution(DistributionType type, int indexSpecies) {
+        this("output.distrib", type, indexSpecies);
     }
 
     public OutputDistribution(DistributionType type) {
@@ -289,6 +293,5 @@ public class OutputDistribution extends OsmoseLinker {
         return output;
 
     }
-
 
 }
