@@ -209,12 +209,12 @@ public class SpatialByClassOutput extends AbstractSpatialOutput {
 
     @Override
     public void reset() {
-        double[][][] values = new double[distribution.getNClass()][getGrid().get_ny()][getGrid().get_nx()];
+        this.values = new double[distribution.getNClass()][getGrid().get_ny()][getGrid().get_nx()];
     }
 
     @Override
     public void update() {
-        int timeStep = this.getSimulation().getIndexTimeSimu();
+
         this.getOutputSchoolStream().forEach(school -> {
 
             int j = (int) school.getY();
@@ -261,13 +261,20 @@ public class SpatialByClassOutput extends AbstractSpatialOutput {
             }
         }
 
+        float denominator;
+        if (this.computeAverage) {
+            denominator = this.getConfiguration().getRecordFrequency();
+        } else {
+            denominator = 1f;
+        }
+
         // Write into NetCDF file
         int nSpecies = getNSpecies();
         ArrayFloat.D4 arrBiomass = new ArrayFloat.D4(1, nSpecies, getGrid().get_ny(), getGrid().get_nx());
         for (int kspec = 0; kspec < nClass; kspec++) {
             for (int j = 0; j < getGrid().get_ny(); j++) {
                 for (int i = 0; i < getGrid().get_nx(); i++) {
-                    arrBiomass.set(0, kspec, j, i, data[kspec][j][i]);
+                    arrBiomass.set(0, kspec, j, i, data[kspec][j][i] / denominator);
                 }
             }
         }
