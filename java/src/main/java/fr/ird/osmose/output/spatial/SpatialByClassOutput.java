@@ -174,9 +174,9 @@ public class SpatialByClassOutput extends AbstractSpatialOutput {
         StringBuilder attribute = new StringBuilder();
         attribute.append("[0, ");
         for (Float thres : distribution.getThresholds()) {
-            attribute.append(thres).append(",");
+            attribute.append(thres).append(", ");
         }
-        attribute.append(Float.MAX_VALUE).append(",");
+        attribute.append(Float.MAX_VALUE).append("]");
         bNc.addAttribute(new Attribute("distribution_thresholds", attribute.toString()));
         bNc.addAttribute(new Attribute("distribution_type", type.name()));
 
