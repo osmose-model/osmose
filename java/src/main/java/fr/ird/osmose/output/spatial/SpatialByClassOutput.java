@@ -51,7 +51,6 @@ import java.util.stream.Stream;
 import fr.ird.osmose.Cell;
 import fr.ird.osmose.IMarineOrganism;
 import fr.ird.osmose.School;
-import fr.ird.osmose.output.AbstractOutputRegion;
 import fr.ird.osmose.output.SchoolVariableGetter;
 import fr.ird.osmose.output.distribution.DistributionType;
 import fr.ird.osmose.output.distribution.OutputDistribution;
@@ -75,7 +74,6 @@ public class SpatialByClassOutput extends AbstractSpatialOutput {
     private final int speciesIndex;
     private final String variableName;
     private final OutputDistribution distribution;
-    private double values[][][];
 
     private interface SchoolSetMethod {
         public Stream<School> getSchoolSet();
@@ -209,7 +207,7 @@ public class SpatialByClassOutput extends AbstractSpatialOutput {
 
     @Override
     public void reset() {
-        this.values = new double[distribution.getNClass()][getGrid().get_ny()][getGrid().get_nx()];
+        this.data = new float[distribution.getNClass()][getGrid().get_ny()][getGrid().get_nx()];
     }
 
     @Override
@@ -222,8 +220,8 @@ public class SpatialByClassOutput extends AbstractSpatialOutput {
             int classSchool = getClass(school);
 
             if ((classSchool >= 0) & (i >= 0) & (j >= 0)) {
-                double var = variable.getVariable(school);
-                values[classSchool][j][i] += var;
+                float var = (float) variable.getVariable(school);
+                data[classSchool][j][i] += var;
             }
         });
     }
@@ -232,17 +230,17 @@ public class SpatialByClassOutput extends AbstractSpatialOutput {
         return distribution.getClass(school);
     }
 
-    private String getFilename() {
+    @Override
+    public String getFilename() {
         File path = new File(getConfiguration().getOutputPathname());
         StringBuilder filename = new StringBuilder(path.getAbsolutePath());
         filename.append(File.separatorChar);
-        filename.append(getConfiguration().getString("output.file.prefix"));
-        filename.append(File.separatorChar);
         filename.append("Spatial");
         filename.append(File.separatorChar);
-        filename.append("spatial_").append(variableName);
+        filename.append(getConfiguration().getString("output.file.prefix"));
+        filename.append("_spatial_").append(variableName);
         filename.append("by").append(distribution.getType());
-        filename.append("species-");
+        filename.append("-");
         filename.append(getConfiguration().getSpecies(speciesIndex).getName());
         filename.append("_Simu");
         filename.append(getRank());
@@ -276,8 +274,7 @@ public class SpatialByClassOutput extends AbstractSpatialOutput {
         }
 
         // Write into NetCDF file
-        int nSpecies = getNSpecies();
-        ArrayFloat.D4 arrBiomass = new ArrayFloat.D4(1, nSpecies, getGrid().get_ny(), getGrid().get_nx());
+        ArrayFloat.D4 arrBiomass = new ArrayFloat.D4(1, nClass, getGrid().get_ny(), getGrid().get_nx());
         for (int kspec = 0; kspec < nClass; kspec++) {
             for (int j = 0; j < getGrid().get_ny(); j++) {
                 for (int i = 0; i < getGrid().get_nx(); i++) {
