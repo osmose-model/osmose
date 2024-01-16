@@ -172,6 +172,8 @@ public class OutputDistribution extends OsmoseLinker {
                 for (int i = 0; i < classValues.length - 1; i++) {
                     thresholds[i] = classValues[i + 1];
                 }
+            } else {
+                thresholds = classValues.clone();
             }
         }
     }
