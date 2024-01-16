@@ -177,8 +177,9 @@ public class SpatialByClassOutput extends AbstractSpatialOutput {
             attribute.append(thres).append(", ");
         }
         attribute.append(Float.MAX_VALUE).append("]");
-        bNc.addAttribute(new Attribute("distribution_thresholds", attribute.toString()));
-        bNc.addAttribute(new Attribute("distribution_type", type.name()));
+        outVarBuilder.addAttribute(new Attribute("distribution_thresholds", attribute.toString()));
+        outVarBuilder.addAttribute(new Attribute("distribution_type", type.name()));
+        outVarBuilder.addAttribute(new Attribute("species_name", getConfiguration().getSpecies(speciesIndex).getName()));
 
         try {
             /*
@@ -215,13 +216,21 @@ public class SpatialByClassOutput extends AbstractSpatialOutput {
 
         this.getOutputSchoolStream().forEach(school -> {
 
-            int j = (int) school.getY();
-            int i = (int) school.getX();
-            int classSchool = getClass(school);
+            if (school.getSpeciesIndex() == speciesIndex) {
 
-            if ((classSchool >= 0) & (i >= 0) & (j >= 0)) {
-                float var = (float) variable.getVariable(school);
-                data[classSchool][j][i] += var;
+                if ((!getConfiguration().isCutoffEnabled())
+                        || ((school.getAge() >= getConfiguration().getCutoffAge()[school.getSpeciesIndex()]) & (school
+                                .getLength() >= getConfiguration().getCutoffLength()[school.getSpeciesIndex()]))) {
+
+                    int j = (int) school.getY();
+                    int i = (int) school.getX();
+                    int classSchool = getClass(school);
+
+                    if ((classSchool >= 0) & (i >= 0) & (j >= 0)) {
+                        float var = (float) variable.getVariable(school);
+                        data[classSchool][j][i] += var;
+                    }
+                }
             }
         });
     }
