@@ -1239,7 +1239,7 @@ public class Configuration extends OLogger {
         String pathname = filename;
         try {
             File file = new File(relativeTo);
-            pathname = new File(file.toURI().resolve(filename)).getCanonicalPath();
+            pathname = new File(file.toURI().resolve(filename)).getAbsolutePath();
         } catch (Exception ex) {
             // do nothing, just return the argument
         }
