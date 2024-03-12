@@ -1,4 +1,4 @@
-# Running Osmose demo
+# Running Osmose demo {#sec-osm-run-demo}
 
 Now that the R package is installed, let's try to run the Osmose demo configuration.
 
