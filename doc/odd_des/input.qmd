@@ -88,7 +88,7 @@ with `separator1` either equal or different from `separator2`.
 
 ### Decimal separator
 
-Osmose is quite flexible in terms of separators for the configuration files (automatically detected among = , ; : t), the CSV output files (user-defined by parameter output.csv.separator) and the CSV input files (automatically detected among = , ; : t ). On the contrary it restricts the decimal separator to dot, and only dot.
+Osmose is quite flexible in terms of separators for the configuration files (automatically detected), the CSV output files (user-defined by parameter `output.csv.separator`) and the CSV input files (automatically detected). On the contrary it restricts the decimal separator to dot, and only dot.
 
 ``` bash
 Example given: 3.14159265 or 1.618
@@ -114,12 +114,36 @@ CSV input file separators can be any of the following characters:
 -   colon `:`
 -   tab `\\t`
 
-Osmose will detect the separator automatically and independently for every CSV file. It means that one CSV input file may be comma separated and an other one may be tab-separated
+Osmose will detect the separator automatically and independently for every CSV file. It means that one CSV input file may be comma separated and an other one may be tab-separated.
 
-## Spatial distribution files
+### Spatial maps
 
-First, the spatial dynamics of OSMOSE focus species are driven by spatial distribution maps which can vary according to time (year, season or the age of fish). These maps are derived either from observational data (presence/absence data or density maps) or from climate niche models.
+The spatial dynamics of Osmose (species distribution, fishing dynamics, etc.) can be configured using CSV files. Each line of the CSV file represents a given latitude, and each column represents a given longitude.
+
+In the CSV file, the land cell must either have negative or `NA` values.
+
+::: callout-important
+## Warning
+
+The land cells (`NA`values), the number of lines (longitudes) and columns (latitudes) must be consistent with the lower trophic level (LTL) forcing file!
+:::
+
+<!-- focus species are driven by spatial distribution maps which can vary according to time (year, season or the age of fish). These maps are derived either from observational data (presence/absence data or density maps) or from climate niche models. -->
+
+### Accessibility and catchability matrix
+
+Accessibility and catchability matrix are provided as a CSV file. The first line specifies the name of the predator (either fish species or fishing gear), while the first column specifies the name of the prey (either fish species or biogeochemical forcing).
+
+In accessibility matrix, the size information is provided by appending the `<` character before the upper bound of the class value.
+
+For example, if the predator column is `cod` , the values will be used for all `cod` schools. On the other hand, if the CSV file contains three columns:
+
+| cod \< 0.25 | cod \< 2 | cod |
+|-------------|----------|-----|
+| 0.25        | 0.5      | 0.7 |
+
+The 0.25 value will be used for `cod` schools smaller than 0.25 cm, the 0.5 value will be used for `cod` schools between 0.25 and 2cm, and the 0.7 value will be used for all the other school size.
 
 ## Forcing data
 
-Secondly, the modelled system is driven by prey fields which are not explicitly represented as focus species in OSMOSE. For example, biomass fields of phytoplankton and zooplankton varying in space and time are typical input to OSMOSE. In the different OSMOSE applications, these prey fields were usually produced from coupled hydrodynamic and biogeochemical (BGC) models such as ROMS-NPZD (@Travers2014), ROMS-PISCES (@Oliveros2014), NEMOMed-ECO3M (@Halouani2016) or are derived from observational data (@Gruss2015,Fu2013). Benthic resources can also drive the dynamics of the system as in @Halouani2016`.
+Secondly, the modelled system is driven by prey fields which are not explicitly represented as focus species in OSMOSE. For example, biomass fields of phytoplankton and zooplankton varying in space and time are typical input to OSMOSE. In the different OSMOSE applications, these prey fields were usually produced from coupled hydrodynamic and biogeochemical (BGC) models such as ROMS-NPZD [@Travers2014], ROMS-PISCES [@Oliveros2014], NEMOMed-ECO3M [@Halouani2016] or are derived from observational data [@Gruss2015; @Fu2013]. Benthic resources can also drive the dynamics of the system as in @Halouani2016.
