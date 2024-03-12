@@ -29,11 +29,11 @@ book:
 
   chapters:
     - index.qmd
-    - down_java.qmd
-    - download_osm.qmd
-    - datarmor.qmd
-    - running.qmd
-    - input.qmd
+    - 1_download_requirements.qmd
+    - 2_install_osmose.qmd
+    - 3_datarmor_install.qmd
+    - 4_running_osmose.qmd
+    - 5_input.qmd
 
   search: true
   repo-url: https://github.com/osmose-model/osmose/
