@@ -70,7 +70,7 @@
 #' }
 #' @export
 run_osmose = function(input, parameters = NULL, output = NULL, log = "osmose.log",
-                      version = NULL, osmose = NULL, java = "java",
+                      version = "4.3.3", osmose = NULL, java = "java",
                       options = NULL, verbose = TRUE, clean = TRUE, force = FALSE){
 
   package_version = packageVersion("osmose")
@@ -88,9 +88,7 @@ run_osmose = function(input, parameters = NULL, output = NULL, log = "osmose.log
   # Update to provide by release executables
   if (is.null(osmose)) {
     if (!is.null(version)) {
-      if(.compareVersion(version, "4.3.2") >= 0) {
-        osmose_name = sprintf("osmose_%s-jar-with-dependencies.jar", version)
-      } else if((.compareVersion(version, "4.3.0") >= 0) & (.compareVersion(version, "4.3.1") <= 0)) {
+      if(.compareVersion(version, "4.3.0") >= 0) {
         osmose_name = sprintf("osmose-%s-jar-with-dependencies.jar", version)
       } else {
         osmose_name = sprintf("osmose_%s.jar", version)
@@ -331,7 +329,7 @@ write_osmose = function(x, file, sep=",", ...) {
 #'# plot output data
 #'plot(data)
 #'}
-osmose_demo = function(path = NULL, config = c("gog", "eec_4.3.0")){
+osmose_demo = function(path = NULL, config = c("gog", "eec_4.3.0"), extra_args=NULL){
 
   config = match.arg(config)
 
@@ -364,12 +362,14 @@ osmose_demo = function(path = NULL, config = c("gog", "eec_4.3.0")){
                       stop(paste("There is not reference for", config))
   )
 
-  extra_args = switch(config,
-                      gog = "",
-                      eec_4.3.0 = "",
-                      stop(paste("There is not reference for", config))
-  )
+  if(is.null(extra_args)) {
 
+    extra_args = switch(config,
+                        gog = "",
+                        eec_4.3.0 = "",
+                        stop(paste("There is not reference for", config))
+    )
+  }
 
   file.copy(from = input_dir, to = path, recursive = TRUE, overwrite = FALSE)
   config = basename(path = input_dir)

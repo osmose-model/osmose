@@ -18,7 +18,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import os
 
-plt.rcParams['text.usetex'] = True
+plt.rcParams['text.usetex'] = False
 plt.rcParams['font.size'] = 15
 
 filename = 'repfonct_bioen'
@@ -55,5 +55,3 @@ plt.annotate(r'$f_p = I_{max}\ w^{\alpha}$', [0.5 * (imax + x.max()), 1.1 * ymax
 
 plt.savefig(fileout + '.svg', bbox_inches='tight')
 plt.savefig(fileout + '.pdf', bbox_inches='tight')
-
-

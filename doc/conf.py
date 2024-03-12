@@ -45,7 +45,7 @@ extensions = ['sphinx.ext.todo',
     'matplotlib.sphinxext.plot_directive',
     'sphinxcontrib.mermaid',
     'sphinx_rtd_theme',
-    'myst_parser'
+    'myst_nb'
 ]
 
 plantuml = 'plantuml'
@@ -63,8 +63,36 @@ templates_path = ['_templates']
 
 # The suffix(es) of source filenames.
 # You can specify multiple suffix as a list of string:
-#
-source_suffix = ['.rst', '.md']
+source_suffix = {'.md': 'myst-nb'}
+
+myst_enable_extensions = [
+    "amsmath",
+    "attrs_inline",
+    "colon_fence",
+    "deflist",
+    "dollarmath",
+    "fieldlist",
+    "html_admonition",
+    "html_image",
+    "linkify",
+    "replacements",
+    "smartquotes",
+    "strikethrough",
+    "substitution",
+    "tasklist",
+]
+
+myst_substitutions = {
+  'cal': "'{samp}`calibrar`'",
+  'cman': "Osmose Configuration Mansager",
+  'csv': "CSV",
+  'dat': "Datarmor",
+  'jos': "OSMOSE Java",
+  'nc': "NetCDF",
+  'orc': "ORCA",
+  'os': "OSMOSE",
+  'ros': "'{samp}`osmose`'",
+}
 
 # The master toctree document.
 master_doc = 'index'
@@ -79,7 +107,7 @@ copyright = '%s, %s' %(date.today().strftime("%Y-%m-%d"), author)
 # |version| and |release|, also used in various other places throughout the
 # built documents.
 #
-# Recover the Ichthyop version based
+# Recover the Osmose version based
 pom_file = os.path.join('..', 'pom.xml')
 with open(pom_file, 'r') as fpom:
     lines = fpom.readlines()
@@ -103,20 +131,22 @@ todo_emit_warnings = True
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
 # This patterns also effect to html_static_path and html_extra_path
-exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store', 'alias.rst', 'index_private.rst', 'index_public.rst', 'calib.rst', 'misc.rst']
-exclude_patterns += glob(os.path.join('calib', '*rst'))
-exclude_patterns += glob(os.path.join('misc', '*rst'))
+exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store', 'alias.md', 'index_private.md', 'index_public.md', 'calib.md', 'misc.md', 'README.md']
+exclude_patterns += glob(os.path.join('calib', '*md'))
+exclude_patterns += glob(os.path.join('misc', '*md'))
+exclude_patterns += glob(os.path.join('rosmose', '*md'))
+
+exclude_patterns += glob(os.path.join('odd_des', 'submodel', '_static', 'mermaid', '*md'))
+exclude_patterns += glob(os.path.join('odd_des', '_static', 'mermaid', '*md'))
+exclude_patterns += glob(os.path.join('evo_odd_des', '_static', 'mermaid', '*md'))
+exclude_patterns += glob(os.path.join('bioen_odd_des', '_static', 'mermaid', '*md'))
+
 
 # The name of the Pygments (syntax highlighting) style to use.
 pygments_style = 'sphinx'
 
 # If true, `todo` and `todoList` produce output, else they produce nothing.
 todo_include_todos = True
-
-# Included at the beginning of every source file that is read.
-with open('alias.rst', 'r') as pr:
-    rst_prolog = pr.read()
-
 
 # -- Options for HTML output ----------------------------------------------
 
@@ -129,6 +159,7 @@ numfig = True
 numfig_secnum_depth = (1)
 
 html_theme = "sphinx_rtd_theme"
+html_logo = os.path.join('_static', 'logo-osmose.svg')
 
 # Theme options are theme-specific and customize the look and feel of a theme
 # further.  For a list of options available for each theme, see the
@@ -140,16 +171,10 @@ html_theme = "sphinx_rtd_theme"
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
 html_static_path = ['_static']
-html_css_files = ['css/hacks.css']
+#html_css_files = ['theme_overrides.css']
 
-#html_context = {
-#        'css_files': [
-#            '_static/theme_overrides.css',  # override wide tables in RTD theme
-#            ],
-#        }
-
-def setup(app):
-   app.add_css_file('theme_overrides.css')
+#def setup(app):
+#   app.add_css_file('theme_overrides.css')
 
 # -- Options for HTMLHelp output ------------------------------------------
 
