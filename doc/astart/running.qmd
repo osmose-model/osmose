@@ -1,4 +1,4 @@
-# Running Osmose
+# Running Osmose demo
 
 Now that the R package is installed, let's try to run the Osmose demo configuration.
 
@@ -47,7 +47,7 @@ configuration version number is inconsistent with the Osmose version.
 Use the `force` argument with caution!
 :::
 
-While Osmose is running, an `osmose.log` file is written in the working directory. This file gives you some informations about the simulation. If the simulation ended properly, you should see:
+While Osmose is running, an `osmose.log` file is written in the working directory. This file gives you some information about the simulation. If it has finished properly, you should see:
 
 ```
 osmose[info] Simulation 0 completed (time ellapsed: 123 seconds)
@@ -56,7 +56,7 @@ osmose[info] OSMOSE Model copyright © IRD
 osmose[info] *********************************************
 ```
 
-Now that the simulation has been properly finished, you can read the Osmose outputs by using the `read_osmose` function:
+Now that the simulation has been properly completed, you can read the Osmose output files by using the `read_osmose` function:
 
 
 ```{r}
@@ -64,7 +64,7 @@ output = read_osmose(demo$output_dir)
 output
 ```
 
-You can now plot some of the available fields using the `plot` function. For instance, to plot the biomass for all the species:
+You can now plot some of the available fields using the `plot` function. For example, to plot the biomass for all the species:
 
 ```{r}
 plot(output, what="biomass")
