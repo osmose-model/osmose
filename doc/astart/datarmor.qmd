@@ -1,6 +1,6 @@
 # Datarmor install
 
-In this section, the easiest way to install Osmose on the Datarmor HPC is described.
+This section describes the easiest way to install Osmose on the Datarmor HPC.
 
 ## Loading the modules
 
@@ -32,7 +32,7 @@ It specifies the location where the R libraries will be insalled.
 
 :::{.callout-caution}
 
-When running a Job on Datarmor, you do not have access to the internet. Therefore, the Java executables cannot be downloaded as discussed in @sec-java-executable. Therefore, the ``OSMOSE_DIR`` environment variable is not required, since the Java code needs to be manually compiled, as discussed in @sec-java-compile-datarmor
+When running a job on Datarmor, you do not have access to the Internet. Therefore, the Java executables cannot be downloaded as discussed in @sec-java-executable. Therefore, the ``OSMOSE_DIR`` environment variable is not required, since the Java code needs to be manually compiled, as discussed in @sec-java-compile-datarmor
 :::
 
 
@@ -51,26 +51,26 @@ channels:
   - defaults
 ```
 
-When done, type the following:
+When this is done, type the following:
 
 ```csh
 source /appli/anaconda/latest/etc/profile.d/conda.csh
 ```
 
 :::{.callout-tip}
-To make Conda available permanently, you can add the `. /appli/anaconda/latest/etc/profile.d/conda.sh` line into the `~/.cshrc`
+To make Conda permanently available, you can add the line `source /appli/anaconda/latest/etc/profile.d/conda.csh` to the `~/.cshrc`
 file
 :::
 
 ## Cloning the code
 
-When Conda is set-up, activate the Git environment by typing:
+Once Conda is set up, activate the Git environment by typing:
 
 ```
 conda activate git
 ```
 
-This will give you access to a Git executable configured with the LFS support.
+This will give you access to a ``git`` executable configured with the LFS support.
 
 Finally, type the following:
 
@@ -80,7 +80,7 @@ git clone https://github.com/osmose-model/osmose.git
 
 ## Compiling the code {#sec-java-compile-datarmor}
 
-To compile the code from Datarmor, you will to use the ``maven`` conda environment. To activate it:
+To compile the Osmose Java code on Datarmor, you will need to use the ``maven`` conda environment. To activate it:
 
 ```
 conda activate maven
@@ -92,13 +92,13 @@ Then, go in the ``osmose`` folder and type:
 mvn package
 ```
 
-The Java executable file will be created on the ``inst/java/`` folder of the ``osmose`` directory.
+The Java executable file is created in the ``inst/java/`` folder of the ``osmose`` directory.
 
 ## Installing the package
 
-When the Java code is compiled, you can install the Osmose R package.
+Once the Java code is compiled, you can install the Osmose R package.
 
-First, install the required libraries as explained in @sec-install-libraries.
+First, install the required libraries as described in @sec-install-libraries.
 
 Then, install the Osmose R package from the ``osmose`` folder:
 
