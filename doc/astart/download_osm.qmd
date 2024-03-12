@@ -1,25 +1,25 @@
 
 # Installing Osmose {#sec-osm-inst}
 
-The Osmose model is provided as a combination of a Java numerical core (referred to as Osmose Java), associated with an Osmose R package (referred to as Osmose R). The code is available on a [GitHub repository](https://github.com/osmose-model/osmose).
+The Osmose model is provided as a combination of a Java numerical core (referred to as Osmose Java), linked to an Osmose R package (referred to as Osmose R). The code is available on a [GitHub repository](https://github.com/osmose-model/osmose).
 
-It is strongly advised to install Osmose from the R, in order to have access to all the features provided
-by the package. There are several possibilities to install Osmose from the Git repository.
+It is strongly recommended to install Osmose from R, in order to have access to all the features provided
+by the package. There are several ways to install Osmose from the Git repository.
 
 ## Install using ``devtools``
 
 It is possible to install the Osmose package using the ``install_github`` function of the ``devtools`` package.
-First, open a R session (by typing ``R`` from a Terminal or CMD prompt). In the R console, type:
+First, open an R session (by typing ``R`` from a terminal or CMD prompt). In the R console, type:
 
 ```R
 library(devtools)
 install_github("osmose-model/osmose/")
 ```
 
-This will download the latest commit of the ``master`` branch and use it to compile the Osmose package.
+This will download the latest commit from the ``master`` branch and use it to compile the Osmose package.
 
 :::{.callout-note}
-The ``devtools`` package need to be installed
+The ``devtools`` package is required
 :::
 
 ## Install from RStudio
@@ -29,7 +29,7 @@ open the `Version Control --> Git` menu.
 
 Set the package URL to [https://github.com/osmose-model/osmose](https://github.com/osmose-model/osmose).
 
-When the project is opened, click on the
+Once the project is open, click on the
 `Build & Reload` button to install the package.
 
 :::{.callout-note}
@@ -38,7 +38,7 @@ The ``devtools`` package need to be installed.
 
 ## Install from source files
 
-To install the model from the source files, first download the code. You can either dowload it from the [Archive file](https://github.com/osmose-model/osmose/archive/refs/heads/master.zip) or via the ``git clone`` command, as follows:
+To install the Osmose package from source, first download the code. You can either download it from the [archive file](https://github.com/osmose-model/osmose/archive/refs/heads/master.zip) or by using the ``git clone`` command, as follows:
 
 ```bash
 git clone https://github.com/osmose-model/osmose.git
@@ -51,22 +51,22 @@ R CMD INSTALL osmose
 ```
 
 :::{.callout-tip}
-In the case of a manual install, we strongly advise to favor the ``git clone`` method. Indeed, update of the code
-can be simply done by pulling changes from the remote folder.
+In the case of a manual installation, we strongly recommend that you favour the ``git clone`` method. Updating the code
+can be simply done by pulling changes from the remote folder using ``git pull``
 :::
 
 :::{.callout-important}
-Note that the code must be reinstalled using the ``R CMD INSTALL osmose`` command anytime the sources are updated.
+Note that the code must be reinstalled using the ``R CMD INSTALL osmose`` command each time the sources are updated.
 :::
 
 ## Java executable {#sec-java-executable}
 
-When installing the Osmose R package, no java executable is provided. The latter will be automatically downloaded by
+When installing the Osmose R package, no java executable is provided. The latter is automatically downloaded by
 the R package when the ``run_osmose`` package function is called.
 
-The location where the executable files will be downloaded must be specified in a ``.Renviron`` file (see
+The location where the executables are to be downloaded must be specified in a ``.Renviron`` file (see
 [this article](https://support.posit.co/hc/en-us/articles/360047157094-Managing-R-with-Rprofile-Renviron-Rprofile-site-Renviron-site-rsession-conf-and-repos-conf) for a description of ``.Renviron``
-file).
+files).
 
 Create or edit the ``.Renviron`` file and set the ``OSMOSE_DIR`` variable to the destination folder:
 
@@ -74,14 +74,13 @@ Create or edit the ``.Renviron`` file and set the ``OSMOSE_DIR`` variable to the
 OSMOSE_DIR=/home/barrier/Work/codes/osmose-executables
 ```
 
-If the ``OSMOSE_DIR`` variables does not exist, the java executables will
-be downloaded in a temporary folder. It will be downloaded anytime the ``run_osmose``
-function is called. This is summarized in {numref}`mermaid-java-exe`.
+If no ``.Renviron`` file exists or if the ``OSMOSE_DIR`` variable does not exist, the Java executables are downloaded to a temporary folder anytime the ``run_osmose``
+function is called.
 
-Note that the Java executable are available on the [Releases](https://github.com/osmose-model/osmose/releases) section
-of the Github repository. The Java executable files are named ``osmose-X.Y.Z-jar-with-dependencies.jar``,
-with ``X.Y.Z`` the Osmose version. These Java executables contain all the external Java libraries required
-by Osmose.
+Note that the Java executables are available in the [Releases](https://github.com/osmose-model/osmose/releases) section
+of the Github repository. The Java executables are named ``osmose-X.Y.Z-jar-with-dependencies.jar``,
+where ``X.Y.Z`` is the Osmose version. These Java executables contain all the external Java libraries required
+by Osmose (NetCDF, etc.).
 
 ```{mermaid}
 %%| label: fig-run-osmose-diagram
