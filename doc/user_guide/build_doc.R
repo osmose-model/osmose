@@ -6,4 +6,5 @@ createLink(target=file.path("..", "astart", "download_osm.qmd"), link="2_install
 createLink(target=file.path("..", "astart", "datarmor.qmd"), link="3_datarmor_install.qmd")
 createLink(target=file.path("..", "astart", "running.qmd"), link="4_running_osmose.qmd")
 createLink(target=file.path("..", "odd_des", "input.qmd"), link="5_input.qmd")
+createLink(target=file.path("..", "biblio.qmd"), link="biblio.qmd")
 quarto_render()

@@ -34,6 +34,7 @@ book:
     - 3_datarmor_install.qmd
     - 4_running_osmose.qmd
     - 5_input.qmd
+    - biblio.qmd
 
   search: true
   repo-url: https://github.com/osmose-model/osmose/
