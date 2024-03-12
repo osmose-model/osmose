@@ -41,16 +41,16 @@ public class TestPredMatrix {
     private ArrayList<Integer> preyIndex = new ArrayList<>();
 
     private int nStepYears;
-    
+
     interface Index {
         int getIndex(School school);
     }
-        
+
     String[] testNames = new String[] { "lesserSpottedDogfish", "lesserSpottedDogfish", "redMullet", "redMullet",
     "pouting", "pouting", "whiting", "whiting", "poorCod", "poorCod", "cod", "cod", "dragonet", "dragonet",
     "sole", "sole", "plaice", "plaice", "horseMackerel", "horseMackerel", "mackerel", "mackerel", "herring",
     "herring", "sardine", "sardine", "squids", "squids"};
-    
+
     float[] testAges = new float[] { 0.3f, 0.46f, // lesser
             0.2f, 0.3f, // rm
             0.2f, 0.3f, // pouting
@@ -82,7 +82,7 @@ public class TestPredMatrix {
         assertEquals(35, nPreys);
 
     }
-    
+
     @Test
     public void TestPreyNames() {
         String[] expected = new String[] { "lesserSpottedDogfish", "lesserSpottedDogfish", "redMullet", "redMullet",
@@ -101,7 +101,7 @@ public class TestPredMatrix {
                 "squids", "backgroundSpecies" };
         assertArrayEquals(expected, this.accessMatrix.getPredNames());
     }
-    
+
     @Test
     public void TestPredClass() {
         float[] expected = new float[] { 0.45f, Float.MAX_VALUE, 0.25f, Float.MAX_VALUE, 0.25f, Float.MAX_VALUE, 0.25f,
@@ -121,8 +121,8 @@ public class TestPredMatrix {
                 Float.MAX_VALUE, Float.MAX_VALUE };
         assertArrayEquals(expected, this.accessMatrix.getPreyClasses());
     }
-    
-    
+
+
     @Test
     public void TestSortedPreyNames() {
         String[] expected = new String[] { "backgroundSpecies", "cod", "cod", "Diatoms", "Dinoflagellates", "dragonet",
@@ -141,7 +141,7 @@ public class TestPredMatrix {
                 "squids", "squids", "whiting", "whiting" };
         assertArrayEquals(expected, this.accessMatrix2.getPredNames());
     }
-    
+
     @Test
     public void TestSortedPredClass() {
         float[] expected = new float[] { Float.MAX_VALUE, 0.4f, Float.MAX_VALUE, 0.25f, Float.MAX_VALUE,
@@ -161,12 +161,12 @@ public class TestPredMatrix {
                 Float.MAX_VALUE, 0.25f, Float.MAX_VALUE };
         assertArrayEquals(expected, this.accessMatrix2.getPreyClasses());
     }
-    
+
     /** Method that generates the expected index of the accessible matrix for the species and
-     * age classes defined in the above. 
+     * age classes defined in the above.
      */
     private int[] getIndexes(Index indexer) {
-        
+
         List<Integer> values = new ArrayList<>();
         for(int i = 0; i < testNames.length; i++) {
             String speciesName = testNames[i];
@@ -176,17 +176,17 @@ public class TestPredMatrix {
             int index = indexer.getIndex(school);
             values.add(index);
         }
-        
+
         int[] actual = values.stream().mapToInt(i -> i).toArray();
         return actual;
-        
+
     }
-    
+
     /** Test of the predator (column) index on unsorted array */
     @Test
     @Order(2)
     public void TestPredIndex() {
-                
+
         int[] expected = new int[] { 0, 1, // less
                 2, 3, // rm
                 4, 5, // pout
@@ -201,13 +201,13 @@ public class TestPredMatrix {
                 20, 20, // hering
                 21, 21, // sard
                 22, 23 };
-            
+
         int[] actual = this.getIndexes(sch-> this.accessMatrix.getIndexPred(sch));
-        
+
         assertArrayEquals(expected, actual);
-            
+
     }
-    
+
     /** Test of the predator (column) index on unsorted array */
     @Test
     public void SortedTestPredIndex() {
@@ -232,7 +232,7 @@ public class TestPredMatrix {
         assertArrayEquals(expected, actual);
 
     }
-    
+
     /** Test of the predator (column) index on unsorted array */
     @Test
     public void SortedTestPreYIndex() {
@@ -257,13 +257,13 @@ public class TestPredMatrix {
         assertArrayEquals(expected, actual);
 
     }
-    
+
 
     /** Test on prey (row) for unsorted matrix **/
     @Test
     @Order(3)
     public void TestPreyIndex() {
-        
+
         int[] expected = new int[] { 0, 1, // less
                 2, 3, // rm
                 4, 5, // pout
@@ -278,9 +278,9 @@ public class TestPredMatrix {
                 20, 20, // hering
                 21, 21, // sard
                 22, 23 };
-        
+
         int[] actual = this.getIndexes(sch -> this.accessMatrix.getIndexPrey(sch));
-        
+
         assertArrayEquals(expected, actual);
 
     }
@@ -309,7 +309,7 @@ public class TestPredMatrix {
     public Species getSpecies(int index) {
         return Osmose.getInstance().getConfiguration().getSpecies(index);
     }
-    
+
     public Species getSpecies(String name) {
         return Osmose.getInstance().getConfiguration().getSpecies(name);
     }
@@ -332,7 +332,7 @@ public class TestPredMatrix {
         osmose.readConfiguration(configurationFile, cmd);
         cfg = osmose.getConfiguration();
         cfg.init();
-        
+
         // First, we read the accessibility matrix when the matrixes is not sorted.
         // i.e. we read the file as it is.
         AccessibilityManager access = new AccessibilityManager(0,"predation.accessibility",".acc",
@@ -502,7 +502,7 @@ public class TestPredMatrix {
             }
         }
     }
-    
+
     @Test
     public void TestSortedFullValues() {
 
@@ -660,6 +660,67 @@ public class TestPredMatrix {
         double[][] actual = this.accessMatrix.getValues();
         assertArrayEquals(expected, actual);
 
+    }
+
+    @Test
+    public void testAccessValue() {
+
+        String configurationFile = this.getClass().getClassLoader().getResource("osmose-eec/predation-accessibility2.csv").getFile();
+        configurationFile = configurationFile.replace("%20", " ");
+        Matrix matrix = new Matrix(configurationFile, (school -> school.getLength()));
+
+        Species lesser = cfg.getSpecies("lesserSpottedDogfish");
+        Species mullet = cfg.getSpecies("redMullet");
+
+        float x = 0;
+        float y = 0;
+        double abundance = 0;
+        float length = 0;
+        float weight = 0;
+        int ageDt = 0;
+        float trophicLevel = 0;
+
+        School pred = new School(lesser, x, y, abundance, 0.1f, weight, ageDt, trophicLevel);
+        School prey = new School(lesser, x, y, abundance, 0.1f, weight, ageDt, trophicLevel);
+        assertEquals(1, testValue(matrix, pred, prey));
+
+        pred = new School(lesser, x, y, abundance, 0.46f, weight, ageDt, trophicLevel);
+        prey = new School(lesser, x, y, abundance, 0.1f, weight, ageDt, trophicLevel);
+        assertEquals(2, testValue(matrix, pred, prey));
+
+        pred = new School(lesser, x, y, abundance, 0.1f, weight, ageDt, trophicLevel);
+        prey = new School(lesser, x, y, abundance, 0.46f, weight, ageDt, trophicLevel);
+        assertEquals(17, testValue(matrix, pred, prey));
+
+        pred = new School(mullet, x, y, abundance, 0.1f, weight, ageDt, trophicLevel);
+        prey = new School(lesser, x, y, abundance, 0.46f, weight, ageDt, trophicLevel);
+        assertEquals(19, testValue(matrix, pred, prey));
+
+        pred = new School(mullet, x, y, abundance, 0.4f, weight, ageDt, trophicLevel);
+        prey = new School(lesser, x, y, abundance, 0.46f, weight, ageDt, trophicLevel);
+        assertEquals(25, testValue(matrix, pred, prey));
+
+        pred = new School(mullet, x, y, abundance, 0.4f, weight, ageDt, trophicLevel);
+        prey = new School(lesser, x, y, abundance, 0.91f, weight, ageDt, trophicLevel);
+        assertEquals(22, testValue(matrix, pred, prey));
+
+        pred = new School(mullet, x, y, abundance, 0.6f, weight, ageDt, trophicLevel);
+        prey = new School(lesser, x, y, abundance, 0.7f, weight, ageDt, trophicLevel);
+        assertEquals(20, testValue(matrix, pred, prey));
+
+        pred = new School(lesser, x, y, abundance, 0.99f, weight, ageDt, trophicLevel);
+        prey = new School(mullet, x, y, abundance, 0.2f, weight, ageDt, trophicLevel);
+        assertEquals(10, testValue(matrix, pred, prey));
+
+    }
+
+    private double testValue(Matrix matrix, School pred, School prey) {
+        int indexPred, indexPrey;
+        indexPred = matrix.getIndexPred(pred);
+        indexPrey = matrix.getIndexPrey(prey);
+        double output = matrix.getValue(indexPrey, indexPred);
+
+        return output;
     }
 
 }
