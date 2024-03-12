@@ -708,7 +708,7 @@ public class TestPredMatrix {
         prey = new School(lesser, x, y, abundance, 0.7f, weight, ageDt, trophicLevel);
         assertEquals(20, testValue(matrix, pred, prey));
 
-        pred = new School(lesser, x, y, abundance, 0.99f, weight, ageDt, trophicLevel);
+        pred = new School(lesser, x, y, abundance, 0.9f, weight, ageDt, trophicLevel);
         prey = new School(mullet, x, y, abundance, 0.2f, weight, ageDt, trophicLevel);
         assertEquals(10, testValue(matrix, pred, prey));
 
