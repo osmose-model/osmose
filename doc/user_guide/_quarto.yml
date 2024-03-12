@@ -5,27 +5,27 @@ book:
   title: "Osmose User Guide"
   author:
     - name: Nicolas Barrier
-      orcid: https://orcid.org/0000-0002-1693-4719
+      orcid: 0000-0002-1693-4719
     - name: Philippe Verley
       given-names: Philippe
-      orcid: https://orcid.org/0000-0002-5686-2764
+      orcid: 0000-0002-5686-2764
     - name: Ricardo Oliveros-Ramos
-      orcid: https://orcid.org/0000-0002-8069-2101
+      orcid: 0000-0002-8069-2101
     - name: Bruno Ernande
-      orcid:  https://orcid.org/0000-0002-0727-5774
+      orcid:  0000-0002-0727-5774
     - name: Wencheng Lau-Medrano
-      orcid:  https://orcid.org/0000-0002-7979-9710
+      orcid:  0000-0002-7979-9710
     - name: Criscely Luján
-      orcid: https://orcid.org/0000-0003-2658-7340
+      orcid: 0000-0003-2658-7340
     - name: Alaia Morell
       given-names: Alaia
-      orcid: https://orcid.org/0000-0003-3719-4462
+      orcid: 0000-0003-3719-4462
     - name: Morgane Travers-Trolet
-      orcid: https://orcid.org/0000-0003-1493-662X
+      orcid: 0000-0003-1493-662X
     - name: Laure Velez
-      orcid: https://orcid.org/0000-0001-9555-6770
+      orcid: 0000-0001-9555-6770
     - name: Yunne-Jai Shin
-      orcid: https://orcid.org/0000-0002-7259-9265
+      orcid: 0000-0002-7259-9265
 
   chapters:
     - index.qmd
