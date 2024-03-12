@@ -144,6 +144,21 @@ For example, if the predator column is `cod` , the values will be used for all `
 
 The 0.25 value will be used for `cod` schools smaller than 0.25 cm, the 0.5 value will be used for `cod` schools between 0.25 and 2cm, and the 0.7 value will be used for all the other school size.
 
+In catchability matrix (used for fishing mortality and discards when fisheries are enabled), the predator names are the fishing gears that are being defined.
+
+### Time series
+
+Time series are provided in CSV files that contain two columns
+and a header. The first column contains the time value, which are not used by Osmose. The second column contains the values that will be used.
+
+If the number of values is less than the total number of simulation time steps, the same values will be repeated over and over. For example, in a 100 year simulation with a bi-monthly time-step (24 time steps per year), the user can either provide
+2400 values (one value per time step) or 24 values (the same values will be used 100 times).
+
+
+### By class time series
+
+
+
 ## Forcing data
 
 Secondly, the modelled system is driven by prey fields which are not explicitly represented as focus species in OSMOSE. For example, biomass fields of phytoplankton and zooplankton varying in space and time are typical input to OSMOSE. In the different OSMOSE applications, these prey fields were usually produced from coupled hydrodynamic and biogeochemical (BGC) models such as ROMS-NPZD [@Travers2014], ROMS-PISCES [@Oliveros2014], NEMOMed-ECO3M [@Halouani2016] or are derived from observational data [@Gruss2015; @Fu2013]. Benthic resources can also drive the dynamics of the system as in @Halouani2016.
