@@ -79,7 +79,9 @@ To install the Osmose package, R libraries are required (see the ``DESCRIPTION``
 These libraries can be installed by typing from an R console:
 
 ```R
-install.packages(c("calibrar", "knitr", "ncdf4", "rlist", "rmarkdown", "stringr", "fields", "R.utils"))
+install.packages(c("calibrar", "knitr", "ncdf4", "rlist",
+                   "rmarkdown", "stringr", "fields",
+                   "R.utils"))
 ```
 
 
