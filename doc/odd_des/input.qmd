@@ -144,20 +144,45 @@ For example, if the predator column is `cod` , the values will be used for all `
 
 The 0.25 value will be used for `cod` schools smaller than 0.25 cm, the 0.5 value will be used for `cod` schools between 0.25 and 2cm, and the 0.7 value will be used for all the other school size.
 
-In catchability matrix (used for fishing mortality and discards when fisheries are enabled), the predator names are the fishing gears that are being defined.
+In catchability matrix (used for fishing mortality and discards when fisheries are enabled), the predator names are the fishing gears.
 
 ### Time series
 
-Time series are provided in CSV files that contain two columns
-and a header. The first column contains the time value, which are not used by Osmose. The second column contains the values that will be used.
+Time series are provided in CSV files that contain two columns and a header. The first column contains the time value, which are not used by Osmose. The second column contains the values that will be used. Below is an example of CSV time series:
 
-If the number of values is less than the total number of simulation time steps, the same values will be repeated over and over. For example, in a 100 year simulation with a bi-monthly time-step (24 time steps per year), the user can either provide
-2400 values (one value per time step) or 24 values (the same values will be used 100 times).
+| Time       	| Value |
+|---------------|-------|
+| 0           	| 0.05  |
+| 0.041666668	| 0.05  |
+| 0.083333336	| 0.15  |
+| 0.125	        | 0.15  |
+| 0.16666667	| 0.15  |
+| 0.20833333	| 0.15  |
+| 0.25	        | 0.15  |
+| 0.29166666	| 0.05  |
+| 0.33333334	| 0.05  |
+| 0.375	        | 0     |
+| 0.41666666	| 0     |
+| 0.45833334	| 0     |
+| 0.5	        | 0     |
+| 0.5416667	    | 0     |
+| 0.5833333	    | 0     |
+| 0.625	        | 0     |
+| 0.6666667	    | 0     |
+| 0.7083333	    | 0     |
+| 0.75	        | 0     |
+| 0.7916667	    | 0     |
+| 0.8333333	    | 0     |
+| 0.875	        | 0     |
+| 0.9166667	    | 0     |
+| 0.9583333	    | 0.05  |
 
+
+: Example of time series CSV file
+
+If the number of values is less than the total number of simulation time steps, the same values will be repeated over and over. For example, in a 100 year simulation with a bi-monthly time-step (24 time steps per year), the user can either provide 2400 values (one value per time step) or 24 values (the same values will be used 100 times).
 
 ### By class time series
-
-
 
 ## Forcing data
 
