@@ -59,6 +59,3 @@ format:
   html:
     number-sections: true
     theme: cosmo
-
-  pdf:
-    fontfamily: libertinus

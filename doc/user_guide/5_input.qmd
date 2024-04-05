@@ -1,0 +1,176 @@
+# Input data
+
+This section described the input files that are required to run the Osmose model.
+
+## Configuration files
+
+As seen in @sec-osm-run-demo, when you run Osmose, you need to specify a path to an Osmose configuration file.
+
+An Osmose configuration file is a text based file. The name of the file doesn'nt matter, but we recommend that you avoid any special characters and spaces in the name of the file as this may cause IO errors when you'll be running Osmose from the command line or calibrating the model in a UNIX environment. The extension of the file does not matter either.
+
+We call the **main** configuration file the file that is passed as an argument. The main configuration file can contain comments, empty lines and parameters. Osmose scans each line of the main configuration file looking for parameters and automatically discards:
+
+-   empty lines (regardless of blank or tab characters).
+-   lines that start with a punctuation character, one of `!"#$%&'()*+,-./:;<=>?@[\]^_{|}~`
+
+::: callout-tip
+## Tip
+
+For comments, it is recommended to start the line with `#` or `//`
+:::
+
+A parameter is formed by the juxtaposition of three elements: **key**, **separator** and **value**.
+
+### Key
+
+The **key** can be any sequence of characters, without blank or any special characters (dot, hyphen and underscore are accepted). Example of keys:
+
+``` bash
+simulation.ncpu
+predation.ingestion.rate.max.sp6
+```
+
+Osmose makes no difference between upper and lower case: `simulation.ncpu`, `simulation.Ncpu`, `Simulation.nCPU`, `SIMULATION.NCPU` designate the same key.
+
+Keys starting with *`osmose.configuration.`* have a special meaning for the configuration manager. It means that the value of this parameter is the path to another Osmose configuration file and the parameters in that file are to be loaded into the current configuration. This way, instead of having one big configuration file with all the parameters, it is possible to split the parameters into as many files as the user wants.
+
+This process works recursively: a file can contain one or several `osmose.configuration` parameters that point to embedded configuration files, which may also contain one or several `osmose.configuration`parameters, and so on. Osmose handles the sub-configuration file exactly the same way as it handles the main configuration file (same convention for comments, special characters and naming of).
+
+::: callout-warning
+## Relative path
+
+Paths parameters are always defined relative to the configuration file in which they are defined
+:::
+
+### Separators
+
+The separator can be any of the following characters:
+
+-   equals `=`
+-   semicolon `;`
+-   comma `,`
+-   colon `:`
+-   tab `\\t`
+
+Parameters in the same configuration file can have different separators (although it is advisable to be consistent and use the same one). The configuration manager will work out what the delimiter for each parameter.
+
+### Value
+
+The value can be any sequence of characters (even empty). The configuration manager does not attempt to interpret the value when loading the configuration files. It simply stores it as a string object. A value can be passed to the configuration manager as:
+
+-   a string
+-   an integer
+-   a float
+-   a double
+-   a boolean
+-   an array of strings
+-   an array of integers
+-   an array of floats
+-   an array of doubles
+-   a resolved path
+
+An array of values is a sequence of values with a separator in between. Accepted separators for an array of values are the same characters listed above. The separator for an array of values can either be the same or distinct from the separator between the key and the value. The following examples are valid entries:
+
+``` bash
+movement.map0.season;0;1;2;3;4;5
+movement.map0.season=0;1;2;3;4;5
+movement.map0.season = 0, 1, 2, 3, 4, 5
+movement.map0.season : 0 ; 1 ; 2;3;4;5
+```
+
+and are equivalent for the configuration manager. It can be summarize as:
+
+``` bash
+key separator1 value1 separator2 value2 separator2 value3 separator2 value4
+```
+
+with `separator1` either equal or different from `separator2`.
+
+### Decimal separator
+
+Osmose is quite flexible in terms of separators for the configuration files (automatically detected), the CSV output files (user-defined by parameter `output.csv.separator`) and the CSV input files (automatically detected). On the contrary it restricts the decimal separator to dot, and only dot.
+
+``` bash
+Example given: 3.14159265 or 1.618
+```
+
+Any other decimal separator (COMMA for instance as in French locale) will be misunderstood and will unmistakably lead to errors. One must be careful when editing CSV input files (either parameters or time series) with tools such as spreadsheets that may automatically replace decimal separator depending on the locale settings. Future Osmose release might allow the use of specific locale but for now remember that DOT is the only accepted decimal separator.
+
+## CSV input file separator
+
+Many Osmose parameters are paths to CSV file, for instance:
+
+``` bash
+movement.map0.file
+mortality.fishing.rate.byDt.byAge.file.sp#
+reproduction.season.file.sp#
+```
+
+CSV input file separators can be any of the following characters:
+
+-   equals `=`
+-   semicolon `;`
+-   comma `,`
+-   colon `:`
+-   tab `\\t`
+
+Osmose will detect the separator automatically and independently for every CSV file. It means that one CSV input file may be comma separated and an other one may be tab-separated.
+
+### Spatial maps
+
+The spatial dynamics of Osmose (species distribution, fishing dynamics, etc.) can be configured using CSV files. Each line of the CSV file represents a given latitude, and each column represents a given longitude.
+
+In the CSV file, the land cell must either have negative or `NA` values.
+
+::: callout-important
+## Warning
+
+The land cells (`NA`values), the number of lines (longitudes) and columns (latitudes) must be consistent with the lower trophic level (LTL) forcing file!
+:::
+
+<!-- focus species are driven by spatial distribution maps which can vary according to time (year, season or the age of fish). These maps are derived either from observational data (presence/absence data or density maps) or from climate niche models. -->
+
+### Accessibility and catchability matrix
+
+Accessibility and catchability matrix are provided as a CSV file. The first line specifies the name of the predator (either fish species or fishing gear), while the first column specifies the name of the prey (either fish species or biogeochemical forcing).
+
+In accessibility matrix, the size information is provided by appending the `<` character before the upper bound of the class value.
+
+For example, if the predator column is `cod` , the values will be used for all `cod` schools. On the other hand, if the CSV file contains three columns:
+
+| cod \< 0.25 | cod \< 2 | cod |
+|-------------|----------|-----|
+| 0.25        | 0.5      | 0.7 |
+
+The 0.25 value will be used for `cod` schools smaller than 0.25 cm, the 0.5 value will be used for `cod` schools between 0.25 and 2cm, and the 0.7 value will be used for all the other school size.
+
+In catchability matrix (used for fishing mortality and discards when fisheries are enabled), the predator names are the fishing gears.
+
+### Time series
+
+Time series are provided in CSV files that contain two columns and a header. The first column contains the time value, which are not used by Osmose. The second column contains the values that will be used. Below is an example of CSV time series:
+
+| Time       	| Value |
+|---------------|-------|
+| 0           	| 0.05  |
+| 0.083333336	| 0.15  |
+| 0.16666667	| 0.15  |
+| 0.25	        | 0.15  |
+| 0.33333334	| 0.05  |
+| 0.41666666	| 0     |
+| 0.5	        | 0     |
+| 0.5833333	    | 0     |
+| 0.6666667	    | 0     |
+| 0.75	        | 0     |
+| 0.8333333	    | 0     |
+| 0.9166667	    | 0     |
+
+: Example of time series CSV file
+
+If the number of values is less than the total number of simulation time steps, the same values will be repeated over and over. For example, in a 100 year simulation with a bi-monthly time-step (24 time steps per year), the user can either provide 2400 values (one value per time step) or 24 values (the same values will be used 100 times).
+
+### By class time series
+
+## Forcing data
+
+Secondly, the modelled system is driven by prey fields which are not explicitly represented as focus species in OSMOSE. For example, biomass fields of phytoplankton and zooplankton varying in space and time are typical input to OSMOSE. In the different OSMOSE applications, these prey fields were usually produced from coupled hydrodynamic and biogeochemical (BGC) models such as ROMS-NPZD [@Travers2014], ROMS-PISCES [@Oliveros2014], NEMOMed-ECO3M [@Halouani2016] or are derived from observational data [@Gruss2015; @Fu2013]. Benthic resources can also drive the dynamics of the system as in @Halouani2016.

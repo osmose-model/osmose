@@ -1,0 +1,84 @@
+# Running Osmose demo {#sec-osm-run-demo}
+
+Now that the R package is installed, let's try to run the Osmose demo configuration.
+
+First, launch an `R` console and load the Osmose library:
+
+```{r}
+library(osmose)
+ls("package:osmose")
+```
+
+Now, call the `osmose_demo` function, which allows to copy the reference configuration into your working directory:
+
+```{r}
+demo = osmose_demo(path = "original-demo", config="eec_4.3.0")
+demo
+```
+
+The `demo` object contains the location of the configuration file and extra arguments.
+
+If some parameters provided in the default configuration must be overwritten, an `extra_args` argument can be provided. It must have the following format:
+
+```{r}
+extra_args = "-Psimulation.time.nyear=15 -Poutput.recordfrequency.ndt=1"
+```
+
+Here, the `simulation.time.nyear` and `output.recordfrequency.ndt` have been modified. The updated demo configuration can then be created follows:
+
+```{r}
+demo2 = osmose_demo(path = "modified-demo", config="eec_4.3.0", extra_args=extra_args)
+demo2
+```
+
+Now, you can run the Osmose model as follows:
+
+```{r}
+run_osmose(demo$config_file, parameters=demo$extra_args, force=TRUE)
+```
+
+The first argument is the Osmose configuration file, the `parameters` argument allows to overwrite some of the original parameters. The `force` argument allows to run the configuration even if the configuration version number is inconsistent with the Osmose version.
+
+::: callout-warning
+Use the `force` argument with caution!
+:::
+
+If you installed Osmose from sources, as discussed in @sec-install-sources, and that you want to use the Jar file compiled with Maven, set the `version` argument to `NULL`:
+
+```{r}
+run_osmose(demo$config_file, parameters=demo$extra_args, force=TRUE, version=NULL)
+```
+
+While Osmose is running, an `osmose.log` file is written in the working directory. This file gives you some information about the simulation. If it has finished properly, you should see:
+
+```         
+osmose[info] Simulation 0 completed (time ellapsed: 123 seconds)
+osmose[info] *********************************************
+osmose[info] OSMOSE Model copyright © IRD
+osmose[info] *********************************************
+```
+
+Now that the simulation has been properly completed, you can read the Osmose output files by using the `read_osmose` function:
+
+```{r}
+output = read_osmose(demo$output_dir)
+output
+```
+
+You can now plot some of the available fields using the `plot` function. For example, to plot the biomass for all the species:
+
+```{r}
+plot(output, what="biomass")
+```
+
+To plot the abundance of a single species:
+
+```{r}
+plot(output, what="abundance", species=c(0, 1, 2))
+```
+
+You can also change the type of the plot as follows:
+
+```{r}
+plot(output, what="abundance", species=c(0, 1), type=3)
+```

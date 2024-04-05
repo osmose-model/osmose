@@ -108,7 +108,6 @@ doc/**/*_cache
 doc/user_guide/.quarto
 doc/user_guide/site_libs
 doc/user_guide/_static
-doc/user_guide/*qmd
 doc/user_guide/index*
 doc/user_guide/_book
 doc/user_guide/.gitignore
