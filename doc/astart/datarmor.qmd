@@ -30,18 +30,17 @@ R_LIBS_USER=/home1/datawork/nbarrier/libs/R/lib
 
 It specifies the location where the R libraries will be insalled.
 
-:::{.callout-caution}
-
-When running a job on Datarmor, you do not have access to the Internet. Therefore, the Java executables cannot be downloaded as discussed in @sec-java-executable. Therefore, the ``OSMOSE_DIR`` environment variable is not required, since the Java code needs to be manually compiled, as discussed in @sec-java-compile-datarmor
-:::
-
+When running a job on Datarmor, you do not have access to the Internet. Therefore, the Java executables cannot be downloaded as discussed in @sec-java-executable. As a consequence, both the Java core and the R package must be compiled manually following @sec-install-sources. The definition of the `OSMOSE_DIR` variable is therefore not required.
 
 ## Setting up conda
 
-To clone and compile the code, you will need to use the dedicated Conda environments. Create a `~/.condarc` file, which contains the following lines:
+To have access to Git and Maven, the first step is to enable the use of Conda, through which these tools are available.
+
+First, create a `~/.condarc` file, which contains the following lines:
 
 ```bash
 envs_dirs:
+  - ${DATAWORK}/anaconda3-envs
   - /home1/datahome/nbarrier/softwares/anaconda3-envs
   - /appli/conda-env
   - /appli/conda-env/2.7
@@ -51,14 +50,20 @@ channels:
   - defaults
 ```
 
-When this is done, type the following:
+When this is done, if using CSH, type:
 
 ```csh
 source /appli/anaconda/latest/etc/profile.d/conda.csh
 ```
 
+If using BASH, type:
+
+```bash
+. /appli/anaconda/latest/etc/profile.d/conda.sh
+```
+
 :::{.callout-tip}
-To make Conda permanently available, you can add the line `source /appli/anaconda/latest/etc/profile.d/conda.csh` to the `~/.cshrc`
+To make Conda permanently available, you can add the line above commands to your `~/.cshrc` or `~/.bashrc` files.
 file
 :::
 
