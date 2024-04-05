@@ -152,3 +152,9 @@ can be simply done by pulling changes from the remote folder using ``git pull``
 :::{.callout-important}
 Any time the Java sources are updated, both the Java and the R must be recompiled as shown in @fig-install-sources
 :::
+
+## For developers {#sec-install-dev}
+
+The development version of Osmose is available on a private GitHub repository: [https://github.com/osmose-model/osmose-private.git](https://github.com/osmose-model/osmose-private.git).
+
+To be able to clone the private repository, you will need to authentify to GitHub (see [here](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/about-authentication-to-github) for details).
