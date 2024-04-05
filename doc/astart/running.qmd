@@ -47,6 +47,13 @@ configuration version number is inconsistent with the Osmose version.
 Use the `force` argument with caution!
 :::
 
+
+If you installed Osmose from sources, as discussed in @sec-install-sources, and that you want to use the Jar file compiled with Maven, set the `version` argument to `NULL`:
+
+```{r}
+run_osmose(demo$config_file, parameters=demo$extra_args, force=TRUE, version=NULL)
+```
+
 While Osmose is running, an `osmose.log` file is written in the working directory. This file gives you some information about the simulation. If it has finished properly, you should see:
 
 ```
