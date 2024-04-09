@@ -48,9 +48,7 @@ sudo apt install netcdf4
 
 ### Windows
 
-To install the library on a Windows system, first download and install the HDF5 library from the [HDF5 website](https://www.hdfgroup.org/downloads/hdf5/).
-
-Then download and install the NetCDF library from the [Unidata website](https://www.unidata.ucar.edu/software/netcdf/docs/winbin.html)
+Download and install the NetCDF library from the [Unidata website](https://www.unidata.ucar.edu/software/netcdf/docs/winbin.html). Select the `netCDFX.Y.Z-NC4-DAP-64.exe` install.
 
 ::: callout-warning
 Ensure that the NetCDF binaries are added to the `PATH` environment variable.
