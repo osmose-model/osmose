@@ -71,6 +71,7 @@ import fr.ird.osmose.output.spatial.SpatialTLOutput;
 import fr.ird.osmose.output.spatial.SpatialSizeOutput;
 import fr.ird.osmose.output.spatial.SpatialEnetOutput;
 import fr.ird.osmose.output.spatial.SpatialEnetOutputlarvae;
+import fr.ird.osmose.output.spatial.SpatialFisheryOutput;
 import fr.ird.osmose.output.spatial.SpatialEnetOutputjuv;
 import fr.ird.osmose.output.spatial.SpatialdGOutput;
 import fr.ird.osmose.output.spatial.SpatialEggOutput;
@@ -278,6 +279,11 @@ public class OutputManager extends SimulationLinker {
 
         // Fisheries output
         if (getConfiguration().isFisheryEnabled()) {
+
+            if (getConfiguration().getBoolean("output.spatial.fishery.enabled")) {
+                outputs.add(new SpatialFisheryOutput(rank));
+            }
+
             if (getConfiguration().getBoolean("output.fishery.enabled")) {
                 outputs.add(new FisheryOutput(rank));
             }
