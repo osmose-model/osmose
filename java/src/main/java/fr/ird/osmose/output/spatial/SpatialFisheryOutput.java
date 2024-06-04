@@ -140,7 +140,7 @@ public class SpatialFisheryOutput extends SimulationLinker implements IOutput {
                 new Attribute("description", "time ellapsed, in days, since the beginning of the simulation"));
 
         Variable.Builder<?> biomassVarBuilder = bNc.addVariable("landings", DataType.FLOAT,
-                new ArrayList<>(Arrays.asList(timeDim, speciesDim, fisheriesDim, xDim, yDim)));
+                new ArrayList<>(Arrays.asList(timeDim, speciesDim, fisheriesDim, yDim, xDim)));
         biomassVarBuilder.addAttribute(new Attribute("units", "ton"));
         biomassVarBuilder.addAttribute(new Attribute("description", "landings, in tons, by species and by fishery"));
         biomassVarBuilder.addAttribute(new Attribute("_FillValue", -99.f));
@@ -148,7 +148,7 @@ public class SpatialFisheryOutput extends SimulationLinker implements IOutput {
         biomassVarBuilder.addAttribute(new Attribute("fisheries_names", fisheryNames));
 
         Variable.Builder<?> discardsVarBuilder = bNc.addVariable("discards", DataType.FLOAT,
-                new ArrayList<>(Arrays.asList(timeDim, speciesDim, fisheriesDim, xDim, yDim)));
+                new ArrayList<>(Arrays.asList(timeDim, speciesDim, fisheriesDim, yDim, xDim)));
         discardsVarBuilder.addAttribute(new Attribute("units", "ton"));
         discardsVarBuilder.addAttribute(new Attribute("description", "discards, in tons, by species and by fishery"));
         discardsVarBuilder.addAttribute(new Attribute("_FillValue", -99.f));
@@ -156,7 +156,7 @@ public class SpatialFisheryOutput extends SimulationLinker implements IOutput {
         discardsVarBuilder.addAttribute(new Attribute("fisheries_names", fisheryNames));
 
         Variable.Builder<?> accessibleBiomassVarBuilder = bNc.addVariable("accessible_biomass", DataType.FLOAT,
-                new ArrayList<>(Arrays.asList(timeDim, speciesDim, fisheriesDim, xDim, yDim)));
+                new ArrayList<>(Arrays.asList(timeDim, speciesDim, fisheriesDim, yDim, xDim)));
         accessibleBiomassVarBuilder.addAttribute(new Attribute("units", "ton"));
         accessibleBiomassVarBuilder
                 .addAttribute(new Attribute("description", "accessible biomass, in tons, by species and by fishery"));
@@ -246,8 +246,7 @@ public class SpatialFisheryOutput extends SimulationLinker implements IOutput {
 
                         arrBiomass.set(0, iSpecies, iFishery, iY, iX, (float) biomass[iSpecies][iFishery][iY][iX]);
                         arrDiscards.set(0, iSpecies, iFishery, iY, iX, (float) discards[iSpecies][iFishery][iY][iX]);
-                        arrAccessBiomass.set(0, iSpecies, iFishery, iY, iX,
-                                (float) accessibleBiomass[iSpecies][iFishery][iY][iX]);
+                        arrAccessBiomass.set(0, iSpecies, iFishery, iY, iX, (float) accessibleBiomass[iSpecies][iFishery][iY][iX]);
                     }
                 }
             }
