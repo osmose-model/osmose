@@ -12,6 +12,7 @@ The displacement mode is defined through the {samp}`movement.distribution.method
 import os
 import subprocess
 cwd = os.getcwd()
+print(cwd)
 
 fpath = "odd_des/submodel/_static/plot_random_dis.py"
 subprocess.call(["python", fpath])
