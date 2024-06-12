@@ -91,8 +91,8 @@ random_drift.svg
 doc/bioen_odd_des/submodel/_static/repfonct_bioen.pdf
 doc/odd_des/_static/mermaid/scheduling_files
 doc/build.sh
-doc/_book
-doc/.quarto
+*/_book
+*/.quarto
 
 doc/**/*_files
 **/.jupyter_cache
@@ -108,7 +108,11 @@ doc/**/*_cache
 doc/user_guide/.quarto
 doc/user_guide/site_libs
 doc/user_guide/index*
-doc/user_guide/_book
+doc/*/_book
 doc/user_guide/.gitignore
 !doc/user_guide/index.qmd
 !doc/user_guide/_static/*svg
+
+**/index.toc
+**/index.tex
+**/index.pdf

@@ -1,0 +1,6 @@
+| Variable                                    | Description                    |
+| ------------------------------------------- | ------------------------------ |
+| species.length2weight.condition.factor.sp#  |  Allometric factor (:math:`c`) |
+| species.length2weight.allometric.power.sp#  |  Allometric power (:math:`b`)  |
+| species.egg.size.sp#                        |  Egg size (cm)                 |
+| species.egg.weight.sp#                      |  Egg weight (g)                |

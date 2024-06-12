@@ -1,0 +1,1 @@
+{{< include ../user_guide/biblio.qmd >}}
