@@ -1,3 +1,4 @@
+```{mermaid}
     graph TD;
 
     id00("Loop over species")
@@ -22,3 +23,4 @@
     id2bis --> id3bis
 
     id00 --> id0
+```
