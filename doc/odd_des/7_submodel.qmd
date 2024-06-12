@@ -1,10 +1,9 @@
 # Submodels
 
 {{< include submodel/influx.qmd >}}
-
-<!-- {{< include submodel/school-init.qmd >}}
+{{< include submodel/school-init.qmd >}}
 {{< include submodel/ltl-update.qmd >}}
 {{< include submodel/movement.qmd >}}
 {{< include submodel/mort.qmd >}}
 {{< include submodel/growth.qmd >}}
-{{< include submodel/reprod.qmd >}} -->
+{{< include submodel/reprod.qmd >}}
