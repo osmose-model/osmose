@@ -71,9 +71,6 @@ Using all these parameters, schools for a given species are initialized as follo
 - Using length, computes the weight using allometric relationship. If age is 0, force weight to be equal to species `eggWeight`.
 - Compute the number of individuals to put in school $i$:  $A_{s, k, i} = \dfrac{B_{s, k} \times 10^6}{N_{s, k} \times W_{s, k, i}}$
 
-The steps are summarized in "{numref}`"init-biomass`
+The steps are summarized below:
 
 {{< include _static/mermaid/init_biomass.qmd >}}
-
-<!-- ```{index} single: population.initialization.relativebiomass.enabled single: population.initialization.seed single: species.linf.sp# single: population.initialization.biomass.sp# single: population.initialization.size.sp# single: population.initialization.tl.sp# single: population.initialization.relativebiomass.sp# single: population.initialization.age.sp# single: population.initialization.nschool.sp#
-``` -->
