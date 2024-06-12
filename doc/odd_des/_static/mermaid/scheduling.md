@@ -1,3 +1,4 @@
+```{mermaid}
 %%{init: {'theme': 'dark', 'themeVariables': { 'fontSize': '13px'}}}%%
 graph TD;
 
@@ -18,3 +19,4 @@ graph TD;
 
     classDef className2 fill:firebrick,stroke:black,stroke-width:3px,color:white
     class id5 className2;
+```
