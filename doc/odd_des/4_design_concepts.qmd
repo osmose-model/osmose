@@ -4,7 +4,7 @@ Following the ODD framework and terminology, we briefly present here some design
 
 ## Basic principles
 
-> Dieta data, such as those of {cite}`SHANNON200383`, suggest that patterns in fish diets include variability
+> Dieta data, such as those of @SHANNON200383, suggest that patterns in fish diets include variability
 > in time and space and prey switching, cannibalism and omnivory. Therefore, two species can be a predator or prey of one
 > another depending on the life stages considered. Therefore, predation in Osmose is size-based, taking into account thresholds
 > for predator/prey size ratio, and relies on the spatio-temporal co-occurrence of individuals.
@@ -44,7 +44,7 @@ There are different sources of stochasticity in the model. First, the order at w
 As the total number of fish (from eggs to adult fish) to be taken into account in the simulated system can
 reach a value of the order of $10^{12}$, the model was not brought down to the fish
 level but to an aggregated level consisting of a group of fish having similar ecological attributes.
-The unit of action and interaction, i.e., the “super-individual” as defined by {cite}`SCHEFFER1995161`, is a group of fish having
+The unit of action and interaction, i.e., the “super-individual” as defined by @SCHEFFER1995161, is a group of fish having
 the same size, the same spatial coordinates, requiring similar food, and belonging to the same
 species (therefore having similar physiological and morphological characteristics). For
 convenience, this super-individual is also called a “fish school” in the following sections.

@@ -66,7 +66,7 @@ $$
 L_{thres} = min\left[L_{egg}, L_{\infty} \times \left(1 - \exp^{-K\left(a_{thres} - t_0\right)}\right) \right]
 $$
 
-A Von Bertalanffy model is used to calculate mean length increase above a threshold age $a_{thres}$ determined for each HTL group from the literature. Below $a_{thres}$, a simple linear model is used. The rationale behind this is that Von Bertalanffy parameters are usually estimated from data excluding youngs of the year or including only very few of them. Assuming a linear growth between age 0 and $a_{thres}$ ensures a more realistic calculation of mean length increases for early ages of HTL groups ({cite}`Travers2009`).
+A Von Bertalanffy model is used to calculate mean length increase above a threshold age $a_{thres}$ determined for each HTL group from the literature. Below $a_{thres}$, a simple linear model is used. The rationale behind this is that Von Bertalanffy parameters are usually estimated from data excluding youngs of the year or including only very few of them. Assuming a linear growth between age 0 and $a_{thres}$ ensures a more realistic calculation of mean length increases for early ages of HTL groups (@Travers2009).
 
 :::{figure} _static/vb.*
 :align: center
