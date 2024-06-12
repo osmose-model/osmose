@@ -1,10 +1,9 @@
-(movements)=
 
 ## Spatial distribution
 
 At each time-step, the spatial distribution of fished is randomly changed based either based on distribution maps or based on random walk processes.
 
-The displacement mode is defined through the {samp}`movement.distribution.method.sp#`, whose values are either {samp}`random` or {samp}`maps`.
+The displacement mode is defined through the `movement.distribution.method.sp#`, whose values are either `random` or `maps`.
 
 ### Random distribution
 
