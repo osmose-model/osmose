@@ -1,3 +1,4 @@
+```{mermaid}
 graph TD;
 
     id0(Reading parameters) --> id1
@@ -10,3 +11,4 @@ graph TD;
 
     id6 --> id2
     id6 --> id1
+```

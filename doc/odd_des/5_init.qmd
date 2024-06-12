@@ -1,6 +1,6 @@
 # Initialization
 
-% In previous versions of the model, the main way of initialising the system consisted in building age-structured populations from target biomass specified in input. Osmose would distribute fish biomass across age classes and schools according to a simple exponential decay of fish populations and applying the total annual mortality from one age to the next (sum of fishing and natural mortality parameters in input). Fish numbers were then calculated by using the length-weight parameters in input of the model and distributed evenly among the schools of a given age cohort. This initialisation method shows several drawbacks:
+<!-- % In previous versions of the model, the main way of initialising the system consisted in building age-structured populations from target biomass specified in input. Osmose would distribute fish biomass across age classes and schools according to a simple exponential decay of fish populations and applying the total annual mortality from one age to the next (sum of fishing and natural mortality parameters in input). Fish numbers were then calculated by using the length-weight parameters in input of the model and distributed evenly among the schools of a given age cohort. This initialisation method shows several drawbacks:
 
 % - it provides a fully structured population though, ideally, no assumption should be made about this structure which the model needs ot build up given some basic laws at individual level.
 
@@ -10,7 +10,7 @@
 
 % We must first acknowledge that there is no ideal solution for initialising OSMOSE but it should be done by making as
 
-% little assumptions as possible, keeping the spin-up time as short as possible and individual rules as much as possible.
+% little assumptions as possible, keeping the spin-up time as short as possible and individual rules as much as possible. -->
 
 In Osmose, there are several initialisation methods.
 
@@ -31,13 +31,13 @@ By following this approach:
 - it reduces the number of time steps for the spin-up
 - it minimizes the amplitude of population oscillations
 
-```{index} single: population.seeding.biomass.sp# single: population.seeding.year.max
-```
+<!-- ```{index} single: population.seeding.biomass.sp# single: population.seeding.year.max
+``` -->
 
 The initialisation process is controlled by two parameters:
 
-- {samp}`population.seeding.year.max` defined the number of years for running the seeding process (from year 0 to {samp}`population.seeding.year.max`), and during which Osmose ensures that some eggs will be released even though there are no mature individuals in the system. Then, the seeding ceases completely until the end of the simulation. If the parameter is not specified, Osmose will set it by default to the lifespan of the longest lived species of the system.
-- {samp}`population.seeding.biomass.sp#` defines the spawning stock biomass (SSB) that Osmose considers during the seeding period when there are no mature adults to ensure the reproduction process. SSB is then used to compute the number of eggs to be released in the system (cf. {numref}`reprod`).
+- `population.seeding.year.max` defined the number of years for running the seeding process (from year 0 to `population.seeding.year.max`), and during which Osmose ensures that some eggs will be released even though there are no mature individuals in the system. Then, the seeding ceases completely until the end of the simulation. If the parameter is not specified, Osmose will set it by default to the lifespan of the longest lived species of the system.
+- `population.seeding.biomass.sp#` defines the spawning stock biomass (SSB) that Osmose considers during the seeding period when there are no mature adults to ensure the reproduction process. SSB is then used to compute the number of eggs to be released in the system (cf. {numref}`reprod`).
 
 ## Using a NetCDF file
 
@@ -48,8 +48,8 @@ This method is used if the `simulation.restart.file` or the
 These parameters point to the NetCDF file that will be used to restart the simulation. If `simulation.restart.file`
 is used, then one file per replicate is expected (sufix ends with `.nc.#`, with `#` the index of the simulation).
 
-```{index} single: population.initialization.file single: simulation.restart.file
-```
+<!-- ```{index} single: population.initialization.file single: simulation.restart.file
+``` -->
 
 ## Using relative biomass
 
@@ -71,15 +71,9 @@ Using all these parameters, schools for a given species are initialized as follo
 - Using length, computes the weight using allometric relationship. If age is 0, force weight to be equal to species `eggWeight`.
 - Compute the number of individuals to put in school $i$:  $A_{s, k, i} = \dfrac{B_{s, k} \times 10^6}{N_{s, k} \times W_{s, k, i}}$
 
-The steps are summarized in {numref}`init-biomass`
+The steps are summarized in "{numref}`"init-biomass`
 
-(init-biomass)=
+{{< include _static/mermaid/init_biomass.qmd >}}
 
-```{eval-rst}
-.. mermaid:: _static/mermaid/init_biomass.md
-    :align: center
-    :caption: Initialization steps using the relative biomass method.
-```
-
-```{index} single: population.initialization.relativebiomass.enabled single: population.initialization.seed single: species.linf.sp# single: population.initialization.biomass.sp# single: population.initialization.size.sp# single: population.initialization.tl.sp# single: population.initialization.relativebiomass.sp# single: population.initialization.age.sp# single: population.initialization.nschool.sp#
-```
+<!-- ```{index} single: population.initialization.relativebiomass.enabled single: population.initialization.seed single: species.linf.sp# single: population.initialization.biomass.sp# single: population.initialization.size.sp# single: population.initialization.tl.sp# single: population.initialization.relativebiomass.sp# single: population.initialization.age.sp# single: population.initialization.nschool.sp#
+``` -->
