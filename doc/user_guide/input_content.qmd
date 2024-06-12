@@ -1,5 +1,3 @@
-# Input data
-
 This section described the input files that are required to run the Osmose model.
 
 ## Configuration files
