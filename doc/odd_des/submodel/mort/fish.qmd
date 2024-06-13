@@ -329,24 +329,14 @@ Note that the `#` here is not related to the one of fisheries.
 
 There is also the possibility to define fisheries discards. It is defined in the same way as catchabilies (cf above for a detailed description of the parameters).
 
-```{index} fisheries.discards.file, fisheries.discards.file.dis#, fisheries.discards.initialYear.dis#, fisheries.discards.finalYear.dis#, fisheries.discards.years.dis#, fisheries.discards.steps.dis#
-```
-
-```{eval-rst}
-.. table:: Fisheries discards
-    :align: center
-
-    .. csv-table::
-        :delim: ;
-
-        fisheries.discards.file ; Name of the catchability file
-
-        fisheries.discards.file.dis# ; Name of the catchability file
-        fisheries.discards.initialYear.dis# ; First year when the catchability matrix should be used
-        fisheries.discards.finalYear.dis# ; Last year when the catchability matrix should be used
-        fisheries.discards.years.dis# ; List of years when the catchability should be used.
-        fisheries.discards.steps.dis# ; List of steps within a year when the catchability should be used.
-```
+| Parameters                           | Description                                                        |
+| ------------------------------------ | ------------------------------------------------------------------ |
+| fisheries.discards.file              |  Name of the catchability file                                     |
+| fisheries.discards.file.dis#         |  Name of the catchability file                                     |
+| fisheries.discards.initialYear.dis#  |  First year when the catchability matrix should be used            |
+| fisheries.discards.finalYear.dis#    |  Last year when the catchability matrix should be used             |
+| fisheries.discards.years.dis#        |  List of years when the catchability should be used.               |
+| fisheries.discards.steps.dis#        |  List of steps within a year when the catchability should be used. |
 
 Fishery discards should be provided as a CSV file, with fisheries as column (predators) and species (background and focal) as rows (preys).
 
