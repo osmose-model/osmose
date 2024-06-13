@@ -1,7 +1,7 @@
 import numpy as np
 import pylab as plt
 
-dirout = 'odd_des/submodel/mort/_static/'
+dirout = 'submodel/mort/_static/'
 
 plt.rcParams['lines.linewidth'] = 1.
 plt.rcParams['text.usetex'] = True

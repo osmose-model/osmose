@@ -6,7 +6,7 @@ import os
 
 np.random.seed(1)
 
-dirout = 'odd_des/submodel/_static'
+dirout = 'submodel/_static'
 
 def getNeighbourCells(j, i, r):
 

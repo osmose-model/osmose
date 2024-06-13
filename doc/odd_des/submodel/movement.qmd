@@ -1,4 +1,8 @@
 
+---
+jupyter: python3
+---
+
 ## Spatial distribution
 
 At each time-step, the spatial distribution of fished is randomly changed based either based on distribution maps or based on random walk processes.
@@ -13,7 +17,7 @@ import subprocess
 cwd = os.getcwd()
 print(cwd)
 
-fpath = "odd_des/submodel/_static/plot_random_dis.py"
+fpath = "submodel/_static/plot_random_dis.py"
 subprocess.call(["python", fpath])
 ```
 
