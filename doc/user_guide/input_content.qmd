@@ -2,7 +2,7 @@ This section described the input files that are required to run the Osmose model
 
 ## Configuration files
 
-As seen in @sec-osm-run-demo, when you run Osmose, you need to specify a path to an Osmose configuration file.
+Running Osmose requires specifying the path to an Osmose configuration file.
 
 An Osmose configuration file is a text based file. The name of the file doesn'nt matter, but we recommend that you avoid any special characters and spaces in the name of the file as this may cause IO errors when you'll be running Osmose from the command line or calibrating the model in a UNIX environment. The extension of the file does not matter either.
 

@@ -35,6 +35,7 @@ book:
     - 4_design_concepts.qmd
     - 5_init.qmd
     - 6_input.qmd
+    - 7_submodel.qmd
     - biblio.qmd
 
 
