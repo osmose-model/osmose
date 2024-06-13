@@ -1,5 +1,5 @@
 
-# Reproduction
+## Reproduction
 
 The system starts from a pristine state, with no schools in the domain. For a few years (user-defined), Osmose will
 release some eggs for every species. The eggs enter the different steps of the life cycle, and once the
