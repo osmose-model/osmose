@@ -42,7 +42,7 @@ $$
 
 | Parameter                               | Description                                                                                    |
 | --------------------------------------- | ---------------------------------------------------------------------------------------------- |
-| predation.predPrey.stage.structure      |  Structure to determine thresholds for predator/prey size ratios (:samp:`age` or :samp:`size`) |
+| predation.predPrey.stage.structure      |  Structure to determine thresholds for predator/prey size ratios (`age` or `size`)             |
 | predation.predPrey.stage.threshold.sp#  |  Array of age or size thresholds                                                               |
 | predation.predPrey.sizeRatio.max.sp#    |  Array of :math:`R_{max}` values                                                               |
 | predation.predPrey.sizeRatio.min.sp#    |  Array of :math:`R_{min}` values                                                               |
@@ -154,14 +154,6 @@ $$
 
 and used to increment the number of dead individuals by predation (`nDead` attribute).
 
-```{index} predation.ingestion.rate.max.sp#
-```
-
-```{eval-rst}
-.. table:: Ingestion parameter
-
-    .. csv-table::
-        :delim: ;
-
-        predation.ingestion.rate.max.sp# ; :math:`I_{max}` (grams of food per gram of fish and per year)
-```
+| Parameter                              | Description                                            |
+|----------------------------------------|--------------------------------------------------------|
+| predation.ingestion.rate.max.sp#       |$I_{max}$ (grams of food per gram of fish and per year) |
