@@ -132,9 +132,9 @@ There is now the possibility to define a fishing period ($F_{period}$), i.e. a p
 
 | Parameter                     | Description                                                                            |
 | ----------------------------- | -------------------------------------------------------------------------------------- |
-| fisheries.period.number.fsh#  |  Number of fishing periods within one year (:math:`N_{per}`)                           |
-| fisheries.period.start.fsh#   |  Start of the active fishing period (fraction of year, default = 0, :math:`Y_{start}`) |
-| fisheries.rate.byperiod.fsh#  |  Fishing mortality rate. Must me in :math:`year^{-1}`                                  |
+| fisheries.period.number.fsh#  |  Number of fishing periods within one year ($N_{per}$)                                 |
+| fisheries.period.start.fsh#   |  Start of the active fishing period (fraction of year, default = 0, $Y_{start}$)       |
+| fisheries.rate.byperiod.fsh#  |  Fishing mortality rate. Must me in $year^{-1}$                                        |
 
 Note that the number of values expected in the `fisheries.rate.byperiod.fsh#` parameter depends on $Y_{start}$.
 
@@ -159,8 +159,8 @@ In order to distribute the fishery mortality over the season, the user can defin
 
 | Parameter                        | Description                                                                          |
 | -------------------------------- | ------------------------------------------------------------------------------------ |
-| fisheries.seasonality.fsh#       |  Array of fishing seasonality. Must contain :math:`\frac{N_{step/year}}{N_{season}}` |
-| fisheries.seasonality.file.fsh#  |  File containing the fishing seasonalities (must contain :math:`N_{step}` values)    |
+| fisheries.seasonality.fsh#       |  Array of fishing seasonality. Must contain $\frac{N_{step/year}}{N_{season}}$       |
+| fisheries.seasonality.file.fsh#  |  File containing the fishing seasonalities (must contain $N_{step}$ values)          |
 
 In the first case, the same seasonality will be applied for each fishing season. Imagine that we have 24 time-steps per year and two fishing season (with no offeset, top of figure {numref}`fig-fperiod`),
 then the seasonality provided should contain 12 values, which would apply for the active fishing period (green zone).
