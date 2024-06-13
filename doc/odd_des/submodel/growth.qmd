@@ -24,7 +24,9 @@ $\Delta L(a) = L(a + 1) - L(a)$ is the mean length increase determined from a gr
 | ---------------------------------- | --------------------------------------------- |
 | growth.java.classname.sp#          |  Class name of the age to length conversion   |
 | predation.efficiency.critical.sp#  |  Critical predation success ($C_{S_R}$)       |
-| species.delta.lmax.factor.sp#      |  $\lambda$ (default = 2)                |
+| species.delta.lmax.factor.sp#      |  $\lambda$ (default = 2)                      |
+
+: Growth parameters {.striped .hover #tbl-growth-params}
 
 ```{python}
 #| echo: false

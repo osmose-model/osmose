@@ -163,7 +163,7 @@ Time series are provided in CSV files that contain two columns and a header. The
 | 0.8333333	    | 0     |
 | 0.9166667	    | 0     |
 
-: Example of time series CSV file
+: Example of time series CSV file {.striped .hover}
 
 If the number of values is less than the total number of simulation time steps, the same values will be repeated over and over. For example, in a 100 year simulation with a bi-monthly time-step (24 time steps per year), the user can either provide 2400 values (one value per time step) or 24 values (the same values will be used 100 times).
 
