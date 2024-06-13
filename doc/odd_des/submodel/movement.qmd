@@ -37,7 +37,7 @@ can live is initialized:
 (fig-random-dis)=
 
 ![Initialization process of species domain when random distribution is used with a limited number of cells.
-Black squares indicate land cells, colors and numbers indicate the iteration step when the cell is included in the domain.](submodel/_static/random_drift.svg)
+Black squares indicate land cells, colors and numbers indicate the iteration step when the cell is included in the domain.](submodel/_static/random_drift.png)
 
 Then, at each time-step, schools are moved following a random walk method within this domain, with the range defined in the parameters.
 Unlocated schools are randomly put in one of the cell of the defined domain.
@@ -131,6 +131,7 @@ In the latter case (change of map), the schools are relocated randomly in the ne
 - If $P(i, j) < R \times P_{max}$, the operation is repeated. Else, the cell is selected.
 
 ```{mermaid}
+%%| fig-align: "center"
     graph TD;
 
         id1["Random draft of <br>cell (probability P)"]
