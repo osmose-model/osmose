@@ -1,4 +1,5 @@
 ```{mermaid}
+%%| fig-align: center
     graph TD;
 
     id0(Loop over species)

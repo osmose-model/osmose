@@ -12,6 +12,8 @@ The displacement mode is defined through the `movement.distribution.method.sp#`,
 ### Random distribution
 
 ```{python}
+#| echo: false
+#| output: false
 import os
 import subprocess
 cwd = os.getcwd()

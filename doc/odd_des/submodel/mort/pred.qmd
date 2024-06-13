@@ -61,6 +61,8 @@ $$
 which is the overlapping range of the predator accessible range and of the resource size range.
 
 ```{python}
+#| echo: false
+#| output: false
 import os
 import subprocess
 cwd = os.getcwd()
