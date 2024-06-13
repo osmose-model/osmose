@@ -99,9 +99,9 @@ Additionnally, accessibility matrix can vary over time. To do so, one set of par
 for each accessibility matrix, as done for the parameterization of movements. The keys of these
 parameters must end with `.acc#`, with `#` the number of the accessibility matrix.
 
-| a                                         | b                                                                                                       |
+| Parameter                                 | Description                                                                                             |
 | ----------------------------------------- | ------------------------------------------------------------------------------------------------------- |
-| predation.accessibility.stage.structure   |  Threshold type. Must be :samp:`age` or :samp:`size`.                                                   |
+| predation.accessibility.stage.structure   |  Threshold type. Must be `age` or `size`.                                                               |
 | predation.accessibility.file              |  CSV file containing the accessibility matrix **if constant over time**                                 |
 | predation.accessibility.file.acc#         |  CSV file containing the accessibility matrix for the accessibility matrix ``#``                        |
 | predation.accessibility.initialYear.acc#  |  Start year when to use the accessibility matrix ``#``                                                  |

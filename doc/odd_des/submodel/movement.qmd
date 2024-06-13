@@ -48,7 +48,7 @@ Another way to define species distribution is to use distribution maps, which ca
 
 A single map is defined as follows:
 
-| a                                      | b                                                                                       |
+| Parameter                              | Description                                                                             |
 | -------------------------------------- | --------------------------------------------------------------------------------------- |
 |         movement.randomwalk.range.sp#  |  Number of adjacent cells a species can use during random walk (foraging)               |
 |         movement.file.map#             |  Name of the CSV file that contains the distribution map                                |
@@ -60,7 +60,7 @@ A single map is defined as follows:
 |         movement.years.map#            |  Array of years during when to use the map. (instead of setting initial and final year) |
 |         movement.steps.map#            |  Array of time-steps during when to use the map                                         |
 
-| a                                  | b                                                                      |
+| Parameter                          | Description                                                            |
 | ---------------------------------- | ---------------------------------------------------------------------- |
 |         movement.netcdf.enabled    |  True if NetCDF maps are provided                                      |
 |         movement.species.map#      |  Species to which the movement map is associated                       |

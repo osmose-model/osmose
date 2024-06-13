@@ -117,7 +117,7 @@ $F_{period}$, $F_season$ and : math:`F_base` should be saved. It allows to contr
 
 The fishing base mortality multiplier ($F_{base}$) is provided as regime shifts.
 
-| a                                     | b                                            |
+| Parameter                             | Description                                  |
 | ------------------------------------- | -------------------------------------------- |
 | fisheries.rate.base.fsh#              |  Fishing base for the different regimes.     |
 | fisheries.rate.base.shift.fsh#        |  Years of the regime shifts.                 |

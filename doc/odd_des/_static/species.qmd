@@ -1,9 +1,9 @@
 | Variable             |  Description                                      |  Type                                 |  Units      |
 | -------------------- | ------------------------------------------------- | ------------------------------------- | ----------- |
 | name                 |  name of the species                              |  string                               |             |
-| index                |  index of the species                             |  int, :math:`\in[0, N_{species} - 1]` |             |
-| fileIndex            |  index of the species in the configuration file   |  int, :math:`>0`                      |             |
-| lifespan             |  species life span                                |  int, :math:`>0`                      |  time-steps |
+| index                |  index of the species                             |  int, $\in[0, N_{species} - 1]$       |             |
+| fileIndex            |  index of the species in the configuration file   |  int, $>0$                            |             |
+| lifespan             |  species life span                                |  int, $>0$                            |  time-steps |
 | c                    |  allometric factor                                |  float                                |             |
 | bPower               |  allometric power                                 |  float                                |             |
 | sizeMaturity         |  Size at maturity                                 |  float                                |  cm         |
@@ -12,4 +12,4 @@
 | eggWeight            |  Weight of eggs                                   |  float                                |  g          |
 | firstFeedingAgeDt    |  First feeding age                                |  int                                  |  time-step  |
 | larvaeToAdultsAgeDt  |  Age at which the school is considered as adult   |  int                                  |  time-step  |
-| TL_EGG               |  egg trophic level                                |  float, :math:`= 3.0`                 |             |
+| TL_EGG               |  egg trophic level                                |  float, $= 3.0$                       |             |
