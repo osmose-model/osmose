@@ -116,3 +116,4 @@ doc/user_guide/.gitignore
 **/index.toc
 **/index.tex
 **/index.pdf
+doc/odd_des/test.csv
