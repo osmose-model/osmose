@@ -1,5 +1,5 @@
 ```mermaid
-
+%%| fig-align: center
 %%{init: {'theme': 'dark', 'themeVariables': { 'fontSize': '13px'}}}%%
 graph TD;
 

@@ -27,3 +27,5 @@
 | abundanceHasChanged     | True if abundance has changed in the current time-step                                                                        |  boolean        |
 | accessibility           | Array of accessibility of the school to its preys                                                                             |  float[]        |
 | ageDeath                | Age at which a school individuals die times the abundance                                                                     |  float[]        |
+
+: School state variables {tbl-colwidths="[50,40,10]" .striped .hover}
