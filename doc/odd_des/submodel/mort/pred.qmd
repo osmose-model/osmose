@@ -159,3 +159,5 @@ and used to increment the number of dead individuals by predation (`nDead` attri
 | Parameter                              | Description                                            |
 |----------------------------------------|--------------------------------------------------------|
 | predation.ingestion.rate.max.sp#       |$I_{max}$ (grams of food per gram of fish and per year) |
+
+: Predation mortality parameter {.striped .hover #tbl-pred-params}
