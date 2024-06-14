@@ -1,7 +1,7 @@
 | Variable         |   Description                                                        |  Type                                                              |  Units     |
 | ---------------- | -------------------------------------------------------------------- | ------------------------------------------------------------------ | ---------- |
 | name             |  Species name                                                        |  string                                                            |            |
-| index            |  Species index.                                                      |  int, $\in [N_{species}, N_{species} + N_{bkgspecies}] - 1$        |            |
+| index            |  Species index.                                                      |  int, $\in [N_{species}, N_{species} + N_{bkgspecies} - 1]$        |            |
 | fileindex        |  index of the species in the                                         |  int, $>0$                                                         |            |
 | age              |  Age array                                                           |  [float]                                                           |  years     |
 | ageDt            |  Age array                                                           |  [int]                                                             |  time-step |

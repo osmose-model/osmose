@@ -1,5 +1,7 @@
 ```{mermaid}
 %%| fig-align: center
+%%| fig-cap: Influx process
+%%| label: fig-mermaid-influx
     graph TD;
 
     id0(Loop over species)

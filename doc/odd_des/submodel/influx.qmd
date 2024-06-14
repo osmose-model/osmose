@@ -35,7 +35,7 @@ The state variable that is updated is the `Simulation.schoolSet` variable, to wh
 The number of schools created for each species and each size-class is controlled by
 the `simulation.nschool.sp#` (also used in the reproduction processes). If the abundance is less than the number
 of schools, one school of abundance $A$ is created. Else, $N_{school}$ of
-abundance $\dfrac{A}{N_{school}}$ are created (cf. `mermaid-influx`).
+abundance $\dfrac{A}{N_{school}}$ are created (cf. @fig-mermaid-influx).
 
 {{< include  submodel/_static/mermaid/influx.md >}}
 

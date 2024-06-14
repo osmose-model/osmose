@@ -30,16 +30,16 @@ For random distribution, two parameters need to be defined:
 | movement.distribution.ncell.sp#  |  Number of cells in which the species is allowed to move. If undefined, the whole domain is used. |
 | movement.randomwalk.range.sp#    |  Number of adjacent cells a species can use during random walk (foraging)                         |
 
+: Random distribution parameter {#tbl-random-mov .striped .hover tbl-colwidths=["40", "50"]}
+
 At the beginning of the simulation, during the initialization process, the areas where the schools
 can live is initialized:
 
 - If `ncell` is not set or is equal to the total number of ocean cells, this areas is set equal to all the ocean cells of the domain.
-- Else, one cell is first randomly picked up in the whole domain, and the domain is extended from neighbours to neighbours until the number of cells reaches `ncell` (cf. {numref}`fig-random-dis`)
-
-(fig-random-dis)=
+- Else, one cell is first randomly picked up in the whole domain, and the domain is extended from neighbours to neighbours until the number of cells reaches `ncell` (cf. @fig-random-dis)
 
 ![Initialization process of species domain when random distribution is used with a limited number of cells.
-Black squares indicate land cells, colors and numbers indicate the iteration step when the cell is included in the domain.](submodel/_static/random_drift.png)
+Black squares indicate land cells, colors and numbers indicate the iteration step when the cell is included in the domain.](submodel/_static/random_drift.png){#fig-random-dis fig-align="center"}
 
 Then, at each time-step, schools are moved following a random walk method within this domain, with the range defined in the parameters.
 Unlocated schools are randomly put in one of the cell of the defined domain.
