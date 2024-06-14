@@ -1,6 +1,7 @@
 ```{mermaid}
 %%| fig-align: "center"
-%%{init: {'theme': 'dark', 'themeVariables': { 'fontSize': '13px'}}}%%
+%%| fig-cap: "Initialization using relative biomass"
+%%| label: fig-init-relbiom
 
 graph TD;
 
@@ -8,7 +9,7 @@ graph TD;
     id1("Loop over species") --> id2("Loop over size-class")
     id2 --> id3("Compute relative biomass")
     id3 --> id4("Loop over number of schools")
-    id4 --> id5("Random draft of lenght")
+    id4 --> id5("Random draft of length")
     id5 --> id6("Create school")
     id6 --> id4
     id6 --> id2

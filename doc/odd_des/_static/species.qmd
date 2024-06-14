@@ -14,4 +14,4 @@
 | larvaeToAdultsAgeDt  |  Age at which the school is considered as adult   |  int                                  |  time-step  |
 | TL_EGG               |  egg trophic level                                |  float, $= 3.0$                       |             |
 
-: Species state variables {.striped .hover #tbl-species-statevar}
+: Species state variables {.striped .hover #tbl-species-statevar tbl-colwidths="[40,40,10, 10]"}

@@ -17,7 +17,7 @@ It provides the biomass (in tons) for the given size or age classes and must be 
 The values of the class intervals (first row) are automatically scanned by Osmose. If `flux.incoming.byDt.byAge.file.sp#` is provided,
 the corresponding length will be computed from age classes using the growth `ageToLength` method.
 Conversely, if `flux.incoming.byDt.bySize.file.sp#` is provided, the corresponding age will be computed using the `lengthToAge`
-method (cf. `mermaid-init-influx`).
+method (cf. @fig-mermaid-init-influx).
 
 {{< include  submodel/_static/mermaid/init_influx.md >}}
 

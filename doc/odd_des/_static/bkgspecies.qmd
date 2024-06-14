@@ -12,3 +12,5 @@
 | nClass           |  Number of size-classes                                              |  int, $>1$                                                         |            |
 | trophicLevel     |  Array of trophic level                                              |  float[]                                                           |            |
 | timeSeries       |  Time series of proportion of biomass attributed to each size-class  |                                                                    |            |
+
+: Background species state variables {.striped .hover #tbl-bkgspecies-statevar tbl-colwidths="[40,40,10, 10]"}

@@ -4,3 +4,5 @@
 | rank           | Index of the simulation                                 |   int, $\in[0, N_{simulation}]$                        |        |
 | schoolSet      | List of the ``School`` inside the simulation            |  ``SchoolSet``                                         |        |
 | backSchoolSet  | List of the ``BackgroundSchool`` inside the simulation  |   ``BackgroundSchoolSet``                              |        |
+
+: Simulation state variables {#tbl-sim-statevar .hover .striped tbl-colwidths="[40,40,10, 10]"}

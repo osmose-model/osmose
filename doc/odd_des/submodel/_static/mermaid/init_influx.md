@@ -1,5 +1,7 @@
 ```{mermaid}
 %%| fig-align: center
+%%| fig-cap: Input flux initialisation
+%%| label: fig-mermaid-init-influx
     graph TD;
 
     id00("Loop over species")
