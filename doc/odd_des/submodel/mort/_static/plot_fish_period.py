@@ -2,7 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.patches
 
-dirout = 'odd_des/submodel/mort/_static/'
+dirout = 'submodel/mort/_static/'
 
 def compute_period(start):
     smin = start

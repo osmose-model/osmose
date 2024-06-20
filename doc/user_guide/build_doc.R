@@ -1,9 +1,4 @@
 library("quarto")
-file.copy(file.path("..", "_static"), ".", recursive=TRUE, overwrite = TRUE)
-file.copy(file.path("..", "astart", "down_java.qmd"), ".", overwrite = TRUE)
-file.copy(file.path("..", "astart", "download_osm.qmd"), ".", overwrite = TRUE)
-file.copy(file.path("..", "astart", "datarmor.qmd"), ".", overwrite = TRUE)
-file.copy(file.path("..", "astart", "down_java.qmd"), ".", overwrite = TRUE)
-file.copy(file.path("..", "astart", "running.qmd"), ".", overwrite = TRUE)
-file.copy(file.path("..", "odd_des", "input.qmd"), ".", overwrite = TRUE)
+library("R.utils")
+
 quarto_render()

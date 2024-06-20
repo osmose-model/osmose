@@ -1,104 +1,81 @@
-(movements)=
 
-# Spatial distribution
+---
+jupyter: python3
+---
+
+## Spatial distribution
 
 At each time-step, the spatial distribution of fished is randomly changed based either based on distribution maps or based on random walk processes.
 
-The displacement mode is defined through the {samp}`movement.distribution.method.sp#`, whose values are either {samp}`random` or {samp}`maps`.
+The displacement mode is defined through the `movement.distribution.method.sp#`, whose values are either `random` or `maps`.
 
-## Random distribution
+### Random distribution
 
-```{eval-rst}
-.. ipython:: python
-    :suppress:
+```{python}
+#| echo: false
+#| output: false
+import os
+import subprocess
+cwd = os.getcwd()
+print(cwd)
 
-    import os
-    import subprocess
-    cwd = os.getcwd()
-
-    fpath = "odd_des/submodel/_static/plot_random_dis.py"
-    subprocess.call(["python", fpath], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+fpath = "submodel/_static/plot_random_dis.py"
+subprocess.call(["python", fpath])
 ```
 
 For random distribution, two parameters need to be defined:
 
-```{eval-rst}
-.. table:: Random distribution parameters
-    :align: center
+| Parameter                        | Description                                                                                       |
+| -------------------------------- | ------------------------------------------------------------------------------------------------- |
+| movement.distribution.ncell.sp#  |  Number of cells in which the species is allowed to move. If undefined, the whole domain is used. |
+| movement.randomwalk.range.sp#    |  Number of adjacent cells a species can use during random walk (foraging)                         |
 
-    .. csv-table::
-        :delim: =
-        :class: tight-table
-        :header: Parameter, Description
-
-        movement.distribution.ncell.sp# = Number of cells in which the species is allowed to move. If undefined, the whole domain is used.
-        movement.randomwalk.range.sp# = Number of adjacent cells a species can use during random walk (foraging)
-```
+: Random distribution parameter {#tbl-random-mov .striped .hover tbl-colwidths="[60, 40]"}
 
 At the beginning of the simulation, during the initialization process, the areas where the schools
 can live is initialized:
 
 - If `ncell` is not set or is equal to the total number of ocean cells, this areas is set equal to all the ocean cells of the domain.
-- Else, one cell is first randomly picked up in the whole domain, and the domain is extended from neighbours to neighbours until the number of cells reaches `ncell` (cf. {numref}`fig-random-dis`)
+- Else, one cell is first randomly picked up in the whole domain, and the domain is extended from neighbours to neighbours until the number of cells reaches `ncell` (cf. @fig-random-dis)
 
-(fig-random-dis)=
-
-:::{figure} _static/random_drift.*
-:align: center
-:width: 600 px
-
-Initialization process of species domain when random distribution is used with a limited number of cells.
-Black squares indicate land cells, colors and numbers indicate the iteration step when the cell is included in the domain.
-:::
+![Initialization process of species domain when random distribution is used with a limited number of cells.
+Black squares indicate land cells, colors and numbers indicate the iteration step when the cell is included in the domain.](submodel/_static/random_drift.png){#fig-random-dis fig-align="center"}
 
 Then, at each time-step, schools are moved following a random walk method within this domain, with the range defined in the parameters.
 Unlocated schools are randomly put in one of the cell of the defined domain.
 
-## Map definition
+### Map definition
 
 Another way to define species distribution is to use distribution maps, which can generally be obtained from niche modelling.
 
-A single map is defined as follows:
+A single map distribution can be defined either using CSV (@tbl-csvmap-mov) or NetCDF (@tbl-ncmap-mov) files
 
-```{eval-rst}
-.. table:: Spatial distribution parameters when CSV maps are provided
-    :align: center
+| Parameter                      | Description                                                                             |
+| ------------------------------ | --------------------------------------------------------------------------------------- |
+| movement.randomwalk.range.sp#  |  Number of adjacent cells a species can use during random walk (foraging)               |
+| movement.file.map#             |  Name of the CSV file that contains the distribution map                                |
+| movement.species.map#          |  Name of the species associated with the map.                                           |
+| movement.initialAge.map#       |  Minimum age (in years) when to use the map.                                            |
+| movement.lastAge.map#          |  Maximum age (in years) when to use the map.                                            |
+| movement.initialYear.map#      |  Minimum simulation time (in years) when to use the map.                                |
+| movement.lastYear.map#         |  Maximum simulation time (in years) when to use the map.                                |
+| movement.years.map#            |  Array of years during when to use the map. (instead of setting initial and final year) |
+| movement.steps.map#            |  Array of time-steps during when to use the map                                         |
 
-    .. csv-table::
-        :delim: =
-        :header: Parameter, Description
-        :class: tight-table
+: CSV map distribution parameter {#tbl-csvmap-mov .striped .hover tbl-colwidths="[50, 40]"}
 
-        movement.randomwalk.range.sp# = Number of adjacent cells a species can use during random walk (foraging)
-        movement.file.map# = Name of the CSV file that contains the distribution map
-        movement.species.map# = Name of the species associated with the map.
-        movement.initialAge.map# = Minimum age (in years) when to use the map.
-        movement.lastAge.map# = Maximum age (in years) when to use the map.
-        movement.initialYear.map# = Minimum simulation time (in years) when to use the map.
-        movement.lastYear.map# = Maximum simulation time (in years) when to use the map.
-        movement.years.map# = Array of years during when to use the map. (instead of setting initial and final year)
-        movement.steps.map# = Array of time-steps during when to use the map
 
-```
+| Parameter                          | Description                                                            |
+| ---------------------------------- | ---------------------------------------------------------------------- |
+|         movement.netcdf.enabled    |  True if NetCDF maps are provided                                      |
+|         movement.species.map#      |  Species to which the movement map is associated                       |
+|         movement.file.map#         |  NetCDF file containing the spatial distribution maps                  |
+|         movement.nsteps.year.map#  |  Number of time steps per year associated with the file.               |
+|         movement.initialAge.map#   |  Minimum age (in years) when to use the map.                           |
+|         movement.lastAge.map#      |  Maximum age (in years) when to use the map.                           |
+|         movement.variable.map#     |  Name of the NetCDF variable containing the spatial distribution file. |
 
-```{eval-rst}
-.. table:: Spatial distribution parameters when NetCDF maps are provided
-    :align: center
-
-    .. csv-table::
-        :delim: =
-        :header: Parameter, Description
-        :class: tight-table
-
-        movement.netcdf.enabled = True if NetCDF maps are provided
-        movement.species.map# = Species to which the movement map is associated
-        movement.file.map# = NetCDF file containing the spatial distribution maps
-        movement.nsteps.year.map# = Number of time steps per year associated with the file.
-        movement.initialAge.map# = Minimum age (in years) when to use the map.
-        movement.lastAge.map# = Maximum age (in years) when to use the map.
-        movement.variable.map# = Name of the NetCDF variable containing the spatial distribution file.
-
-```
+: NetCDF map distribution parameter {#tbl-ncmap-mov .striped .hover tbl-colwidths="[50, 40]"}
 
 One map is associated to a unique species for a given age span, year span and season. The full spatial distribution of a species can be represented using as many maps as necessary to cover different age spans and/or year spans and/or seasons. Let's now have a look at each parameter in detail.
 
@@ -160,11 +137,10 @@ In the latter case (change of map), the schools are relocated randomly in the ne
 - A random number is drafted, which is called $R$.
 - If $P(i, j) < R \times P_{max}$, the operation is repeated. Else, the cell is selected.
 
-```{eval-rst}
-.. mermaid::
-    :align: center
-    :caption: Algorithm to select the cell where to move an unlocated school.
-
+```{mermaid}
+%%| fig-align: "center"
+%%| fig-cap:  "Movement process"
+%%| label: fig-movement
     graph TD;
 
         id1["Random draft of <br>cell (probability P)"]

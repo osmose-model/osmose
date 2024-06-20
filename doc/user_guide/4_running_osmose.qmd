@@ -9,8 +9,7 @@ library(osmose)
 ls("package:osmose")
 ```
 
-Now, call the `osmose_demo` function, which allows to copy the reference configuration into your working
-directory:
+Now, call the `osmose_demo` function, which allows to copy the reference configuration into your working directory:
 
 ```{r}
 demo = osmose_demo(path = "original-demo", config="eec_4.3.0")
@@ -25,8 +24,7 @@ If some parameters provided in the default configuration must be overwritten, an
 extra_args = "-Psimulation.time.nyear=15 -Poutput.recordfrequency.ndt=1"
 ```
 
-Here, the `simulation.time.nyear` and `output.recordfrequency.ndt` have been modified. The updated demo configuration
-can then be created follows:
+Here, the `simulation.time.nyear` and `output.recordfrequency.ndt` have been modified. The updated demo configuration can then be created follows:
 
 ```{r}
 demo2 = osmose_demo(path = "modified-demo", config="eec_4.3.0", extra_args=extra_args)
@@ -39,14 +37,11 @@ Now, you can run the Osmose model as follows:
 run_osmose(demo$config_file, parameters=demo$extra_args, force=TRUE)
 ```
 
-The first argument is the Osmose configuration file, the `parameters` argument allows to overwrite
-some of the original parameters. The `force` argument allows to run the configuration even if the
-configuration version number is inconsistent with the Osmose version.
+The first argument is the Osmose configuration file, the `parameters` argument allows to overwrite some of the original parameters. The `force` argument allows to run the configuration even if the configuration version number is inconsistent with the Osmose version.
 
-:::{.callout-warning}
+::: callout-warning
 Use the `force` argument with caution!
 :::
-
 
 If you installed Osmose from sources, as discussed in @sec-install-sources, and that you want to use the Jar file compiled with Maven, set the `version` argument to `NULL`:
 
@@ -56,7 +51,7 @@ run_osmose(demo$config_file, parameters=demo$extra_args, force=TRUE, version=NUL
 
 While Osmose is running, an `osmose.log` file is written in the working directory. This file gives you some information about the simulation. If it has finished properly, you should see:
 
-```
+```         
 osmose[info] Simulation 0 completed (time ellapsed: 123 seconds)
 osmose[info] *********************************************
 osmose[info] OSMOSE Model copyright © IRD
@@ -64,7 +59,6 @@ osmose[info] *********************************************
 ```
 
 Now that the simulation has been properly completed, you can read the Osmose output files by using the `read_osmose` function:
-
 
 ```{r}
 output = read_osmose(demo$output_dir)

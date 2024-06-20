@@ -1,4 +1,8 @@
-# Predation mortality
+---
+jupyter: python3
+---
+
+### Predation mortality
 
 The central assumption in OSMOSE is that predation is an opportunistic process, which depends on:
 
@@ -9,7 +13,7 @@ The central assumption in OSMOSE is that predation is an opportunistic process, 
 During the predation mortality process, the predation success
 rate (`predSuccessRate` attribute) is updated.
 
-## Size predation
+#### Size predation
 
 Size-predation matrix is controlled by two parameters. The predator school $S_{pred}$ can only feed on prey schools whose length belongs
 to a given interval:
@@ -28,26 +32,20 @@ Therefore, the minimum and maximum sizes of a prey that a predator can eat is gi
 
 $$
 L_{max} = \frac{L_{pred}}{R_{max}}
+$$
 
+$$
 L_{min} = \frac{L_{pred}}{R_{min}}
 $$
 
-```{index} predation.predPrey.stage.structure, predation.predPrey.stage.threshold.sp#, predation.predPrey.sizeRatio.max.sp#, predation.predPrey.sizeRatio.min.sp#
-```
 
-```{eval-rst}
-.. table:: Size-predation parameters
-    :class: tight-table
 
-    .. csv-table::
-        :delim: ;
-
-        predation.predPrey.stage.structure ; Structure to determine thresholds for predator/prey size ratios (:samp:`age` or :samp:`size`)
-        predation.predPrey.stage.threshold.sp# ; Array of age or size thresholds
-        predation.predPrey.sizeRatio.max.sp# ; Array of :math:`R_{max}` values
-        predation.predPrey.sizeRatio.min.sp# ; Array of :math:`R_{min}` values
-
-```
+| Parameter                               | Description                                                                                    |
+| --------------------------------------- | ---------------------------------------------------------------------------------------------- |
+| predation.predPrey.stage.structure      |  Structure to determine thresholds for predator/prey size ratios (`age` or `size`)             |
+| predation.predPrey.stage.threshold.sp#  |  Array of age or size thresholds                                                               |
+| predation.predPrey.sizeRatio.max.sp#    |  Array of :math:`R_{max}` values                                                               |
+| predation.predPrey.sizeRatio.min.sp#    |  Array of :math:`R_{min}` values                                                               |
 
 :::{danger}
 To make sure that  $L_{max} < L_{min}$, the `predation.predPrey.sizeRatio.max.sp#` and `predation.predPrey.sizeRatio.min.sp#`
@@ -62,26 +60,22 @@ $$
 
 which is the overlapping range of the predator accessible range and of the resource size range.
 
-```{eval-rst}
-.. ipython:: python
-    :suppress:
-
-    import os
-    import subprocess
-    cwd = os.getcwd()
-    fpath = "odd_des/submodel/mort/_static/plot_size_ratios.py"
-    subprocess.call(["python", fpath], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+```{python}
+#| echo: false
+#| output: false
+import os
+import subprocess
+cwd = os.getcwd()
+print(cwd)
+fpath = "submodel/mort/_static/plot_size_ratios.py"
+subprocess.call(["python", fpath])
 ```
 
-:::{figure} _static/size_ratio.*
-:align: center
-
-Size-based predation in Osmose
-:::
+![Size-based predation in Osmose](submodel/mort/_static/size_ratio.svg)
 
 (predation-access)=
 
-## Accessibility
+#### Accessibility
 
 First, the accessibility of all the preys to a given school is determined from an accessibility  matrix for every
 species and stages. This matrix must not be used to define diet preferences but rather to take into account
@@ -90,13 +84,7 @@ area but never meet because they do not occur at the same depth).
 
 (table-paros-acessfile)=
 
-```{eval-rst}
-.. table:: Example of a CSV predation accessibility file.
-
-    .. csv-table::
-        :delim: ,
-        :file: _static/predation-accessibility.csv
-```
+{{< include submodel/mort/_static/predation-accessibility.qmd >}}
 
 Each line of the matrix corresponds to a prey (including plankton groups), and each column to
 a predator. The file must be understood as follow: `lesserSpottedDogfish` of age class less than 0.45 (line 1) are only accessible to
@@ -104,41 +92,31 @@ young `lesserSpottedDogfish` (5%) and old `redMullet` (5%).
 
 The class thresholds (age or size, defined with the `predation.accessibility.stage.structure` parameter) that are used
 to determine which row or column should be used are read directly from the CSV files by matching
-the {samp}`<` character. It is assumed that if there is no match, no threshold is provided. However, when {samp}`<` is matched, it
+the `<` character. It is assumed that if there is no match, no threshold is provided. However, when `<` is matched, it
 is assumed that the number that follows is the upper bound of the class.
 
 Furthermore, the column and row order is not important, since a match of the species name is performed.
 
 Additionnally, accessibility matrix can vary over time. To do so, one set of parameters must be defined
 for each accessibility matrix, as done for the parameterization of movements. The keys of these
-parameters must end with {samp}`.acc#`, with {samp}`#` the number of the accessibility matrix.
+parameters must end with `.acc#`, with `#` the number of the accessibility matrix.
 
-```{index} predation.accessibility.stage.structure, predation.accessibility.stage.threshold.sp#, predation.accessibility.file predation.accessibility.file.acc#, predation.accessibility.initialYear.acc#, predation.accessibility.finalYear.acc#, predation.accessibility.years.acc#, predation.accessibility.steps.acc#
-```
+| Parameter                                 | Description                                                                                             |
+| ----------------------------------------- | ------------------------------------------------------------------------------------------------------- |
+| predation.accessibility.stage.structure   |  Threshold type. Must be `age` or `size`.                                                               |
+| predation.accessibility.file              |  CSV file containing the accessibility matrix **if constant over time**                                 |
+| predation.accessibility.file.acc#         |  CSV file containing the accessibility matrix for the accessibility matrix ``#``                        |
+| predation.accessibility.initialYear.acc#  |  Start year when to use the accessibility matrix ``#``                                                  |
+| predation.accessibility.finalYear.acc#    |  Start year when to use the accessibility matrix ``#``                                                  |
+| predation.accessibility.years.acc#        |  List of years when to use the accessibility matrix  ``#`` (instead of setting initial and final years) |
+| predation.accessibility.steps.acc#        |  List of time steps when to use the accessibility matrix ``#``                                          |
 
-```{eval-rst}
-.. table:: Parameters for accessibility matric
-    :class: tight-table
-
-    .. csv-table::
-        :delim: ;
-
-        predation.accessibility.stage.structure ; Threshold type. Must be :samp:`age` or :samp:`size`.
-        predation.accessibility.file ; CSV file containing the accessibility matrix **if constant over time**
-
-        predation.accessibility.file.acc# ; CSV file containing the accessibility matrix for the accessibility matrix ``#``
-        predation.accessibility.initialYear.acc# ; Start year when to use the accessibility matrix ``#``
-        predation.accessibility.finalYear.acc# ; Start year when to use the accessibility matrix ``#``
-        predation.accessibility.years.acc# ; List of years when to use the accessibility matrix  ``#`` (instead of setting initial and final years)
-        predation.accessibility.steps.acc# ; List of time steps when to use the accessibility matrix ``#``
-```
-
-:::{danger}
-If the {samp}`predation.accessibility.file` (with no {samp}`.acc` suffix) is found, Osmose will assume constant
+:::{.callout-warming}
+If the `predation.accessibility.file` (with no `.acc` suffix) is found, Osmose will assume constant
 predation accessibility matrix.
 :::
 
-## Predation rate
+#### Predation rate
 
 Finally, the predation rate is computed as follows. First, the total accessible biomass for the predator school is computed:
 
@@ -178,14 +156,8 @@ $$
 
 and used to increment the number of dead individuals by predation (`nDead` attribute).
 
-```{index} predation.ingestion.rate.max.sp#
-```
+| Parameter                              | Description                                            |
+|----------------------------------------|--------------------------------------------------------|
+| predation.ingestion.rate.max.sp#       |$I_{max}$ (grams of food per gram of fish and per year) |
 
-```{eval-rst}
-.. table:: Ingestion parameter
-
-    .. csv-table::
-        :delim: ;
-
-        predation.ingestion.rate.max.sp# ; :math:`I_{max}` (grams of food per gram of fish and per year)
-```
+: Predation mortality parameter {.striped .hover #tbl-pred-params}

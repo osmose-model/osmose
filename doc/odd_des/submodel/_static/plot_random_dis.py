@@ -6,7 +6,7 @@ import os
 
 np.random.seed(1)
 
-dirout = 'odd_des/submodel/_static'
+dirout = 'submodel/_static'
 
 def getNeighbourCells(j, i, r):
 
@@ -106,5 +106,4 @@ for j in range(ny + 1):
     ax.axhline(j - 0.5, linewidth=0.5)
 
 
-plt.savefig(os.path.join(dirout, 'random_drift.svg'), bbox_inches='tight')
-plt.savefig(os.path.join(dirout, 'random_drift.pdf'), bbox_inches='tight')
+plt.savefig(os.path.join(dirout, 'random_drift.png'), bbox_inches='tight')

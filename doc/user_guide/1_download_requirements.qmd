@@ -6,27 +6,25 @@ In this section you will find the list of software and libraries that are requir
 
 Since the Osmose numerical core is coded in Java, let us clarify some of the acronyms related to the Java technologies.
 
-- ``JVM``: Java Virtual Machine. This is a set of software programs that interprets the Java byte code.
+-   `JVM`: Java Virtual Machine. This is a set of software programs that interprets the Java byte code.
 
-- ``JRE``: Java Runtime Environment. This is a kit distributed by Sun for running Java programs. A ``JRE`` provides a ``JVM`` and some basic Java libraries. **A JRE is required to run Osmose**.
+-   `JRE`: Java Runtime Environment. This is a kit distributed by Sun for running Java programs. A `JRE` provides a `JVM` and some basic Java libraries. **A JRE is required to run Osmose**.
 
-- ``JDK`` or ``SDK``: Java (or Software) Development Kit used by the programmer. It provides a ``JRE``, a compiler, useful programs, examples and the source of the API (Application Programming Interface: some standard libraries). **A JDK is required if the precompiled Java binaries are not used**
+-   `JDK` or `SDK`: Java (or Software) Development Kit used by the programmer. It provides a `JRE`, a compiler, useful programs, examples and the source of the API (Application Programming Interface: some standard libraries). **A JDK is required if the precompiled Java binaries are not used**
 
-We strongly recommend the OpenJDK suite, available from [https://jdk.java.net/](https://jdk.java.net/) :
+We strongly recommend the OpenJDK suite, available from <https://jdk.java.net/> :
 
-- Download the archive file (``.tar.gz`` for ``.zip`` extension).
-- Extract the files to a dedicated folder.
-- Set the ``JAVA_HOME`` environment variable to the location of the Java folder.
+-   Download the archive file (`.tar.gz` for `.zip` extension).
+-   Extract the files to a dedicated folder.
+-   Set the `JAVA_HOME` environment variable to the location of the Java folder.
 
-:::{.callout-tip}
-To find out how to set environment variables in Windows, click
-[here](https://docs.oracle.com/en/database/oracle/machine-learning/oml4r/1.5.1/oread/creating-and-modifying-environment-variables-on-windows.html#GUID-DD6F9982-60D5-48F6-8270-A27EC53807D0). For Linux/Mac Os users, click [here](https://www.serverlab.ca/tutorials/linux/administration-linux/how-to-set-environment-variables-in-linux/)
+::: callout-tip
+To find out how to set environment variables in Windows, click [here](https://docs.oracle.com/en/database/oracle/machine-learning/oml4r/1.5.1/oread/creating-and-modifying-environment-variables-on-windows.html#GUID-DD6F9982-60D5-48F6-8270-A27EC53807D0). For Linux/Mac Os users, click [here](https://www.serverlab.ca/tutorials/linux/administration-linux/how-to-set-environment-variables-in-linux/)
 :::
 
-:::{.callout-important}
+::: callout-important
 **The OpenJDK version must be at least 8**
 :::
-
 
 ## Installing NetCDF library
 
@@ -36,7 +34,7 @@ As Osmose makes extensive use of NetCDF files, the NetCDF4 library must be insta
 
 To install the library on a Mac OS system, open a terminal and type:
 
-```bash
+``` bash
 sudo port install netcdf4
 ```
 
@@ -44,21 +42,16 @@ sudo port install netcdf4
 
 To install the library on a Linux system, open a terminal and type:
 
-```bash
+``` bash
 sudo apt install netcdf4
 ```
 
 ### Windows
 
-To install the library on a Windows system, first download and install the HDF5 library from the
-[HDF5 website](https://www.hdfgroup.org/downloads/hdf5/).
+Download and install the NetCDF library from the [Unidata website](https://www.unidata.ucar.edu/software/netcdf/docs/winbin.html). Select the `netCDFX.Y.Z-NC4-DAP-64.exe` install.
 
-Then download and install the NetCDF library from the
-[Unidata website](https://www.unidata.ucar.edu/software/netcdf/docs/winbin.html)
-
-:::{.callout-warning}
-Ensure that the NetCDF binaries are added to
-the ``PATH`` environment variable.
+::: callout-warning
+Ensure that the NetCDF binaries are added to the `PATH` environment variable.
 :::
 
 ## Download R
@@ -67,26 +60,26 @@ The Osmose Java core is embedded in an Osmose R package, which allows pre-proces
 
 Download instructions for R are available for [Windows](https://cran.r-project.org/bin/windows/base/), [Linux](https://cran.r-project.org/bin/linux/ubuntu/README.html) and [Mac Os X](https://cran.r-project.org/bin/macosx/).
 
-It is also recommended that you install the RStudio GUI ([https://rstudio.com/](https://rstudio.com/)).
+It is also recommended that you install the RStudio GUI (<https://rstudio.com/>).
 
-:::{.callout-tip}
+::: callout-tip
 If you do not intend to use the R package, you can skip this part.
 :::
 
 ## Installing R libraries {#sec-install-libraries}
 
-To install the Osmose package, R libraries are required (see the ``DESCRIPTION`` file).
-These libraries can be installed by typing from an R console:
+To install the Osmose package, R libraries are required (see the `DESCRIPTION` file). These libraries can be installed by typing from an R console:
 
-```R
+``` r
 install.packages(c("calibrar", "knitr", "ncdf4", "rlist",
                    "rmarkdown", "stringr", "fields",
                    "R.utils"))
 ```
 
-
+```{=html}
 <!-- ## Defining the Osmose target directory
 
 Since Osmose version 3.3.4, Java executables and demo configuration files have been moved out of the R build to meet CRAN requirements on size package. These files are now downloaded from the Internet and moved to a local directory.
 
 By default, a temporary directory is used; but in this case, the Java code will be downloaded at each new session. To define a directory where to put these downloads, the user need to edit or create a ``~/.Renviron`` file and to define the {samp}``OSMOSE_DIR`` environment variable. More defined can be found on the [Osmose-R CRAN page](https://cran.r-project.org/web/packages/osmose/vignettes/create_run_read.html) -->
+```
