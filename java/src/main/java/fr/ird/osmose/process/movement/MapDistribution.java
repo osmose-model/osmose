@@ -82,14 +82,14 @@ public class MapDistribution extends AbstractSpatialDistribution {
     public void init() {
 
         boolean fixedSeed = false;
-        if (!getConfiguration().isNull("movement.randomseed.fixed")) {
-            fixedSeed = getConfiguration().getBoolean("movement.randomseed.fixed");
+        if (!getConfiguration().isNull("simulation.fixedseed.enabled")) {
+            fixedSeed = getConfiguration().getBoolean("simulation.fixedseed.enabled");
         }
         if (fixedSeed) {
             rd1 = new Random((13L ^ iSpecies) * (rank + 1));
             rd2 = new Random((5L ^ iSpecies) * (rank + 1));
             rd3 = new Random((1982L ^ iSpecies) * (rank + 1));
-            warning("Parameter 'movement.randomseed.fixed' is set to true. It means that two simulations with strictly identical initial school distribution will lead to same movement.");
+            warning("Parameter 'simulation.fixedseed.enabled' is set to true. It means that two simulations with strictly identical initial school distribution will lead to same movement.");
         } else {
             rd1 = new Random();
             rd2 = new Random();
