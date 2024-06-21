@@ -21,7 +21,7 @@
 # Ricardo OLIVEROS RAMOS (ricardo.oliveros@gmail.com)
 # Philippe VERLEY (philippe.verley@ird.fr)
 # Laure VELEZ (laure.velez@ird.fr)
-# Nicolas Barrier (nicolas.barrier@ird.fr)
+# Nicolas BARRIER (nicolas.barrier@ird.fr)
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -59,31 +59,31 @@
 #'
 #' @keywords Internal
 #' @export
-cacheManager <- function(nameFile) {
+cacheManager = function(nameFile) {
 
   # gets the mainPath for the cache directory
-  basePath <- cachePath()
+  basePath = cachePath()
 
   # creates the cache directory if does not exist
-  if (!dir.exists(basePath)) dir.create(basePath, recursive = T, showWarnings = F)
+  if (!dir.exists(basePath)) dir.create(basePath, recursive = TRUE, showWarnings = FALSE)
 
-  path <- cachePath(nameFile)
+  path = cachePath(nameFile)
 
   ############# if the folder exists in the designed cache folder
-  file_exists <- file.exists(path)
+  file_exists = file.exists(path)
 
   ############# if the folder exists in the working directory, move it to the cache directory
   if (file.exists(nameFile) && !file_exists) {
-    file.copy(nameFile, basePath, recursive = T)
+    file.copy(nameFile, basePath, recursive = TRUE)
     unlink(nameFile, recursive = TRUE, force = FALSE)
     message("Your folder '", nameFile, "' has been moved in this folder : ", basePath)
-    file_exists <- T
+    file_exists = TRUE
   }
 
   # if the file is empty
   #if (file_exists && length(dir(path)) == 0) {
   #  file.remove(path)
-  #  file_exists <- F
+  #  file_exists = F
   #}
 
   ############# if the folder does not exist anywhere
@@ -96,7 +96,7 @@ cacheManager <- function(nameFile) {
 
 
 #' @keywords Internal
-cachePath <- function(path = NULL) {
+cachePath = function(path = NULL) {
 
   # give the path of OSMOSE_DIR
   # If variable is not set, then points to a temporary directory.
@@ -111,22 +111,23 @@ cachePath <- function(path = NULL) {
   basePath = Sys.getenv("OSMOSE_DIR")
 
   if (!is.null(path)) {
-    basePath <- file.path(basePath, path)
+    basePath = file.path(basePath, path)
   }
 
-  basePath
+  return(basePath)
 
 }
 
 
 #' @keywords  Internal
-flushCache <- function(filename=NULL) {
+flushCache = function(filename=NULL) {
 
   basePath = ifelse(is.null(filename), cachePath(), cachePath(filename))
   if (dir.exists(basePath) || file.exists(basePath)) {
     message(basePath, " has been cleaned.")
-    unlink(basePath, recursive = T, force = F)
+    unlink(basePath, recursive = TRUE, force = FALSE)
   }
+  return(invisible(NULL))
 }
 
 
@@ -148,10 +149,10 @@ flushCache <- function(filename=NULL) {
 #' \dontrun{
 #' updateCache()
 #' }
-updateCache <- function(nameFile) {
+updateCache = function(nameFile) {
 
   # the url of the differents zip to download
-  zip_urls <- list(
+  zip_urls = list(
     "gog" = "https://github.com/osmose-model/osmose/raw/master/data-raw/gog.zip",
     "calib_demo" =  "https://github.com/osmose-model/osmose/raw/master/data-raw/calib_demo.zip",
     "outputs" = "https://github.com/osmose-model/osmose/raw/master/data-raw/outputs.zip",
@@ -169,15 +170,15 @@ updateCache <- function(nameFile) {
     "lib" = "https://github.com/osmose-model/osmose/raw/master/inst/java/lib.zip"
   )
 
-  folder_names <- list(
+  folder_names = list(
     "eec_4.3.0" =  "osmose-eec-develop"
   )
 
   # dowload and unzip the files
-  downloadZip <- function(zip_url, path) {
-    tmp <- tempfile(fileext = ".zip")
+  downloadZip = function(zip_url, path) {
+    tmp = tempfile(fileext = ".zip")
 
-    DEMzip <- download.file(zip_url, destfile = tmp)
+    DEMzip = download.file(zip_url, destfile = tmp)
 
     # If URL ends with .zip, unzip the file
     if(endsWith(basename(zip_url), ".zip")) {
@@ -201,18 +202,18 @@ updateCache <- function(nameFile) {
     #writeLines(as.character(Sys.Date()), cachePath("last_check.txt"))
 
     message("Your file ", nameFile, " has been download and/or deziped in this folder : ", path)
-    return()
+    return(invisible(NULL))
   }
 
-  #nameFileZip <- paste0(nameFile, ".zip")
-  path <- cachePath(nameFile)  # gets the cache path for the given file
+  #nameFileZip = paste0(nameFile, ".zip")
+  path = cachePath(nameFile)  # gets the cache path for the given file
 
-  zip_url <- zip_urls[[nameFile]]
+  zip_url = zip_urls[[nameFile]]
   if (is.null(zip_url)) {
     stop("URL is not found")
   }
 
   downloadZip(zip_url, path)
-  return()
+  return(invisible(NULL))
 
 }

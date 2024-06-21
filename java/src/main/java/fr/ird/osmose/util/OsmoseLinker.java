@@ -1,10 +1,10 @@
-/* 
- * 
+/*
+ *
  * OSMOSE (Object-oriented Simulator of Marine Ecosystems)
  * http://www.osmose-model.org
- * 
+ *
  * Copyright (C) IRD (Institut de Recherche pour le Développement) 2009-2020
- * 
+ *
  * Osmose is a computer program whose purpose is to simulate fish
  * populations and their interactions with their biotic and abiotic environment.
  * OSMOSE is a spatial, multispecies and individual-based model which assumes
@@ -15,7 +15,7 @@
  * processes of fish life cycle (growth, explicit predation, additional and
  * starvation mortalities, reproduction and migration) and fishing mortalities
  * (Shin and Cury 2001, 2004).
- * 
+ *
  * Contributor(s):
  * Yunne SHIN (yunne.shin@ird.fr),
  * Morgane TRAVERS (morgane.travers@ifremer.fr)
@@ -23,20 +23,20 @@
  * Philippe VERLEY (philippe.verley@ird.fr)
  * Laure VELEZ (laure.velez@ird.fr)
  * Nicolas Barrier (nicolas.barrier@ird.fr)
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation (version 3 of the License). Full description
  * is provided on the LICENSE file.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
- * 
+ *
  */
 package fr.ird.osmose.util;
 
@@ -84,6 +84,27 @@ public class OsmoseLinker extends OLogger {
         }
     }
 
+    final public ISpecies getISpecies(String name) {
+        for(int i = 0; i < getNSpecies(); i++) {
+            if(name.compareTo(getSpecies(i).getName()) == 0) {
+                return getSpecies(i);
+            }
+        }
+        for(int i = 0; i < getNBkgSpecies(); i++) {
+            if(name.compareTo(getBkgSpecies(i).getName()) == 0) {
+                return getBkgSpecies(i);
+            }
+        }
+        for(int i = 0; i < getNRscSpecies(); i++) {
+            if(name.compareTo(getRscSpecies(i).getName()) == 0) {
+                return getRscSpecies(i);
+            }
+        }
+
+        return null;
+
+    }
+
     final public Species getSpecies(String name) {
         return getConfiguration().getSpecies(name);
     }
@@ -127,7 +148,7 @@ public class OsmoseLinker extends OLogger {
     final public int getNRscSpecies() {
         return getConfiguration().getNRscSpecies();
     }
-    
+
     final public int[] getFocalIndex() {
         return getConfiguration().getFocalIndex();
     }
@@ -136,10 +157,15 @@ public class OsmoseLinker extends OLogger {
         return getConfiguration().getBackgroundIndex();
     }
 
+    /** Returns the index for focal and background species. */
+    final public int[] getPredatorIndex() {
+        return getConfiguration().getPredatorIndex();
+    }
+
     final public int[] getResourceIndex() {
         return getConfiguration().getResourceIndex();
     }
-        
+
     final public BackgroundSpecies getBkgSpecies(int index) {
         return getConfiguration().getBkgSpecies(index);
     }
@@ -199,13 +225,13 @@ public class OsmoseLinker extends OLogger {
         }
     }
 
-    // Function to find the index of an element 
+    // Function to find the index of an element
     public static int findIndex(int arr[], int t) {
         int len = arr.length;
         return IntStream.range(0, len)
                 .filter(i -> t == arr[i])
-                .findFirst() // first occurrence 
-                .orElse(-1); // No element found 
+                .findFirst() // first occurrence
+                .orElse(-1); // No element found
     }
 
 }

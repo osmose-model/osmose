@@ -10,6 +10,15 @@ VB = function(age, this, method=3) {
   L_egg = .getPar(this, "species.egg.size")
   L_thr = Linf*(1 - exp(-k*(t_thr - t0)))
   
+  spname = get_par(this, "species.name")
+  
+  msg = "Value not found for growth parameter '%s' (%s)."
+  if(is.null(k)) stop(sprintf(msg, "k", spname))
+  if(is.null(Linf)) stop(sprintf(msg, "Linf", spname))
+  if(is.null(t0)) stop(sprintf(msg, "t0", spname))
+  if(is.null(t_thr)) stop(sprintf(msg, "vonbertalanffy.threshold.age", spname))
+  if(is.null(L_egg)) stop(sprintf(msg, "egg.size", spname))
+  
   if(method==0) {
     # original VB
     l = ifelse(age < 0, NA, Linf*(1 - exp(-k*(age - t0))))
@@ -136,6 +145,10 @@ calculateMLF = function(conf, sp) {
   age = seq(from=0+0.5/ndt, to=tn, by=1/ndt)
   size = VB(age, this, method=3)
   weight = a*size^b
+  
+  msg = sprintf("Error when calculating MLF, check growth parameters for %s.", get_par(this, "species.name"))
+  
+  if(any(is.na(weight))) stop(msg)
   
   repfile = .getPar(this, "reproduction.season.file")
   

@@ -20,7 +20,7 @@
 # Ricardo OLIVEROS RAMOS (ricardo.oliveros@gmail.com)
 # Philippe VERLEY (philippe.verley@ird.fr)
 # Laure VELEZ (laure.velez@ird.fr)
-# Nicolas Barrier (nicolas.barrier@ird.fr)
+# Nicolas BARRIER (nicolas.barrier@ird.fr)
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -237,7 +237,31 @@ plot.osmose.yield = function(x, species = NULL, speciesNames = NULL,
                 horizontal = horizontal, conf = conf, factor = factor,
                 xlim = xlim, ylim = ylim, col = col, alpha = alpha, 
                 border = border, lty = lty, lwd = lwd, axes = axes, 
-                legend = legend, units = units, ...)
+                legend = legend, units = units, intype="h", ...)
+  
+  return(invisible())
+}
+
+#' @rdname plot.osmose
+#' @method plot osmose.yieldByYear
+plot.osmose.yieldByYear = function(x, species = NULL, speciesNames = NULL, 
+                                   start = NULL, end = NULL, 
+                                   initialYear = NULL, ts = TRUE, type = 1, 
+                                   replicates = TRUE, freq = 12, 
+                                   horizontal = FALSE, conf = 0.95, factor = 1e-3, 
+                                   xlim = NULL, ylim = NULL, col = NULL, alpha = NULL, 
+                                   border = NULL, lty = 1, lwd = 2, axes = TRUE, 
+                                   legend = TRUE, units = "tonnes", ...){
+  
+  # Run the plot
+  osmosePlots2D(x = x, species = species, speciesNames = speciesNames, 
+                start = start, end = end, 
+                initialYear = initialYear, ts = ts, type = type, 
+                replicates = replicates, freq = 1, 
+                horizontal = horizontal, conf = conf, factor = factor,
+                xlim = xlim, ylim = ylim, col = col, alpha = alpha, 
+                border = border, lty = lty, lwd = lwd, axes = axes, 
+                legend = legend, units = units, intype="h", ...)
   
   return(invisible())
 }

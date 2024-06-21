@@ -22,7 +22,7 @@
  * Ricardo OLIVEROS RAMOS (ricardo.oliveros@gmail.com)
  * Philippe VERLEY (philippe.verley@ird.fr)
  * Laure VELEZ (laure.velez@ird.fr)
- * Nicolas Barrier (nicolas.barrier@ird.fr)
+ * Nicolas BARRIER (nicolas.barrier@ird.fr)
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -40,6 +40,7 @@
  */
 package fr.ird.osmose.resource;
 
+import fr.ird.osmose.util.OsmoseLinker;
 import fr.ird.osmose.Configuration;
 import fr.ird.osmose.ISpecies;
 import fr.ird.osmose.Osmose;
@@ -99,7 +100,7 @@ public class ResourceSpecies implements ISpecies {
      * exceed one to avoid any numerical problem when converting from float to
      * double.
      */
-    private final double accessMax = 0.99d;
+    private final double accessMax = 0.999d;
 
     private final int index;
     private final int offset;
@@ -130,7 +131,25 @@ public class ResourceSpecies implements ISpecies {
             ts.read(cfg.getFile("species.accessibility2fish.file.sp" + fileindex));
             accessibilityCoeff = ts.getValues();
         } else {
-            double accessibility = cfg.getDouble("species.accessibility2fish.sp" + fileindex);
+            
+        String keyVal = String.format("species.accessibility2fish.sp%d", fileindex);
+        String keyValLog = String.format("species.accessibility2fish.logit.sp%d", fileindex);
+
+        // test if only one of the two values exists
+        if (!cfg.isNull(keyValLog) && !cfg.isNull(keyVal)) {
+            String message = String.format("Both %s and %s parameters are defined. Choose only one.\n", keyValLog, keyVal);
+            //error(message, new Exception());
+        }
+        
+        double accessibility;
+        if(cfg.isNull(keyValLog)) {
+            // If the key for logit values is Null, assume accessibility in standard mode
+            accessibility = cfg.getDouble("species.accessibility2fish.sp" + fileindex);
+        } else {
+            // If the key for logit values is not null, assume accessibility in logit
+            accessibility = 1.0 / (1.0 + Math.exp(-1.0*cfg.getDouble("species.accessibility2fish.logit.sp" + fileindex)));
+        }
+            
             accessibilityCoeff = new double[cfg.getNStep()];
             for (int i = 0; i < accessibilityCoeff.length; i++) {
                 accessibilityCoeff[i] = (accessibility >= 1) ? accessMax : accessibility;

@@ -18,7 +18,7 @@ update_maps(input, output, conf, sep = ",", na.strings = -99, test = FALSE)
 \item{na.strings}{Value used for 'land' in the maps, default to -99.}
 }
 \value{
-
+The side effect is to create ncdf files with the maps.
 }
 \description{
 Update OSMOSE maps from csv (v3.x) to ncdf (v4.2+)

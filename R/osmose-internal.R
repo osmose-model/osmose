@@ -20,7 +20,7 @@
 # Ricardo OLIVEROS RAMOS (ricardo.oliveros@gmail.com)
 # Philippe VERLEY (philippe.verley@ird.fr)
 # Laure VELEZ (laure.velez@ird.fr)
-# Nicolas Barrier (nicolas.barrier@ird.fr)
+# Nicolas BARRIER (nicolas.barrier@ird.fr)
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -49,12 +49,12 @@
   version = suppressWarnings(as.numeric(version))
 
   # Check if version has a valid form
-  if(any(is.na(version)) | length(version) > 3 | any(version < 0, na.rm = TRUE)) {
-    stop("Version must be of the form X, X.Y or X.Y.Z")
+  if(any(is.na(version)) | length(version) > 4 | any(version < 0, na.rm = TRUE)) {
+    stop("Version must be of the form X, X.Y, X.Y.Z, X.Y.Z.W")
   }
 
   # Complete version with zeros if its length is less than 3
-  version = as.integer(c(version, rep(0, 3 - length(version))))
+  version = as.integer(c(version, rep(0, 4 - length(version))))
 
   return(version)
 }
@@ -96,20 +96,19 @@
 }
 
 # get a parameter from a name chain
-.getPar = function(x, ..., keep.att=FALSE) {
-
-  chain = unlist(list(...))
-  if(is.list(x))
-    x = do.call(.getPar, list(x = x[[chain[1]]], chain[-1]))
-
-  return(.guessType(x, keep.att = keep.att))
-}
+# .getPar = function(x, ..., keep.att=FALSE) {
+#
+#   chain = unlist(list(...))
+#   if(is.list(x))
+#     x = do.call(.getPar, list(x = x[[chain[1]]], chain[-1]))
+#
+#   return(.guessType(x, keep.att = keep.att))
+# }
 
 # Get species names. It matches the spX regular expression.
 .getSpecies = function(x)  {
   x = names(x)
   x = grep(pattern = "^sp[0-9]*$", x = x, value = TRUE)
-
   return(x)
 }
 
@@ -150,10 +149,12 @@
 .bySpecies = function(files, sep=c("_", "-")) {
   out = NULL
   if(length(files)>0) {
-    sp  = sapply(sapply(files, FUN=.strsplit2v, sep[1],
-                        USE.NAMES=FALSE)[2,], FUN=.strsplit2v, sep[2],
-                 USE.NAMES=FALSE)[2,]
-    out = as.list(tapply(files, INDEX=sp, FUN=identity))
+    sp  = lapply(sapply(files, FUN=.strsplit2v, sep[1],
+                        USE.NAMES=FALSE)[2,], FUN=.strsplit2v, sep[2])
+    ind = sapply(sp, length)!=2
+    sp[ind] = NULL
+    sp = do.call(cbind, sp)[2,]
+    out = as.list(tapply(files[!ind], INDEX=sp, FUN=identity))
   }
   # change names for all species
   return(out)
@@ -172,10 +173,10 @@
 # Read Osmose CSV files
 .readOsmoseCsv = function(file, sep = ",", skip = 1, row.names = 1,
                           na.strings = c("NA", "NaN"), ...) {
-  out = read.csv(file = file, sep = sep, skip = skip,
+  out = try(read.csv(file = file, sep = sep, skip = skip,
                  row.names = row.names, na.strings = na.strings,
-                 check.names = FALSE, ...)
-
+                 check.names = FALSE, ...), silent=TRUE)
+  if(inherits(out, "try-error")) return(NULL)
   return(out)
 }
 
@@ -316,25 +317,25 @@
 # @return A 3D array (time, species, replicates) or NULL if no file is found.
 .read_1D = function(files, path, ...) {
   # TO_DO: change for the unified approach! species as list
-  if(length(files)!=0) {
-    x = .readOsmoseCsv(file.path(path, files[1]), ...)
-    species = names(x)
-    times   = rownames(x)
-
-    output = array(dim=c(dim(x),length(files)))
-    output[,,1] = as.matrix(x)
-    if(length(files)>1) {
-      for(i in seq_along(files[-1])) {
-        x = .readOsmoseCsv(file.path(path, files[i+1]), ...)
-        output[,,i+1]= as.matrix(x)
-      }
+  if(length(files)==0) return(NULL)
+  
+  x = .readOsmoseCsv(file.path(path, files[1]), ...)
+  if(is.null(x)) return(NULL)
+  species = names(x)
+  times   = rownames(x)
+  
+  output = array(dim=c(dim(x),length(files)))
+  output[,,1] = as.matrix(x)
+  if(length(files)>1) {
+    for(i in seq_along(files[-1])) {
+      x = .readOsmoseCsv(file.path(path, files[i+1]), ...)
+      output[,,i+1]= as.matrix(x)
     }
-    rownames(output) = times
-    colnames(output) = species
-  } else {
-    output = NULL
   }
-
+  rownames(output) = times
+  colnames(output) = species
+  names(dimnames(output)) = c("time", "species", "replicates")
+  
   return(output)
 }
 
@@ -351,6 +352,7 @@
   if(length(files)!=0) {
 
     x = .readOsmoseCsv(file.path(path, files[1]), row.names=NULL, ...)
+    if(is.null(x)) return(NULL)
 
     rows    = unique(x[,1])
     cols    = unique(x[,2])
@@ -384,10 +386,14 @@
       dnames = dimnames(y)[1:3]
       dim(y) = dim(y)[-length(dim(y))]
       dimnames(y) = dnames
-      output[[i]] = drop(y)
+      names(dimnames(y)) = c("time", "species", "replicates")
+      output[[i]] = y #drop(y) no drop!
     }
 
+    output = lapply(output, FUN = .trim_matrix)
+
     names(output) = slices
+
 
   } else {
     output = NULL
@@ -401,6 +407,7 @@
   if(length(files)!=0) {
 
     x = .readMortalityCsv(file.path(path, files[1]), row.names=NULL, ...)
+    if(is.null(x)) return(NULL)
 
     rows = row.names(x)
     cols = c("pred", "starv", "other", "fishing", "out")
@@ -447,7 +454,9 @@
 
   if(length(files)!=0) {
 
-    nc = nc_open(file.path(path, files[1]))
+    nc = try(nc_open(file.path(path, files[1])))
+    if(inherits(nc, "try-error")) return(NULL)
+
     x = ncvar_get(nc, varid=varid) # assumes only one variable in the file
     att = ncatt_get(nc, varid, attname="species_names")
     if(att$hasatt) {
@@ -529,6 +538,19 @@
   ncode = floor(log10(x)) + 1
   out = sprintf(paste0("%0", ncode, "d"), seq_len(x) - zero)
   return(out)
+}
+
+
+.trim_matrix = function(x) {
+  ind = apply(x, 2, FUN=function(x) !all(is.na(x)))
+  if(all(ind)) return(x)       # all TRUE
+  if(all(!ind)) return(NULL)   # all FALSE
+  if(tail(ind, 1)) return(x)   # ends in TRUE
+  xind = rle(ind)
+  xind$values[-length(xind$values)] = TRUE
+  ind = inverse.rle(xind)
+  x = x[,ind,, drop=FALSE]
+  return(x)
 }
 
 # read_osmose old ---------------------------------------------------------
@@ -628,19 +650,50 @@ osmose2R.v4r0 = function (path=NULL, species.names=NULL, conf=NULL, ...) {
     # end of temporal
   }
 
-  outputData = .add_surveys(x=outputData$surveyBiomass, out=outputData, type="biomass")
-  outputData = .add_surveys(x=outputData$surveyAbundance, out=outputData, type="abundance")
-  outputData = .add_surveys(x=outputData$surveyYield, out=outputData, type="yield")
-  outputData = .add_surveys(x=outputData$yieldByFishery, out=outputData, type="yield")
+  outputData = .add_surveys(x=outputData$surveyBiomass, out=outputData, type="biomass", conf=conf)
+  outputData = .add_surveys(x=outputData$surveyAbundance, out=outputData, type="abundance", conf=conf)
+  outputData = .add_surveys(x=outputData$yieldByFishery, out=outputData, type="yield", conf=conf)
 
-  model = list(version = "4",
-               model = .getModelName(path = path),
-               simus = dim(outputData$biomass)[3],
-               times = as.numeric(row.names(outputData$biomass)),
-               T = nrow(outputData$biomass),
-               start = as.numeric(row.names(outputData$biomass))[1],
-               nsp = ncol(outputData$biomass),
-               lspecies = if (!is.null(species.names)) species.names else colnames(outputData$biomass))
+  if(!is.null(conf)) {
+
+    outputData = .calculate_size_residuals_byage(outputData, conf)
+    outputData = .calculate_mort_residuals_byage(outputData, conf)
+
+    outputData = .aggregate_catch_byclass(outputData, conf, "size", "abundance")
+    outputData = .aggregate_catch_byclass(outputData, conf, "size", "biomass")
+    outputData = .aggregate_catch_byclass(outputData, conf, "age", "abundance")
+    outputData = .aggregate_catch_byclass(outputData, conf, "age", "biomass")
+
+    outputData = .aggregate_catch_bytime(outputData, conf, type="yield")
+    outputData = .aggregate_catch_byyear(outputData, conf, type="yield")
+
+    start = get_par(conf, "simulation.time.start")
+    if(is.null(start)) start = 0
+    ndt   = get_par(conf, "simulation.time.ndtPerYear")/get_par(conf, "output.recordfrequency.ndt")
+    nyear = get_par(conf, "simulation.time.nyear") - get_par(conf, "output.start.year")
+    step0 = get_par(conf, "output.step0.include")
+    if(is.null(step0)) step0 = 0
+    times = start + seq(from=1-step0, to=nyear*ndt)/ndt
+
+    spp = c(get_species(conf, type="focal"), get_species(conf, type="background"))
+
+    model = get_par(conf, "output.file.prefix")
+    simus = get_par(conf, "simulation.nsimulation")
+    nsp = length(spp)
+    T = nyear*ndt
+
+  } else {
+    model = NULL
+    simus = NULL
+    times = NULL
+    T     = NULL
+    start = NULL
+    spp   = NULL
+    nsp   = NULL
+  }
+
+  model = list(version = "4", model = model, simus = simus, times = times,
+               T = T, start = start, nsp = nsp, lspecies = spp)
 
   output = c(model = list(model), species = list(colnames(outputData$biomass)),
              outputData)
@@ -816,7 +869,6 @@ osmose2R.v3r0 = function(path=NULL, species.names=NULL, ...) {
 #' @param config Configuration object to which file parameters are appended
 #' @param absolute Whether the path is absolute (TRUE) or relative (FALSE)
 #' @return A list tree.
-#' @export
 readOsmoseConfiguration = function(file, config=NULL, absolute=TRUE) {
 
   L0 = .readOsmoseConfiguration(input=file, absolute=absolute)
@@ -865,11 +917,23 @@ configureCalibration = function(L1) {
 
 }
 
-.add_surveys = function(x, out, type) {
+.add_surveys = function(x, out, type, conf) {
+
   if(is.null(x)) return(out)
+  if(all(sapply(x, is.null))) return(out)
   if(length(x) == 0) return(out)
+  for(i in seq_along(x)) {
+    if(type!="yield") {
+      src = get_surveys(conf, sr=names(x)[i])
+      spc = get_par(conf, par=sprintf("surveys.targetspecies.sr%d", src))
+      if(!is.null(spc)) {
+        spx = get_species(conf, nm=sprintf("sp%d", spc))
+        x[[i]] = x[[i]][, spx, , drop=FALSE]
+      }
+    }
+    class(x[[i]]) = c(sprintf("osmose.%s", type), class(x[[i]]))
+  }
   names(x) = paste(type, names(x), sep=".")
-  for(i in seq_along(x)) class(x[[i]]) = c(sprintf("osmose.%s", type), class(x[[i]]))
   out = c(out, x)
   return(out)
 }

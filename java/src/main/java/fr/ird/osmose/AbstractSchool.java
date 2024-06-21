@@ -145,7 +145,10 @@ public abstract class AbstractSchool extends GridPoint implements IAggregation {
     public abstract double getAgeMat();
     public abstract boolean isSexuallyMature();
     public abstract double getSizeMat();
+    public abstract boolean isAlive();
     public abstract double getNEggs();
+    public abstract int getClassIndex();
+    public abstract boolean isOut();
 
     @Override
     public void incrementNdead(MortalityCause cause, double nDead) {

@@ -22,7 +22,7 @@
  * Ricardo OLIVEROS RAMOS (ricardo.oliveros@gmail.com)
  * Philippe VERLEY (philippe.verley@ird.fr)
  * Laure VELEZ (laure.velez@ird.fr)
- * Nicolas Barrier (nicolas.barrier@ird.fr)
+ * Nicolas BARRIER (nicolas.barrier@ird.fr)
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -111,7 +111,7 @@ public class GrowthProcess extends AbstractProcess {
 
                 // barrier.n: patch for Fabien to limit the maximum grow rate
                 //maxDelta[i][ageDt] = deltaMeanLength[i][ageDt] + deltaMeanLength[i][ageDt];
-                minDelta[cpt][ageDt] = deltaMeanLength[cpt][ageDt] - deltaMeanLength[cpt][ageDt];
+                minDelta[cpt][ageDt] = 0; //deltaMeanLength[cpt][ageDt] - deltaMeanLength[cpt][ageDt];
                 maxDelta[cpt][ageDt] = delta_lmax_factor * deltaMeanLength[cpt][ageDt];
             }
             // Read maximal length

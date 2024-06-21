@@ -1,10 +1,10 @@
-/* 
- * 
+/*
+ *
  * OSMOSE (Object-oriented Simulator of Marine Ecosystems)
  * http://www.osmose-model.org
- * 
+ *
  * Copyright (C) IRD (Institut de Recherche pour le Développement) 2009-2020
- * 
+ *
  * Osmose is a computer program whose purpose is to simulate fish
  * populations and their interactions with their biotic and abiotic environment.
  * OSMOSE is a spatial, multispecies and individual-based model which assumes
@@ -15,7 +15,7 @@
  * processes of fish life cycle (growth, explicit predation, additional and
  * starvation mortalities, reproduction and migration) and fishing mortalities
  * (Shin and Cury 2001, 2004).
- * 
+ *
  * Contributor(s):
  * Yunne SHIN (yunne.shin@ird.fr),
  * Morgane TRAVERS (morgane.travers@ifremer.fr)
@@ -23,20 +23,20 @@
  * Philippe VERLEY (philippe.verley@ird.fr)
  * Laure VELEZ (laure.velez@ird.fr)
  * Nicolas Barrier (nicolas.barrier@ird.fr)
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation (version 3 of the License). Full description
  * is provided on the LICENSE file.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
- * 
+ *
  */
 package fr.ird.osmose;
 
@@ -139,16 +139,16 @@ public class Osmose extends OLogger {
         configurationFiles = new ArrayList<>();
 
         // Usage1 & Usage2, OSMOSE
-        if (set.getSetName().equals("Usage1")) {
+        if ((set != null) && set.getSetName().equals("Usage1")) {
             configurationFiles.addAll(readFilepath(set.getOption("F").getResultValue(0)));
         }
 
-        if (set.getSetName().equals("Usage2")) {
+        if ((set != null) && set.getSetName().equals("Usage2")) {
             configurationFiles.addAll(set.getData());
         }
 
         // Option for updating configuration file, only Usage1 & Usage2
-        if (set.getSetName().matches("Usage[12]")) {
+        if ((set != null) && set.getSetName().matches("Usage[12]")) {
             if (set.isSet("update")) {
                 if (!set.isSet("P")) {
                     updateConfiguration = true;
@@ -169,7 +169,7 @@ public class Osmose extends OLogger {
         cmd = new HashMap<>();
 
         // Parameters option -Pkey=value
-        if (set.isSet("P")) {
+        if ((set != null) && set.isSet("P")) {
             OptionData optParam = set.getOption("P");
             for (int i = 0; i < optParam.getResultCount(); i++) {
                 String key = optParam.getResultDetail(i).toLowerCase();
@@ -180,15 +180,15 @@ public class Osmose extends OLogger {
         }
 
         // Verbose and quiet options are exclusive
-        if (set.isSet("verbose") && set.isSet("quiet")) {
+        if ((set != null) && set.isSet("verbose") && set.isSet("quiet")) {
             info(getCmdUsage());
             error("Invalid command usage, -verbose and -quiet options are exclusive",
                     new IllegalArgumentException("Osmose logging cannot be both verbose and quiet."));
         }
-        if (set.isSet("verbose")) {
+        if ((set != null) && set.isSet("verbose")) {
             getLogger().setLevel(Level.FINE);
         }
-        if (set.isSet("quiet")) {
+        if ((set != null) && set.isSet("quiet")) {
             getLogger().setLevel(Level.SEVERE);
         }
     }
@@ -261,7 +261,7 @@ public class Osmose extends OLogger {
             VersionManager.getInstance().updateConfiguration();
         }
     }
-    
+
     public void readConfiguration(String configurationFile, HashMap<String, String> cmdInput) {
         // Initialize the configuration
         configuration = new Configuration(configurationFile, cmdInput);
@@ -278,7 +278,7 @@ public class Osmose extends OLogger {
             }
         }
     }
-    
+
     public void readConfiguration(String configurationFile) {
         this.readConfiguration(configurationFile, new HashMap<>());
     }
@@ -316,11 +316,11 @@ public class Osmose extends OLogger {
         }
 
         this.initSimulation();
-        
+
         // Loop over the number of replica
         long begin = System.currentTimeMillis();
         int nProcs = Math.min(configuration.getNCpu(), configuration.getNSimulation());
-        
+
         if (nProcs == 1) {
 
             // If nProcs is 1, run the simulations on a single thread.
@@ -359,21 +359,21 @@ public class Osmose extends OLogger {
                 }
             }
         }
-        
+
         getLogger().setLevel(lvl);
         if (configuration.getNSimulation() > 1) {
             int time = (int) ((System.currentTimeMillis() - begin) / 1000);
             info("All simulations completed (time ellapsed:  {0} seconds)", time);
         }
     }
-    
+
     public void initSimulation() {
         simulation = new Simulation[configuration.getNSimulation()];
         for (int i = 0; i < configuration.getNSimulation(); i++) {
             simulation[i] = new Simulation(i);
         }
     }
-    
+
     /**
      * Inner class that initializes and runs one simulation in a dedicated thread.
      * It informs the {@link java.util.concurrent.CountDownLatch} when the

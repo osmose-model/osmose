@@ -20,7 +20,7 @@
 # Ricardo OLIVEROS RAMOS (ricardo.oliveros@gmail.com)
 # Philippe VERLEY (philippe.verley@ird.fr)
 # Laure VELEZ (laure.velez@ird.fr)
-# Nicolas Barrier (nicolas.barrier@ird.fr)
+# Nicolas BARRIER (nicolas.barrier@ird.fr)
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -75,6 +75,8 @@ run_osmose = function(input, parameters = NULL, output = NULL, log = "osmose.log
 
   package_version = packageVersion("osmose")
 
+  if(is.null(version)) version = as.character(package_version)
+  
   # Print message with version
   # if version argument is null, Java version is the same as the package version
   if (isTRUE(verbose)) {
@@ -96,9 +98,9 @@ run_osmose = function(input, parameters = NULL, output = NULL, log = "osmose.log
       }
       osmose = shQuote(cacheManager(osmose_name))
     } else {
-       osmose_name = sprintf("osmose_%s-jar-with-dependencies.jar", package_version)
+       version = paste(.getVersion(package_version)[1:3], collapse = ".")
+       osmose_name = sprintf("osmose_%s-jar-with-dependencies.jar", version)
        osmose = shQuote(system.file("java", osmose_name, package = "osmose"))
-       version = package_version
     }
   }
 
@@ -124,7 +126,7 @@ run_osmose = function(input, parameters = NULL, output = NULL, log = "osmose.log
     output = .getPar(conf, "output.dir.path")
     input_dir = dirname(input)
     output = file.path(input_dir, output)
-  }else{
+  } else {
     # else, overwrites the Osmose output parameter
     if(.compareVersion(version, versionRef) < 0) {
       outDir = output
@@ -148,15 +150,28 @@ run_osmose = function(input, parameters = NULL, output = NULL, log = "osmose.log
 
   if(isTRUE(verbose)) message(sprintf("Running: %s", command))
 
+  .t0 = Sys.time()
   system2(java, args = args, stdout = stdout, stderr = stderr, wait = TRUE)
+  .t1 = Sys.time()
+  seconds = as.integer(difftime(.t1, .t0, units = "secs"))
 
   prefix = .getPar(conf, "output.file.prefix")
   if(is.null(prefix)) prefix = "osmose"
-  write_osmose.osmose.configuration(conf, file = file.path(output, sprintf("%s-configuration.osm", prefix)))
 
-  return(invisible(command))
+  conf = .add_to_configuration(conf)
+  class(conf) = "osmose.configuration"
+  write_osmose(conf, file = file.path(output, sprintf("%s-configuration.osm", prefix)))
+
+  return(invisible(list(command=command, elapsed=seconds)))
 }
 
+.get_default_osmose_jar = function() {
+  package_version = packageVersion("osmose")
+  version <- paste(.getVersion(package_version)[1:3], collapse = ".")
+  osmose_name <- sprintf("osmose_%s-jar-with-dependencies.jar", version)
+  osmose <- system.file("java", osmose_name, package = "osmose")
+  return(osmose)
+}
 
 # read_osmose -------------------------------------------------------------
 #' @title Read OSMOSE outputs into an R object
@@ -169,8 +184,7 @@ run_osmose = function(input, parameters = NULL, output = NULL, log = "osmose.log
 #' @param version OSMOSE version used to run the model.
 #' @param species.names Display names for species, overwrite the species names
 #' provided to the OSMOSE model. Used for plots and summaries.
-#' @param absolute Whether the path is absolute (\code{TRUE}) or relative
-#' (\code{FALSE}). Only used if input is not NULL.
+#' @param null.on.error Return NULL if an error happens, useful for robust simulations.
 #' @param ... Additional arguments.
 #'
 #' @details \code{read_osmose} will return a list of fields with the information
@@ -193,10 +207,20 @@ run_osmose = function(input, parameters = NULL, output = NULL, log = "osmose.log
 #'
 #' @aliases osmose2R
 read_osmose = function(path = NULL, input = NULL, version = "4.3.2",
-                       species.names = NULL, absolute = TRUE, ...){
+                       species.names = NULL, null.on.error=FALSE, ...){
 
+  .t0 = Sys.time()
   # If both path and input are NULL, then show an error message
-  if(is.null(path) & is.null(input)) stop("No output or configuration path has been provided.")
+  if(is.null(path) & is.null(input)) stop("No output folder or configuration file has been provided.")
+
+  # use first argument as path and input if not specified.
+  if(!is.null(path) & is.null(input)) {
+    if(!file.exists(path)) stop(sprintf("Path '%s' not found here (%s)", path, getwd()))
+    if(!file.info(path)$isdir) {
+      input = path
+      path = NULL
+    }
+  }
 
   # If config is not NULL, then read it
   recursive = TRUE
@@ -221,15 +245,26 @@ read_osmose = function(path = NULL, input = NULL, version = "4.3.2",
   if(!dir.exists(path)) stop("The output directory does not exist.")
 
   # Depending on the version, apply the corresponding method
-  output = switch(output_version,
+  output = try(switch(output_version,
                   v3r0 = osmose2R.v3r0(path = path, species.names = species.names, ...),
                   v3r1 = osmose2R.v3r1(path = path, species.names = species.names, ...),
                   v3r2 = osmose2R.v3r2(path = path, species.names = species.names, ...),
                   v4r0 = osmose2R.v4r0(path = path, species.names = species.names, conf=config, ...),
-                  stop(sprintf("Incorrect osmose version %s", version)))
+                  stop(sprintf("Incorrect osmose version %s", version))), silent = TRUE)
 
+  if(inherits(output, "try-error")) {
+    if(null.on.error) {
+      warning("There was an error reading osmose, returning NULL.")
+      return(NULL)
+    } else {
+      stop(output)
+    }
+  }
+
+  .t1 = Sys.time()
+  seconds = as.integer(difftime(.t1, .t0, units = "secs"))
   # Add config info
-  output = c(output, config = list(config))
+  output = c(output, config = list(config), elapsed=list(seconds))
 
   # Define class of output
   class(output) = "osmose"
@@ -253,11 +288,8 @@ report = function(x, format, output, ...) {
 #' @title Get variable from an \code{osmose}-like object.
 #' @description Function to get a variable from an object of \code{osmose} class.
 #' This function uses the get_var method (see the \code{\link{get_var.osmose}}).
-#'
-#' @param object Object of \code{osmose} class (see the \code{\link{read_osmose}} function).
-#' @param what Variable to extract
-#' @param how Output format
-#' @param ... Additional arguments of the function.
+#' @details \code{what} can be any available variable contained on \code{object}
+#' (e.g. biomass, abundance, yield, yieldN, etc).
 #'
 #' @return An array or a list containing the extracted data.
 #' @export

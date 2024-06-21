@@ -7,8 +7,6 @@ init_ncdf = function(input, file, parameters = NULL, output = NULL,
                      java = "java", options = NULL, verbose = TRUE, 
                      clean = TRUE, force = FALSE, run=TRUE, append=FALSE, ...) {
   
-  parameters = paste("-Poutput.restart.enabled=TRUE", parameters)
-  
   if(isTRUE(run)) {
     run_osmose(input=input, parameters=parameters, output=output, log=log,
                version=version, osmose=osmose, java=java,
@@ -134,13 +132,59 @@ init_ncdf = function(input, file, parameters = NULL, output = NULL,
   
 }
 
+init_alaia = function(input, file, parameters = NULL, output = NULL, 
+                     log = "osmose.log", version = NULL, osmose = NULL, 
+                     java = "java", options = NULL, verbose = TRUE, 
+                     clean = TRUE, force = FALSE, run=TRUE, append=FALSE, ...) {
+  
+  if(isTRUE(run)) {
+    run_osmose(input=input, parameters=parameters, output=output, log=log,
+               version=version, osmose=osmose, java=java,
+               options=options, verbose=verbose, clean=clean, force=force)
+  }
+  
+  rpath = file.path(output, "restart")
+  conf = .readConfiguration(input)
+  rfiles = dir(path=rpath, pattern = "\\.nc.*")
+  nf = length(rfiles)
+  
+  spnames = unlist(.getPar(conf, par="species.name")[.getPar(conf, par="species.type")=="focal"])
+  spindex = as.numeric(gsub(names(spnames), pattern="species.name.sp", replacement = ""))
+ 
+  if(!dir.exists(file.path(dirname(file), "initial_conditions")))
+    dir.create(file.path(dirname(file), "initial_conditions"), recursive = TRUE)
+   
+  for(i in seq_along(rfiles)) {
+    ifile = file.path(rpath, rfiles[i])
+    icode = tail(unlist(strsplit(ifile, split="\\.")), 1)
+    bname = sprintf("%s-initial_conditions.nc.%s", .getPar(conf, "output.file.prefix"), icode)
+    ncfile = file.path(dirname(file), "initial_conditions", bname)
+    file.copy(ifile, ncfile)
+    nc = nc_open(ncfile, write=TRUE)
+    ncatt_put(nc, varid = 0, attname="step", attval=-1)
+    nc_close(nc)
+  }
+  
+  mainfile = file.path("initial_conditions", 
+                       sprintf("%s-initial_conditions.nc", .getPar(conf, "output.file.prefix")))
+  
+  # the file is only bname because we are saving in the same folder as file (relative)
+  pars = list(mainfile)
+  pars = as.data.frame(pars)
+  colnames(pars) = NULL
+  rownames(pars) = "population.initialization.file" 
+  xoutput = list(par=pars)
+  class(xoutput) = "osmose.initialization"
+  
+  return(invisible(xoutput))
+  
+}
+
 
 init_firstyear = function(input, file, parameters = NULL, output = NULL, 
                           log = "osmose.log", version = NULL, osmose = NULL, 
                           java = "java", options = NULL, verbose = TRUE, 
                           clean = TRUE, force = FALSE, run=TRUE, append=FALSE, ...) {
-  
-  parameters = paste("-Poutput.restart.enabled=TRUE", parameters)
   
   if(isTRUE(run)) {
     run_osmose(input=input, parameters=parameters, output=output, log=log,
@@ -244,20 +288,26 @@ init_firstyear = function(input, file, parameters = NULL, output = NULL,
 }
 
 
-init_sofia = function(input, file=NULL, test=FALSE, ...) {
+init_sofia = function(input, file=NULL, test=FALSE, sp=NULL, ...) {
   
-  ow = options("warn")
-  options(warn=1)
-  on.exit(options(ow))
+  # ow = options("warn")
+  # options(warn=1)
+  # on.exit(options(ow))
   
   conf = .readConfiguration(input)
   
   nsp = .getPar(conf, "simulation.nspecies")
+  ndt = .getPar(conf, "simulation.time.ndtPerYear")
   
   spind = .getPar(conf, "species.type") == "focal"
   spind = gsub(names(spind)[which(spind)], pattern="species.type.sp", replacement = "") 
   spnames = .getPar(conf, "species.name")[sprintf("species.name.sp%s", spind)]
   spind = sort(as.numeric(spind))
+  
+  if(!is.null(sp)) {
+    spind = intersect(sp, spind)
+    if(length(spind)==0) stop("Species codes are not valid.")
+  }
   
   out = vector("list", nsp)
   names(out) = spnames
@@ -285,15 +335,16 @@ init_sofia = function(input, file=NULL, test=FALSE, ...) {
     sim$nschool = .getPar(this, "simulation.nschool")
     if(is.null(sim$nschool))
       stop(sprintf("Parameter 'simulation.nschool.sp%d' not found.", sp))
-    sim$osmose = .initial_length_dist(sim, sp)
+    sim$larvalM = ndt*sim$larvalM # transform to annual rate, asummed 'by time-step'
+    add_larvae = is.null(get_par(this, "mortality.additional.larva.rate.sp"))
+    sim$osmose  = .initial_length_dist(sim, sp, add_larvae)
     pars[[iSpName]] = as.matrix(sim$osmose)
     out[[iSpName]] = sim
     
+    larv_msg = sprintf("Estimated Larval Mortality: %0.3f", sim$larvalM)
+    message(larv_msg)
+    
   }
-  
-  # pars = as.data.frame(pars)
-  # colnames(pars) = NULL
-  # pars = pars[order(rownames(pars)), ]
   
   xoutput = list(par=pars, init=out)
   class(xoutput) = "osmose.initialization"
@@ -345,7 +396,7 @@ init_sofia = function(input, file=NULL, test=FALSE, ...) {
   
   ini = exp(-cumsum(c(0,Ma[-length(Ma)]/ndt)))
   inibio = 1e-6*sum(ini*weight)
-  R = ndt*bioguess/inibio
+  R = as.numeric(ndt)*(bioguess/inibio)
   ini = R*ini/sum(ini)
   
   if(bioguess==0) {
@@ -417,9 +468,9 @@ init_sofia = function(input, file=NULL, test=FALSE, ...) {
                 bins=list(age=age_bins, size=size_bins), harvested=harvested)
   
   isMature = size >= .getPar(this, "species.maturity.size")
-  eggs   = rowSums(1e6*fecundity[1:ndt]*t(t(output$pop)*isMature))
-  larvae = output$R*rF
-  Mlarval = mean(-log(larvae/eggs), na.rm=TRUE)
+  eggs   = sum(1e6*fecundity[1:ndt]*t(t(output$pop)*isMature), na.rm=TRUE)
+  larvae = output$R
+  Mlarval = -log(larvae/eggs)
   
   output$larvalM = Mlarval
   
@@ -471,7 +522,7 @@ init_sofia = function(input, file=NULL, test=FALSE, ...) {
     Fseason = yield_obs[1:ndt]/sum(yield_obs[1:ndt])
     ini = exp(-cumsum(c(0,Ma[-length(Ma)]/ndt)))
     inibio = 1e-6*sum(ini*weight)
-    R = ndt*bioguess/inibio
+    R = as.numeric(ndt)*(bioguess/inibio)
     xdist = R*ini/sum(ini)
     
     sim = list(R=R, Fguess=sum(yield_obs[1:ndt]/bioguess))
@@ -537,14 +588,18 @@ init_sofia = function(input, file=NULL, test=FALSE, ...) {
     
   }
   
-  opt = calibrate(par=log(c(sim$R, sim$Fguess)), fn = .simF, method = "L-BFGS-B")
+  opt = calibrate(par=log(c(sim$R, sim$Fguess)), fn = .simF, method = "Rvmmin")
+
+  # opt = calibrate(par=log(c(sim$R, sim$Fguess)), fn = .simF, method = "Rvmmin",
+  #                 lower=c(0, -20), upper=c(log(),2))
   
   output = c(.simF(opt$par, value=TRUE),  opt=list(opt))
   
   isMature = size >= .getPar(this, "species.maturity.size")
-  eggs   = rowSums(1e6*fecundity[1:ndt]*t(t(output$pop)*isMature))
-  larvae = output$R*rF
-  Mlarval = mean(-log(larvae/eggs), na.rm=TRUE)
+  eggs   = sum(1e6*fecundity[1:ndt]*t(t(output$pop)*isMature), na.rm=TRUE)
+  
+  larvae = output$R
+  Mlarval = -log(larvae/eggs)
   
   output$larvalM = Mlarval
     
@@ -567,11 +622,13 @@ lnorm2 = function(obs, sim, tiny=1e-2, ...) {
 
 llw = function(cv) 1/(2*cv^2)
 
-.initial_length_dist = function(sim, sp) {
+.initial_length_dist = function(sim, sp, add_larvae) {
   
   dist = sim$distB
+  biotest = sum(dist)==0
   dist[dist==0] = 1e-3 # 1kg instead of nothing
   bio_ini = sum(dist)
+  if(isTRUE(biotest)) bio_ini = 0
   bio_rel = if(bio_ini==0) dist else dist/bio_ini
   tl_sp = rep(2, length(dist))
   xage  = sim$age
@@ -579,20 +636,27 @@ llw = function(cv) 1/(2*cv^2)
   # begin test 
   
   # end test
-   
-  rel_dist = sim$dist/max(sim$dist, na.rm=TRUE)
+
+  min_school = pmax(ceiling(sim$nschool*0.025), 1L)
+  max_school = sim$nschool - min_school
+  rel_dist = sim$distB
+  rel_dist = rel_dist - min(rel_dist, na.rm=TRUE)
+  rel_dist = rel_dist/max(rel_dist, na.rm=TRUE)
   
-  nschool = pmax(ceiling(sim$nschool*rel_dist), 1)
+  nschool = pmax(ceiling(max_school*rel_dist), 1) + min_school
+  nschool[is.na(nschool)] = 1
+  nschool = pmin(nschool, sim$nschool)
   
-  out = c(round(bio_ini, 1), 
+  out = c(round(bio_ini, 3), 
           paste(format(bio_rel, scientific = FALSE), collapse=", "), 
           paste(round(sim$bins$size,3), collapse=","),
           paste(xage, collapse=","),
           paste(round(tl_sp, 2), collapse=", "),
           paste(nschool, collapse = ", "),
-          round(sim$larvalM, 3))
+          round(sim$larvalM, 5))
   dim(out) = c(length(out), 1)
   
+  lpatt = if(add_larvae) "mortality.additional.larva.rate.sp%d" else "initialization.additional.larva.rate.sp%d"
   out = as.data.frame(out)
   rownames(out) = sprintf(c("population.initialization.biomass.sp%d",
                             "population.initialization.relativebiomass.sp%d",
@@ -600,7 +664,7 @@ llw = function(cv) 1/(2*cv^2)
                             "population.initialization.age.sp%d",
                             "population.initialization.tl.sp%d",
                             "population.initialization.nschool.sp%d",
-                            "mortality.additional.larva.rate.sp%d"), sp)
+                            lpatt), sp)
   colnames(out) = NULL
   
   return(out)

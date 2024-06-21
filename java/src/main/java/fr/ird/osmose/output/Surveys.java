@@ -77,28 +77,23 @@ public class Surveys extends AbstractOutputRegion {
         selectivity.init();
 
         /*
-        if (!getConfiguration().isNull("output.region.file.rg" + index)) {
-            // region defined by a grid map
-            String file = getConfiguration().getFile("output.region.file.rg" + index);
-            GridMap map = new GridMap(file);
-            cells = getConfiguration().getGrid().getCells().stream()
-                    .filter(cell -> !cell.isLand() && map.getValue(cell) > 0)
-                    .mapToInt(Cell::getIndex)
-                    .toArray();
-        } else {
-            // region defined by lon/lat min & max
-            double lonmin = getConfiguration().getDouble("output.region.lon.min.rg" + index);
-            double lonmax = getConfiguration().getDouble("output.region.lon.max.rg" + index);
-            double latmin = getConfiguration().getDouble("output.region.lat.min.rg" + index);
-            double latmax = getConfiguration().getDouble("output.region.lat.max.rg" + index);
-            double lat[] = new double[]{latmin, latmax, latmax, latmin, latmin};
-            double lon[] = new double[]{lonmin, lonmin, lonmax, lonmax, lonmax};
-            cells = getConfiguration().getGrid().getCells().stream()
-                    .filter(cell -> !cell.isLand() && isInside(cell.getLat(), cell.getLon(), lat, lon))
-                    .mapToInt(Cell::getIndex)
-                    .toArray();
-        }
-        Arrays.sort(cells);
+         * if (!getConfiguration().isNull("output.region.file.rg" + index)) { // region
+         * defined by a grid map String file =
+         * getConfiguration().getFile("output.region.file.rg" + index); GridMap map =
+         * new GridMap(file); cells = getConfiguration().getGrid().getCells().stream()
+         * .filter(cell -> !cell.isLand() && map.getValue(cell) > 0)
+         * .mapToInt(Cell::getIndex) .toArray(); } else { // region defined by lon/lat
+         * min & max double lonmin =
+         * getConfiguration().getDouble("output.region.lon.min.rg" + index); double
+         * lonmax = getConfiguration().getDouble("output.region.lon.max.rg" + index);
+         * double latmin = getConfiguration().getDouble("output.region.lat.min.rg" +
+         * index); double latmax =
+         * getConfiguration().getDouble("output.region.lat.max.rg" + index); double
+         * lat[] = new double[]{latmin, latmax, latmax, latmin, latmin}; double lon[] =
+         * new double[]{lonmin, lonmin, lonmax, lonmax, lonmax}; cells =
+         * getConfiguration().getGrid().getCells().stream() .filter(cell ->
+         * !cell.isLand() && isInside(cell.getLat(), cell.getLon(), lat, lon))
+         * .mapToInt(Cell::getIndex) .toArray(); } Arrays.sort(cells);
          */
     }
 
@@ -108,34 +103,17 @@ public class Surveys extends AbstractOutputRegion {
      * https://stackoverflow.com/questions/12083093/how-to-define-if-a-determinate-point-is-inside-a-region-lat-long
      */
     /*
-    private boolean isInside(double lat0, double lon0, double[] lat, double[] lon) {
-        int i, j;
-        boolean inside = false;
-        int sides = lat.length;
-        for (i = 0, j = sides - 1; i < sides; j = i++) {
-            //verifying if your coordinate is inside your region
-            double dxi0 = substract(lon0, lon[i]);
-            double dxj0 = substract(lon0, lon[j]);
-            double dxji = substract(lon[j], lon[i]);
-            if ((((dxi0 >= 0) && (dxj0 < 0)) || ((dxj0 >= 0) && (dxi0 < 0)))
-                    && (lat0 < ((lat[j] - lat[i]) * dxi0 / dxji + lat[i]))) {
-                inside = !inside;
-            }
-        }
-        return inside;
-    }
-
-    private double substract(double lon1, double lon2) {
-        double dx;
-        if ((lon1 - lon2) > 180.d) {
-            dx = lon1 - lon2 - 360.d;
-        } else if ((lon1 - lon2) < -180.d) {
-            dx = 360.d + lon1 - lon2;
-        } else {
-            dx = lon1 - lon2;
-        }
-        return dx;
-    }
+     * private boolean isInside(double lat0, double lon0, double[] lat, double[]
+     * lon) { int i, j; boolean inside = false; int sides = lat.length; for (i = 0,
+     * j = sides - 1; i < sides; j = i++) { //verifying if your coordinate is inside
+     * your region double dxi0 = substract(lon0, lon[i]); double dxj0 =
+     * substract(lon0, lon[j]); double dxji = substract(lon[j], lon[i]); if ((((dxi0
+     * >= 0) && (dxj0 < 0)) || ((dxj0 >= 0) && (dxi0 < 0))) && (lat0 < ((lat[j] -
+     * lat[i]) * dxi0 / dxji + lat[i]))) { inside = !inside; } } return inside; }
+     *
+     * private double substract(double lon1, double lon2) { double dx; if ((lon1 -
+     * lon2) > 180.d) { dx = lon1 - lon2 - 360.d; } else if ((lon1 - lon2) < -180.d)
+     * { dx = 360.d + lon1 - lon2; } else { dx = lon1 - lon2; } return dx; }
      */
     /**
      * Check if school is given the region at a given time step.
@@ -146,6 +124,9 @@ public class Surveys extends AbstractOutputRegion {
      */
     @Override
     public boolean contains(int timeStep, AbstractSchool school) {
+        if(school.isOut()) {
+            return false;
+        }
         return (this.mapSet.getValue(timeStep, school.getCell()) > 0);
     }
 

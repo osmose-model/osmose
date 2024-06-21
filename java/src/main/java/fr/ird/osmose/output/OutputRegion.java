@@ -142,6 +142,9 @@ public class OutputRegion extends AbstractOutputRegion {
      */
     @Override
     public boolean contains(int timeStep, AbstractSchool school) {
+        if(school.isOut()) {
+            return false;
+        }
         return (this.mapSet.getValue(timeStep, school.getCell()) > 0);
     }
 

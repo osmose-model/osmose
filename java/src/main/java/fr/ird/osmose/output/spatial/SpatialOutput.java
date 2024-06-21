@@ -160,6 +160,7 @@ public class SpatialOutput extends SimulationLinker implements IOutput {
         Variable.Builder<?>  lonvarBuilder = bNc.addVariable("longitude", DataType.FLOAT, new ArrayList<>(Arrays.asList(linesDim, columnsDim)));
         lonvarBuilder.addAttribute(new Attribute("units", "degree"));
         lonvarBuilder.addAttribute(new Attribute("description", "longitude of the center of the cell"));
+
         /*
          * Add global attributes
          */

@@ -46,7 +46,6 @@ osmose2R = function(path = NULL, version = "v3r2", species.names = NULL, ...) {
   
 }
 
-#' @rdname get_var
 #' @export
 getVar = function(object, what, how, ...) {
   
