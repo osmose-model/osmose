@@ -35,8 +35,8 @@ import os
 import subprocess
 cwd = os.getcwd()
 print(cwd)
-fpath = "odd_des/submodel/_static/plot_growth.py"
-subprocess.call(["python", fpath], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+fpath = "submodel/_static/plot_growth.py"
+subprocess.call(["python", fpath])
 ```
 
 ### Von Bertalanffy growth

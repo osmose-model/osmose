@@ -65,3 +65,4 @@ format:
 
   pdf:
     fontfamily: libertinus
+    keep-tex: true

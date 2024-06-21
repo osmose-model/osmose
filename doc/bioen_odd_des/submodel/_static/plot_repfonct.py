@@ -54,4 +54,3 @@ plt.annotate('$f_p = P(w)$', [0.45 * imax, 0.75 * imax], rotation=30, va='center
 plt.annotate(r'$f_p = I_{max}\ w^{\alpha}$', [0.5 * (imax + x.max()), 1.1 * ymax], va='center', ha='center')
 
 plt.savefig(fileout + '.svg', bbox_inches='tight')
-plt.savefig(fileout + '.pdf', bbox_inches='tight')

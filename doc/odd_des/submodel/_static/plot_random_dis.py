@@ -36,11 +36,11 @@ mask[3:7, 3:5] = 1
 alreadyChoosen = np.full((ny, nx), False, dtype=bool)
 randomMap = []
 
-i = int(np.round(np.random.rand(1) * (nx - 1)))
-j = int(np.round(np.random.rand(1) * (ny - 1)))
+i = int(np.round(np.random.rand(1)[0] * (nx - 1)))
+j = int(np.round(np.random.rand(1)[0] * (ny - 1)))
 while(mask[j, i]):
-    i = int(np.round(np.random.rand(1) * (nx - 1)))
-    j = int(np.round(np.random.rand(1) * (ny - 1)))
+    i = int(np.round(np.random.rand(1)[0] * (nx - 1)))
+    j = int(np.round(np.random.rand(1)[0] * (ny - 1)))
 
 
 cpt = 0
@@ -79,12 +79,12 @@ colors = np.array([v[2] for v in randomMap])
 
 ncolors = len(np.unique(colors)) - 1
 
-cmap = plt.cm.get_cmap('Spectral')
+cmap = mpl.colormaps['Spectral']
 
 fig = plt.figure()
 ax = plt.gca()
 
-plt.imshow(mask, interpolation='none', cmap=plt.cm.get_cmap('binary'))
+plt.imshow(mask, interpolation='none', cmap=mpl.colormaps['binary'])
 
 for j, i, c in zip(jout, iout, colors):
 

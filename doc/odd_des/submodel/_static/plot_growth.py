@@ -1,7 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-dirout = 'odd_des/submodel/_static'
+dirout = 'submodel/_static'
 
 lifespan = 10
 eggsize = 9.5
@@ -38,7 +38,7 @@ plt.xlabel('Age (years)')
 plt.ylabel('Size (cm)')
 plt.axvline(thres, color='red', linestyle='--')
 plt.savefig('%s/vb.svg' %dirout, bbox_inches='tight')
-plt.savefig('%s/vb.pdf' %dirout, bbox_inches='tight')
+
 
 def grom(x):
 
@@ -69,4 +69,3 @@ plt.ylabel('Size (cm)')
 plt.axvline(thres, color='red', linestyle='--')
 plt.axvline(agom, color='blue', linestyle='--')
 plt.savefig('%s/gom.svg' %dirout, bbox_inches='tight')
-plt.savefig('%s/gom.pdf' %dirout, bbox_inches='tight')

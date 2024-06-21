@@ -119,3 +119,10 @@ doc/user_guide/.gitignore
 **/site_libs
 
 doc/odd_des/test.csv
+doc/user_guide/Osmose-User-Guide.tex
+doc/user_guide/Osmose-User-Guide.toc
+doc/user_guide/Osmose-User-Guide.synctex.gz
+doc/user_guide/Osmose-User-Guide.pdf
+doc/user_guide/Osmose-User-Guide.fls
+doc/user_guide/Osmose-User-Guide.fdb_latexmk
+doc/odd_des/Osmose-ODD-Description.tex

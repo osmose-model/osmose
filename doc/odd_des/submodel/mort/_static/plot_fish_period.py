@@ -86,4 +86,3 @@ plot_period(period6, xpos6, lab6)
 plt.title('Start = 0.25')
 
 plt.savefig('%s/fishing-period.svg' %dirout, bbox_inches='tight')
-plt.savefig('%s/fishing-period.pdf' %dirout, bbox_inches='tight')
