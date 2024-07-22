@@ -137,16 +137,16 @@ public class PredatorPressureOutput extends SimulationLinker implements IOutput 
                 prw.print(time);
                 prw.print(separator);
                 if (nStagePred == 1) {
-                    prw.print(name);    // Name predators
+                    prw.print(name);    // Name prey
                 } else {
                     if (iStage == 0) {
-                        prw.print(quote(name + " < " + threshold[iStage]));    // Name predators
+                        prw.print(quote(name + " < " + threshold[iStage]));    // Name prey
                     } else {
-                        prw.print(quote(name + " >=" + threshold[iStage - 1]));    // Name predators
+                        prw.print(quote(name + " >=" + threshold[iStage - 1]));    // Name prey
                     }
                 }
                 prw.print(separator);
-                for (int i = 0; i < nSpec; i++) {
+                for (int i = 0; i < nSpec + nBkg; i++) {
                     int nStage = dietOutputStage.getNStage(i);
                     for (int s = 0; s < nStage; s++) {
                         float val = (float) (predatorPressure[i][s][iSpec][iStage] / dtRecord);
@@ -154,7 +154,7 @@ public class PredatorPressureOutput extends SimulationLinker implements IOutput 
                                 ? "Inf"
                                 : Float.toString(val);
                         prw.print(sval);
-                        if (i < nSpec - 1 || s < nStage - 1) {
+                        if (i < nSpec + nBkg - 1 || s < nStage - 1) {
                             prw.print(separator);
                         }
                     }
@@ -169,11 +169,11 @@ public class PredatorPressureOutput extends SimulationLinker implements IOutput 
             prw.print(separator);
             prw.print(getConfiguration().getResourceSpecies(j));
             prw.print(separator);
-            for (int i = 0; i < nSpec; i++) {
+            for (int i = 0; i < nSpec + nBkg; i++) {
                 int nStage = dietOutputStage.getNStage(i);
                 for (int s = 0; s < nStage; s++) {
                     prw.print((float) (predatorPressure[i][s][j + offset][0] / dtRecord));
-                    if (i < nSpec - 1 || s < nStage - 1) {
+                    if (i < nSpec + nBkg - 1 || s < nStage - 1) {
                         prw.print(separator);
                     }
                 }
