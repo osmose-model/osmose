@@ -143,7 +143,7 @@ public class SpatialFisheryOutput extends SimulationLinker implements IOutput {
                 new ArrayList<>(Arrays.asList(timeDim, speciesDim, fisheriesDim, yDim, xDim)));
         biomassVarBuilder.addAttribute(new Attribute("units", "ton"));
         biomassVarBuilder.addAttribute(new Attribute("description", "landings, in tons, by species and by fishery"));
-        biomassVarBuilder.addAttribute(new Attribute("_FillValue", -99.f));
+        biomassVarBuilder.addAttribute(new Attribute("_FillValue", Float.NaN));
         biomassVarBuilder.addAttribute(new Attribute("species_names", attr));
         biomassVarBuilder.addAttribute(new Attribute("fisheries_names", fisheryNames));
 
@@ -151,7 +151,7 @@ public class SpatialFisheryOutput extends SimulationLinker implements IOutput {
                 new ArrayList<>(Arrays.asList(timeDim, speciesDim, fisheriesDim, yDim, xDim)));
         discardsVarBuilder.addAttribute(new Attribute("units", "ton"));
         discardsVarBuilder.addAttribute(new Attribute("description", "discards, in tons, by species and by fishery"));
-        discardsVarBuilder.addAttribute(new Attribute("_FillValue", -99.f));
+        discardsVarBuilder.addAttribute(new Attribute("_FillValue", Float.NaN));
         discardsVarBuilder.addAttribute(new Attribute("species_names", attr));
         discardsVarBuilder.addAttribute(new Attribute("fisheries_names", fisheryNames));
 
@@ -173,6 +173,22 @@ public class SpatialFisheryOutput extends SimulationLinker implements IOutput {
         } catch (IOException ex) {
             Logger.getLogger(SpatialFisheryOutput.class.getName()).log(Level.SEVERE, null, ex);
         }
+
+        ArrayFloat.D2 arrLon = new ArrayFloat.D2(getGrid().get_ny(), getGrid().get_nx());
+        ArrayFloat.D2 arrLat = new ArrayFloat.D2(getGrid().get_ny(), getGrid().get_nx());
+        for (Cell cell : getGrid().getCells()) {
+            arrLon.set(cell.get_jgrid(), cell.get_igrid(), cell.getLon());
+            arrLat.set(cell.get_jgrid(), cell.get_igrid(), cell.getLat());
+        }
+        try {
+            nc.write(nc.findVariable("longitude"), arrLon);
+            nc.write(nc.findVariable("latitude"), arrLat);
+        } catch (IOException ex){
+            Logger.getLogger(AbstractSpatialOutput.class.getName()).log(Level.SEVERE, null, ex);
+        } catch ( InvalidRangeException ex) {
+            Logger.getLogger(AbstractSpatialOutput.class.getName()).log(Level.SEVERE, null, ex);
+        }
+
     }
 
     @Override
@@ -205,6 +221,19 @@ public class SpatialFisheryOutput extends SimulationLinker implements IOutput {
         biomass = new double[nSpecies][nFishery][nY][nX];
         discards = new double[nSpecies][nFishery][nY][nX];
         // accessibleBiomass = new double[nSpecies][nFishery][nY][nX];
+        // Init the land cells with NaN
+        for (Cell cell : getGrid().getCells()) {
+            if (cell.isLand()) {
+                int i = cell.get_igrid();
+                int j = cell.get_jgrid();
+                for (int iSpecies = 0; iSpecies < nSpecies; iSpecies++) {
+                    for (int iFisheries = 0; iFisheries < nFishery; iFisheries++) {
+                        discards[iSpecies][iFisheries][j][i] = Float.NaN;
+                        biomass[iSpecies][iFisheries][j][i] = Float.NaN;
+                    }
+                }
+            }
+        }
     }
 
     @Override
