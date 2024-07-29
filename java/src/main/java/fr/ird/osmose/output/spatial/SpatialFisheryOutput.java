@@ -155,6 +155,14 @@ public class SpatialFisheryOutput extends SimulationLinker implements IOutput {
         discardsVarBuilder.addAttribute(new Attribute("species_names", attr));
         discardsVarBuilder.addAttribute(new Attribute("fisheries_names", fisheryNames));
 
+        Variable.Builder<?> latVarBuilder = bNc.addVariable("latitude", DataType.FLOAT, new ArrayList<>(Arrays.asList(yDim, xDim)));
+        latVarBuilder.addAttribute(new Attribute("units", "degree"));
+        latVarBuilder.addAttribute(new Attribute("description", "latitude of the center of the cell"));
+
+        Variable.Builder<?> lonVarBuilder = bNc.addVariable("longitude", DataType.FLOAT, new ArrayList<>(Arrays.asList(yDim, xDim)));
+        lonVarBuilder.addAttribute(new Attribute("units", "degree"));
+        lonVarBuilder.addAttribute(new Attribute("description", "longitude of the center of the cell"));
+
         // Variable.Builder<?> accessibleBiomassVarBuilder = bNc.addVariable("accessible_biomass", DataType.FLOAT,
         //         new ArrayList<>(Arrays.asList(timeDim, speciesDim, fisheriesDim, yDim, xDim)));
         // accessibleBiomassVarBuilder.addAttribute(new Attribute("units", "ton"));
