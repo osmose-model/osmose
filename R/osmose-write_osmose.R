@@ -94,6 +94,19 @@ write_osmose.osmose.configuration = function(x, file, sep = " = ", append=FALSE,
 #' @author Ricardo Oliveros-Ramos
 #' 
 #' @export
+#' @method c osmose.configuration
+c.osmose.configuration = function(...) {
+  args = list(...)
+  out = c(unlist(args))
+  # print(out)
+  out = as.list(out)
+  class(out) = "osmose.configuration"
+  return(out)
+}
+
+#' @author Ricardo Oliveros-Ramos
+#' 
+#' @export
 #' @method write_osmose list 
 write_osmose.list = function(x, file, sep = ",", col.names = NA, quote = FALSE, 
                             row.names = TRUE, append=FALSE, ...) {
