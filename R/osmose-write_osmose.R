@@ -70,12 +70,18 @@ write_osmose.data.frame = function(x, file, sep = ",", col.names = TRUE, quote =
 #' @export
 #' @method write_osmose osmose.configuration
 write_osmose.osmose.configuration = function(x, file, sep = " = ", append=FALSE, 
-                                            par.sep=",", ...) {
+                                            par.sep=",", justify=FALSE, ...) {
 
   .format_par = function(x, sep=",") {
     if(length(x)<2) return(x)
     out = paste(x, collapse=sep)
     return(out)
+  }
+  
+  if(isTRUE(justify)) {
+    n = max(nchar(names(x))) - nchar(names(x))
+    ns = sapply(n, function(times, x) paste(rep(x, times), collapse=""), x=" ")
+    names(x) = apply(cbind(names(x), ns), 1, paste, collapse="")
   }
   
   x = as.matrix(lapply(x, FUN=.format_par, sep=par.sep))
