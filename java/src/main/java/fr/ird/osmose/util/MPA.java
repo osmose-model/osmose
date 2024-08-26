@@ -96,14 +96,11 @@ public class MPA extends OsmoseLinker {
     public void init() {
 
         cells = new ArrayList<>();
-        if (!getConfiguration().isNull("mpa.file.mpa" + index)) {
-            percentageMPA = new float[getGrid().get_ny()][getGrid().get_nx()];
-            loadMPA(getConfiguration().getFile("mpa.file.mpa" + index));
-            start = getConfiguration().getInt("mpa.start.year.mpa" + index);
-            end = getConfiguration().getInt("mpa.end.year.mpa" + index);
-        } else {
-            start = Integer.MAX_VALUE;
-        }
+        percentageMPA = new float[getGrid().get_ny()][getGrid().get_nx()];
+        loadMPA(getConfiguration().getFile("mpa.file.mpa" + index));
+        start = getConfiguration().getInt("mpa.start.year.mpa" + index);
+        end = getConfiguration().getInt("mpa.end.year.mpa" + index);
+
 
         if(end < start) {
             String message = String.format("End (%d) and start (%d) dates have been swapped for MPA index %d", end, start, index);
@@ -140,9 +137,6 @@ public class MPA extends OsmoseLinker {
      * @return {@code true} if the MPA is active at the given time step.
      */
     public boolean isActive(int iStepSimu) {
-        if (iStepSimu < 0) {
-            return false;
-        }
         int year = iStepSimu / getConfiguration().getNStepYear();
         return (year >= start) && (year <= end);
     }

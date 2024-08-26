@@ -105,7 +105,10 @@ update_ltl = function(input, filename=NULL, absolute=TRUE) {
   }
   
   # recovers the index for plk as 
-  pltindex = names(param$plankton$name)
+  pltindex = names(param$species$name)
+  nspecies = strtoi(param$simulation$nspecies)
+  index = (nspecies + 1):length(pltindex)
+  pltindex = pltindex[index]
   
   # create back up file
   isOK = FALSE
@@ -167,10 +170,11 @@ update_ltl = function(input, filename=NULL, absolute=TRUE) {
   # Loop over all the plankton classes to initialise variables in the NetCDF
   list_vars = c()
   for(i in 1:n_ltl_file) {
-    ltl_var = param$plankton$name[[pltindex[i]]]
+    ltl_var = param$species$name[[pltindex[i]]]
     var_nc = ncvar_def(ltl_var, biomass_units, dims, longname=ltl_var)
     list_vars[[i]] = var_nc
   }
+
   
   # Opens the output NetCDF file
   ncout = nc_create(tmp, list_vars)
@@ -178,7 +182,7 @@ update_ltl = function(input, filename=NULL, absolute=TRUE) {
   # loops over all the LTL classes and write data into 
   # the file
   for(i in 1:n_ltl_file) {
-    ltl_var = param$plankton$name[[pltindex[i]]]
+    ltl_var = param$species$name[[pltindex[i]]]
     ncvar_put(ncout, ltl_var, biomass[, , i, ])
   }
   

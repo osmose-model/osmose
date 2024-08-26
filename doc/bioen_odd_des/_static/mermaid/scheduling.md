@@ -1,6 +1,7 @@
-```mermaid
-
-%%{init: {'theme': 'dark', 'themeVariables': { 'fontSize': '13px'}}}%%
+```{mermaid}
+%%| fig-align: center
+%%| fig-cap: Scheduling
+%%| label: fig-scheduling
 graph TD;
 
     id0(Simu. initialisation) --> id1

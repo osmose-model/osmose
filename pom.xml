@@ -147,7 +147,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
     </repositories>
 
     <build>
-        <finalName>${project.artifactId}_${project.version}</finalName>
+        <finalName>${project.artifactId}-${project.version}</finalName>
         <sourceDirectory>java/src/main/java/</sourceDirectory>
         <testSourceDirectory>java/src/test/java/</testSourceDirectory>
         <resources>

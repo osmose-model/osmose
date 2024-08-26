@@ -2,7 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.patches
 
-dirout = 'odd_des/submodel/mort/_static/'
+dirout = 'submodel/mort/_static/'
 
 def compute_period(start):
     smin = start
@@ -86,4 +86,3 @@ plot_period(period6, xpos6, lab6)
 plt.title('Start = 0.25')
 
 plt.savefig('%s/fishing-period.svg' %dirout, bbox_inches='tight')
-plt.savefig('%s/fishing-period.pdf' %dirout, bbox_inches='tight')

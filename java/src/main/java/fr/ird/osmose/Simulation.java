@@ -104,6 +104,9 @@ public class Simulation extends OsmoseLinker {
      */
     private int i_step_simu;
 
+    /** Initial time-step of the simulation */
+    private int init_step_simu;
+
     /**
      * The object that controls what should be done during one time step.
      */
@@ -158,12 +161,12 @@ public class Simulation extends OsmoseLinker {
         // discards)
         this.backSchoolSet = new BackgroundSchoolSet();
 
-        i_step_simu = 0;
+        init_step_simu = 0;
 
         // Look for restart file if restart is enabled
         if(getConfiguration().isRestart()) {
             String ncfile = getConfiguration().getFile("simulation.restart.file") + "." + rank;
-            i_step_simu = 0;
+            init_step_simu = 0;
             try {
                 NetcdfFile nc = NetcdfDatasets.openDataset(ncfile);
                 Attribute ncAttribute = nc.findGlobalAttribute("step");
@@ -282,6 +285,8 @@ public class Simulation extends OsmoseLinker {
      */
     public void run() {
 
+        i_step_simu = init_step_simu;
+
         while (i_step_simu < getConfiguration().getNStep()) {
 
             int year = getYear();
@@ -345,6 +350,10 @@ public class Simulation extends OsmoseLinker {
      */
     public int getIndexTimeSimu() {
         return i_step_simu;
+    }
+
+    public boolean isFirstTimeStep() {
+        return i_step_simu == init_step_simu;
     }
 
     /**

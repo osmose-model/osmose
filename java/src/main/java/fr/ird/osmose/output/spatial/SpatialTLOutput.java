@@ -89,7 +89,7 @@ public class SpatialTLOutput extends AbstractSpatialOutput {
                 if (null != getSchoolSet().getSchools(cell)) {
                     for (School school : getSchoolSet().getSchools(cell)) {
                         int iSpec = school.getSpeciesIndex();
-                        if (getConfiguration().isCutoffEnabled() && ((school.getAge() < getConfiguration().getCutoffAge()[iSpec]) || (school.getAge() < getConfiguration().getCutoffAge()[iSpec]))) {
+                        if (getConfiguration().isCutoffEnabled() && ((school.getAge() < getConfiguration().getCutoffAge()[iSpec]) || (school.getLength() < getConfiguration().getCutoffLength()[iSpec]))) {
                             continue;
                         }
 

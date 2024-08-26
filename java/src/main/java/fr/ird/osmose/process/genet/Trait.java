@@ -94,7 +94,7 @@ public class Trait extends SimulationLinker {
         // Trait eyecolor = new Trait(rank, "eyecol")
         this.prefix = prefix;
 
-        if(getConfiguration().getBoolean("genetics.randomseed.fixed", false)) {
+        if(getConfiguration().getBoolean("simulation.fixedseed.enabled", false)) {
             // Assumes a seed of dimension [trait][nSimu]
             long seed = traitIndex * getConfiguration().getNSimulation() + getRank();
             generator = new Random(seed);

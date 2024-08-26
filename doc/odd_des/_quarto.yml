@@ -1,0 +1,68 @@
+project:
+  type: book
+
+book:
+  title: "Osmose ODD Description"
+  author:
+    - name: Nicolas Barrier
+      orcid: 0000-0002-1693-4719
+    - name: Philippe Verley
+      given-names: Philippe
+      orcid: 0000-0002-5686-2764
+    - name: Ricardo Oliveros-Ramos
+      orcid: 0000-0002-8069-2101
+    - name: Bruno Ernande
+      orcid:  0000-0002-0727-5774
+    - name: Wencheng Lau-Medrano
+      orcid:  0000-0002-7979-9710
+    - name: Criscely Luján
+      orcid: 0000-0003-2658-7340
+    - name: Alaia Morell
+      given-names: Alaia
+      orcid: 0000-0003-3719-4462
+    - name: Morgane Travers-Trolet
+      orcid: 0000-0003-1493-662X
+    - name: Laure Velez
+      orcid: 0000-0001-9555-6770
+    - name: Yunne-Jai Shin
+      orcid: 0000-0002-7259-9265
+
+  chapters:
+    - index.qmd
+    - 1_purpose.qmd
+    - 2_statevar.qmd
+    - 3_proc_sche.qmd
+    - 4_design_concepts.qmd
+    - 5_init.qmd
+    - 6_input.qmd
+    - 7_submodel.qmd
+    - biblio.qmd
+
+
+  search: true
+  repo-url: https://github.com/osmose-model/osmose/
+  repo-actions: [edit]
+  downloads: [pdf]
+  sidebar:
+    style: "docked"
+    logo: ../user_guide/_static/logo-osmose.svg
+  favicon: ../user_guide/_static/_static/logo-osmose.svg
+  page-navigation: true
+  issue-url: "https://github.com/osmose-model/osmose/issues"
+
+
+bibliography: ../user_guide/_static/biblio.bib
+
+execute:
+  cache: true
+
+jupyter: ir
+
+format:
+  html:
+    number-sections: true
+    theme: cosmo
+
+  pdf:
+    fontfamily: libertinus
+    keep-tex: true

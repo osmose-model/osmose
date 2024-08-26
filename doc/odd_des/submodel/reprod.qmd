@@ -1,0 +1,65 @@
+
+## Reproduction
+
+The system starts from a pristine state, with no schools in the domain. For a few years (user-defined), Osmose will
+release some eggs for every species. The eggs enter the different steps of the life cycle, and once the
+fish reach sexual maturity, the reproduction process takes over. Osmose stops the seeding, unless the
+spawning stock biomass gets depleted. In that case Osmose resumes the seeding by releasing some
+eggs until there are again mature individuals in the system for carrying on the reproduction process. Osmose
+completely ceases the seeding when the simulation reaches the maximal number of years for seeding (user-defined).
+
+For a given species:
+
+$$
+B_{mat} = \sum_{mature\ sch.}B
+$$
+
+$$
+N_{eggs} = FRAC_{fem} \times \alpha \times season \times B_{mat}\ \ if\ SSB > 0
+$$
+
+$$
+N_{eggs} = FRAC_{fem} \times \alpha \times season \times B_{seeding}\ \ if\ SSB=0
+$$
+
+By following this approach:
+
+- No assumption is made about the structure of the populations but it emerges from individual interactions
+- it reduces computing requirements for the spin-up as the first years are the fastest to run
+- it reduces the number of time steps for the spin-up
+- it minimizes the amplitude of population oscillations
+
+Finally, the seeding biomass is then used to add new schools to the system, depending on the value of $N_{eggs}$.
+
+If $N_{eggs} < N_s$:
+
+$$
+N_{sch} = 1
+$$
+
+$$
+A_{sch} = N_{eggs}
+$$
+
+else:
+
+$$
+N_{sch} = N_s
+$$
+
+$$
+A_{sch} = \frac{N_{eggs}}{N_s}
+$$
+
+
+| Parameter                       | Description                                                                                                |
+| ------------------------------- | ---------------------------------------------------------------------------------------------------------- |
+| simulation.nschool.sp#          |  Number of schools of species # to create during reproduction ($N_s$)                                |
+| simulation.nschool              |  Number of schools to create during reproduction ($N_s$). Used if no species specific value provided |
+| population.seeding.biomass.sp#  |  Seeding biomass ($B_{seeding}$, tons)                                                               |
+| reproduction.season.file.sp#    |  File providing the seeding distribution within a year                                                     |
+| species.sexratio.sp#            |  Fraction of females ($FRAC_{fem}$)                                                                  |
+| species.relativefecundity.sp#   |  Number of eggs per gram of mature female (relative fecundity)                                             |
+| population.seeding.year.max     |  Number of years when the artificial seeding is activated                                                  |
+
+: Reproduction paramters {.hover .striped #tbl-repro-params}

@@ -188,12 +188,12 @@ public class SimulationStep extends SimulationLinker {
             resource.update(iStepSimu);
         }
 
+        // Spatial distribution
+        movementProcess.run();
+
         // Some indicators might need a snapshot of the population
         // at the beginning of the step
         indicators.initStep();
-
-        // Spatial distribution
-        movementProcess.run();
 
         // Save 1st time step
         if (recordStep0 && iStepSimu == 0) {

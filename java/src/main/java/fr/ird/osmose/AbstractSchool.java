@@ -43,8 +43,11 @@ package fr.ird.osmose;
 
 import fr.ird.osmose.process.mortality.MortalityCause;
 import fr.ird.osmose.util.GridPoint;
+
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.UUID;
 
 /**
@@ -117,6 +120,9 @@ public abstract class AbstractSchool extends GridPoint implements IAggregation {
      * Array of temporary accessibility of preys for this predator
      */
     protected double[] accessibility;
+
+    private List<Integer> listAccessiblePreys;
+
 
     /**
      * Monitor whether the number of dead has changed. It helps to prevent
@@ -431,6 +437,18 @@ public abstract class AbstractSchool extends GridPoint implements IAggregation {
      */
     public double getAgeDeath(MortalityCause cause) {
         return ageDeath[cause.index];
+    }
+
+    public void resetAccessiblePreyIndex() {
+        this.listAccessiblePreys = new ArrayList<>();
+    }
+
+    public void addAccessiblePreyIndex(int index) {
+        this.listAccessiblePreys.add(index);
+    }
+
+    public List<Integer> getAccessiblePreyIndex() {
+        return this.listAccessiblePreys;
     }
 
 }
