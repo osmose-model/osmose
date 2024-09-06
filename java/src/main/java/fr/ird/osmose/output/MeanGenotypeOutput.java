@@ -52,6 +52,7 @@ import java.util.logging.Logger;
 import fr.ird.osmose.School;
 import fr.ird.osmose.util.SimulationLinker;
 import ucar.ma2.ArrayDouble;
+import ucar.ma2.ArrayFloat;
 import ucar.ma2.ArrayInt;
 import ucar.ma2.DataType;
 import ucar.ma2.Index;
@@ -167,11 +168,11 @@ public class MeanGenotypeOutput extends SimulationLinker implements IOutput {
         ArrayDouble.D1 arrTime = new ArrayDouble.D1(1);
         arrTime.set(0, time);
 
-        ArrayDouble.D3 arrAbund = new ArrayDouble.D3(1, nSpecies, nTraits);
+        ArrayFloat.D3 arrAbund = new ArrayFloat.D3(1, nSpecies, nTraits);
 
         for (int i = 0; i < nSpecies; i++) {
             for (int j = 0; j < nTraits; j++) {
-                double toWrite = denominator[i] > 0 ? (float) output[i][j] / denominator[i] : Double.NaN;
+                float toWrite = denominator[i] > 0 ? (float) (output[i][j] / denominator[i]) : Float.NaN;
                 arrAbund.set(0, i, j, toWrite);
             }
         }
