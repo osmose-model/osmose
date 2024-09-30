@@ -158,7 +158,7 @@ public class EnergyBudget extends AbstractProcess {
      */
     @Override
     public void run() {
-        
+        //test
         // Updates the temperature and oxygen variables. 
         this.temp_function.run();
         this.oxygen_function.run();
