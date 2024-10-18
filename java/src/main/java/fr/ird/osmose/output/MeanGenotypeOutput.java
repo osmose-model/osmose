@@ -81,7 +81,7 @@ public class MeanGenotypeOutput extends SimulationLinker implements IOutput {
     private final SchoolSetGetter schoolGetter;
 
     private String prefix;
-
+    private int recordFrequency;
 
     /**
      * List of dimensions of the variable to write out.
@@ -169,11 +169,12 @@ public class MeanGenotypeOutput extends SimulationLinker implements IOutput {
         arrTime.set(0, time);
 
         ArrayFloat.D3 arrAbund = new ArrayFloat.D3(1, nSpecies, nTraits);
+        double nsteps = getConfiguration().getRecordFrequency();
 
         for (int i = 0; i < nSpecies; i++) {
             for (int j = 0; j < nTraits; j++) {
-                float toWrite = denominator[i] > 0 ? (float) (output[i][j] / denominator[i]) : Float.NaN;
-                arrAbund.set(0, i, j, toWrite);
+                double toWrite = denominator[i] > 0 ? (double) (output[i][j] / denominator[i]) : Double.NaN;
+                arrAbund.set(0, i, j, (float) (toWrite / nsteps));
             }
         }
 
@@ -203,11 +204,13 @@ public class MeanGenotypeOutput extends SimulationLinker implements IOutput {
 
     @Override
     public boolean isTimeToWrite(int iStepSimu) {
-        return true;
+        return (((iStepSimu + 1) % recordFrequency) == 0);
     }
 
     @Override
     public void init() {
+
+        recordFrequency = getConfiguration().getInt("output.recordfrequency.ndt");
 
         Nc4Chunking chunk = getConfiguration().getChunker();
 
