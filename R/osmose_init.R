@@ -1,11 +1,11 @@
 
-#' Create initialization file for an OSMOSE configuration
+#' Create initialisation file for an OSMOSE configuration
 #'
 #' @param file File to write the initialization configuration
-#' @param type Initialization type: currently 'interannual', 'climatological' and 'ncdf'
+#' @param type Initialisation type: currently 'interannual', 'climatological' and 'ncdf'
 #' @param run Do we have to run the model to produce the outputs or are already there?
 #' @param append To append or not the results to \code{file}
-#' @param sp Species to initialize. NULL by default, meaning all species.
+#' @param sp Species to initialise. NULL by default, meaning all species.
 #' @param ... Additional arguments, currently unused.
 #' @inheritParams run_osmose
 #'
@@ -63,7 +63,7 @@ initialize_osmose = function(input, file, type="internannual", parameters = NULL
   )  
 
   # write the output
-  msg = sprintf("# OSMOSE initialization configuration (created %s)\n", date())
+  msg = sprintf("# OSMOSE initialisation configuration (created %s)\n", date())
   dn = dirname(file)
   if(!dir.exists(dn)) dir.create(dn, recursive=TRUE)
   cat(msg, file=file, append=append)
@@ -76,7 +76,7 @@ initialize_osmose = function(input, file, type="internannual", parameters = NULL
     suppressWarnings(write_osmose(out, file=file, append=TRUE))
   }
   
-  message(sprintf("Initialization configuration file written in '%s'.", file))
+  message(sprintf("Initialisation configuration file written in '%s'.", file))
   
   return(invisible(out))
     
