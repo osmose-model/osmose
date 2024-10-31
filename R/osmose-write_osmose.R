@@ -97,7 +97,7 @@ write_osmose.osmose.configuration = function(x, file, sep = " = ", append=FALSE,
 #' @method c osmose.configuration
 c.osmose.configuration = function(...) {
   args = list(...)
-  out = c(unlist(args))
+  out = c(unlist(args, recursive=FALSE))
   # print(out)
   out = as.list(out)
   class(out) = "osmose.configuration"
@@ -136,4 +136,12 @@ write_osmose.osmose.initialization = function(x, file, sep=" = ", append=FALSE, 
   
 }
 
-
+#' @author Ricardo Oliveros-Ramos
+#' 
+#' @export
+#' @method write_osmose NULL 
+write_osmose.NULL = function(x, file, sep = ",", ...) {
+  
+  return(invisible(NULL))
+  
+}
