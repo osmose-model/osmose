@@ -2,7 +2,7 @@
 % Please edit documentation in R/osmose_init.R
 \name{initialize_osmose}
 \alias{initialize_osmose}
-\title{Create initialization file for an OSMOSE configuration}
+\title{Create initialisation file for an OSMOSE configuration}
 \usage{
 initialize_osmose(
   input,
@@ -29,7 +29,7 @@ initialize_osmose(
 
 \item{file}{File to write the initialization configuration}
 
-\item{type}{Initialization type: currently 'interannual', 'climatological' and 'ncdf'}
+\item{type}{Initialisation type: currently 'interannual', 'climatological' and 'ncdf'}
 
 \item{parameters}{Parameters to be passed to osmose (version 4 or higher).}
 
@@ -58,7 +58,7 @@ on the search path.}
 
 \item{append}{To append or not the results to \code{file}}
 
-\item{sp}{Species to initialize. NULL by default, meaning all species.}
+\item{sp}{Species to initialise. NULL by default, meaning all species.}
 
 \item{...}{Additional arguments, currently unused.}
 }
@@ -66,5 +66,5 @@ on the search path.}
 The side effect is to create a configuration file with the initialization parameters.
 }
 \description{
-Create initialization file for an OSMOSE configuration
+Create initialisation file for an OSMOSE configuration
 }

@@ -25,7 +25,7 @@ colsum(x, group, reorder = TRUE, ...)
     \code{sort(unique(group))}, if \code{FALSE}, it will be in the order
     that groups were encountered.}
 
-\item{...}{other arguments to be passed to or from methods}
+\item{...}{other arguments to be passed to or from methods.}
 
 \item{na.rm}{logical (\code{TRUE} or \code{FALSE}).  Should \code{NA}
     (including \code{NaN}) values be discarded?}
