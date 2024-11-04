@@ -3,10 +3,25 @@
 #'
 #' @param file File to write the template.
 #' @param what Type of template desired. Currently: "initialisation".
-#' @param control Additional arguments provided for each type of template.
+#' @param control Additional arguments provided for each type of template. See details.
 #' @param ... Extra arguments passed to each method.
 #'
 #' @return Called by its side effects, it creates a file with the desired template.
+#' @details
+#' For the template for the initialisation (\code{what='initialisation'}), control arguments
+#' can be supplied as a list containing the named elements \code{'file_biomass'}, \code{'file_yield'},
+#' providing the full path to the file containing the biomass and yield. If ommited, a dummy
+#' value will be used in the template (that can be replaced programmatically after the file has
+#' been created). Additionally, an element named \code{'path_cal'} can be used to provide a path
+#' to the catch-at-length files, but each line will need to be modified to add the species-specific
+#' file, as one file per species is expected. 
+#' 
+#' @examples 
+#' \dontrun{
+#' osmose_template(input=configFile, file="initialisation_template.osm")
+#' osmose_template(input=configFile, file="initialisation_template.osm",
+#'   control=list(file_biomass="dummy_biomass.csv", 
+#'   file_yield="dummy_yield.csv", path_cal="mypath"))}
 #' @export
 #'
 #' @inheritParams run_osmose
