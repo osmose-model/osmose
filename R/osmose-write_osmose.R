@@ -70,9 +70,10 @@ write_osmose.data.frame = function(x, file, sep = ",", col.names = TRUE, quote =
 #' @export
 #' @method write_osmose osmose.configuration
 write_osmose.osmose.configuration = function(x, file, sep = " = ", append=FALSE, 
-                                            par.sep=",", justify=FALSE, ...) {
+                                            par.sep=",", justify=FALSE, digits=NULL, ...) {
 
-  .format_par = function(x, sep=",") {
+  .format_par = function(x, sep=",", digits=NULL) {
+    if(!is.null(digits)) x = round(x, digits=digits)
     if(length(x)<2) return(x)
     out = paste(x, collapse=sep)
     return(out)
@@ -84,7 +85,7 @@ write_osmose.osmose.configuration = function(x, file, sep = " = ", append=FALSE,
     names(x) = apply(cbind(names(x), ns), 1, paste, collapse="")
   }
   
-  x = as.matrix(lapply(x, FUN=.format_par, sep=par.sep))
+  x = as.matrix(lapply(x, FUN=.format_par, sep=par.sep, digits=digits))
   
   write_osmose.default(x=x, file=file, sep=sep, col.names=FALSE, quote = FALSE, 
                                   row.names = TRUE, append=append, ...)
