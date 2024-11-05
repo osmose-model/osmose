@@ -173,7 +173,7 @@ public class FisherySelectivity extends OsmoseLinker {
                     break;
             }
 
-            key = String.format("%s.selectivity.%s%d", selPrefix, selSuffix, fIndex);
+            key = String.format("%s.values.%s%d", selPrefix, selSuffix, fIndex);
             discreteSelectivities = getConfiguration().getArrayDouble(key);
             if(discreteSelectivities.length != nStage) {
                 error("Wrong number of values in selectivity", null);
