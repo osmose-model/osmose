@@ -111,7 +111,7 @@ public class FisherySelectivity extends OsmoseLinker {
 
     // used only in the case of discrete selectivities
     private float[] thresholds;
-    private float[] discreteSelectivities;
+    private double[] discreteSelectivities;
     private ClassGetter classGetter;
 
     /**
@@ -174,13 +174,17 @@ public class FisherySelectivity extends OsmoseLinker {
             }
 
             key = String.format("%s.selectivity.%s%d", selPrefix, selSuffix, fIndex);
-            discreteSelectivities = getConfiguration().getArrayFloat(key);
+            discreteSelectivities = getConfiguration().getArrayDouble(key);
+            if(discreteSelectivities.length != nStage) {
+                error("Wrong number of values in selectivity", null);
+            }
 
             selectTypeArray = new double[cfg.getNStep()];
             for (int i = 0; i < selectTypeArray.length; i++) {
                 selectTypeArray[i] = 0.d;
             }
 
+            sizeSelectMethods = new SizeSelect[1];
             sizeSelectMethods[0] = (index, sch) -> this.getDiscreteSelectivity(index, sch); // knife edge selectivity
 
         } else {
