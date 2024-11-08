@@ -44,7 +44,8 @@
 #' from user input parameters.
 #'
 #' @param input Filename of the main configuration file
-#' @param parameters Parameters to be passed to osmose (version 4 or higher).
+#' @param parameters Parameters to be passed to osmose (version 4 or higher). Parameters must
+#' be passed as a string indicating the parameter name and values. See details.
 #' @param output Output directory. If NULL, the value set in the configuration file is used.
 #' @param log File to save OSMOSE execution messages.
 #' @param version OSMOSE version. Integer (2, 3, etc.) or releases ('v3r2') are
@@ -60,12 +61,17 @@
 #'
 #' @details Basic configurations may not need the use of \code{buildConfiguration},
 #' but it is required for configuration using interannual inputs or fishing selectivity.
+#' OSMOSE parameters passed to the command line must start with the '-P' chain to tell java
+#' these are OSMOSE parameters. Multiple parameters can be set, separated by a space (only one
+#' string for all the parameters). See the examples.
 #' @author Ricardo Oliveros-Ramos
 #' @examples{
 #'   \dontrun{
 #'     path = cacheManager("eec-4.3.0")
 #'     filename = file.path(path, "osm_all-parameters.csv")
 #'     run_osmose(filename)
+#'     run_osmose(input=input,
+#'                parameters="-Pspecies.length2weight.allometric.power.sp0=3 -Pspecies.length2weight.allometric.power.sp1=3")
 #'   }
 #' }
 #' @export
