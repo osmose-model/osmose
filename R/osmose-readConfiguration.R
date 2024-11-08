@@ -23,10 +23,19 @@
 #'
 #' @return A list with all the matched parameters.
 #' @export
-get_par = function(conf, par=NULL, sp=NULL, fsh=NULL, invert=FALSE, as.is=FALSE, unlist=FALSE, linear=FALSE) {
-  if(!is.null(sp) & !is.null(fsh)) return(NULL)
+get_par = function(conf, par=NULL, sp=NULL, fsh=NULL, sr=NULL, invert=FALSE, as.is=FALSE, unlist=FALSE, linear=FALSE) {
+  xind = 0 + (!is.null(sp)) + (!is.null(fsh)) + (!is.null(sr))
+  if(xind > 1) {
+    warning("You can only specify one of the following arguments: sp, fsh, sr. Returning NULL.")
+    return(NULL)
+  }
+  if(xind > 1 & !is.null(par))
+    warning("Ignoring 'par' argument as sp, fsh or sr are in use.")
+  
   if(!is.null(sp)) par = sprintf(".sp%d$", sp)
   if(!is.null(fsh)) par = sprintf(".fsh%d$", fsh)
+  if(!is.null(sr)) par = sprintf(".sr%d$", sr)
+  
   if(!is.null(par)) {
     par = tolower(par)
     out = conf[grep(names(conf), pattern=par, invert=invert)]
@@ -313,7 +322,7 @@ read.cal = function(conf, sp) {
   check = !identical(length_classes, sort(length_classes))
   msg = sprintf("Catch-at-length size classes must be in increasing order, check %s's file.", spname)
   if(check) stop(msg)
-  dbin = unique(diff(length_classes))
+  dbin = unique(round(diff(length_classes), 2))
   msg = sprintf("Catch-at-length size classes must be provided in regular size bins, check %s's file.", spname)
   if(length(dbin)!=1) stop(msg)
   
