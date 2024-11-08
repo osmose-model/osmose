@@ -31,7 +31,8 @@ initialize_osmose(
 
 \item{type}{Initialisation type: currently 'interannual', 'climatological' and 'ncdf'}
 
-\item{parameters}{Parameters to be passed to osmose (version 4 or higher).}
+\item{parameters}{Parameters to be passed to osmose (version 4 or higher). Parameters must
+be passed as a string indicating the parameter name and values. See details.}
 
 \item{output}{Output directory. If NULL, the value set in the configuration file is used.}
 
