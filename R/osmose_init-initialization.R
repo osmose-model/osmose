@@ -442,7 +442,7 @@ init_sofia = function(input, file=NULL, test=FALSE, sp=NULL, ...) {
     if(all(is.na(Fseason))) Fseason = rep(1, ndt)/ndt
     
     Rupb = bioguess/bioref
-    Rupc = mean(tail(yield_obs/yield, ndt))
+    Rupc = sum(tail(yield_obs, ndt))/sum(tail(yield,ndt))
     
     inc = weighted.mean(c(Rupb, Rupc), w = c(1, 2), na.rm=TRUE)
     R = R*inc
@@ -455,6 +455,7 @@ init_sofia = function(input, file=NULL, test=FALSE, sp=NULL, ...) {
   pind = xind + seq_len(ndt) - 1
   
   es = colSums(catch[pind, ])/colMeans(pop[pind, ])
+  es = es/max(es, na.rm=TRUE)
   
   Fguess = sum(yield[pind]/biomass[pind])
   
@@ -531,8 +532,15 @@ init_sofia = function(input, file=NULL, test=FALSE, sp=NULL, ...) {
     
     es = empirical_selectivity(matrix(sim$selectivity, nrow=1), fleet = "sim",
                                years = 1, bins = sim$size)
-    ss_emp = suppressMessages(fit_selectivity(es, pattern=27, k=5))
-    sel = ss_emp$selectivity
+    xind = .nonNullPoints(y=sim$selectivity, thr=1e-3, span=5)
+    k = min(length(xind)-1, 5)
+    ss_emp = try(suppressMessages(fit_selectivity(es, pattern=27, k=k)), silent = TRUE)
+    if(inherits(ss_emp, "try-error")) {
+      sel = sim$selectivity
+    } else {
+      sel = ss_emp$selectivity    
+    }
+  
     Fseason = sim$F
     xdist = sim$dist
     

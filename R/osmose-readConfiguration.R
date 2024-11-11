@@ -340,10 +340,11 @@ read.cal = function(conf, sp) {
   if(nrow(mat)>nT) MSG = c(MSG, msg)
   mat = mat[seq_len(nT), ]
   
-  if(all(is.na(mat))) {
+  if( all(is.na(mat)) | (sum(mat, na.rm=TRUE)<1e-16) ) {
     
-    msg = sprintf("No catch-at-length data in %s's file is provided, all NAs.", spname)
-    message(msg)
+    typ = ifelse(all(is.na(mat)), "NA", "0")
+    msg = sprintf("Positive catch but no catch-at-length data in %s's file is provided, all %ss.", spname, typ)
+    stop(msg, call. = FALSE)
     
     Linf = .getPar(this, "species.linf")
     bins = pretty(c(0, 0.9*Linf), n=15)
@@ -353,6 +354,7 @@ read.cal = function(conf, sp) {
     newmat = matrix(NA, nrow=T, ncol=length(length_classes))
     output = list(cal=NULL, marks=length_classes, dbin=dbin, mat=newmat, bins=NULL,
                   harvested=TRUE, time=time)
+    return(output)
     
   }
   
@@ -435,18 +437,27 @@ read.cal = function(conf, sp) {
   
   # validation
   msg1 = sprintf("Maximum length for %s in the model (%0.1f cm at %d years) is lower than maximum reported size in landings (%0.2fcm), check catch-at-length data.",
-                 .getPar(this, "species.name"), lmax_pop, Amax, lmax_cal)
+                 .getPar(this, "species.name"), lmax_pop, as.integer(Amax), lmax_cal)
   msg2 = sprintf("Maximum length for %s in the model (%0.1f cm at %d years) is %0.1f%% of Linf (%0.1fcm), check growth parameters.",
-                 .getPar(this, "species.name"), lmax_pop, Amax, 100*lmax_pop/Linf, Linf)
+                 .getPar(this, "species.name"), lmax_pop, as.integer(Amax), 100*lmax_pop/Linf, Linf)
   msg3 = sprintf("Only %0.1f%% of landings are used! Check catch-at-length data and growth parameters.",
                  100*irat)
   
   msg = NULL
-  if(ratio<1) msg = c(msg, msg1)
-  if(lmax_pop/Linf<0.9) msg = c(msg, msg2)
-  if(irat<0.99) msg = c(msg, msg3)
+  if(ratio < 0.95) msg = c(msg, msg1)
+  if(lmax_pop/Linf < 0.95) msg = c(msg, msg2)
+  if(irat < 0.97) msg = c(msg, msg3)
+  
+  err = NULL
+  if(ratio < 0.7) err = c(err, msg1)
+  if(lmax_pop/Linf < 0.7) err = c(err, msg2)
+  if(irat < 0.7) err = c(err, msg3)
   
   MSG = c(MSG, msg)
+  
+  if((ratio < 0.7) | (lmax_pop/Linf < 0.7) | (irat < 0.7))
+    stop(paste(c("Inconsistent data supplied for the initialisation. Please check:", err), 
+               collapse="\n"), call. = FALSE)
   
   if(!is.null(MSG)) message(paste(MSG, collapse="\n"))
   
@@ -512,6 +523,7 @@ read.fecundity = function(conf, sp) {
   if(abs(sfec-1)< 1e-2) {
     warning("Using relative fecundities.")
     relfec = .getPar(this, "species.relativefecundity")
+    if(relfec < 1e-16) stop(sprintf("Null relative fecundity for sp%s, please check.", sp), call. = FALSE) 
     fecundity = relfec*fecundity
   }
   return(fecundity)
