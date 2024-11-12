@@ -521,7 +521,7 @@ read.fecundity = function(conf, sp) {
   fecundity = as.numeric(unlist(.readCSV(repfile, row.names = 1)))
   sfec = sum(fecundity) 
   if(abs(sfec-1)< 1e-2) {
-    warning("Using relative fecundities.")
+    # warning("Using relative fecundities.")
     relfec = .getPar(this, "species.relativefecundity")
     if(relfec < 1e-16) stop(sprintf("Null relative fecundity for sp%s, please check.", sp), call. = FALSE) 
     fecundity = relfec*fecundity

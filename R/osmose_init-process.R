@@ -146,22 +146,40 @@ calculateMLF = function(conf, sp) {
   size = VB(age, this, method=3)
   weight = a*size^b
   
-  msg = sprintf("Error when calculating MLF, check growth parameters for %s.", get_par(this, "species.name"))
+  msg = sprintf("Failure in Mean Lifetime Fecundity calculation, check growth parameters for %s.", get_par(this, "species.name"))
   
-  if(any(is.na(weight))) stop(msg)
+  if(any(is.na(weight))) stop(msg, call. = FALSE)
   
   repfile = .getPar(this, "reproduction.season.file")
   
   fecundity = read.fecundity(conf = conf, sp=sp)
   
-  isMature = size >= .getPar(this, "species.maturity.size")
+  matsize = .get_matsize(this)
+  isMature = size >= matsize
   
+  if(all(!isMature)) {
+    msg0 = sprintf("Failure in Mean Lifetime Fecundity calculation, check maturity and growth parameters for %s.", 
+                  get_par(this, "species.name"))
+    msg1 = sprintf("No mature individuals are produced, maximum length in the model (%0.2f cm) is lower than maturity size (%0.2f cm).", 
+                   max(size), matsize)
+    stop(paste(msg0, msg1, collapse="/n"), call. = FALSE)
+  }
+    
   MLF = .calculateMLF(fecundity, isMature, weight)
   
   return(MLF)
   
 }
 
+.get_matsize = function(this, method=3) {
+  matsize = .getPar(this, "species.maturity.size")
+  if(is.null(matsize)) {
+    matsize = VB(.getPar(this, "species.maturity.age"), this, method=method)
+  }
+  msg0 = sprintf("No maturity parameters for %s.", get_par(this, "species.name"))
+  if(is.null(matsize)) stop(msg0)
+  return(matsize)
+}
 
 # Mortality ---------------------------------------------------------------
 

@@ -318,7 +318,7 @@ init_sofia = function(input, file=NULL, test=FALSE, sp=NULL, ...) {
     this = .getPar(conf, sp=sp)
     iSpName = .getPar(this, "species.name")
     
-    cat(sprintf("\nInitializing species %d (%s)\n", sp, iSpName))
+    cat(sprintf("\nInitialising species %d (%s)\n", sp, iSpName))
     
     sim = list()
     sim$cal       = read.cal(conf, sp)
@@ -391,7 +391,6 @@ init_sofia = function(input, file=NULL, test=FALSE, sp=NULL, ...) {
   M = calculateMortality(conf, sp)
   Ma = M$M[cut(age, breaks = M$age, labels = FALSE)]
   
-  
   xn = which.max(size >= .getPar(this, "observed.biomass.cutoff.size")) - 1
   
   ini = exp(-cumsum(c(0,Ma[-length(Ma)]/ndt)))
@@ -411,7 +410,6 @@ init_sofia = function(input, file=NULL, test=FALSE, sp=NULL, ...) {
     class(output) = c("osmose.init", class(output))
     
     return(output)
-    
   }
   
   for(ix in 1:5) {
@@ -441,8 +439,8 @@ init_sofia = function(input, file=NULL, test=FALSE, sp=NULL, ...) {
     Fseason = Fguess/sum(Fguess)
     if(all(is.na(Fseason))) Fseason = rep(1, ndt)/ndt
     
-    Rupb = bioguess/bioref
-    Rupc = sum(tail(yield_obs, ndt))/sum(tail(yield,ndt))
+    Rupb = bioguess/max(bioref, 1, na.rm=TRUE) # assume a minimum of 1 tonne (biomass)
+    Rupc = sum(tail(yield_obs, ndt))/max(sum(tail(yield,ndt)), 0.1, na.rm=TRUE) # assume a minimum of 100 kg (catch)
     
     inc = weighted.mean(c(Rupb, Rupc), w = c(1, 2), na.rm=TRUE)
     R = R*inc
@@ -468,7 +466,8 @@ init_sofia = function(input, file=NULL, test=FALSE, sp=NULL, ...) {
                 Fguess=Fguess, observed=list(biomass=bioguess, yield=yield_obs[1:ndt]),
                 bins=list(age=age_bins, size=size_bins), harvested=harvested)
   
-  isMature = size >= .getPar(this, "species.maturity.size")
+  matsize = .get_matsize(this)
+  isMature = size >= matsize
   eggs   = sum(1e6*fecundity[1:ndt]*t(t(output$pop)*isMature), na.rm=TRUE)
   larvae = output$R
   Mlarval = -log(larvae/eggs)
@@ -480,7 +479,7 @@ init_sofia = function(input, file=NULL, test=FALSE, sp=NULL, ...) {
   
 }
 
-.simF_ini = function(conf, sp, tiny=1e-3, cv=c(0.1, 0.1), test=FALSE) {
+.simF_ini = function(conf, sp, tiny=1e-3, cv=c(0.25, 0.1), test=FALSE) {
   
   sim = .simCatch_ini(conf, sp)
   if(!isTRUE(sim$harvested) & !is.null(sim)) return(sim)
@@ -508,8 +507,15 @@ init_sofia = function(input, file=NULL, test=FALSE, sp=NULL, ...) {
   biofit   = .bioguess(x=dat, ndt=ndt, ts=TRUE)
   bioguess = .bioguess(x=dat, ndt=ndt)
   
+  if(all(is.na(dat$yield))) stop("No catch data has been provided (all NAs).")
+  if(any(is.na(dat$yield))) warning("Missing catch data for some years, complete it if possible.", call. = FALSE)
+  
   yield_obs   = dat$yield
   yield_obs   = rep(yield_obs[1:ndt], length=T)
+  if(all(is.na(yield_obs))) {
+    warning("No catch data has been provided for the initial year, using the average of the time series.", call. = FALSE)
+    yield_obs = rep(rowSums(matrix(dat$yield, nrow=ndt), na.rm=TRUE), length=T)
+  }
   
   weight = a*size^b
   M = calculateMortality(conf, sp)
@@ -521,6 +527,7 @@ init_sofia = function(input, file=NULL, test=FALSE, sp=NULL, ...) {
     
     sel = .getSelectivity(size, this) # creado con parametros
     Fseason = yield_obs[1:ndt]/sum(yield_obs[1:ndt])
+    if(all(is.nan(Fseason))) Fseason = rep(1, length(Fseason))/length(Fseason)
     ini = exp(-cumsum(c(0,Ma[-length(Ma)]/ndt)))
     inibio = 1e-6*sum(ini*weight)
     R = as.numeric(ndt)*(bioguess/inibio)
@@ -552,6 +559,7 @@ init_sofia = function(input, file=NULL, test=FALSE, sp=NULL, ...) {
     
     R = exp(par[1])
     F = exp(par[2])
+    if(is.na(F)) F=0
     
     pop = matrix(0, nrow=T, ncol=C)
     catch = matrix(NA, nrow=T, ncol=C)
@@ -578,7 +586,7 @@ init_sofia = function(input, file=NULL, test=FALSE, sp=NULL, ...) {
     
     ll = ll_biomass*llw(cv[1]) + ll_yield*llw(cv[2])
     
-    if(!isTRUE(value)) return(ll)
+    if(isFALSE(value)) return(ll)
     
     xind = T - ndt + 1
     pind = xind + seq_len(ndt) - 1
@@ -596,21 +604,43 @@ init_sofia = function(input, file=NULL, test=FALSE, sp=NULL, ...) {
     
   }
   
-  opt = calibrate(par=log(c(sim$R, sim$Fguess)), fn = .simF, method = "Rvmmin")
-
+  logR = log(sim$R)
+  logF = log(sim$Fguess)
+  
+  if(sum(yield_obs)==0) {
+    opt = optim2(par=logR, fn = .simF, method = "Brent", lower=0, upper=logR+6)  
+  } else {
+    opt = optim2(par=c(logR, logF), fn = .simF, method = "Rvmmin")
+  }
+  
   # opt = calibrate(par=log(c(sim$R, sim$Fguess)), fn = .simF, method = "Rvmmin",
   #                 lower=c(0, -20), upper=c(log(),2))
   
   output = c(.simF(opt$par, value=TRUE),  opt=list(opt))
   
-  isMature = size >= .getPar(this, "species.maturity.size")
+  matsize = .get_matsize(this)
+  isMature = size >= matsize
   eggs   = sum(1e6*fecundity[1:ndt]*t(t(output$pop)*isMature), na.rm=TRUE)
   
   larvae = output$R
   Mlarval = -log(larvae/eggs)
   
+  msgL = sprintf("Estimated larval mortality (%0.2f) for %s is too low, check fecundity.",
+                 ndt*Mlarval, get_par(this, par="species.name"))
+  
+  if(Mlarval < 5) message(msgL)
+  
   output$larvalM = Mlarval
-    
+  
+  mB = mean(output$biomass/output$observed$biomass, na.rm=TRUE)
+  mY = mean(output$yield/output$observed$yield, na.rm=TRUE)
+  
+  msgB = sprintf("It was not possible to fit the suggested biomass (%0.2f). Please check all the parameters provided for this species, including growth and length-weight.", mB)
+  msgY = sprintf("It was not possible to fit the suggested yield (%0.2f). Please check all the parameters provided for this species, including growth and length-weight.", mY)
+  
+  if(mB > 100) stop(msgB, call. = FALSE)
+  if(mY > 10) stop(msgY, call. = FALSE)
+  
   class(output) = c("osmose.init", class(output))
   return(output)
   
