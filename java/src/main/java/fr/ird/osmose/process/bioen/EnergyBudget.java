@@ -79,7 +79,11 @@ public class EnergyBudget extends AbstractProcess {
         oxygen_function.init();
 
     }
-
+    
+    // Add for migrating school
+	private double[] c_rateBioen;
+	private double[] W0; // weigth of indicidual at age = species.larvae.growth.threshold.age.sp ; only for migration species. We can compute automaticaly if prameters was no provide with von berta parameters and length weight coefficients. But can be specified if more reliable data 
+	
     @Override
     public void init() {
 
@@ -150,7 +154,23 @@ public class EnergyBudget extends AbstractProcess {
             assimilation[cpt] = this.getConfiguration().getDouble(key);
             cpt++;
         }
-        
+
+        // Add for migrating school
+		c_rateBioen = new double[nSpecies];
+        cpt = 0;
+        for (int i : getConfiguration().getFocalIndex()) {
+            key = String.format("predation.c.bioen.sp%d", i);
+            c_rateBioen[cpt] = this.getConfiguration().getDouble(key);
+            cpt++;
+        }
+		
+		W0 = new double[nSpecies];
+        cpt = 0;
+        for (int i : getConfiguration().getFocalIndex()) {
+            key = String.format("species.weight.at.larvae.growth.threshold.age.sp%d", i);
+            W0[cpt] = this.getConfiguration().getDouble(key);
+            cpt++;
+        }
     }
 
     /**
@@ -165,6 +185,11 @@ public class EnergyBudget extends AbstractProcess {
 
         // Loop over all the alive schools
         for (School school : getSchoolSet().getAliveSchools()) {
+            // Add for migrating school
+			if (school.isOut()) {
+			    this.getDw_mig(school);
+			} else {
+            
             this.getEgross(school);   // computes E_gross, stored in the attribute.
             this.getMaintenance(school);   // computes E_maintanance
 
@@ -301,6 +326,77 @@ public class EnergyBudget extends AbstractProcess {
         }
     }
 
+    // Add for migrating
+	public void getDw_mig(School school) {
+		
+		int ispec = school.getSpeciesIndex();
+		double ageThreshold = school.getSpecies().getLarvaeThresDt()/getConfiguration().getNStepYear();
+		double age = school.getAge() - ageThreshold;
+		double ageMat = school.getAgeMat() - ageThreshold;
+		double growth_mig_a1;
+		double growth_mig_a2;
+		double dgrowth_mig;
+		double rho = school.getRho();
+		
+		if(school.getAge() < ageThreshold) {
+			
+			// Total weight of an egg
+			growth_mig_a1 = school.getSpecies().getEggWeight();
+			
+			// Total weight of an individual at ageThreshold 
+			
+			growth_mig_a2 = this.W0[ispec];
+			
+			
+			// Delta growth per year 
+			dgrowth_mig = (growth_mig_a2-growth_mig_a1)/(ageThreshold* getConfiguration().getNStepYear());
+	
+		}else {
+			
+			// Total weight of an individual of current school age
+			if (age<=ageMat) {
+				growth_mig_a1 = 
+				 Math.pow(
+							Math.pow(this.W0[ispec], 1*(1-school.getBetaBioen())) + c_rateBioen[ispec]*(1-school.getBetaBioen())*(age/Math.pow(1, 1-school.getBetaBioen())),
+							1/(1*(1-school.getBetaBioen()))
+							);
+			}else {
+				growth_mig_a1 = 
+				 Math.pow(
+							Math.pow(Math.pow(this.W0[ispec], 1*(1-school.getBetaBioen()))*(1+(1-school.getBetaBioen())*r[ispec]), ageMat-age)+(c_rateBioen[ispec]/(r[ispec]*Math.pow(1,1-school.getBetaBioen())))*(1-(1-(1-school.getBetaBioen())*r[ispec]*ageMat)*Math.pow(1+(1-school.getBetaBioen())*r[ispec], ageMat-age))
+							, 1/(1*(1-school.getBetaBioen()))
+						);
+			}
+		
+			// Total weight of an individual of school age +1
+			if ((age+1)<=ageMat) {
+				growth_mig_a2 =  
+				 Math.pow(
+							Math.pow(this.W0[ispec], 1*(1-school.getBetaBioen())) + c_rateBioen[ispec]*(1-school.getBetaBioen())*((age+1)/Math.pow(1, 1-school.getBetaBioen())),
+							1/(1*(1-school.getBetaBioen()))
+							);
+			}else {
+				
+				growth_mig_a2 =  
+				 Math.pow(
+							Math.pow(Math.pow(this.W0[ispec], 1*(1-school.getBetaBioen()))*(1+(1-school.getBetaBioen())*r[ispec]), ageMat-(age+1))+(c_rateBioen[ispec]/(r[ispec]*Math.pow(1,1-school.getBetaBioen())))*(1-(1-(1-school.getBetaBioen())*r[ispec]*ageMat)*Math.pow(1+(1-school.getBetaBioen())*r[ispec], ageMat-(age+1)))
+							, 1/(1*(1-school.getBetaBioen()))
+						);
+			}
+		
+			// Delta growth per time step 
+			dgrowth_mig = (growth_mig_a2-growth_mig_a1)/getConfiguration().getNStepYear();
+			
+			
+		}
+
+        if (school.isAlive()) {
+            // increments the weight
+            school.incrementWeight((float) ((dgrowth_mig*(1-rho))/1e6f));
+			school.incrementGonadWeight((float) ((dgrowth_mig*rho)/1e6f));
+        }
+    }
+    
     /**
      * Returns the gonadic weight increment (Equation 12). In this function,
      * only positive increments of gonad weights (Enet > 0) are considered.
