@@ -2,126 +2,184 @@
 
 # Main --------------------------------------------------------------------
 
-#' @export
-.readConfiguration = function(file, usePath=TRUE, recursive=TRUE, ...) {
-  
-  if(!is.null(attr(file, "path"))) file = c(file.path(attr(file, "path"), file))
-  if(!file.exists(file)) {
-    warning(sprintf("configuration file '%s' does not exist.", file))
-    return(NULL)
-  }
-  
-  .guessSeparator = function(Line){
-    SEPARATORS = c(equal = "=", semicolon = ";",
-                   coma = ",", colon = ":", tab = "\t")
-    guess = which.min(nchar(lapply(str_split(Line,SEPARATORS), "[", i = 1)))
-    separator = SEPARATORS[guess]
-    
-    return(separator)
-  }
-  
-  .getKey = function(Line, KeySeparator) {
-    Key = str_split(Line, KeySeparator)[[1]][1]
-    return(stringr::str_trim(Key))
-  }
-  
-  .getValues = function(x, KeySeparator){
-    start = str_locate(x, pattern=KeySeparator)[1,1]
-    if(is.na(start)) return(NULL)
-    values = stringr::str_sub(x, start+1, nchar(x))
-    valueseparator = .guessSeparator(values)
-    values = stringr::str_trim(str_split(values, valueseparator)[[1]])
-    values = values[nchar(values)!=0]
-    values = .guessType(values)
-    return(values)
-  }
-  
-  .guessType = function(x) {
-    xx = tolower(x)
-    if(identical(xx, "null")) return(NULL)
-    if(identical(xx, "NA")) return(NULL)
-    x[xx=="true"] = "TRUE"
-    x[xx=="false"] = "FALSE"
-    x = x[xx!="null"]
-    out = type.convert(c(x), as.is = TRUE)
-    return(out)
-  }
-  
-  .comment_trim = function(x, char="#") {
-    start = str_locate(x, pattern=char)[1,1]
-    if(is.na(start)) return(x)
-    return(str_sub(x, 1, start - 1))
-  }
-  
-  .addPath = function(x, path, force=FALSE) {
-    if(is.null(x)) return(x)
-    if(!is.character(x)) return(x)
-    # if(!is.null(attr(x, "path"))) 
-    # path = file.path(attr(x, "path"), path)
-    if(file.exists(file.path(path, x)) | isTRUE(force)) 
-      attr(x, "path") = normalizePath(path, winslash = "/", mustWork = FALSE)
-    return(x)
-  }
-  
-  
-  config = readLines(file) # read lines
-  config = lapply(config, .comment_trim) # remove comments
-  config = lapply(config, str_trim)
-  config[grep("^[[:punct:]]", config)] = NULL
-  config = config[nchar(config)!=0]
-  
-  keySeparator  = sapply(config, .guessSeparator)
-  key           = mapply(.getKey, config, keySeparator)
-  values        = mapply(.getValues, config, keySeparator, SIMPLIFY = FALSE)
-  
-  names(values) = tolower(key)
-  
-  force = grepl(names(values), pattern="osmose.configuration")
-  # if(isTRUE(usePath)) values = lapply(values, .addPath, path = dirname(file))
-  
-  values = mapply(FUN=.addPath, x=values, force=force, 
-                   MoreArgs=list(path = dirname(file)), SIMPLIFY = FALSE)
-  
-  
-  ii = grep(names(values), pattern="osmose.configuration")
-  if(length(ii) == 0 | !isTRUE(recursive)) return(values)
-  
-  cpath = NULL
-  
-  ovalues = values
-  
-  while(length(ii) > 0) {
-    
-    ifile = ovalues[[ii[1]]]
-    ifile = file.path(attr(ifile, "path"), ifile)
-    
-    if(!file.exists(ifile)) 
-      stop(sprintf("Configuration file '%s = %s not found'. \n (%s not found.)", names(ovalues)[ii[1]], ovalues[[ii[1]]], ifile))
-
-    values = append(values, .readConfiguration(ifile), ii[1])
-    cpath = c(cpath, values[ii[1]])
-    # values = values[-ii[1]]
-    ii = ii[-1]
-    # ii = grep(names(values), pattern="osmose.configuration")
-  }
-  
-  # values = c(values, cpath)
-  
-  return(values)
+.readConfiguration = function(file, recursive=TRUE, ...) {
+  .read_configuration(file=file, recursive=recursive, keep.names=FALSE, conf.key="osmose.configuration", ...)
 }
 
 
 # Internal ----------------------------------------------------------------
 
+#' Get a parameter from a configuration file.
+#'
+#' @param conf The 'osmose.configuration' object.
+#' @param par The name of the parameter, partial matching is allowed.
+#' @param sp The number of the species (starting at 0).
+#' @param fsh The number of the fishery (starting at 0).
+#' @param invert Revert the selection (all but 'par')
+#' @param as.is Boolean, TRUE if the results be returned as an osmose.configuration object, FALSE for a list or vector. 
+#' The default is FALSE, but only when one exact match is found.
+#' @param unlist Boolean, TRUE if you want the result to be returned as a vector instead of as a list.
+#' @param linear Boolean, TRUE to transform 'log' and 'logit' parameters into linear scale. 
+#'
+#' @return A list with all the matched parameters.
 #' @export
-.getPar = function(conf, par, sp=NULL, invert=FALSE) {
+get_par = function(conf, par=NULL, sp=NULL, fsh=NULL, sr=NULL, invert=FALSE, as.is=FALSE, unlist=FALSE, linear=FALSE) {
+  xind = 0 + (!is.null(sp)) + (!is.null(fsh)) + (!is.null(sr))
+  if(xind > 1) {
+    warning("You can only specify one of the following arguments: sp, fsh, sr. Returning NULL.")
+    return(NULL)
+  }
+  if(xind > 1 & !is.null(par))
+    warning("Ignoring 'par' argument as sp, fsh or sr are in use.")
+  
   if(!is.null(sp)) par = sprintf(".sp%d$", sp)
-  par = tolower(par)
-  out = conf[grep(names(conf), pattern=par, invert=invert)]
+  if(!is.null(fsh)) par = sprintf(".fsh%d$", fsh)
+  if(!is.null(sr)) par = sprintf(".sr%d$", sr)
+  
+  if(!is.null(par)) {
+    par = tolower(par)
+    out = conf[grep(names(conf), pattern=par, invert=invert)]
+  } else {
+    out = conf
+  }
+  
+  if(length(out)==0) return(NULL)
+
+  if(isTRUE(linear)) {
+    # log10 to linear
+    ind = grep(x=names(out), pattern="\\.log10\\.")
+    out[ind] = lapply(out[ind], FUN=function(x) 10^x)
+    names(out)[ind] = gsub(x=names(out)[ind], pattern="\\.log10\\.", replacement = ".")
+    # log to linear
+    ind = grep(x=names(out), pattern="\\.log\\.")
+    out[ind] = lapply(out[ind], FUN=exp)
+    names(out)[ind] = gsub(x=names(out)[ind], pattern="\\.log\\.", replacement = ".")
+    # logit to linear
+    ind = grep(x=names(out), pattern="\\.logit\\.")
+    out[ind] = lapply(out[ind], FUN=ilogit)
+    names(out)[ind] = gsub(x=names(out)[ind], pattern="\\.logit\\.", replacement = ".")
+  }
+
+  if(isTRUE(as.is)) {
+    class(out) = "osmose.configuration"
+    return(out)
+  }
+  
   if(length(out)==1) out = out[[1]]
-  if(length(out)==0) out = NULL
+  
+  if(isTRUE(unlist)) {
+    # out = out[order(names(out))]
+    return(unlist(out))
+  }
+    
   return(out)
+  
 }
+
+# to_do: find all instances of .getPar and replace by get_par
+.getPar = get_par
+
+#' @param type type of species to get the names for.
+#' @param code Boolean, return the numerical code of the species or fishery?
+#' @rdname get_par
+#' @export
+get_species = function(x, type=NULL, code=FALSE, sp=NULL, nm=NULL) {
+  
+  type = match.arg(type, choices = c("all", "focal", "background", "resource"))
+  
+  if(!is.null(sp) & !is.null(nm)) stop("Only 'sp' or 'nm' must be provided.")
+  
+  if(!is.null(nm)) {
+    
+    sp = gsub(regmatches(nm, regexec("sp[0-9]*$", nm)), pattern="sp", replacement = "")
+    sp = suppressWarnings(as.numeric(sp))
+    out = get_species(x)[match(x=sp, get_species(x, code=TRUE))]
+    return(out)
+    
+  }
+  
+  if(!is.null(sp)) {
+    isp = as.numeric(get_species(x, type=type, code = TRUE)[match(x=sp, get_species(x, type=type))])
+    if(any(is.na(isp))) {
+      xsp = paste(sp[is.na(isp)], collapse=", ")
+      if(type=="all") stop(sprintf("These are not species in the model: %s.", xsp))
+      stop(sprintf("These are not %s species in the model: %s.", type, xsp))
+    }
+    return(isp)
+  }
+  
+  nm = unlist(get_par(x, "species.name"))
+  xtype = unlist(get_par(x, "species.type"))
+  this = if(type=="all") nm else nm[xtype==type]  
+  xcode = gsub(names(this), pattern="species.name.sp", replacement = "")
+  names(this) = NULL
+  if(isTRUE(code)) return(xcode)
+  return(this)
+}
+
+#' @rdname get_par
+#' @export
+get_fisheries = function(x, code=FALSE, fsh=NULL, nm=NULL) {
+  
+  if(!is.null(fsh) & !is.null(nm)) stop("Only 'fsh' or 'nm' must be provided.")
+  
+  if(!is.null(nm)) {
+    
+    fsh = gsub(regmatches(nm, regexec("fsh[0-9]*$", nm)), pattern="fsh", replacement = "")
+    fsh = suppressWarnings(as.numeric(fsh))
+    out = get_fisheries(x)[match(x=fsh, get_fisheries(x, code=TRUE))]
+    return(out)
+    
+  }
+  
+  if(!is.null(fsh)) {
+    isp = as.numeric(get_fisheries(x, code=TRUE)[match(x=fsh, get_fisheries(x))])
+    if(any(is.na(isp))) {
+      xsp = paste(fsh[is.na(isp)], collapse=", ")
+      stop(sprintf("These are not fisheries in the model: %s.", xsp))
+    }
+    return(isp)
+  }
+  
+  this = unlist(get_par(x, "fisheries.name"))
+  xcode = gsub(names(this), pattern="fisheries.name.fsh", replacement = "")
+  names(this) = NULL
+  if(isTRUE(code)) return(xcode)
+  return(this)
+}
+
+#' @rdname get_par
+#' @export
+get_surveys = function(x, code=FALSE, sr=NULL, nm=NULL) {
+  
+  if(!is.null(sr) & !is.null(nm)) stop("Only 'sr' or 'nm' must be provided.")
+  
+  if(!is.null(nm)) {
+    
+    sr = gsub(regmatches(nm, regexec("sr[0-9]*$", nm)), pattern="sr", replacement = "")
+    sr = suppressWarnings(as.numeric(sr))
+    out = get_surveys(x)[match(x=sr, get_surveys(x, code=TRUE))]
+    return(out)
+    
+  }
+  
+  if(!is.null(sr)) {
+    isp = as.numeric(get_surveys(x, code=TRUE)[match(x=sr, get_surveys(x))])
+    if(any(is.na(isp))) {
+      xsp = paste(sr[is.na(isp)], collapse=", ")
+      stop(sprintf("These are not surveys in the model: %s.", xsp))
+    }
+    return(isp)
+  }
+  
+  this = unlist(get_par(x, "surveys.name", as.is=TRUE))
+  xcode = gsub(names(this), pattern="surveys.name.sr", replacement = "")
+  names(this) = NULL
+  if(isTRUE(code)) return(xcode)
+  return(this)
+}
+  
+
 
 .time.conv = function(ndt_in, ndt, Tref, T) {
   caltime = seq(from=0, by=1/ndt_in, length.out=Tref+1)
@@ -136,6 +194,8 @@
 .bioguess = function(x, ndt, ts=FALSE) {
   bio = x$biomass
   bguess = x$bioguess
+  msg = sprintf("More than one '%s' has been provided.", unique(names(bguess)))
+  if(length(bguess)>1) stop(msg)
   if(!is.null(bguess)) {
     out = bguess
     out_ts = rep(NA, ndt)
@@ -146,7 +206,7 @@
   out_ts = bio[1:ndt]
   out = mean(out_ts, na.rm=TRUE)
   if(is.na(out)) {
-    warning("No biomass information for the first year, using average of time series.")
+    message("No biomass information for the first year, using average of time series.")
     out = mean(bio, na.rm=TRUE)
     out_ts = rep(NA, ndt)
     out_ts[1] = out
@@ -165,6 +225,7 @@
     return(separator)
   }
   
+  if(length(file)!=1) stop("You can only read one file at the time.")
   file = if(!is.null(attr(file, "path"))) file.path(attr(file, "path"), file) else file
   
   config = readLines(file) # read lines
@@ -245,8 +306,9 @@ read.cal = function(conf, sp) {
   if(length(file)>1) stop(msg)
   if(is.null(file)) return(NULL)
   
-  file = file.path(attr(file, "path"), file)
-  periods = c("year", "quarter", "month", "week")
+  if(!is.null(attr(file, "path"))) file = file.path(attr(file, "path"), file)
+  if(!file.exists(file)) stop(sprintf("File '%s' not found.", file))
+  periods = c("year", "quarter", "month", "week","period")
   out = read.csv(file, check.names = FALSE)
   must = names(out)[names(out) %in% periods]
   msg = sprintf("Missing time information in %s's catch-at-length file.", spname)
@@ -260,7 +322,9 @@ read.cal = function(conf, sp) {
   check = !identical(length_classes, sort(length_classes))
   msg = sprintf("Catch-at-length size classes must be in increasing order, check %s's file.", spname)
   if(check) stop(msg)
-  dbin = unique(diff(length_classes))
+  dbin = unique(round(diff(length_classes), 2))
+  msg = sprintf("Catch-at-length size classes must be provided in regular size bins, check %s's file.", spname)
+  if(length(dbin)!=1) stop(msg)
   
   mat = as.matrix(out[, as.character(length_classes)])
 
@@ -276,10 +340,11 @@ read.cal = function(conf, sp) {
   if(nrow(mat)>nT) MSG = c(MSG, msg)
   mat = mat[seq_len(nT), ]
   
-  if(all(is.na(mat))) {
+  if( all(is.na(mat)) | (sum(mat, na.rm=TRUE)<1e-16) ) {
     
-    msg = sprintf("No catch-at-length data in %s's file is provided, all NAs.", spname)
-    warning(msg)
+    typ = ifelse(all(is.na(mat)), "NA", "0")
+    msg = sprintf("Positive catch but no catch-at-length data in %s's file is provided, all %ss.", spname, typ)
+    stop(msg, call. = FALSE)
     
     Linf = .getPar(this, "species.linf")
     bins = pretty(c(0, 0.9*Linf), n=15)
@@ -289,11 +354,12 @@ read.cal = function(conf, sp) {
     newmat = matrix(NA, nrow=T, ncol=length(length_classes))
     output = list(cal=NULL, marks=length_classes, dbin=dbin, mat=newmat, bins=NULL,
                   harvested=TRUE, time=time)
+    return(output)
     
   }
   
   ix = .time.conv(ndtcal, ndt, nrow(mat), T)
-  bins = c(length_classes - dbin, length_classes[length(length_classes)] + dbin)
+  bins = c(length_classes, length_classes[length(length_classes)] + dbin)
   bins = pmax(0, bins)
   
   isize = pmax(bins, .getPar(this, "egg.size")) 
@@ -311,7 +377,7 @@ read.cal = function(conf, sp) {
   if(all(is.na(units))) {
     units = 1 # assume CAL is unbiased
     msg = sprintf("No landing data for %s, assuming catch-at-length is unbiased and representing the full landings. 
-            If TRUE, please manually calculate the landings from catch-at-length.", spname)
+            If TRUE, please manually calculate the landings from catch-at-length and run the initialization again.", spname)
     MSG = c(MSG, msg)
   }
   
@@ -320,6 +386,30 @@ read.cal = function(conf, sp) {
   newmat = newmat*units
   
   # check for incomplete rows
+  
+  allna = apply(newmat, 1, FUN = function(x) all(is.na(x)))
+  
+  if(any(allna)) {
+    
+    calmean = colMeans(newmat, na.rm=TRUE)
+    newmat[allna, ] = calmean
+
+    wmat = t(t(newmat)*W2)
+    ilandings = 1e-6*rowSums(wmat)
+    ilandings[ilandings==0] = 1
+    units = landings/ilandings
+    if(all(is.na(units))) {
+      units = 1 # assume CAL is unbiased
+      msg = sprintf("No landing data for %s, assuming catch-at-length is unbiased and representing the full landings. 
+            If TRUE, please manually calculate the landings from catch-at-length and run the initialization again.", spname)
+      MSG = c(MSG, msg)
+    }
+    
+    units[is.na(units)] = 1 # assume unbiased when landing data is not available.
+    
+    newmat = newmat*units
+    
+  }
   
   # check for maximum size
   
@@ -333,7 +423,7 @@ read.cal = function(conf, sp) {
   Linf = .getPar(this, "species.Linf")
   
   marks = length_classes[seq_len(Lmax)]
-  bins = c(marks - dbin, marks[length(marks)] + dbin)
+  bins = c(marks, marks[length(marks)] + dbin)
   bins = pmax(0, bins)
   
   newmat = newmat[, seq_len(Lmax)]
@@ -347,20 +437,29 @@ read.cal = function(conf, sp) {
   
   # validation
   msg1 = sprintf("Maximum length for %s in the model (%0.1f cm at %d years) is lower than maximum reported size in landings (%0.2fcm), check catch-at-length data.",
-                 .getPar(this, "species.name"), lmax_pop, Amax, lmax_cal)
+                 .getPar(this, "species.name"), lmax_pop, as.integer(Amax), lmax_cal)
   msg2 = sprintf("Maximum length for %s in the model (%0.1f cm at %d years) is %0.1f%% of Linf (%0.1fcm), check growth parameters.",
-                 .getPar(this, "species.name"), lmax_pop, Amax, 100*lmax_pop/Linf, Linf)
+                 .getPar(this, "species.name"), lmax_pop, as.integer(Amax), 100*lmax_pop/Linf, Linf)
   msg3 = sprintf("Only %0.1f%% of landings are used! Check catch-at-length data and growth parameters.",
                  100*irat)
   
   msg = NULL
-  if(ratio<1) msg = c(msg, msg1)
-  if(lmax_pop/Linf<0.9) msg = c(msg, msg2)
-  if(irat<0.99) msg = c(msg, msg3)
+  if(ratio < 0.95) msg = c(msg, msg1)
+  if(lmax_pop/Linf < 0.95) msg = c(msg, msg2)
+  if(irat < 0.97) msg = c(msg, msg3)
+  
+  err = NULL
+  if(ratio < 0.7) err = c(err, msg1)
+  if(lmax_pop/Linf < 0.7) err = c(err, msg2)
+  if(irat < 0.7) err = c(err, msg3)
   
   MSG = c(MSG, msg)
   
-  if(!is.null(MSG)) warning(paste(MSG, collapse="\n"))
+  if((ratio < 0.7) | (lmax_pop/Linf < 0.7) | (irat < 0.7))
+    stop(paste(c("Inconsistent data supplied for the initialisation. Please check:", err), 
+               collapse="\n"), call. = FALSE)
+  
+  if(!is.null(MSG)) message(paste(MSG, collapse="\n"))
   
   output = list(cal=out, marks=marks, dbin=dbin, mat=newmat, bins=bins, harvested=TRUE, time=time)
   
@@ -373,13 +472,19 @@ read.biomass = function(conf, sp) {
   ndt = conf$simulation.time.ndtperyear 
   T = ndt*conf$simulation.time.nyear
   biofile = .getPar(this, "observed.biomass.file")
-  if(is.null(biofile)) stop("Observed biomass have not been provided.")
+  if(is.null(biofile)) {
+    message(sprintf("Observed biomass has not been provided for species %d, using 'observed.biomass.guess' instead.", sp))
+    return(NULL)
+  }
+    
+  q = .getPar(this, "observed.biomass.q")
+  if(is.null(q)) q = 1
   bioref = .readCSV(biofile)
   ivar= .getPar(this, "species.name")
   ndtbio = .getPar(this, "observed.biomass.ndtPerYear")
   if(is.null(ndtbio)) stop("Parameter 'observed.biomass.ndtPerYear' is missing.")
   ix = .time.conv(ndtbio, ndt, nrow(bioref), T)
-  biomass = bioref[ix$ind, ivar]
+  biomass = bioref[ix$ind, ivar]/q
   return(biomass)
   
 }
@@ -410,16 +515,20 @@ read.yield = function(conf, sp) {
 read.fecundity = function(conf, sp) {
   
   this = .getPar(conf, sp=sp)
+  opar = .getPar(this, "reproduction.fecundity.sp")
+  if(!is.null(opar)) return(opar)
   repfile = .getPar(this, "reproduction.season.file")
   fecundity = as.numeric(unlist(.readCSV(repfile, row.names = 1)))
   sfec = sum(fecundity) 
   if(abs(sfec-1)< 1e-2) {
-    warning("Using relative fecundities.")
+    # warning("Using relative fecundities.")
     relfec = .getPar(this, "species.relativefecundity")
+    if(relfec < 1e-16) stop(sprintf("Null relative fecundity for sp%s, please check.", sp), call. = FALSE) 
     fecundity = relfec*fecundity
   }
   return(fecundity)
   
 }
+
 
 

@@ -22,7 +22,7 @@
  * Ricardo OLIVEROS RAMOS (ricardo.oliveros@gmail.com)
  * Philippe VERLEY (philippe.verley@ird.fr)
  * Laure VELEZ (laure.velez@ird.fr)
- * Nicolas Barrier (nicolas.barrier@ird.fr)
+ * Nicolas BARRIER (nicolas.barrier@ird.fr)
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -87,6 +87,10 @@ public class RelativeBiomassPopulator extends AbstractPopulator {
 
     private int[] nSize;
 
+    private double[] gonadicIndex;
+
+    private boolean isBioenEnabled = false;
+
     private GrowthProcess growthProcess;
 
     public RelativeBiomassPopulator(int rank) {
@@ -105,11 +109,23 @@ public class RelativeBiomassPopulator extends AbstractPopulator {
         int cpt;
 
         // Init the random generator
-        if (cfg.getBoolean("population.initialization.randomseed.fixed", false)) {
+        if (cfg.getBoolean("simulation.fixedseed.enabled", false)) {
             long seed = getRank();
             rand = new Random(seed);
         } else {
             rand = new Random();
+        }
+
+        if (cfg.isBioenEnabled()) {
+            this.isBioenEnabled = true;
+            // Recovers the r parameters for focal + background species
+            cpt = 0;
+            gonadicIndex = new double[nSpecies];
+            for (int i : getConfiguration().getFocalIndex()) {
+                String key = String.format("species.bioen.maturity.r.sp%d", i);
+                gonadicIndex[cpt] = this.getConfiguration().getDouble(key);
+                cpt++;
+            }
         }
 
         double[] lInf = new double[nSpecies];
@@ -123,8 +139,23 @@ public class RelativeBiomassPopulator extends AbstractPopulator {
         seedingBiomass = new double[nSpecies];
         cpt = 0;
         for (int i : this.getFocalIndex()) {
+
+        String keyVal = String.format("population.initialization.biomass.sp%d", i);
+        String keyValLog = String.format("population.initialization.biomass.log.sp%d", i);
+
+        // test if only one of the two values exists
+        if (!getConfiguration().isNull(keyValLog) && !getConfiguration().isNull(keyVal)) {
+            String message = String.format("Both %s and %s parameters are defined. Choose only one.\n", keyValLog, keyVal);
+            error(message, new Exception());
+        }
+
+        if (!getConfiguration().isNull(keyValLog)) {
+            seedingBiomass[cpt] = Math.exp(cfg.getDouble("population.initialization.biomass.log.sp" + i));
+        } else {
             seedingBiomass[cpt] = cfg.getDouble("population.initialization.biomass.sp" + i);
-            cpt++;
+        }
+        cpt++;
+
         }
 
         // Init the sizes (in cm) for each species and each size class
@@ -271,6 +302,10 @@ public class RelativeBiomassPopulator extends AbstractPopulator {
 
         // In school constructor, weight is provided in g.
         School school0 = new School(species, nEgg, (float) length, (float) weight, (int) ageDt);
+        if(this.isBioenEnabled) {
+            float gonadWeight = (float) (weight * gonadicIndex[iSpecies]);
+            school0.incrementGonadWeight(gonadWeight);
+        }
 
         return school0;
 

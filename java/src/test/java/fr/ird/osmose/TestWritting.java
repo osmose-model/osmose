@@ -166,9 +166,9 @@ public class TestWritting {
         cmd.put("output.spatialagespecies.enabled", bool);
         cmd.put("output.fishing.accessible.biomass", bool);
         cmd.put("output.fishing.harvested.biomass", bool);
-        cmd.put("output.fishery.enabled", bool);
-        cmd.put("output.fishery.byage.enabled", bool);
-        cmd.put("output.fishery.bysize.enabled", bool);
+        cmd.put("output.fisheries.enabled", bool);
+        cmd.put("output.fisheries.byage.enabled", bool);
+        cmd.put("output.fisheries.bysize.enabled", bool);
         cmd.put("output.biomass.bysize.enabled", bool);
         cmd.put("output.biomass.byage.enabled", bool);
         cmd.put("output.abundance.age1.enabled", bool);

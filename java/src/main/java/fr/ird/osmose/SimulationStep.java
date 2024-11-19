@@ -41,6 +41,7 @@
 
 package fr.ird.osmose;
 
+import fr.ird.osmose.background.BackgroundProcess;
 import fr.ird.osmose.output.OutputManager;
 import fr.ird.osmose.process.GrowthProcess;
 import fr.ird.osmose.process.IncomingFluxProcess;
@@ -61,10 +62,15 @@ import fr.ird.osmose.resource.ResourceForcing;
  */
 public class SimulationStep extends SimulationLinker {
 
+
+    /* Background process. */
+    private BackgroundProcess backgroundProcess;
+
     /*
      * Growth process
      */
     private GrowthProcess growthProcess;
+
     /*
      * Reproduction process
      */
@@ -106,6 +112,9 @@ public class SimulationStep extends SimulationLinker {
         // Initialize general mortality process
         mortalityProcess = new MortalityProcess(getRank());
         mortalityProcess.init();
+
+        backgroundProcess = new BackgroundProcess(getRank());
+        backgroundProcess.init();
 
         // If the bioen module is activated, no more use of the
         // GrowthProcess class, use of the EnergyBudget module instead.
@@ -163,6 +172,12 @@ public class SimulationStep extends SimulationLinker {
         if (getConfiguration().isIncomingFluxEnabled()) {
             incomingFLuxProcess.run();
         }
+
+        // Reset the background schools for the given time step
+        backgroundProcess.run();
+        getBkgSchoolSet().getSchools().forEach((school) -> {
+            school.init();
+        });
 
         // Reset some school state variables
         getSchoolSet().getSchools().forEach((school) -> {

@@ -1,0 +1,38 @@
+# ---------------------
+# 'calibrar' options
+# ---------------------
+
+# This file include any option you can pass to the 'control' argument when 
+# using the calibrate(..., control) call in R.
+# This arguments will be parsed and passed to your calibration.
+# Here we are including only the arguments you may want to change.
+# The rest of the arguments have defaults, you probably do not want to change them.
+# If so, set them here with care.
+
+# The default optimization method for OSMOSE is 'AHR-ES'.
+# AHR-ES: Adaptative Hierarchical Recombination Evolutionary Strategy (Oliveros-Ramos, 2014).
+# It is the current default for OSMOSE calibration (and your only option so far).
+# It's NOT a Genetic Algorithm. It's an Evolutionary Strategy.
+
+method      = AHR-ES 
+
+REPORT      = 1 # level of report for the calibration (i.e. after how many iterations).
+trace       = 3 # level of report (4 if you're gossip)
+
+verbose     = TRUE # FALSE to keep it quiet, unless you are nervous and want to know everything.
+
+# WARNING: setting trace=3 or higher for AHR-ES will slow down your calibration.
+# The slow-down will be proportional to a factor of (REPORT + 1)/REPORT
+# You do not need trace=3 (or higher) unless your research is about the performance
+# of the calibration process itself.
+
+# TERMINATION CRITERIA: this will impact when the calibration (and each phase) is done.
+#   0: maxgen reached only
+#   1: maxgen reached OR max step reduction (convergence value)
+#   2: relative tolerance (reltol) on function value (this is the RECOMMENDED option for OSMOSE)
+#   3: maximum number of generations without improvement of best value.
+
+maxgen  = 2000 # maximum number of generations (for the ES)
+termination_criteria = 2 # recommended for OSMOSE is 2.
+max_no_improvement = 10 # maximum number of generations with no improvement (according to termination criteria)
+

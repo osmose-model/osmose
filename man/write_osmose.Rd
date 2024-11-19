@@ -14,21 +14,21 @@ write_osmose(x, file, sep = ",", ...)
 
 \item{file}{Output file}
 
-\item{sep}{The field separator string. Values within each row of x are 
+\item{sep}{The field separator string. Values within each row of x are
 separated by this string.}
 
 \item{...}{Extra arguments passed to \code{write.table} funtion.}
 
-\item{col.names}{either a logical value indicating whether the column names 
-of x are to be written along with x, or a character vector of column names to 
-be written. See the section on ‘CSV files’ for the meaning of 
+\item{col.names}{either a logical value indicating whether the column names
+of x are to be written along with x, or a character vector of column names to
+be written. See the section on ‘CSV files’ for the meaning of
 \code{col.names = NA}.}
 
-\item{quote}{A \code{logical} value (\code{TRUE} or \code{FALSE}) or a 
+\item{quote}{A \code{logical} value (\code{TRUE} or \code{FALSE}) or a
 \code{numeric} vector.}
 
-\item{row.names}{either a logical value indicating whether the row names of x 
-are to be written along with x, or a character vector of row names to be 
+\item{row.names}{either a logical value indicating whether the row names of x
+are to be written along with x, or a character vector of row names to be
 written.}
 
 \item{append}{Append to 'file' or create a new one?}

@@ -800,7 +800,11 @@ public class School extends AbstractSchool {
     }
 
     public boolean existsTrait(String key) throws Exception {
-        return this.getGenotype().existsTrait(key);
+        if (this.getGenotype() == null) {
+            return false;
+        } else {
+            return this.getGenotype().existsTrait(key);
+        }
     }
 
     public double getgenet_value(String key) throws Exception {
@@ -880,6 +884,12 @@ public class School extends AbstractSchool {
     @Override
     public boolean isSexuallyMature() {
         return this.getSpecies().isSexuallyMature(this);
+    }
+
+    @Override
+    public int getClassIndex() {
+        error("Not implemented yet", new Exception());
+        return 0;
     }
 
 }

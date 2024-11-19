@@ -65,6 +65,7 @@ public class MapDistribution extends AbstractSpatialDistribution {
     private Random rd1, rd2, rd3;
     private MapSet maps;
     private float[] maxProbaPresence;
+    private float randomWalkProba;
     private int rank;
 
     /*
@@ -82,14 +83,14 @@ public class MapDistribution extends AbstractSpatialDistribution {
     public void init() {
 
         boolean fixedSeed = false;
-        if (!getConfiguration().isNull("movement.randomseed.fixed")) {
-            fixedSeed = getConfiguration().getBoolean("movement.randomseed.fixed");
+        if (!getConfiguration().isNull("simulation.fixedseed.enabled")) {
+            fixedSeed = getConfiguration().getBoolean("simulation.fixedseed.enabled");
         }
         if (fixedSeed) {
             rd1 = new Random((13L ^ iSpecies) * (rank + 1));
             rd2 = new Random((5L ^ iSpecies) * (rank + 1));
             rd3 = new Random((1982L ^ iSpecies) * (rank + 1));
-            warning("Parameter 'movement.randomseed.fixed' is set to true. It means that two simulations with strictly identical initial school distribution will lead to same movement.");
+            warning("Parameter 'simulation.fixedseed.enabled' is set to true. It means that two simulations with strictly identical initial school distribution will lead to same movement.");
         } else {
             rd1 = new Random();
             rd2 = new Random();
@@ -115,6 +116,12 @@ public class MapDistribution extends AbstractSpatialDistribution {
             range = getConfiguration().getInt("movement.randomwalk.range.sp" + iSpeciesFile);
         } else {
             range = 1;
+        }
+        
+        if (!getConfiguration().isNull("movement.randomwalk.prob.sp" + iSpeciesFile)) {
+            randomWalkProba = getConfiguration().getFloat("movement.randomwalk.prob.sp" + iSpeciesFile);
+        } else {
+            randomWalkProba = 0;
         }
 
     }
@@ -182,10 +189,14 @@ public class MapDistribution extends AbstractSpatialDistribution {
             } while (proba <= 0.d || proba < rd2.nextDouble() * maxProbaPresence[indexMap] || Double.isNaN(proba) || getGrid().getCell(indexCell).isLand());
             school.moveToCell(getGrid().getCell(indexCell));
         } else {
-            // Random move in adjacent cells contained in the map.
-            List<Cell> accessibleCells = getAccessibleCells(school, map);
-            Cell destinationCell = randomDeal(accessibleCells, rd3);
-            school.moveToCell(destinationCell);
+            
+            double testMove = rd1.nextDouble();  // valeur entre 0 et 1
+            if (testMove >= randomWalkProba) {
+                // Random move in adjacent cells contained in the map.
+                List<Cell> accessibleCells = getAccessibleCells(school, map);
+                Cell destinationCell = randomDeal(accessibleCells, rd3);
+                school.moveToCell(destinationCell);
+            }
         }
     }
 
@@ -214,10 +225,15 @@ public class MapDistribution extends AbstractSpatialDistribution {
             Cell neighbour = neighbours.next();
             // 2. Eliminate cell that is on land
             // 3. Add the cell if it is within the current map of distribution
-            if (!neighbour.isLand() && (map.getValue(neighbour) > 0) && (!Double.isNaN(map.getValue(neighbour)))) {
+            if ((!neighbour.equals(cell)) && !neighbour.isLand() && (map.getValue(neighbour) > 0) && (!Double.isNaN(map.getValue(neighbour)))) {
                 accessibleCells.add(neighbour);
             }
         }
+        
+        if(accessibleCells.isEmpty()) {
+            accessibleCells.add(cell);
+        }
+        
         return accessibleCells;
     }
 

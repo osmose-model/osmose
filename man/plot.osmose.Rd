@@ -5,6 +5,7 @@
 \alias{plot.osmose.biomass}
 \alias{plot.osmose.abundance}
 \alias{plot.osmose.yield}
+\alias{plot.osmose.yieldByYear}
 \alias{plot.osmose.yieldN}
 \alias{plot.osmose.biomassByTL}
 \alias{plot.osmose.biomassBySize}
@@ -96,6 +97,33 @@
   border = NULL,
   lty = 1,
   lwd = 1,
+  axes = TRUE,
+  legend = TRUE,
+  units = "tonnes",
+  ...
+)
+
+\method{plot}{osmose.yieldByYear}(
+  x,
+  species = NULL,
+  speciesNames = NULL,
+  start = NULL,
+  end = NULL,
+  initialYear = NULL,
+  ts = TRUE,
+  type = 1,
+  replicates = TRUE,
+  freq = 12,
+  horizontal = FALSE,
+  conf = 0.95,
+  factor = 0.001,
+  xlim = NULL,
+  ylim = NULL,
+  col = NULL,
+  alpha = NULL,
+  border = NULL,
+  lty = 1,
+  lwd = 2,
   axes = TRUE,
   legend = TRUE,
   units = "tonnes",

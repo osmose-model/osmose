@@ -75,3 +75,25 @@
   
 }
 
+.nonNullPoints = function(y, thr, span) {
+  # copy y
+  
+  if(length(span)==1) span = c(span, span)
+  if(any(span<0)) stop("span must be positive.")
+  
+  y[is.na(y)] = 0
+  yx = cumsum(y)/sum(y)
+  
+  ind0 = which.min(yx<thr/2)
+  ind1 = which.max(yx>=(1-thr/2))
+  
+  imin = which.max(y>0)
+  imax = length(y) - which.max(rev(y)>0) + 1
+  
+  ind = c(ind0, ind1)
+  ind = seq(from=ind[1]-span[1], to=ind[2]+span[2], by=1)
+  ind = pmin(pmax(ind, imin), imax)
+  ind = sort(unique(ind))
+  return(ind)
+}
+

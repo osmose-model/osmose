@@ -97,14 +97,14 @@ public class BiomassDietStageOutput extends AbstractOutput {
             biomassStage[school.getSpeciesIndex()][dietOutputStage.getStage(school)] += school.getBiomass();
         });
 
-        this.getBkgSchoolSet().getAllSchools().forEach(school -> {
+        this.getBkgSchoolSet().getSchools().forEach(school -> {
             biomassStage[school.getSpeciesIndex()][dietOutputStage.getStage(school)] += school.getBiomass();
         });
 
         int nSpecies = this.getNSpecies();
         int nBkg = this.getNBkgSpecies();
         for (int cpt = 0; cpt < this.getNRscSpecies(); cpt++) {
-            biomassStage[nSpecies + nBkg + cpt][0] += getTotalBiomass(cpt + nBkg);
+            biomassStage[nSpecies + nBkg + cpt][0] += getTotalBiomass(cpt);
         }
 
     }

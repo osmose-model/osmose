@@ -1,0 +1,105 @@
+# outputs for calibration type: base
+
+# variables we need to get
+output.biomass.enabled = TRUE
+output.yield.biomass.enabled = TRUE
+output.yield.abundance.bySize.enabled = TRUE
+output.meanSize.byAge.enabled = TRUE
+output.mortality.perSpecies.byage.enabled = TRUE
+
+# all the rest set to FALSE to save time during the calibration
+output.restart.enabled = FALSE
+output.fishing.accessible.biomass = FALSE
+output.fishing.harvested.biomass  = FALSE
+output.fisheries.enabled = FALSE
+
+output.biomass.bysize.enabled = FALSE
+output.biomass.byage.enabled = FALSE
+output.biomass.bytl.enabled = FALSE
+output.biomass.byweight.enabled = FALSE
+
+output.biomass.netcdf.enabled = FALSE
+output.biomass.bysize.netcdf.enabled = FALSE
+output.biomass.byage.netcdf.enabled = FALSE
+output.biomass.bytl.netcdf.enabled = FALSE
+
+output.yield.biomass.bySize.enabled = FALSE
+output.yield.biomass.byAge.enabled = FALSE
+output.yield.biomass.byWeight.enabled   = FALSE
+output.yield.abundance.enabled = FALSE
+output.yield.abundance.byAge.enabled = FALSE
+output.yield.abundance.byWeight.enabled = FALSE
+
+output.yield.biomass.netcdf.enabled = FALSE
+output.yield.biomass.bySize.netcdf.enabled = FALSE
+output.yield.biomass.byage.netcdf.enabled = FALSE
+output.yield.abundance.netcdf.enabled = FALSE
+output.yield.abundance.bySize.netcdf.enabled = FALSE
+output.yield.abundance.byage.netcdf.enabled = FALSE
+
+output.abundance.enabled = FALSE
+output.abundance.age1.enabled = FALSE
+output.abundance.bysize.enabled = FALSE
+output.abundance.byage.enabled = FALSE
+output.abundance.bytl.enabled = FALSE
+output.abundance.byweight.enabled = FALSE
+
+output.abundance.netcdf.enabled = FALSE
+output.abundance.bysize.netcdf.enabled = FALSE
+output.abundance.byage.netcdf.enabled = FALSE
+
+output.meanSize.byAge.netcdf.enabled = FALSE
+
+output.diet.pressure.netcdf.enabled = FALSE
+output.diet.composition.netcdf.enabled = FALSE
+output.diet.composition.byage.netcdf.enabled = FALSE
+output.diet.composition.bysize.netcdf.enabled = FALSE
+
+output.spatial.enabled = FALSE
+output.spatial.ltl.enabled = FALSE
+output.spatialabundance.enabled = FALSE
+output.spatialbiomass.enabled = FALSE
+output.spatialsize.enabled = FALSE
+output.spatialtl.enabled = FALSE
+output.spatialsizespecies.enabled = FALSE
+output.spatialagespecies.enabled = FALSE
+output.spatial.yield.biomass.enabled = FALSE
+output.spatial.yield.abundance.enabled = FALSE
+output.spatialMstarv.enabled = FALSE
+output.spatialMpred.enabled =  FALSE
+
+output.mortality.enabled = FALSE
+output.mortality.perSpecies.bysize.enabled = FALSE
+output.mortality.additional.bySize.enabled = FALSE
+output.mortality.additional.byAge.enabled = FALSE
+output.mortality.additionalN.bySize.enabled = FALSE
+output.mortality.additionalN.byAge.enabled = FALSE
+output.mortality.perSpecies.byage.netcdf.enabled = FALSE
+
+output.size.enabled = FALSE
+output.size.catch.enabled = FALSE
+output.tl.enabled = FALSE
+output.tl.catch.enabled = FALSE
+output.weight.enabled = FALSE
+output.age.at.death.enabled = FALSE
+
+output.meanTL.bySize.enabled = FALSE
+output.meanTL.byAge.enabled = FALSE
+output.meanSize.byAge.enabled = FALSE
+output.meanWeight.byAge.enabled = FALSE
+output.meanWeight.bySize.enabled = FALSE
+output.meanWeight.byWeight.enabled = FALSE
+
+output.diet.composition.enabled = FALSE
+output.diet.composition.byage.enabled = FALSE
+output.diet.composition.bysize.enabled = FALSE
+output.diet.pressure.enabled = FALSE
+output.diet.pressure.byage.enabled = FALSE
+output.diet.pressure.bysize.enabled = FALSE
+output.diet.success.enabled = FALSE
+
+output.spatialenet.enabled = FALSE
+output.spatialenetlarvae.enabled = FALSE
+output.spatialenetjuv.enabled = FALSE
+output.spatialdg.enabled = FALSE
+output.spatialegg.enabled = FALSE

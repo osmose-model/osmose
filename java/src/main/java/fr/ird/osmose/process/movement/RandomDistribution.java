@@ -79,8 +79,8 @@ public class RandomDistribution extends AbstractSpatialDistribution {
 
         boolean fixedSeed = false;
 
-        if (!getConfiguration().isNull("movement.randomseed.fixed")) {
-            fixedSeed = getConfiguration().getBoolean("movement.randomseed.fixed");
+        if (!getConfiguration().isNull("simulation.fixedseed.enabled")) {
+            fixedSeed = getConfiguration().getBoolean("simulation.fixedseed.enabled");
         }
 
         if (fixedSeed) {

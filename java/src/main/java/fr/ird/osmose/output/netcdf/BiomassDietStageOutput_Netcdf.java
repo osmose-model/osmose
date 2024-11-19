@@ -119,7 +119,7 @@ public class BiomassDietStageOutput_Netcdf extends AbstractOutput_Netcdf {
         }
 
         // Init step for all the background schools
-        for (BackgroundSchool school : this.getBkgSchoolSet().getAllSchools()) {
+        for (BackgroundSchool school : this.getBkgSchoolSet().getSchools()) {
             biomassStage[school.getSpeciesIndex()][dietOutputStage.getStage(school)] += school.getBiomass();
         }
 

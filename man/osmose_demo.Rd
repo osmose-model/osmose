@@ -4,7 +4,7 @@
 \alias{osmose_demo}
 \title{Generates required OSMOSE configuration files to run a demo.}
 \usage{
-osmose_demo(path = NULL, config = c("gog", "eec_4.3.0"))
+osmose_demo(path = NULL, config = c("gog", "eec_4.3.0"), extra_args = NULL)
 }
 \arguments{
 \item{path}{Path where to put the Osmose configuration file.}
@@ -31,7 +31,7 @@ library("osmose")
 demo = osmose_demo(path="../", config="eec_4.3.0")
 
 # run the osmose model
-run_osmose(demo$config_file, parameters=NULL, output=NULL, version="4.3.2", 
+run_osmose(demo$config_file, parameters=NULL, output=NULL, version="4.3.2",
           options=NULL, verbose=TRUE, clean=TRUE)
 
 # reads output data

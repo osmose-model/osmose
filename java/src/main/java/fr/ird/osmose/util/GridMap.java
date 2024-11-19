@@ -133,6 +133,10 @@ public class GridMap extends OsmoseLinker {
         return matrix[j][i];
     }
 
+    public float[][] getValues() {
+        return matrix;
+    }
+
     public void setValue(Cell cell, float value) {
         setValue(cell.get_igrid(), cell.get_jgrid(), value);
     }

@@ -159,11 +159,10 @@ public class ResourceOutput extends SimulationLinker implements IOutput {
 
                 int i = cell.get_igrid();
                 int j = cell.get_jgrid();
-                int nBackground = this.getNBkgSpecies();
                 for (int cpt = 0; cpt < this.getNRscSpecies(); cpt++) {
                     // rscBiomass0 is the resource biomass at the beginning of the time step
                     // adding an offset, since resourceForcing starts with bkgSpecies
-                    rscBiomass0[cpt][j][i] = getSimulation().getResourceForcing(cpt + nBackground).getBiomass(cell);
+                    rscBiomass0[cpt][j][i] = getSimulation().getResourceForcing(cpt).getBiomass(cell);
                     // rscBiomass1 is the resource biomass remaining in the water column after the predation process
                     rscBiomass1[cpt][j][i] = rscBiomass0[cpt][j][i] - preyedResources[cpt];
                 }
@@ -250,6 +249,7 @@ public class ResourceOutput extends SimulationLinker implements IOutput {
         Variable.Builder<?> lonVarBuilder = bNc.addVariable("longitude", DataType.FLOAT,  new ArrayList<>(Arrays.asList(nyDim, nxDim)));
         lonVarBuilder.addAttribute(new Attribute("units", "degree"));
         lonVarBuilder.addAttribute(new Attribute("description", "longitude of the center of the cell"));
+
         /*
          * Add global attributes
          */

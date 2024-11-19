@@ -4,8 +4,11 @@
 \name{osmose-package}
 \alias{osmose-package}
 \alias{osmose}
-\title{OSMOSE: Modelling Marine Exploited Ecosystems}
+\title{OSMOSE: Modelling Exploited Marine Ecosystems}
 \description{
+\if{html}{\figure{sticker_osmose.png}{options: align='right' alt='logo' width='150'}}
+}
+\details{
 OSMOSE is a multispecies and Individual-based model (IBM) which 
 focuses on fish species. This model assumes opportunistic predation based on 
 spatial co-occurrence and size adequacy between a predator and its prey 
@@ -19,8 +22,7 @@ available for a wide range of species, and which can be found in FishBase
 for instance. This package provides tools to build a model and run simulations
 using the OSMOSE model. See the 
 \href{http://www.osmose-model.org/}{Official website} for more details.
-}
-\details{
+
 \code{osmose} package is well documented by help descriptions, demos and 
 vignettes.
 

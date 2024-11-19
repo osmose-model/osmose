@@ -1,11 +1,11 @@
 
-/* 
- * 
+/*
+ *
  * OSMOSE (Object-oriented Simulator of Marine Ecosystems)
  * http://www.osmose-model.org
- * 
+ *
  * Copyright (C) IRD (Institut de Recherche pour le Développement) 2009-2020
- * 
+ *
  * Osmose is a computer program whose purpose is to simulate fish
  * populations and their interactions with their biotic and abiotic environment.
  * OSMOSE is a spatial, multispecies and individual-based model which assumes
@@ -16,28 +16,28 @@
  * processes of fish life cycle (growth, explicit predation, additional and
  * starvation mortalities, reproduction and migration) and fishing mortalities
  * (Shin and Cury 2001, 2004).
- * 
+ *
  * Contributor(s):
  * Yunne SHIN (yunne.shin@ird.fr),
  * Morgane TRAVERS (morgane.travers@ifremer.fr)
  * Ricardo OLIVEROS RAMOS (ricardo.oliveros@gmail.com)
  * Philippe VERLEY (philippe.verley@ird.fr)
  * Laure VELEZ (laure.velez@ird.fr)
- * Nicolas Barrier (nicolas.barrier@ird.fr)
- * 
+ * Nicolas BARRIER (nicolas.barrier@ird.fr)
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation (version 3 of the License). Full description
  * is provided on the LICENSE file.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
- * 
+ *
  */
 
 package fr.ird.osmose.process.mortality.fishery;
@@ -69,26 +69,26 @@ public class FisheryBase extends OsmoseLinker {
      * Initialize the time varying index.
      */
     public void init() {
-            
+
         // If a fishing shift exists, take it to extract the fishing values
         String keyShift = String.format("fisheries.rate.base.shift.fsh%d", this.fisheryIndex);
-        
+
         String keyVal = String.format("fisheries.rate.base.fsh%d", this.fisheryIndex);
         String keyValLog = String.format("fisheries.rate.base.log.fsh%d", this.fisheryIndex);
-        
+
         // test if only one of the two values exists
-        if (getConfiguration().isNull(keyValLog) == getConfiguration().isNull(keyVal)) { 
+        if (!getConfiguration().isNull(keyValLog) && !getConfiguration().isNull(keyVal)) {
             String message = String.format("Both %s and %s parameters are defined. Choose only one.\n", keyValLog, keyVal);
             error(message, new Exception());
         }
-        
+
         boolean useLog;
         ByRegimeTimeSeries ts;
-        if(getConfiguration().isNull(keyValLog)) { 
+        if(getConfiguration().isNull(keyValLog)) {
             // If the key for log values is Null, assume fishing mort in standard mode
             ts = new ByRegimeTimeSeries(keyShift, keyVal);
             useLog = false;
-        } else { 
+        } else {
             // If the key for log values is not null, assume fishing mort in log
             ts = new ByRegimeTimeSeries(keyShift, keyValLog);
             useLog = true;
@@ -99,10 +99,6 @@ public class FisheryBase extends OsmoseLinker {
         fisheryBase = ts.getValues();
         if (useLog) {
             for (int i = 0; i < fisheryBase.length; i++) {
-                //if (fisheryBase[i] > 0) {
-                //    String message = String.format("Fishing base mortality rate exponent for fishery %d is positive", this.fisheryIndex);
-                //    error(message, new IllegalArgumentException());
-                //}
                 fisheryBase[i] = Math.exp(fisheryBase[i]);
             }
         }
