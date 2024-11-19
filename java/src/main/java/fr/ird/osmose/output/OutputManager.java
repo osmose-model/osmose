@@ -652,8 +652,8 @@ public class OutputManager extends SimulationLinker {
             if (getConfiguration().getBoolean("output.bioen.ingest.enabled", NO_WARNING)) {
                 outputs.add(new WeightedSpeciesOutput(rank, "Bioen", "ingestion", "Ingestion rate (grams.grams^-alpha)",
                         (school -> (school.getAgeDt() >= school.getSpecies().getFirstFeedingAgeDt())),
-                        school -> school.getIngestion() * 1e6f / (Math.pow(school.getWeight() * 1e6f, school.getBetaBioen())),
-                        school -> school.getInstantaneousAbundance()));
+                        school -> school.getIngestion() / school.getInstantaneousAbundance() * 1e6f / (Math.pow(school.getWeight() * 1e6f, school.getBetaBioen())),
+                        school -> 1.d));
             }
 
             if (getConfiguration().getBoolean("output.bioen.ingest.tot.enabled", NO_WARNING)) {

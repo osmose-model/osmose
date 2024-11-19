@@ -126,8 +126,7 @@ doc/user_guide/Osmose-User-Guide.pdf
 doc/user_guide/Osmose-User-Guide.fls
 doc/user_guide/Osmose-User-Guide.fdb_latexmk
 doc/odd_des/Osmose-ODD-Description.tex
-
-
-
-
 /.quarto/
+
+suppressions.txt
+

@@ -52,6 +52,7 @@ import java.util.logging.Logger;
 import fr.ird.osmose.School;
 import fr.ird.osmose.util.SimulationLinker;
 import ucar.ma2.ArrayDouble;
+import ucar.ma2.ArrayFloat;
 import ucar.ma2.ArrayInt;
 import ucar.ma2.DataType;
 import ucar.ma2.Index;
@@ -80,7 +81,7 @@ public class MeanGenotypeOutput extends SimulationLinker implements IOutput {
     private final SchoolSetGetter schoolGetter;
 
     private String prefix;
-
+    private int recordFrequency;
 
     /**
      * List of dimensions of the variable to write out.
@@ -167,12 +168,13 @@ public class MeanGenotypeOutput extends SimulationLinker implements IOutput {
         ArrayDouble.D1 arrTime = new ArrayDouble.D1(1);
         arrTime.set(0, time);
 
-        ArrayDouble.D3 arrAbund = new ArrayDouble.D3(1, nSpecies, nTraits);
+        ArrayFloat.D3 arrAbund = new ArrayFloat.D3(1, nSpecies, nTraits);
+        double nsteps = getConfiguration().getRecordFrequency();
 
         for (int i = 0; i < nSpecies; i++) {
             for (int j = 0; j < nTraits; j++) {
-                double toWrite = denominator[i] > 0 ? (float) output[i][j] / denominator[i] : Double.NaN;
-                arrAbund.set(0, i, j, toWrite);
+                double toWrite = denominator[i] > 0 ? (double) (output[i][j] / denominator[i]) : Double.NaN;
+                arrAbund.set(0, i, j, (float) (toWrite / nsteps));
             }
         }
 
@@ -202,11 +204,13 @@ public class MeanGenotypeOutput extends SimulationLinker implements IOutput {
 
     @Override
     public boolean isTimeToWrite(int iStepSimu) {
-        return true;
+        return (((iStepSimu + 1) % recordFrequency) == 0);
     }
 
     @Override
     public void init() {
+
+        recordFrequency = getConfiguration().getInt("output.recordfrequency.ndt");
 
         Nc4Chunking chunk = getConfiguration().getChunker();
 
