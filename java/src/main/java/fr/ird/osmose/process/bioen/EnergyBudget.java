@@ -214,6 +214,7 @@ public class EnergyBudget extends AbstractProcess {
             this.getDg(school);   // computes the increase in gonadic weight
         }
     }
+    }
 
     /**
      * Computes the maintenance coefficient. Equation 5
