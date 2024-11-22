@@ -433,11 +433,22 @@ public class Configuration extends OLogger {
 
         this.flushEnabled = getBoolean("output.flush.enabled");
 
-        writeRestart = true;
-        if (!this.isNull("output.restart.enabled")) {
-            writeRestart = this.getBoolean("output.restart.enabled");
+        nSimulation = getInt("simulation.nsimulation");
+
+        nStepYear = getInt("simulation.time.ndtperyear");
+        // PhV 20160203, new parameter simulation.time.nstep
+        if (canFind("simulation.time.nstep")) {
+            nStep = getInt("simulation.time.nstep");
         } else {
-            warning("Could not find parameter 'output.restart.enabled'. Osmose assumes it is true and a NetCDF restart file will be created at the end of the simulation (or more, depending on parameters 'simulation.restart.recordfrequency.ndt' and 'simulation.restart.spinup').");
+            // if simulation.time.nstep not defined, use old parameter simulation.time.nyear
+            nStep = nStepYear * getInt("simulation.time.nyear");
+        }
+        
+        writeRestart = true;
+        if (!this.isNull("simulation.restart.enabled")) {
+            writeRestart = this.getBoolean("simulation.restart.enabled");
+        } else {
+            warning("Could not find parameter 'simulation.restart.enabled'. Osmose assumes it is true and a NetCDF restart file will be created at the end of the simulation (or more, depending on parameters 'simulation.restart.recordfrequency.ndt' and 'simulation.restart.spinup').");
         }
 
         restart = false;
@@ -446,15 +457,22 @@ public class Configuration extends OLogger {
         }
 
         restartFrequency = Integer.MAX_VALUE;
-        if (!this.isNull("output.restart.recordfrequency.ndt")) {
-            restartFrequency = this.getInt("output.restart.recordfrequency.ndt");
+        if (!this.isNull("simulation.restart.recordfrequency.ndt")) {
+            restartFrequency = this.getInt("simulation.restart.recordfrequency.ndt");
         }
 
         spinupRestart = 0;
-        if (!this.isNull("output.restart.spinup")) {
-            spinupRestart = this.getInt("output.restart.spinup") - 1;
+        if (!this.isNull("simulation.restart.spinup.nstep")) {
+            spinupRestart = this.getInt("simulation.restart.spinup.nstep");
+        } else {
+            if (!this.isNull("simulation.restart.spinup.nyear")) {
+              spinupRestart = nStepYear * this.getInt("simulation.restart.spinup.nyear");
+          }
         }
 
+        // Show the output folder
+        info("Simulation restart spinup is " + spinupRestart);
+        
         // Show the output folder
         info("Output folder set to " + outputPathname);
 
@@ -520,17 +538,6 @@ public class Configuration extends OLogger {
                     "Resource species may be badly defined. simulation.nresource=%d, number of resource types=%d",
                     nResource_test, this.nResource);
             error(errorMsg, null);
-        }
-
-        nSimulation = getInt("simulation.nsimulation");
-
-        nStepYear = getInt("simulation.time.ndtperyear");
-        // PhV 20160203, new parameter simulation.time.nstep
-        if (canFind("simulation.time.nstep")) {
-            nStep = getInt("simulation.time.nstep");
-        } else {
-            // if simulation.time.nstep not defined, use old parameter simulation.time.nyear
-            nStep = nStepYear * getInt("simulation.time.nyear");
         }
 
         nSchool = new int[nSpecies];
@@ -615,7 +622,7 @@ public class Configuration extends OLogger {
         }
 
         // Fisheries
-        boolean fisheryEnabled = getBoolean("fisheries.enabled");
+        boolean fisheryEnabled = getBoolean("process.multispecies.fisheries.enabled");
         this.isEconomyEnabled = getBoolean("economy.enabled");
 
         // true if fishingMortality is enabled or not (v3 or v4)

@@ -43,6 +43,9 @@ package fr.ird.osmose.util.version;
 import au.com.bytecode.opencsv.CSVReader;
 import au.com.bytecode.opencsv.CSVWriter;
 import fr.ird.osmose.Configuration;
+import fr.ird.osmose.output.FisheryOutput;
+import fr.ird.osmose.output.FisheryOutputDistrib;
+import fr.ird.osmose.output.spatial.SpatialFisheryOutput;
 import fr.ird.osmose.util.Separator;
 import java.io.FileReader;
 import java.io.FileWriter;
@@ -513,5 +516,62 @@ public class Releases {
                 } // end of bioen condition
             } // end of updatePara
         }, // end of Release(4.3.3)
+
+        new Release("4.4.0") {
+            @Override
+            void updateParameters() {
+
+                Configuration cfg = this.getConfiguration();
+
+                // update parameter names
+                if(cfg.canFind("fisheries.enabled")) {
+                    updateKey("fisheries.enabled", "process.multispecies.fisheries.enabled");
+                }
+                if(cfg.canFind("output.fishery.enabled")) {
+                    updateKey("output.fishery.enabled", "output.fisheries.enabled");
+                }
+                if(cfg.canFind("output.fishery.byage.enabled")) {
+                    updateKey("output.fishery.byage.enabled", "output.fisheries.byage.enabled");
+                }
+                if(cfg.canFind("output.fishery.bysize.enabled")) {
+                    updateKey("output.fishery.bysize.enabled", "output.fisheries.bysize.enabled");
+                }
+                // restart parameters
+                if(cfg.canFind("output.restart.enabled")) {
+                    updateKey("output.restart.enabled", "simulation.restart.enabled");
+                }
+                if(cfg.canFind("output.restart.spinup")) {
+                    updateKey("output.restart.spinup", "simulation.restart.spinup.nyear");
+                }
+                if(cfg.canFind("output.restart.recordFrequency.ndt")) {
+                    updateKey("output.restart.recordFrequency.ndt", "simulation.restart.recordFrequency.ndt");
+                }
+
+            }
+        },
+
+        new Release("4.4.0") {
+            @Override
+            void updateParameters() {
+
+                Configuration cfg = this.getConfiguration();
+
+                if (cfg.canFind("output.spatial.fishery.enabled")) {
+                    updateKey("output.spatial.fishery.enabled", "output.spatial.fisheries.enabled");
+                }
+
+                if (cfg.canFind("output.fishery.enabled")) {
+                    updateKey("output.fishery.enabled", "output.fisheries.enabled");
+                }
+
+                if (cfg.canFind("output.fishery.byage.enabled")) {
+                    updateKey("output.fishery.byage.enabled", "output.fisheries.byage.enabled");
+                }
+
+                if (cfg.canFind("output.fishery.bysize.enabled")) {
+                    updateKey("output.fishery.bysize.enabled", "output.fisheries.bysize.enabled");
+                }
+            }
+        }
     }; // end of ALL array
 } // end of class

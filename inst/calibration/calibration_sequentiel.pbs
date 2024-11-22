@@ -1,0 +1,17 @@
+#!/bin/csh
+#PBS -q sequentiel
+#PBS -l mem=8g
+#PBS -l walltime=00:25:00
+
+cd $PBS_O_WORKDIR
+
+# activate osmose environment
+source /usr/share/Modules/3.2.10/init/csh
+setenv R_LIBS /home1/datawork/rioliver/libs/R/lib
+module load R nco
+
+# run R in parallel mode
+time Rscript .calibration.R >>& calibration.log
+
+
+

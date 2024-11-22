@@ -180,7 +180,7 @@ public class MortalityProcess extends AbstractProcess {
         }
 
         // Possibility to use a seed in the definition of mortality algorithm
-        String key = "stochastic.mortality.randomseed.fixed";
+        String key = "simulation.fixedseed.enabled";
         if (getConfiguration().getBoolean(key, false)) {
             random = new XSRandom(getRank());
         } else {
@@ -322,7 +322,11 @@ public class MortalityProcess extends AbstractProcess {
             // recovers the list of schools for background species and
             // for the current cell. add this to the list of preys
             // for the current cell
-            preys.addAll(this.getBackgroundSchool(cell));
+
+            List<BackgroundSchool> bkgSchools = this.getBackgroundSchool(cell);
+            if (bkgSchools != null) {
+                preys.addAll(bkgSchools);
+            }
 
             // NOTE: at this stage, rsc and bkg biomass is not initialized but
             // it does not matter: only size is used to define access.
@@ -341,9 +345,11 @@ public class MortalityProcess extends AbstractProcess {
             }
 
             // Loop over background species, which are this time predators.
-            for (BackgroundSchool bkg : this.getBackgroundSchool(cell)) {
-                bkg.setAccessibility(predationMortality.getAccessibility(bkg, preys));
-                bkg.setPredSuccessRate(0);
+            if (bkgSchools != null) {
+                for (BackgroundSchool bkg : bkgSchools) {
+                    bkg.setAccessibility(predationMortality.getAccessibility(bkg, preys));
+                    bkg.setPredSuccessRate(0);
+                }
             }
 
         } // end of cell loop
@@ -359,25 +365,12 @@ public class MortalityProcess extends AbstractProcess {
         int nSpecies = this.getNSpecies();
         int nBkg = this.getNBkgSpecies();
 
-        // Init the biomass of background species by using the ResourceForcing class
-        for (List<BackgroundSchool> bkgSchoolList : this.getBkgSchoolSet().getValues()) { // loop over the cells
-            for (BackgroundSchool bkg : bkgSchoolList) { // loop over the resources
-                int ibkg = bkg.getSpeciesIndex() - nSpecies; // bkg index: [0, nbkg - 1]
-                double accessibleBiom = getResourceForcing(ibkg).getBiomass(bkg.getCell());
-                // note that here, the multiplication by proportion value is made in the
-                // setbiomass method
-                bkg.setBiomass(accessibleBiom, iStepSimu);
-                bkg.init(); // reset ndead prior predation
-            }
-        }
-
         // Update resources biomass
-        int offset = this.getNBkgSpecies();
         for (List<Resource> resources : resourcesSet.values()) { // loop over the cells
             for (Resource resource : resources) { // loop over the resources
                 int iRsc = resource.getSpeciesIndex() - nSpecies - nBkg; // [0, nrsc - 1]
                 double accessibleBiom = getConfiguration().getResourceSpecies(iRsc).getAccessibility(iStepSimu)
-                        * getResourceForcing(iRsc + offset).getBiomass(resource.getCell());
+                        * getResourceForcing(iRsc).getBiomass(resource.getCell());
                 resource.setBiomass(accessibleBiom);
             }
         }
@@ -487,10 +480,14 @@ public class MortalityProcess extends AbstractProcess {
 
         // Recover the list of background schools for the current cell
         List<BackgroundSchool> bkgSchool = this.getBackgroundSchool(cell);
-        int nBkg = bkgSchool.size();
-
-        // barrier.n: adding background species to the list of possible preys.
-        preys.addAll(bkgSchool);
+        int nBkg;
+        if (bkgSchool == null) {
+            nBkg = 0;
+        } else {
+            nBkg = bkgSchool.size();
+            // barrier.n: adding background species to the list of possible preys.
+            preys.addAll(bkgSchool);
+        }
 
         // preys contains focal species + resources + bkg species
         // Arrays for loop over schools are initialised with nfocal + nbackgroud
@@ -521,7 +518,7 @@ public class MortalityProcess extends AbstractProcess {
             // every fishery accounts as an independant fishing mortality source
             // note that we start at 1 since the addAll already include one fishing
             // mortality source
-            for (int i = 1; i < nfishery; i++) {
+            for (int i = 1; i < this.nfishery; i++) {
                 causes.add(MortalityCause.FISHING);
             }
         }
@@ -530,8 +527,8 @@ public class MortalityProcess extends AbstractProcess {
 
         if (fishingMortalityEnabled && fisheryEnabled) {
             // distinct random fishery sequences for every school
-            Integer[] singleSeqFishery = new Integer[nfishery];
-            for (int i = 0; i < nfishery; i++) {
+            Integer[] singleSeqFishery = new Integer[this.nfishery];
+            for (int i = 0; i < this.nfishery; i++) {
                 singleSeqFishery[i] = i;
             }
 
@@ -539,7 +536,7 @@ public class MortalityProcess extends AbstractProcess {
             // order, for each fished school, of the fishery attacks
             seqFishery = new Integer[ns + nBkg][];
             for (int i = 0; i < ns + nBkg; i++) {
-                seqFishery[i] = Arrays.copyOf(singleSeqFishery, nfishery);
+                seqFishery[i] = Arrays.copyOf(singleSeqFishery, this.nfishery);
                 shuffleArray(seqFishery[i]);
             }
         }
@@ -551,7 +548,10 @@ public class MortalityProcess extends AbstractProcess {
         // pred contains focal + bkg species
         ArrayList<AbstractSchool> listPred = new ArrayList<>();
         listPred.addAll(schools);
-        listPred.addAll(bkgSchool);
+
+        if(bkgSchool != null) {
+            listPred.addAll(bkgSchool);
+        }
 
         shuffleArray(seqPred);
         shuffleArray(seqFish);

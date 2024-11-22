@@ -150,7 +150,6 @@ public class FisheryOutput extends SimulationLinker implements IOutput {
         accessibleBiomassVarBuilder.addAttribute(new Attribute("species_names", attr));
         accessibleBiomassVarBuilder.addAttribute(new Attribute("fisheries_names", fisheryNames));
 
-
         try {
             /*
              * Validates the structure of the NetCDF file.
@@ -206,8 +205,7 @@ public class FisheryOutput extends SimulationLinker implements IOutput {
             }
         });
 
-
-        this.getBkgSchoolSet().getAllSchools().forEach((bkgSch) -> {
+        this.getBkgSchoolSet().getSchools().forEach((bkgSch) -> {
             int iSpecies = bkgSch.getSpeciesIndex();
             for (int iFishery = 0; iFishery < nFishery; iFishery++) {
                 biomass[iSpecies][iFishery] += bkgSch.getFishedBiomass(iFishery);
