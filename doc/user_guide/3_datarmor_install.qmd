@@ -78,7 +78,7 @@ To make Conda permanently available, you can add the line above commands to your
 
 Once Conda is set up, activate the Git environment by typing:
 
-```
+```bash
 conda activate git
 ```
 
@@ -86,7 +86,7 @@ This will give you access to a ``git`` executable configured with the LFS suppor
 
 Finally, type the following:
 
-```
+```bash
 git clone https://github.com/osmose-model/osmose.git
 ```
 
@@ -94,7 +94,7 @@ git clone https://github.com/osmose-model/osmose.git
 
 Some external libraries are no longer available from CRAN and must be manually installed. Download them by typing, from the terminal:
 
-```
+```bash
 wget https://cran.r-project.org/src/contrib/Archive/optimr/optimr_2019-12.16.tar.gz
 wget https://cran.r-project.org/src/contrib/Archive/Rcgmin/Rcgmin_2022-4.30.tar.gz
 wget https://cran.r-project.org/src/contrib/Archive/Rvmmin/Rvmmin_2018-4.17.tar.gz
@@ -129,7 +129,7 @@ install.packages(c("BB", "cmaes", "DEoptim", "dfoptim", "GenSA", "optimx", "pso"
 
 Leave the R console and download and install calibrar as follows:
 
-```
+```bash
 wget https://github.com/roliveros-ramos/calibrar/archive/refs/heads/master.zip -O calibrar.zip
 unzip calibrar.zip
 R CMD INSTALL calibrar-master/
@@ -139,13 +139,13 @@ R CMD INSTALL calibrar-master/
 
 To compile the Osmose Java code on Datarmor, you will need to use the ``maven`` conda environment. To activate it:
 
-```
+```bash
 conda activate maven
 ```
 
 Then, go in the ``osmose`` folder and type:
 
-```
+```bash
 mvn package
 ```
 
