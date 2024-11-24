@@ -22,7 +22,7 @@
  * Ricardo OLIVEROS RAMOS (ricardo.oliveros@gmail.com)
  * Philippe VERLEY (philippe.verley@ird.fr)
  * Laure VELEZ (laure.velez@ird.fr)
- * Nicolas Barrier (nicolas.barrier@ird.fr)
+ * Nicolas BARRIER (nicolas.barrier@ird.fr)
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -484,14 +484,14 @@ public class Osmose extends OLogger {
     public static void main(String... args) throws IOException, InvalidRangeException {
         OSMOSE.setupLogger();
         OSMOSE.readArgs(args);
-        OSMOSE.info("*********************************************");
-        OSMOSE.info("OSMOSE - Modelling Marine Exploited Ecosystems");
-        OSMOSE.info("http://www.osmose-model.org");
-        OSMOSE.info("*********************************************");
+        OSMOSE.info("----------------------------------------------");
+        OSMOSE.info("OSMOSE: Modelling Exploited Marine Ecosystems");
+        OSMOSE.info("        http://www.osmose-model.org");
+        OSMOSE.info("----------------------------------------------");
         OSMOSE.info("Software version: " + VersionManager.getInstance().getJarVersion());
         OSMOSE.run();
-        OSMOSE.info("OSMOSE Model copyright © IRD");
-        OSMOSE.info("*********************************************");
+        OSMOSE.info("OSMOSE " + VersionManager.getInstance().getJarVersion() + ", (c) IRD");
+        OSMOSE.info("----------------------------------------------");
     }
 
     /**
