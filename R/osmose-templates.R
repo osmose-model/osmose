@@ -278,7 +278,7 @@ osmose_tidy = function(input, key="reference") {
 .update_path = function(config, par, path) {
   ind = grep(names(config), pattern=par)
   for(i in ind) {
-    # print(config[[i]])
+    if(is.null(config[[i]])) next
     config[[i]] = file.path(path, basename(config[[i]]))
   }
   return(config)
