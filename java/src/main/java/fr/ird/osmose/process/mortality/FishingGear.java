@@ -182,7 +182,7 @@ public class FishingGear extends AbstractMortality {
 
         if (Double.isNaN(output)) {
           double size = school.getLength();
-          String msg = String.format("NaN in F (size=%2.2f): species (%.1f), time (%.3f), selectivity (%.9f), spatial(%.2f)", 
+          String msg = String.format("NaN in F (size=%.2f): species (%.1f), time (%.3f), selectivity (%.9f), spatial(%.2f)", 
           school.getLength(), speciesCatchability, timeSelect, sizeSelect, spatialSelect);
           info(msg);
         }

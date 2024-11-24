@@ -159,7 +159,7 @@ public class ReproductionProcess extends AbstractProcess {
         int cpt;
 
         if (getConfiguration().isBioenEnabled()) {
-            error("ReproductionProcess run method not usable in Osmose-PHYSIO", new Exception());
+            error("ReproductionProcess run method not usable with the bioenergetic module", new Exception());
         }
 
         int nSpecies = this.getNSpecies();
