@@ -22,7 +22,7 @@
  * Ricardo OLIVEROS RAMOS (ricardo.oliveros@gmail.com)
  * Philippe VERLEY (philippe.verley@ird.fr)
  * Laure VELEZ (laure.velez@ird.fr)
- * Nicolas Barrier (nicolas.barrier@ird.fr)
+ * Nicolas BARRIER (nicolas.barrier@ird.fr)
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -275,6 +275,10 @@ public class Species implements ISpecies {
         return (float) (Math.pow(weight / c, (1 / bPower)));
     }
 
+    public float computeEggLength(float weight) {
+        return (float) (Math.pow(weight / 0.5366887, (1 / 3)));
+    }
+    
     /**
      * Returns the lifespan of the species. Parameter <i>species.lifespan.sp#</i>
      *
@@ -321,10 +325,17 @@ public class Species implements ISpecies {
      * Returns the size of an egg. Parameter <i>species.egg.size.sp#</i>
      *
      * @return the size of an egg in centimeter
+     * @note (roliveros): bioen method use an allometry estimated for adults. 
+     * A better approach would be assuming an spherical egg, and the fact that 
+     * most fish eggs are slightly denser than seawater (around 1.025 g/cm³ 
+     * for seawater of typical salinity), allowing them to remain suspended at 
+     * certain depths rather than sinking or floating. With this, the volume of 
+     * the egg would be := (4/3)*pi*(size/2)^3 = (pi/6)*size^3, and its 
+     * weight := 1.025*(pi/6)*size^3. Based on this, we get bPower=3 and c~=0.5367.
      */
     public float getEggSize() {
         Configuration cfg = Osmose.getInstance().getConfiguration();
-        float output = cfg.isBioenEnabled() ? this.computeLength(eggWeight) : this.eggSize;
+        float output = cfg.isBioenEnabled() ? this.computeEggLength(eggWeight) : this.eggSize;
         return output;
     }
 
@@ -339,9 +350,12 @@ public class Species implements ISpecies {
 
     public boolean isSexuallyMature(School school) {
         if (Osmose.getInstance().getConfiguration().isBioenEnabled()) {
-            throw new UnsupportedOperationException("isSexualluMature not supported in Osmose-PHYSIO");
+            throw new UnsupportedOperationException("isSexualluMature not supported in the bionergetics module");
         } else {
-            return (school.getLength() >= sizeMaturity) || (school.getAge() >= ageMaturity);
+           if(school.isMature()) return true; // once mature, always mature
+           boolean output = (school.getLength() >= sizeMaturity) || (school.getAge() >= ageMaturity); 
+           school.setIsMature(output);
+           return school.isMature();
         }
     }
 
