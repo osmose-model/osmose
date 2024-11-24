@@ -490,7 +490,7 @@ public class Osmose extends OLogger {
         OSMOSE.info("----------------------------------------------");
         OSMOSE.info("Software version: " + VersionManager.getInstance().getJarVersion());
         OSMOSE.run();
-        OSMOSE.info("OSMOSE " + VersionManager.getInstance().getJarVersion() + " (c) IRD, 2024.");
+        OSMOSE.info("OSMOSE " + VersionManager.getInstance().getJarVersion() + " (c) 2024 IRD.");
         OSMOSE.info("----------------------------------------------");
     }
 
