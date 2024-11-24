@@ -151,14 +151,6 @@ public class FishingGear extends AbstractMortality {
 
         int index = getSimulation().getIndexTimeSimu();
 
-        // Recovers the school cell (used to recover the map factor)
-        Cell cell = school.getCell();
-
-        double spatialSelect = this.fisheryMapSet.getValue(index, cell);
-        if (spatialSelect == 0.0) {
-            return 0.0;
-        }
-
         int speciesIndex = school.getSpeciesIndex();
 
         double speciesCatchability = this.catchability[speciesIndex];
@@ -166,16 +158,36 @@ public class FishingGear extends AbstractMortality {
             return 0.d;
         }
 
+        // Recovers the school cell (used to recover the map factor)
+        Cell cell = school.getCell();
+
+        double spatialSelect = this.fisheryMapSet.getValue(index, cell);
+        if (spatialSelect == 0.0) {
+            return 0.0;
+        }
+        
         // recovers the time varying rate of the fishing mortality
         // as a product of FBase, FSeason and FSeasonality
         double timeSelect = fishingBase.getFisheryBase(index);
         timeSelect *= this.fishingPeriod.getFisheryPeriod(index);
         timeSelect *= this.fishingSeasonality.getFisherySeasonality(index);
 
+        if (timeSelect == 0.d) {
+            return 0.d;
+        }
+        
         // Recovers the size/age fishery selectivity factor [0, 1]
         double sizeSelect = selectivity.getSelectivity(index, school);
+        double output = speciesCatchability * timeSelect * sizeSelect * spatialSelect; 
 
-        return speciesCatchability * timeSelect * sizeSelect * spatialSelect;
+        if (Double.isNaN(output)) {
+          double size = school.getLength();
+          String msg = String.format("NaN in F (size=%2.2f): species (%.1f), time (%.3f), selectivity (%.9f), spatial(%.2f)", 
+          school.getLength(), speciesCatchability, timeSelect, sizeSelect, spatialSelect);
+          info(msg);
+        }
+        
+        return output;
     }
 
     /**
