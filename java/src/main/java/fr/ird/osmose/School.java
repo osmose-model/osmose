@@ -22,7 +22,7 @@
  * Ricardo OLIVEROS RAMOS (ricardo.oliveros@gmail.com)
  * Philippe VERLEY (philippe.verley@ird.fr)
  * Laure VELEZ (laure.velez@ird.fr)
- * Nicolas Barrier (nicolas.barrier@ird.fr)
+ * Nicolas BARRIER  (nicolas.barrier@ird.fr)
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -160,10 +160,11 @@ public class School extends AbstractSchool {
 
 
     // Initialisation of maturity variables.
-    // by default the school is imature.
+    // by default the school is immature.
     private double ageMature = 0;
     private double sizeMature = 0;
     private boolean isMature = false;
+    private boolean hasSpawned = false;
 
     private double e_net_faced; // mean net energy faced during life
     private double nEggs;  // number of eggs that is released by the school
@@ -672,7 +673,7 @@ public class School extends AbstractSchool {
     }
 
     /**
-     * Returns the age at maturity (only used for outputs).
+     * Returns the size at maturity (only used for outputs).
      *
      * @return
      */
@@ -690,7 +691,7 @@ public class School extends AbstractSchool {
     }
 
     /**
-     * Sets the age at maturity (only used for outputs).
+     * Sets the size at maturity (only used for outputs).
      *
      * @param sizemat
      */
