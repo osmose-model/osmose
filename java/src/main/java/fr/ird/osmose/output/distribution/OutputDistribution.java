@@ -128,7 +128,7 @@ public class OutputDistribution extends OsmoseLinker {
         }
 
         if(min == 0) {
-            String message = "The minimum value was set equal to 0. It has been corrected to " + String.valueOf(incr);
+            String message = "The minimum value for output distribution was set equal to 0. It has been corrected to " + String.valueOf(incr);
             warning(message);
             min = incr;
         }
