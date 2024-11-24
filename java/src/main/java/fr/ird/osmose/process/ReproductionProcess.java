@@ -182,6 +182,8 @@ public class ReproductionProcess extends AbstractProcess {
             }
             // increment age
             school.incrementAge();
+            // update spawner status
+            school.setHasSpawned(true);
         }
 
         // Loop over all species

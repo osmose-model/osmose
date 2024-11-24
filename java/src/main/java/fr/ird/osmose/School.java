@@ -664,6 +664,21 @@ public class School extends AbstractSchool {
     }
 
     /**
+     * Returns true if the individual has spawned.
+     *
+     * @return
+     */
+    public boolean hasSpawned() {
+        return this.hasSpawned;
+    }
+
+    /**
+     * Set whether the individual has spawned.
+     */
+    public void setHasSpawned(boolean spawned) {
+        this.hasSpawned = spawned;
+    }
+    /**
      * Returns the age at maturity (only used for outputs).
      *
      * @return
