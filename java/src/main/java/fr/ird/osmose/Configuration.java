@@ -414,14 +414,14 @@ public class Configuration extends OLogger {
         // barrier.n: reads the parameter that defines whether
         // the bioen module should be used.
         // String keybioen = "simulation.use.bioen";
-        String keybioen = "simulation.bioen.enabled";
+        String keybioen = "module.bioenergetics.enabled";
         this.bioenEnabled = this.getBoolean(keybioen);
 
         this.checkPreyRecord();
 
         this.geneticEnabled = false;
         if (this.bioenEnabled) {
-            String key = "simulation.genetic.enabled";
+            String key = "module.genetics.enabled";
             this.geneticEnabled = this.getBoolean(key);
         }
 
@@ -622,8 +622,8 @@ public class Configuration extends OLogger {
         }
 
         // Fisheries
-        boolean fisheryEnabled = getBoolean("process.multispecies.fisheries.enabled");
-        this.isEconomyEnabled = getBoolean("economy.enabled");
+        boolean fisheryEnabled = getBoolean("module.multispecies.fisheries.enabled");
+        this.isEconomyEnabled = getBoolean("module.bioeconomics.enabled");
 
         // true if fishingMortality is enabled or not (v3 or v4)
         if (!isNull("simulation.fishing.mortality.enabled")) {
