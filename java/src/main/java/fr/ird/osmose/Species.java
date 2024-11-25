@@ -106,6 +106,7 @@ public class Species implements ISpecies {
      * Weight (gram) of eggs. Parameter <i>species.egg.weight.sp#</i>
      */
     private final float eggWeight;
+    private final float eggDensity; // used in bioen
 
     private int zlayer = 0;
 
@@ -150,6 +151,11 @@ public class Species implements ISpecies {
 
         c = cfg.getFloat("species.length2weight.condition.factor.sp" + fileIndex);
         bPower = cfg.getFloat("species.length2weight.allometric.power.sp" + fileIndex);
+        if(cfg.canFind("species.egg.density.sp" + fileIndex)) {
+          eggDensity = cfg.getFloat("species.egg.density.sp" + fileIndex);
+        } else {
+          eggDensity = 1.025;
+        }
 
         // If the economic module is on, then we read the file containing the prices for different
         // size classes.
@@ -276,7 +282,8 @@ public class Species implements ISpecies {
     }
 
     public float computeEggLength(float weight) {
-        return (float) (Math.pow(weight / 0.5366887, (1 / 3)));
+        //double eggDensity = 1.025 // average seawater density g/cm3, volume = (pi/6)*size^3
+        return (float) (Math.pow(6 * weight / (Math.PI * eggDensity), (1 / 3)));
     }
     
     /**
@@ -332,6 +339,7 @@ public class Species implements ISpecies {
      * certain depths rather than sinking or floating. With this, the volume of 
      * the egg would be := (4/3)*pi*(size/2)^3 = (pi/6)*size^3, and its 
      * weight := 1.025*(pi/6)*size^3. Based on this, we get bPower=3 and c~=0.5367.
+     * This is implemented in computeEggLength() now. 
      */
     public float getEggSize() {
         Configuration cfg = Osmose.getInstance().getConfiguration();
@@ -350,11 +358,17 @@ public class Species implements ISpecies {
 
     public boolean isSexuallyMature(School school) {
         if (Osmose.getInstance().getConfiguration().isBioenEnabled()) {
-            throw new UnsupportedOperationException("isSexualluMature not supported in the bionergetics module");
+            throw new UnsupportedOperationException("isSexuallyMature not supported in the bionergetics module");
         } else {
            if(school.isMature()) return true; // once mature, always mature
-           boolean output = (school.getLength() >= sizeMaturity) || (school.getAge() >= ageMaturity); 
-           school.setIsMature(output);
+           boolean output;
+           boolean stochasticReproduction = false;
+           if (stochasticReproduction) {
+              school.setIsMature(output);
+           } else {
+              output = (school.getLength() >= sizeMaturity) || (school.getAge() >= ageMaturity); 
+              school.setIsMature(output);
+           }
            return school.isMature();
         }
     }
