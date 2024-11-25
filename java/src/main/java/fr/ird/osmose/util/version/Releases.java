@@ -547,15 +547,6 @@ public class Releases {
                     updateKey("output.restart.recordFrequency.ndt", "simulation.restart.recordFrequency.ndt");
                 }
 
-            }
-        },
-
-        new Release("4.4.0") {
-            @Override
-            void updateParameters() {
-
-                Configuration cfg = this.getConfiguration();
-
                 if (cfg.canFind("output.spatial.fishery.enabled")) {
                     updateKey("output.spatial.fishery.enabled", "output.spatial.fisheries.enabled");
                 }
@@ -572,6 +563,28 @@ public class Releases {
                     updateKey("output.fishery.bysize.enabled", "output.fisheries.bysize.enabled");
                 }
             }
-        }
+        },
+
+        new Release("4.4.1") {
+            @Override
+            void updateParameters() {
+
+                Configuration cfg = this.getConfiguration();
+
+                if (cfg.canFind("process.multispecies.fisheries.enabled")) {
+                    updateKey("process.multispecies.fisheries.enabled", "module.multispecies.fisheries.enabled");
+                }
+                if (cfg.canFind("simulation.bioen.enabled")) {
+                    updateKey("simulation.bioen.enabled", "module.bioenergetics.enabled");
+                }
+                if (cfg.canFind("simulation.genetic.enabled")) {
+                    updateKey("simulation.genetic.enabled", "module.genetics.enabled");
+                }
+                if (cfg.canFind("economy.enabled")) {
+                    updateKey("economy.enabled", "module.bioeconomics.enabled");
+                }
+
+            }
+        }        
     }; // end of ALL array
 } // end of class

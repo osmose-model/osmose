@@ -90,6 +90,8 @@ public class ReproductionProcess extends AbstractProcess {
     public void init() {
 
         boolean normalisationEnabled = false;
+        String mode;
+        
         if(!getConfiguration().isNull("reproduction.normalisation.enabled")) {
             normalisationEnabled = getConfiguration().getBoolean("reproduction.normalisation.enabled");
         }
@@ -118,8 +120,15 @@ public class ReproductionProcess extends AbstractProcess {
                 sum += d;
             }
             if (sum > 0) {
+                if (!getConfiguration().isNull("species.reproduction.mode.sp" + i)) {
+                    mode = getConfiguration().getString("species.reproduction.mode.sp" + i);
+                } else {
+                    mode = "oviparity"; // default
+                }
                 sexRatio[cpt] = getConfiguration().getDouble("species.sexratio.sp" + i);
-                beta[cpt] = getConfiguration().getDouble("species.relativefecundity.sp" + i);
+                String key = (mode.equals("oviparity")) ? "relativefecundity" : "absolutefecundity"; 
+                info(mode + " " + key);
+                beta[cpt] = getConfiguration().getDouble("species."+ key +".sp" + i);
             }
             cpt++;
         }
@@ -157,6 +166,7 @@ public class ReproductionProcess extends AbstractProcess {
     public void run() {
 
         int cpt;
+        String mode;
 
         if (getConfiguration().isBioenEnabled()) {
             error("ReproductionProcess run method not usable with the bioenergetic module", new Exception());
@@ -176,15 +186,21 @@ public class ReproductionProcess extends AbstractProcess {
         // loop over all the schools to compute SSB
         for (School school : getSchoolSet().getSchools()) {
             int i = school.getSpeciesIndex();
+        if (!getConfiguration().isNull("species.reproduction.mode.sp" + i)) {
+            mode = getConfiguration().getString("species.reproduction.mode.sp" + i);
+        } else {
+            mode = "oviparity"; // default
+        }
             // increment spawning stock biomass
-            if (reproduce[i] && school.getSpecies().isSexuallyMature(school)) {
-                SSB[i] += school.getInstantaneousBiomass();
-            }
+        if (reproduce[i] && school.getSpecies().isSexuallyMature(school)) {
+            if (mode.equals("oviparity")) SSB[i] += school.getInstantaneousBiomass();  
+            if (mode.equals("viviparity")) SSB[i] += school.getInstantaneousAbundance();  
             // increment age
             school.incrementAge();
             // update spawner status
             school.setHasSpawned(true);
         }
+      }
 
         // Loop over all species
         for (cpt = 0; cpt < this.getNSpecies(); cpt++) {
@@ -201,6 +217,7 @@ public class ReproductionProcess extends AbstractProcess {
             }
             // compute nomber of eggs to be released
             double season = getSeason(getSimulation().getIndexTimeSimu(), species);
+            //double factor = (true) ? 1000000 : 1;
             double nEgg = sexRatio[cpt] * beta[cpt] * season * SSB[cpt] * 1000000;
             // lay age class zero
             int nSchool = getConfiguration().getNSchool(cpt);
