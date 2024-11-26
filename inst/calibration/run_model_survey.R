@@ -38,10 +38,10 @@ run_model = function(par, conf, osmose, is_a_test=FALSE, version="4.3.3", option
   par = get_par(par, linear=TRUE, as.is = TRUE) # write parameters in linear scale.
 
   write_osmose(par, file='calibration_parameters.osm')
-  
+
   names(larval_deviates)  = paste("larval", get_species(conf, nm=names(larval_deviates)), sep="_")
   names(fishing_deviates) = paste("F", get_fisheries(conf, nm=names(fishing_deviates)), sep="_")
-  
+
   # run osmose!
   if(!isTRUE(is_a_test)) {
     run_osmose(input='osmose-calibration.osm', output='output', osmose=osmose, 
