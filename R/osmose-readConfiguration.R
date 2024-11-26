@@ -301,6 +301,8 @@ read.cal = function(conf, sp) {
   a = .getPar(this, "species.length2weight.condition.factor")
   b = .getPar(this, "species.length2weight.allometric.power")
   
+  taxa = .getPar(this, "species.taxa")
+  
   file = .getPar(this, "fisheries.catchatlength.file")
   msg = sprintf("Only one catch-at-length file must be provided for %s.", spname)
   if(length(file)>1) stop(msg)
@@ -449,13 +451,18 @@ read.cal = function(conf, sp) {
   if(irat < 0.97) msg = c(msg, msg3)
   
   err = NULL
-  if(ratio < 0.7) err = c(err, msg1)
-  if(lmax_pop/Linf < 0.7) err = c(err, msg2)
-  if(irat < 0.7) err = c(err, msg3)
+  
+  cond0 = ratio < 0.7 
+  cond1 = (lmax_pop/Linf < 0.7) & !(taxa %in% c("cephalopods"))
+  cond2 = irat < 0.7
+  
+  if(cond0) err = c(err, msg1)
+  if(cond1) err = c(err, msg2)
+  if(cond2) err = c(err, msg3)
   
   MSG = c(MSG, msg)
   
-  if((ratio < 0.7) | (lmax_pop/Linf < 0.7) | (irat < 0.7))
+  if(cond0 | cond1 | cond2)
     stop(paste(c("Inconsistent data supplied for the initialisation. Please check:", err), 
                collapse="\n"), call. = FALSE)
   
