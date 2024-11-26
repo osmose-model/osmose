@@ -477,7 +477,7 @@ read.biomass = function(conf, sp) {
   
   this = .getPar(conf, sp=sp)
   ndt = conf$simulation.time.ndtperyear 
-  T = ndt*conf$simulation.time.nyear
+  T = .read_nstep(conf)
   biofile = .getPar(this, "observed.biomass.file")
   if(is.null(biofile)) {
     message(sprintf("Observed biomass has not been provided for species %d, using 'observed.biomass.guess' instead.", sp))
@@ -490,23 +490,41 @@ read.biomass = function(conf, sp) {
   ivar= .getPar(this, "species.name")
   ndtbio = .getPar(this, "observed.biomass.ndtPerYear")
   if(is.null(ndtbio)) stop("Parameter 'observed.biomass.ndtPerYear' is missing.")
+  if(nrow(bioref) < ndtbio) 
+    stop(sprintf("Less than one year of data in %s, check observed.biomass.ndtPerYear.sp%d=%d", 
+                 biofile, sp, ndtbio), call. = FALSE)
+  test = ((nrow(bioref)/ndtbio) %% 1) != 0
+  if(test) stop(sprintf("Incomplete year suplied in file %s, please check.", biofile), call. = FALSE)
   ix = .time.conv(ndtbio, ndt, nrow(bioref), T)
   biomass = bioref[ix$ind, ivar]/q
   return(biomass)
   
 }
 
+.read_nstep = function(conf) {
+  T = .getPar(conf, "time.nstep")
+  if(!is.null(T)) return(T)
+  ndt = .getPar(conf, "simulation.time.ndtperyear") 
+  T = ndt*.getPar(conf, "simulation.time.nyear")
+  return(T)
+}
+
 read.yield = function(conf, sp) {
   
   this = .getPar(conf, sp=sp)
   ndt = conf$simulation.time.ndtperyear 
-  T = ndt*conf$simulation.time.nyear
+  T = .read_nstep(conf)
   biofile = .getPar(this, "fisheries.yield.file")
   if(is.null(biofile)) stop("Landings have not been provided.")
   bioref = .readCSV(biofile)
   ivar= .getPar(this, "species.name")
   ndtbio = .getPar(this, "fisheries.yield.ndtPerYear")
   if(is.null(ndtbio)) stop("Parameter 'fisheries.yield.ndtPerYear' is missing.")
+  if(nrow(bioref) < ndtbio) 
+    stop(sprintf("Less than one year of data in %s, check fisheries.yield.ndtPerYear.sp%d=%d", 
+                 biofile, sp, ndtbio), call. = FALSE)
+  test = ((nrow(bioref)/ndtbio) %% 1) != 0
+  if(test) stop(sprintf("Incomplete year suplied in file %s, please check.", biofile), call. = FALSE)
   ix = .time.conv(ndtbio, ndt, nrow(bioref), T)
   biomass = ix$w*bioref[ix$ind, ivar]
   
