@@ -8,6 +8,8 @@
              L0      = .getPar(this, "fisheries.selectivity.l0"),
              L1      = .getPar(this, "fisheries.selectivity.l1"),
              plateau = .getPar(this, "fisheries.selectivity.plateau"),
+             breaks  = .getPar(this, "fisheries.selectivity.breaks"),
+             values  = .getPar(this, "fisheries.selectivity.values"),
              tiny    = .getPar(this, "fisheries.selectivity.tiny"))
   
   if(is.null(par$tiny)) par$tiny = 1e-3
@@ -33,7 +35,7 @@
                                              plateau=par$plateau, L1=par$L1, tiny=par$tiny), # 5-par
                "7"  = .selectivity_doublenorm(x=x, L50=par$L50, L75=par$L75, L25=par$L25, 
                                              plateau=par$plateau, L1=par$L1, L0=par$L0, tiny=par$tiny), # 6-par
-               "9" = .selectivity_nonpar(x, values=par$values, xxx=par$xxx) 
+               "9" = .selectivity_nonpar(x, values=par$values, breaks=par$breaks),
                stop("Invalid selectivity 'type': currently implemented 'logistic',
                     'gaussian', 'lnorm', and 'knife-edge'. See help.")
   )
@@ -71,6 +73,18 @@
   sd = (L75-L50)/qnorm(0.75)
   mean = L50 # mean and median!
   selec = dnorm(x, mean=mean, sd=sd)/dnorm(L50, mean=mean, sd=sd)
+  selec[selec<tiny] = 0
+  names(selec) = x
+  return(selec)
+  
+}
+
+.selectivity_probit = function(x, L50, L75, tiny=1e-6) {
+  
+  sd = (L75-L50)/qnorm(0.75)
+  mean = L50
+  selec = pnorm(x, mean=mean, sd=sd)
+  selec = selec/max(selec, na.rm=TRUE)
   selec[selec<tiny] = 0
   names(selec) = x
   return(selec)
@@ -155,9 +169,9 @@
 }
 
 # 9: non-parametric selectivity
-.selectivity_nonpar = function(x, values=par$values, xxx=par$xxx) {
+.selectivity_nonpar = function(x, values=par$values, breaks=par$breaks) {
   
-  
+  # complete
   
   names(selec) = x
   return(selec)
