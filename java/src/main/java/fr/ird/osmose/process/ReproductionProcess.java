@@ -74,6 +74,10 @@ public class ReproductionProcess extends AbstractProcess {
      */
     private double[] beta;
     /*
+     * All the modes of reproduction
+     */
+    private String[] modes;
+    /*
      * Seeding biomass in tonne
      */
     private double[] seedingBiomass;
@@ -99,6 +103,7 @@ public class ReproductionProcess extends AbstractProcess {
         int nSpecies = getNSpecies();
         sexRatio = new double[nSpecies];
         beta = new double[nSpecies];
+        modes = new String[nSpecies];
         seasonSpawning = new double[nSpecies][];
         int cpt = 0;
         for (int i : getConfiguration().getFocalIndex()) {
@@ -129,6 +134,7 @@ public class ReproductionProcess extends AbstractProcess {
                 String key = (mode.equals("oviparity")) ? "relativefecundity" : "absolutefecundity"; 
                 info(mode + " " + key);
                 beta[cpt] = getConfiguration().getDouble("species."+ key +".sp" + i);
+                modes[cpt] = mode;
             }
             cpt++;
         }
@@ -167,6 +173,7 @@ public class ReproductionProcess extends AbstractProcess {
 
         int cpt;
         String mode;
+        double spawners = 0.0f;
 
         if (getConfiguration().isBioenEnabled()) {
             error("ReproductionProcess run method not usable with the bioenergetic module", new Exception());
@@ -176,6 +183,7 @@ public class ReproductionProcess extends AbstractProcess {
 
         // spawning stock biomass per species
         double[] SSB = new double[nSpecies];
+        double[] SSN = new double[nSpecies];
 
         // check whether the species do reproduce or not
         boolean[] reproduce = new boolean[nSpecies];
@@ -193,14 +201,14 @@ public class ReproductionProcess extends AbstractProcess {
         }
             // increment spawning stock biomass
         if (reproduce[i] && school.getSpecies().isSexuallyMature(school)) {
-            if (mode.equals("oviparity")) SSB[i] += school.getInstantaneousBiomass();  
-            if (mode.equals("viviparity")) SSB[i] += school.getInstantaneousAbundance();  
+              SSB[i] += school.getInstantaneousBiomass();  
+              SSN[i] += school.getInstantaneousAbundance();  
+            }
             // increment age
             school.incrementAge();
             // update spawner status
             school.setHasSpawned(true);
         }
-      }
 
         // Loop over all species
         for (cpt = 0; cpt < this.getNSpecies(); cpt++) {
@@ -215,10 +223,20 @@ public class ReproductionProcess extends AbstractProcess {
             if (getSimulation().getIndexTimeSimu() < yearMaxSeeding && SSB[cpt] == 0.) {
                 SSB[cpt] = seedingBiomass[cpt];
             }
-            // compute nomber of eggs to be released
+            // compute number of eggs to be released
             double season = getSeason(getSimulation().getIndexTimeSimu(), species);
-            //double factor = (true) ? 1000000 : 1;
-            double nEgg = sexRatio[cpt] * beta[cpt] * season * SSB[cpt] * 1000000;
+            mode = modes[cpt];
+            if (mode.equals("oviparity")) {
+                  spawners = 1000000*SSB[cpt]; // spawners in grams  
+            }
+            if (mode.equals("viviparity")) {
+                  spawners = SSN[cpt]; // spawners in individuals
+                  //String msg = String.format("SSB=%.1f, SSN=%.1f, w=%.4f, beta=%.1f, season=%.1f, ratio=%f", 
+                  //1e6*SSB[cpt], SSN[cpt], 1e6*SSB[cpt]/SSN[cpt], beta[cpt], season, SSN[cpt]/(1e6*SSB[cpt]));
+                  //info(msg);
+            }
+            
+            double nEgg = sexRatio[cpt] * beta[cpt] * season * spawners;
             // lay age class zero
             int nSchool = getConfiguration().getNSchool(cpt);
             // nschool increases with time to avoid flooding the simulation with too many schools since the beginning

@@ -41,6 +41,8 @@
 
 package fr.ird.osmose;
 
+import org.apache.commons.math3.distribution.NormalDistribution;
+
 /**
  * This class represents a species. It is characterised by the following
  * variables:
@@ -99,6 +101,12 @@ public class Species implements ISpecies {
      */
     private final float ageMaturity;
     /**
+     * Use stochastic reproduction or not, using maturity ogive</i>
+     */
+    private boolean stochasticReproduction;
+    private double matL50, matL75, matsd;
+    private NormalDistribution maturityDistrib;
+    /**
      * Size (cm) of eggs. Parameter <i>species.egg.size.sp#</i>
      */
     private final float eggSize;
@@ -154,7 +162,7 @@ public class Species implements ISpecies {
         if(cfg.canFind("species.egg.density.sp" + fileIndex)) {
           eggDensity = cfg.getFloat("species.egg.density.sp" + fileIndex);
         } else {
-          eggDensity = 1.025;
+          eggDensity = 1.025f;
         }
 
         // If the economic module is on, then we read the file containing the prices for different
@@ -169,14 +177,25 @@ public class Species implements ISpecies {
             // If not bioen, initialize age at maturity
             // used for reproduction process and egg size
             // used for growth
-            if (!cfg.isNull("species.maturity.size.sp" + fileIndex)) {
-                sizeMaturity = cfg.getFloat("species.maturity.size.sp" + fileIndex);
-                ageMaturity = Float.MAX_VALUE;
+            if (cfg.canFind("species.maturity.l50.sp" + fileIndex)) {
+              stochasticReproduction = true;
+              matL50 = cfg.getDouble("species.maturity.l50.sp" + fileIndex);
+              matL75 = cfg.getDouble("species.maturity.l75.sp" + fileIndex);
+              matsd = (matL75 - matL50) / 0.674489750196082;
+              maturityDistrib = new NormalDistribution(matL50, matsd);
+              sizeMaturity = Float.MAX_VALUE;
+              ageMaturity  = Float.MAX_VALUE;
             } else {
-                ageMaturity = cfg.getFloat("species.maturity.age.sp" + fileIndex);
-                sizeMaturity = Float.MAX_VALUE;
+              stochasticReproduction = false;
+              if (cfg.canFind("species.maturity.size.sp" + fileIndex)) {
+                  sizeMaturity = cfg.getFloat("species.maturity.size.sp" + fileIndex);
+                  ageMaturity  = Float.MAX_VALUE;
+              } else {
+                  ageMaturity = cfg.getFloat("species.maturity.age.sp" + fileIndex);
+                  sizeMaturity = Float.MAX_VALUE;
+              }
             }
-
+            
             starvationInterface = (School sch) -> this.isStarvationEnabledNoBioen(sch);
             eggSize = cfg.getFloat("species.egg.size.sp" + fileIndex);
 
@@ -362,8 +381,11 @@ public class Species implements ISpecies {
         } else {
            if(school.isMature()) return true; // once mature, always mature
            boolean output;
-           boolean stochasticReproduction = false;
            if (stochasticReproduction) {
+              double Ft  = maturityDistrib.cumulativeProbability(school.getLength());
+              double Fti = maturityDistrib.cumulativeProbability(school.getLengthIniStep());
+              double prob = (Ft - Fti) / (1 - Fti);
+              output = Math.random() < prob;
               school.setIsMature(output);
            } else {
               output = (school.getLength() >= sizeMaturity) || (school.getAge() >= ageMaturity); 

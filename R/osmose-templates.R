@@ -232,6 +232,7 @@ osmose_tidy = function(input, key="reference") {
     Linf = gpar(xspp, par="linf", as.is = FALSE, default=0)
     A = gpar(xspp, par="lifespan", as.is = FALSE, default=0)
     smat = gpar(xspp, par="maturity.size", as.is = FALSE)
+    if(is.null(smat)) smat = gpar(xspp, par="maturity.l50", as.is = FALSE)
     amat = unlist(gpar(xspp, par="maturity.age", as.is=TRUE, default=ifelse(A<10, 1, 2)))
     if(is.null(smat)) smat = osmose:::VB(amat, this=xspp)
     
