@@ -89,7 +89,7 @@ public class FisherySelectivity extends OsmoseLinker {
     private double[] selectTypeArray;
 
     /**
-     * Array of selectivity methods. 0:=knife edge. 1:= Sigmoid 2:= Gaussian 
+     * Array of selectivity methods. 0:=knife edge. 1:= Sigmoid 2:= Gaussian
      * 3:=logNormal, 4=3-par double normal, 5=4-par double normal, 6=5-par double normal,
      * 7=6-par double normal, 8:= splines (not implemented yet), 9:=Non-parametric
      */
@@ -149,7 +149,7 @@ public class FisherySelectivity extends OsmoseLinker {
             String msg = String.format("%d: Using default tiny (%f).", fIndex, this.tiny);
             info(msg);
         }
-        
+
         key = String.format("%s.a50.%s%d", selPrefix, selSuffix, fIndex);
         if (!cfg.isNull(key)) {
             String msg0 = "Age selectivity is not compatible with multispecies fisheries and will be deprecated soon.";
@@ -194,11 +194,11 @@ public class FisherySelectivity extends OsmoseLinker {
     public void initByLength() {
 
         String prefix, key, msg;
-        
+
         boolean use_l50;
         boolean use_l75, use_l25, use_plateau, use_l0, use_l1;
         boolean use_nonpar, nonpar_only;
-        
+
         use_l50 = true;
         use_l75 = use_l25 = use_plateau = use_l0 = use_l1 = false;
         use_nonpar = false;
@@ -206,9 +206,9 @@ public class FisherySelectivity extends OsmoseLinker {
 
         prefix = selPrefix + ".type";
         this.selectTypeArray = this.initArray(prefix);
-        
+
         for (double v : this.selectTypeArray) {
-          if (v != 99) nonpar_only = false; 
+          if (v != 9) nonpar_only = false;
           if (v == 1) use_l75 = true;
           if (v == 2) use_l75 = true;
           if (v == 3) use_l75 = true;
@@ -220,41 +220,41 @@ public class FisherySelectivity extends OsmoseLinker {
         }
 
         if (nonpar_only)  use_l50 = false;
-        
+
         if (use_l50) {
             prefix = selPrefix + ".l50";
             this.l50Array = this.initArray(prefix);
         }
-        
+
         if (use_l75) {
             prefix = selPrefix + ".l75";
             this.l75Array = this.initArray(prefix);
         }
-        
+
         if (use_l25) {
             prefix = selPrefix + ".l25";
             this.l25Array = this.initArray(prefix);
         }
-        
+
         if (use_plateau) {
             prefix = selPrefix + ".plateau";
             this.plateauArray = this.initArray(prefix);
         }
-        
+
         if (use_l1) {
             prefix = selPrefix + ".l1";
             this.l1Array = this.initArray(prefix);
         }
-        
+
         if (use_l0) {
             prefix = selPrefix + ".l0";
             this.l0Array = this.initArray(prefix);
         }
-        
+
         if (use_nonpar) {
-          
+
           key = String.format("%s.breaks.%s%d", selPrefix, selSuffix, fIndex);
-          
+
           if(getConfiguration().isNull(key)) {
             error("Could not find parameter " + key, new NullPointerException("Parameter " + key + " not found "));
           }
@@ -266,13 +266,13 @@ public class FisherySelectivity extends OsmoseLinker {
           if(getConfiguration().isNull(key)) {
             error("Could not find parameter " + key, new NullPointerException("Parameter " + key + " not found "));
           }
-          
+
           this.discreteSelectivities = getConfiguration().getArrayDouble(key);
           if(this.discreteSelectivities.length != nStage) {
             error("Wrong number of selectivity values.", null);
           }
         }
-        
+
     }
 
     /**
@@ -283,7 +283,7 @@ public class FisherySelectivity extends OsmoseLinker {
      */
     public double getSelectivity(int index, AbstractSchool school) {
         int selType = (int) this.selectTypeArray[index];
-        return sizeSelectMethods[selType].getSelectivity(index, school); 
+        return sizeSelectMethods[selType].getSelectivity(index, school);
     }
 
     /**
@@ -323,7 +323,7 @@ public class FisherySelectivity extends OsmoseLinker {
         return output;
 
     }
-    
+
     /**
      * 2: Computes the Gaussian selectivity.
      *
@@ -350,10 +350,10 @@ public class FisherySelectivity extends OsmoseLinker {
         double size = varGetter.getVariable(school);
         //double output = normDistrib.density(size) / normDistrib.density(l50);
         double output = Math.exp(-0.5*Math.pow(size - l50, 2)/Math.pow(sd, 2));
-        
+
         //if(output >= 0) {
-        //  String msg = String.format("Selectivity value =%.2f (%.9f/%.9f) at size %.2f, l50=%.3f (mean=%.3f), step %d.", 
-        //  output, normDistrib.density(size), normDistrib.density(l50), size, l50, normDistrib.getMean(), index); 
+        //  String msg = String.format("Selectivity value =%.2f (%.9f/%.9f) at size %.2f, l50=%.3f (mean=%.3f), step %d.",
+        //  output, normDistrib.density(size), normDistrib.density(l50), size, l50, normDistrib.getMean(), index);
         //  info(msg);
         //}
 
@@ -409,7 +409,7 @@ public class FisherySelectivity extends OsmoseLinker {
      * @return
      */
     public double getDoubleNormalSelectivity3(int index, AbstractSchool school) {
-      
+
         double l25 = this.l25Array[index];
         double l50 = this.l50Array[index];
         double l75 = this.l75Array[index];
@@ -428,7 +428,7 @@ public class FisherySelectivity extends OsmoseLinker {
         } else {
           output = Math.exp(-0.5*Math.pow(size - mean2, 2)/Math.pow(sd2, 2));
         }
-        
+
         if (output < this.tiny) {
             output = 0.0;
         }
@@ -444,15 +444,15 @@ public class FisherySelectivity extends OsmoseLinker {
      * @return
      */
     public double getDoubleNormalSelectivity4(int index, AbstractSchool school) {
-      
+
         double l25 = this.l25Array[index];
         double l50 = this.l50Array[index];
         double l75 = this.l75Array[index];
         double plateau = this.plateauArray[index];
-        
+
         String msg = String.format("Fishery %d: L75 must be greater than L50 + plateau", fIndex);
         if (l75 < l50 + plateau) error(msg, null);
-        
+
         double q25 = -0.674489750196082; // declare constant to save time
         double q75 = 0.674489750196082; // declare constant to save time
         // this is the qnorm(0.75), qnorm has to be used here
@@ -465,11 +465,11 @@ public class FisherySelectivity extends OsmoseLinker {
         double size = varGetter.getVariable(school);
         if (size < mean1) {
           output = Math.exp(-0.5*Math.pow(size - mean1, 2)/Math.pow(sd1, 2));
-        } 
+        }
         if (size > mean2) {
           output = Math.exp(-0.5*Math.pow(size - mean2, 2)/Math.pow(sd2, 2));
         }
-        
+
         if (output < this.tiny) {
             output = 0.0;
         }
@@ -485,17 +485,17 @@ public class FisherySelectivity extends OsmoseLinker {
      * @return
      */
     public double getDoubleNormalSelectivity5(int index, AbstractSchool school) {
-      
+
         double l25 = this.l25Array[index];
         double l50 = this.l50Array[index];
         double l75 = this.l75Array[index];
         double plateau = this.plateauArray[index];
         double l1 = this.l1Array[index];
         String msg;
-        
+
         msg = String.format("Fishery %d: L75 must be greater than L50 + plateau", fIndex);
         if (l75 < l50 + plateau) error(msg, null);
-        
+
         double q25 = -0.674489750196082; // declare constant to save time
         double q75 = 0.674489750196082; // declare constant to save time
         // this is the qnorm(0.75), qnorm has to be used here
@@ -506,12 +506,12 @@ public class FisherySelectivity extends OsmoseLinker {
 
         msg = String.format("Fishery %d: L1 must be greater than L50 + plateau", fIndex);
         if (l1 < mean2) error(msg, null);
-        
+
         double output = 1;
         double size = varGetter.getVariable(school);
         if (size < mean1) {
           output = Math.exp(-0.5*Math.pow(size - mean1, 2)/Math.pow(sd1, 2));
-        } 
+        }
         if (size > mean2 && size <= l1) {
           output = Math.exp(-0.5*Math.pow(size - mean2, 2)/Math.pow(sd2, 2));
         }
@@ -519,7 +519,7 @@ public class FisherySelectivity extends OsmoseLinker {
           output = Math.exp(-0.5*Math.pow(l1 - mean2, 2)/Math.pow(sd2, 2));
           return output;
         }
-        
+
         if (output < this.tiny) {
             output = 0.0;
         }
@@ -535,7 +535,7 @@ public class FisherySelectivity extends OsmoseLinker {
      * @return
      */
     public double getDoubleNormalSelectivity6(int index, AbstractSchool school) {
-      
+
         double l25 = this.l25Array[index];
         double l50 = this.l50Array[index];
         double l75 = this.l75Array[index];
@@ -543,10 +543,10 @@ public class FisherySelectivity extends OsmoseLinker {
         double l1 = this.l1Array[index];
         double l0 = this.l0Array[index];
         String msg;
-        
+
         msg = String.format("Fishery %d: L75 must be greater than L50 + plateau", fIndex);
         if (l75 < l50 + plateau) error(msg, null);
-        
+
         double q25 = -0.674489750196082; // declare constant to save time
         double q75 = 0.674489750196082; // declare constant to save time
         // this is the qnorm(0.75), qnorm has to be used here
@@ -559,28 +559,28 @@ public class FisherySelectivity extends OsmoseLinker {
         if (l1 < mean2) error(msg, null);
         msg = String.format("Fishery %d: L0 must be lower than L50", fIndex);
         if (l0 > mean1) error(msg, null);
-        
+
         double output = 1;
         double size = varGetter.getVariable(school);
-        
+
         if (size < l0) {
           output = 0.0;
           return output;
-        } 
+        }
         if (size < mean1) {
           output = Math.exp(-0.5*Math.pow(size - mean1, 2)/Math.pow(sd1, 2));
-        } 
+        }
         if (size > mean2 && size <= l1) {
           output = Math.exp(-0.5*Math.pow(size - mean2, 2)/Math.pow(sd2, 2));
         }
         if (size > l1) {
           output = Math.exp(-0.5*Math.pow(l1 - mean2, 2)/Math.pow(sd2, 2));
         }
-        
+
         if (output < this.tiny) {
             output = 0.0;
         }
-        
+
 
         return output;
 
@@ -617,7 +617,7 @@ public class FisherySelectivity extends OsmoseLinker {
 
         return discreteSelectivities[stage];
     }
-    
+
     /**
      * Init an array either from file (by dt) or shifts.
      *
