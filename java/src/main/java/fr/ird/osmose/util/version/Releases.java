@@ -527,22 +527,28 @@ public class Releases {
                 if(cfg.canFind("fisheries.enabled")) {
                     updateKey("fisheries.enabled", "process.multispecies.fisheries.enabled");
                 }
+
                 if(cfg.canFind("output.fishery.enabled")) {
                     updateKey("output.fishery.enabled", "output.fisheries.enabled");
                 }
+
                 if(cfg.canFind("output.fishery.byage.enabled")) {
                     updateKey("output.fishery.byage.enabled", "output.fisheries.byage.enabled");
                 }
+
                 if(cfg.canFind("output.fishery.bysize.enabled")) {
                     updateKey("output.fishery.bysize.enabled", "output.fisheries.bysize.enabled");
                 }
+
                 // restart parameters
                 if(cfg.canFind("output.restart.enabled")) {
                     updateKey("output.restart.enabled", "simulation.restart.enabled");
                 }
+
                 if(cfg.canFind("output.restart.spinup")) {
                     updateKey("output.restart.spinup", "simulation.restart.spinup.nyear");
                 }
+
                 if(cfg.canFind("output.restart.recordFrequency.ndt")) {
                     updateKey("output.restart.recordFrequency.ndt", "simulation.restart.recordFrequency.ndt");
                 }
@@ -562,29 +568,23 @@ public class Releases {
                 if (cfg.canFind("output.fishery.bysize.enabled")) {
                     updateKey("output.fishery.bysize.enabled", "output.fisheries.bysize.enabled");
                 }
-            }
-        },
-
-        new Release("4.4.1") {
-            @Override
-            void updateParameters() {
-
-                Configuration cfg = this.getConfiguration();
 
                 if (cfg.canFind("process.multispecies.fisheries.enabled")) {
                     updateKey("process.multispecies.fisheries.enabled", "module.multispecies.fisheries.enabled");
                 }
+
                 if (cfg.canFind("simulation.bioen.enabled")) {
                     updateKey("simulation.bioen.enabled", "module.bioenergetics.enabled");
                 }
+
                 if (cfg.canFind("simulation.genetic.enabled")) {
                     updateKey("simulation.genetic.enabled", "module.genetics.enabled");
                 }
+
                 if (cfg.canFind("economy.enabled")) {
                     updateKey("economy.enabled", "module.bioeconomics.enabled");
                 }
-
             }
-        }        
+        }
     }; // end of ALL array
 } // end of class
