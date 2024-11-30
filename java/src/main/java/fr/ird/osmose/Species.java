@@ -393,10 +393,13 @@ public class Species implements ISpecies {
               double Fti = maturityDistrib.cumulativeProbability(school.getLengthIniStep());
               double prob = (Ft - Fti) / (1 - Fti);
               output = Math.random() < prob;
-              school.setIsMature(output);
            } else {
-              output = (school.getLength() >= sizeMaturity) || (school.getAge() >= ageMaturity); 
-              school.setIsMature(output);
+              output = (school.getLength() >= sizeMaturity) || (school.getAge() >= ageMaturity);
+           }
+           if (output) {
+              school.setAgeMat(school.getAge());
+              school.setSizeMat(school.getLength());
+              school.setIsMature(true);
            }
            return school.isMature();
         }
