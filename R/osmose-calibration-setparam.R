@@ -124,10 +124,11 @@
   
   if(!isTRUE(bioen)) {
     # estimating delta.lmax for classical OSMOSE growth
-    pars = list()
+    pars = get_par(conf, "species.delta.lmax.factor.sp", as.is=TRUE)
+    if(is.null(pars)) pars = list()
     for(isp in get_species(conf, type="focal", code=TRUE)) {
       nn = sprintf("species.delta.lmax.factor.sp%s", isp)
-      pars[[nn]] = 2
+      if(is.null(pars[[nn]])) pars[[nn]] = 2
     }
     class(pars) = "osmose.configuration"
     
