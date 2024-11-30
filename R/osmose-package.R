@@ -91,4 +91,4 @@
 #' @references \href{http://www.osmose-model.org/}{Official website}
 #' \href{https://documentation.osmose-model.org/index.html}{Documentation website}
 #' @keywords modelling marine ecosystems
-NULL
+"_PACKAGE"
