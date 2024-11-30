@@ -137,6 +137,7 @@ public class BioenPredationMortality extends PredationMortality {
             // maximum biomass that a single fish can eat during the time step subdt
             // barrier.n: weight is converted into g here
             // this is the (Imax * w^beta) variable 
+            
             double maxBiomassToPredate = getMaxPredationRate(predator) * Math.pow(predator.getWeight() * 1e6f, predator.getBetaBioen()) / subdt;
 
             // multiply the biomass eaten by one fish by the number of fishes to get the maximum biomass that the
@@ -195,7 +196,7 @@ public class BioenPredationMortality extends PredationMortality {
             return predationRateBioen[speciesIndex];
         }
 
-        // recovers the thresshold age (stored on Dt)
+        // recovers the threshold age (stored on Dt)
         int thresAge = this.getSpecies(speciesIndex).getLarvaeThresDt();
         
         double factor = 1;

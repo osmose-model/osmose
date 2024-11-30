@@ -173,7 +173,12 @@ public class PredationMortality extends AbstractMortality {
             double biomAccessibleTot = sum(accessibleBiomass);
 
             // Compute the maximum biomass that the predator could prey upon
-            double maxBiomassToPredate = getMaxPredationRate(predator) * predator.getInstantaneousBiomass() / subdt;
+            //double maxBiomassToPredate = getMaxPredationRate(predator) * predator.getInstantaneousBiomass() / subdt;
+            // Same calculation as bioen, but with default beta=1 for classical osmosis.
+            double maxBiomassToPredate = getMaxPredationRate(predator) * Math.pow(predator.getWeight() * 1e6f, predator.getBetaBioen()) / subdt;
+            maxBiomassToPredate *= predator.getInstantaneousAbundance() * 1e-6f;
+            
+            
             // By default the predator will eat as much as it can
             double biomassToPredate = maxBiomassToPredate;
 
@@ -254,7 +259,7 @@ public class PredationMortality extends AbstractMortality {
      */
     public double getMaxPredationRate(IAggregation predator) {
         if (getConfiguration().isBioenEnabled()) {
-            error("The getMaxPredationRate method of PredationMortality not suitable in Osmose-PHYSIO",
+            error("The getMaxPredationRate method of PredationMortality is not suitable with bioenergetic module.",
                     new Exception());
         }
         return predationRate[predator.getSpeciesIndex()] / getConfiguration().getNStepYear();

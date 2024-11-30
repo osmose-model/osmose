@@ -127,7 +127,7 @@ public class Species implements ISpecies {
     /** Threshold for moving from larvaeToAdults. */
     private final int larvaeToAdultsAgeDt;
 
-    private double beta_bioen;
+    private double betaBioen;
 
     private interface StarvationInterface  {
         public boolean isStarvationEnabled(School school);
@@ -211,11 +211,18 @@ public class Species implements ISpecies {
         float agemax = cfg.getFloat("species.lifespan.sp" + fileIndex);
         lifespan = (int) Math.round(agemax * cfg.getNStepYear());
 
+        // not exclusive of bioenergetics anymore, default to 1
+        String ikey = String.format("species.beta.sp%d", fileIndex);
+        if (cfg.canFind(ikey)) {
+            betaBioen = cfg.getDouble(ikey);
+        } else {
+            // if no parameter exists, species become larva when ageDt = 1
+            betaBioen = 1;
+        }
+        
         // barrier.n: added for bioenergetic purposes.
         if (cfg.isBioenEnabled()) {
             zlayer = cfg.getInt("species.zlayer.sp" + fileIndex);
-            String key = String.format("species.beta.sp%d", fileIndex);
-            beta_bioen = cfg.getDouble(key);
         }
 
         // If the key is found, then the age switch in years is converted into
@@ -264,7 +271,7 @@ public class Species implements ISpecies {
     }
 
     public double getBetaBioen() {
-        return this.beta_bioen;
+        return this.betaBioen;
     }
 
     public int getDepthLayer() {
