@@ -140,11 +140,6 @@ public class BackgroundSpecies extends OsmoseLinker implements ISpecies {
             // if no parameter exists, species become larva when ageDt = 1
             betaBioen = 1;
         }
-        
-        if(getConfiguration().isBioenEnabled()) {
-            String key = String.format("species.beta.sp%d", fileindex);
-            betaBioen = cfg.getDouble(key);
-        }
 
         // Initialization of parameters
         name = cfg.getString("species.name.sp" + fileindex).replaceAll("_", "").replaceAll("-", "");
