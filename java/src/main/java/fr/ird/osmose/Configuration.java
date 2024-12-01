@@ -541,21 +541,17 @@ public class Configuration extends OLogger {
         }
 
         nSchool = new int[nSpecies];
-        if (findKeys("simulation.nschool.sp*").size() == nSpecies) {
-            int cpt = 0;
-            for (int i : this.focalIndex) {
-                nSchool[cpt] = getInt("simulation.nschool.sp" + i);
-                cpt++;
-            }
-        } else if (canFind("simulation.nschool")) {
-            int n = getInt("simulation.nschool");
-            for (int i = 0; i < nSpecies; i++) {
-                nSchool[i] = n;
-            }
-        } else {
-            for (int i = 0; i < nSpecies; i++) {
-                nSchool[i] = 10;
-            }
+        
+        int n, mul, nSchoolDef, ntmp;
+        nSchoolDef = 10; // roliveros: hardcoded, to review
+        mul = canFind("simulation.nschool.multiplier") ? getInt("simulation.nschool.multiplier") : 1;
+        n   = canFind("simulation.nschool") ? getInt("simulation.nschool") : nSchoolDef;
+
+        int cpt = 0;
+        for (int i : this.focalIndex) {
+              ntmp = canFind("simulation.nschool.sp" + i) ? getInt("simulation.nschool.sp" + i) : n;
+              nSchool[cpt] = mul*ntmp;
+              cpt++;
         }
 
         // Create the grid
