@@ -199,28 +199,32 @@ public class BioenPredationMortality extends PredationMortality {
         // recovers the threshold age (stored on Dt)
         int thresAge = this.getSpecies(speciesIndex).getLarvaeThresDt();
         
-        double factor = 1;
+        double thetap = 1;
 
         try {
-            factor = (predator.getAgeDt() < thresAge) ? larvaePredationRateBioen[speciesIndex] : 1;
+            thetap = (predator.getAgeDt() < thresAge) ? larvaePredationRateBioen[speciesIndex] : 1;
         } catch (NullPointerException ex) {
             String message = "Cannot find larvaePredationRateBioen for species " + speciesIndex;
             error(message, ex);
         }
 
-        double output = 0.d;
+        double Imax = 0.d;
 
         if (predator instanceof School) {
             String key = "imax";
             try {
-                output = ((School) predator).existsTrait(key) ? ((School) predator).getTrait(key) : predationRateBioen[speciesIndex];
+                Imax = ((School) predator).existsTrait(key) ? ((School) predator).getTrait(key) : predationRateBioen[speciesIndex];
             } catch (Exception ex) {
                 Logger.getLogger(BioenPredationMortality.class.getName()).log(Level.SEVERE, null, ex);
             }
         } else {
-            output = predationRateBioen[speciesIndex];
+            Imax = predationRateBioen[speciesIndex];
         }
-
-        return ((output + (factor - 1) * c_rateBioen[speciesIndex]) / getConfiguration().getNStepYear());
+        
+        // output = Imax * psi (Eq 2)
+        // psi = (predator.getAgeDt() < thresAge) ? theta : 1; (Eq 3)
+        // theta = (Imax + (thetap - 1)*c_rateBioen)/Imax (Eq S2)
+        // Imax*theta = Imax + (thetap - 1)*c_rateBioen   
+        return ((Imax + (thetap - 1) * c_rateBioen[speciesIndex]) / getConfiguration().getNStepYear());
     }
 }
