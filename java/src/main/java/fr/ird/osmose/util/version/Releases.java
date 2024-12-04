@@ -339,8 +339,9 @@ public class Releases {
                     // spatial
                     updateKey("mortality.natural.spatial.distrib.file.sp" + i, "mortality.additional.spatial.distrib.file.sp" + i);
                 }
-            }
-        }, new Release("4.2.6") {
+            }}, 
+        //    
+        new Release("4.2.6") {
             @Override
             void updateParameters() {
 
@@ -352,7 +353,7 @@ public class Releases {
 
             }
         },
-
+        //
         new Release("4.3.0") {
             @Override
             void updateParameters() {
@@ -583,6 +584,20 @@ public class Releases {
 
                 if (cfg.canFind("economy.enabled")) {
                     updateKey("economy.enabled", "module.bioeconomics.enabled");
+                }
+            }
+        },
+        
+        new Release("4.4.1") {
+            @Override
+            void updateParameters() {
+
+                Configuration cfg = this.getConfiguration();
+
+                // update parameter names
+                if(cfg.canFind("predation.coef.ingestion.rate.max.larvae.bioen.sp")) {
+                    updateKey("predation.coef.ingestion.rate.max.larvae.bioen.sp", 
+                        "predation.larval.ingestion.rate.increase.ratio.sp"); // to be updated.
                 }
             }
         }

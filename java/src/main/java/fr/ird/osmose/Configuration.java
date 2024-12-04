@@ -558,7 +558,7 @@ public class Configuration extends OLogger {
         initGrid();
 
         // Create the species
-        int cpt = 0;
+        cpt = 0;
         species = new Species[nSpecies];
         for (int fileIndex : this.focalIndex) {
             // Species are now instanciated from the fileIndex and the species index (cpt in

@@ -96,7 +96,7 @@ public class BioenPredationMortality extends PredationMortality {
         int cpt = 0;
         for (int i : this.getConfiguration().getPredatorIndex()) {
             predationRateBioen[cpt] = getConfiguration().getDouble("predation.ingestion.rate.max.bioen.sp" + i);
-            larvaePredationRateBioen[cpt] = getConfiguration().getDouble("predation.coef.ingestion.rate.max.larvae.bioen.sp" + i);
+            larvaePredationRateBioen[cpt] = getConfiguration().getDouble("predation.larval.ingestion.rate.increase.ratio.sp" + i);
             c_rateBioen[cpt] = getConfiguration().getDouble("predation.c.bioen.sp" + i);
             cpt++;
         }
@@ -224,7 +224,7 @@ public class BioenPredationMortality extends PredationMortality {
         // output = Imax * psi (Eq 2)
         // psi = (predator.getAgeDt() < thresAge) ? theta : 1; (Eq 3)
         // theta = (Imax + (thetap - 1)*c_rateBioen)/Imax (Eq S2)
-        // Imax*theta = Imax + (thetap - 1)*c_rateBioen   
+        // Imax*theta = Imax*theta = Imax + (thetap - 1)*c_rateBioen
         return ((Imax + (thetap - 1) * c_rateBioen[speciesIndex]) / getConfiguration().getNStepYear());
     }
 }
