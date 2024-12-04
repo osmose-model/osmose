@@ -179,7 +179,7 @@
     ifsh = nmc[i]
     msg = sprintf("\n-- Fishery %s: %s\n", nmc[i], nmf[i])
     mcat(msg, file=allfiles, append = TRUE)
-    this = get_par(conf, sprintf("fsh%s", ifsh))
+    this = get_par(conf, sprintf("fsh%s$", ifsh))
     pars = get_par(get_par(this, "fisheries.rate.base.fsh", as.is=TRUE), "shift", invert=TRUE, as.is=TRUE)
     pars = transform_par(pars, FUN=log)
     
