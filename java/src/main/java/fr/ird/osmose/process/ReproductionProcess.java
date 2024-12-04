@@ -132,7 +132,7 @@ public class ReproductionProcess extends AbstractProcess {
                 }
                 sexRatio[cpt] = getConfiguration().getDouble("species.sexratio.sp" + i);
                 String key = (mode.equals("oviparity")) ? "relativefecundity" : "absolutefecundity"; 
-                info(mode + " " + key);
+                //info(mode + " " + key);
                 beta[cpt] = getConfiguration().getDouble("species."+ key +".sp" + i);
                 modes[cpt] = mode;
             }
