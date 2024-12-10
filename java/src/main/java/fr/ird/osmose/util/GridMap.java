@@ -108,7 +108,7 @@ public class GridMap extends OsmoseLinker {
                 for (int i = 0; i < line.length; i++) {
                     try {
                         String val = line[i].toLowerCase();
-                        if (val.equals("na") || val.equals("nan")) {
+                        if (val.equals("na") || val.equals("nan") || val.equals("")) {
                             this.matrix[j][i] = Float.NaN;
                         } else {
                             float value = Float.valueOf(line[i]);
