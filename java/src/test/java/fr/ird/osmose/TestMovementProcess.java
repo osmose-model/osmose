@@ -73,13 +73,13 @@ public class TestMovementProcess {
         Species species;
         species = cfg.getSpecies(0);
         school = new School(species, 10);
-        for (int i = 0; i < 2 * 23 - 1; i++) {
+        for (int i = 0; i < 2 * 24 - 1; i++) {
             school.incrementAge();
         }
 
         spatialDistribution.move(school, 0);
-        System.out.println("toto");
-        assertEquals(0, 0);
+        school.incrementAge();
+        spatialDistribution.move(school, 1);
 
     }
 }
