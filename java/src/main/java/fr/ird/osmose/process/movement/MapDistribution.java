@@ -89,16 +89,17 @@ public class MapDistribution extends AbstractSpatialDistribution {
         weightedDistribution = new WeightedRandomDraft<>(rank, "movement");
         weightedDistribution.init();
 
-        getMapDistribution = ((school, i) -> legacyDistribution(school, i));
+        getMapDistribution = ((school, iStepSimu) -> legacyDistribution(school, iStepSimu));
         String key = "movement.distribution.method.sp" + iSpeciesFile;
         if (!getConfiguration().isNull(key)) {
             String method = getConfiguration().getString(key);
             if (method == "legacy") {
-                getMapDistribution = ((school, i) -> legacyDistribution(school, i));
+                getMapDistribution = ((school, iStepSimu) -> legacyDistribution(school, iStepSimu));
             } else if (method == "legacy_fixed") {
-                getMapDistribution = ((school, i) -> legacyFixedDistribution(school, i));
+                getMapDistribution = ((school, iStepSimu) -> legacyFixedDistribution(school, iStepSimu));
             } else {
-                error("Movemement method not found", null);
+                warning("Movemement method not found for species " + Integer.toString(iSpecies));
+                warning("Movement method has been set to Legacy");
             }
         }
 
