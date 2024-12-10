@@ -247,8 +247,8 @@ public class MapDistribution extends AbstractSpatialDistribution {
              */
 
             // get the updated probability value
-            float value = map.getValue(school.getCell());
-            if (!Float.isNaN(value) && value > 0) {
+            // before hand, check whether the school is located to avoid error due to access cell with index -1
+            if (!school.isUnlocated() && !Float.isNaN(map.getValue(school.getCell())) && map.getValue(school.getCell()) > 0) {
                 // if the value is not nan and > 0, random walk
                 randomWalk(school, map);
             } else {
