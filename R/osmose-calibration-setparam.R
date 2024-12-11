@@ -219,7 +219,7 @@
       
       write_osmose(pars, file=guess_file, append = TRUE)
       write_osmose(set_par(pars, 0), file=min_file, append = TRUE)
-      write_osmose(set_par(pars, ceiling(0.3*L50)), file=max_file, append = TRUE)
+      write_osmose(set_par(pars, ceiling(1*L50)), file=max_file, append = TRUE)
       write_osmose(set_par(pars, 4), file=phase_file, append = TRUE)
       
     }
