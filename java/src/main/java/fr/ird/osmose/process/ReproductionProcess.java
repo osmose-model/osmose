@@ -153,7 +153,11 @@ public class ReproductionProcess extends AbstractProcess {
         seedingBiomass = new double[nSpecies];
         cpt = 0;
         for (int fileIndex : getConfiguration().getFocalIndex()) {
-            seedingBiomass[cpt] = getConfiguration().getDouble("population.seeding.biomass.sp" + fileIndex);
+            if (!getConfiguration().isNull("population.seeding.biomass.sp" + fileIndex)) {
+              seedingBiomass[cpt] = getConfiguration().getDouble("population.seeding.biomass.sp" + fileIndex);
+            } else {
+              seedingBiomass[cpt] = 0;
+            }
             cpt++;
         }
         // Seeding duration (expressed in number of time steps)
