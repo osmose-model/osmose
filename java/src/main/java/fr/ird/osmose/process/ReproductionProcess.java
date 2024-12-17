@@ -191,8 +191,8 @@ public class ReproductionProcess extends AbstractProcess {
                 modes[cpt] = mode;
 
                 if(mode.equals("oviparity")) {
-                    spawnerInterface[cpt] = (school) -> (1000000 * school.getInstantaneousBiomass());
-                    seedingInterface[cpt] = (species_index) -> (this.getSeedingBiomass(species_index));
+                    spawnerInterface[cpt] = (school) -> (1e6 * school.getInstantaneousBiomass());
+                    seedingInterface[cpt] = (species_index) -> (1e6 * this.getSeedingBiomass(species_index));
                 } else {
                     spawnerInterface[cpt] = (school) -> (school.getInstantaneousAbundance());
                     seedingInterface[cpt] = (species_index) -> (this.getSeedingAbundance(species_index));
