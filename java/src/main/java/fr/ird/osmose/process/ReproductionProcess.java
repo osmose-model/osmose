@@ -83,6 +83,8 @@ public class ReproductionProcess extends AbstractProcess {
      * Seeding biomass in tonne
      */
     private double[] seedingBiomass;
+
+    private double[] seedingAbundance;
     /*
      * Year max for seeding collapsed species, in number of time steps
      */
@@ -189,6 +191,19 @@ public class ReproductionProcess extends AbstractProcess {
             }
             cpt++;
         }
+
+        // Seeding abundance
+        seedingAbundance = new double[nSpecies];
+        cpt = 0;
+        for (int fileIndex : getConfiguration().getFocalIndex()) {
+            if (!getConfiguration().isNull("population.seeding.abundance.sp" + fileIndex)) {
+                seedingAbundance[cpt] = getConfiguration().getDouble("population.seeding.abundance.sp" + fileIndex);
+            } else {
+                seedingAbundance[cpt] = 0;
+            }
+            cpt++;
+        }
+
         // Seeding duration (expressed in number of time steps)
         yearMaxSeeding = 0;
         if (!getConfiguration().isNull("population.seeding.year.max")) {
@@ -258,6 +273,7 @@ public class ReproductionProcess extends AbstractProcess {
             // seeding process for collapsed species
             if (getSimulation().getIndexTimeSimu() < yearMaxSeeding && SSB[cpt] == 0.) {
                 SSB[cpt] = seedingBiomass[cpt];
+                SSN[cpt] = seedingAbundance[cpt];
             }
             // compute number of eggs to be released
             double season = getSeason(getSimulation().getIndexTimeSimu(), species);
@@ -487,7 +503,8 @@ public class ReproductionProcess extends AbstractProcess {
 
         int cpt;
         String mode;
-        double spawners = 0.0f;
+        double spawners = 0.0;
+        double school_spawners = 0;
 
         int nSpecies = this.getNSpecies();
 
@@ -514,8 +531,24 @@ public class ReproductionProcess extends AbstractProcess {
         // Loop over all species
         for (cpt = 0; cpt < this.getNSpecies(); cpt++) {
 
+            // reset the weighted random mean
+            weight_rand.reset();
+
             Species species = getSpecies(cpt);
             List<School> schoolset = getSchoolSet().getSchools(species);
+
+            // If the species does not reproduce, then
+            // nothing is done here.
+            if (!reproduce[cpt]) {
+                continue;
+            }
+
+            // If needed, the seeding biomass and abundance is used to fill
+            // the reproducing biomass and abundance
+            if (getSimulation().getIndexTimeSimu() < yearMaxSeeding && SSB[cpt] == 0.) {
+                SSB[cpt] = seedingBiomass[cpt];
+                SSN[cpt] = seedingAbundance[cpt];
+            }
 
             // compute number of eggs to be released
             double season = getSeason(getSimulation().getIndexTimeSimu(), species);
@@ -525,15 +558,11 @@ public class ReproductionProcess extends AbstractProcess {
             }
             if (mode.equals("viviparity")) {
                 spawners = SSN[cpt]; // spawners in individuals
-                // String msg = String.format("SSB=%.1f, SSN=%.1f, w=%.4f, beta=%.1f,
-                // season=%.1f, ratio=%f",
-                // 1e6*SSB[cpt], SSN[cpt], 1e6*SSB[cpt]/SSN[cpt], beta[cpt], season,
-                // SSN[cpt]/(1e6*SSB[cpt]));
-                // info(msg);
             }
 
-            // seeding process for collapsed species
             if (getSimulation().getIndexTimeSimu() < yearMaxSeeding && SSB[cpt] == 0.) {
+                // seeding process for collapsed species. we create random schools with
+                // random creation of genotypes.
                 double nEgg = sexRatio[cpt] * beta[cpt] * season * spawners;
                 // in this case, weight_rand is never used.
                 this.create_reproduction_schools(cpt, nEgg, false, weight_rand);
@@ -554,17 +583,16 @@ public class ReproductionProcess extends AbstractProcess {
                     // barrier.n: change in conversion from tone to gram
                     // since EggWeight is in g.
                     if (mode.equals("oviparity")) {
-                        spawners = 1000000 * SSB[cpt]; // spawners in grams
+                        school_spawners = 1000000 * school.getInstantaneousBiomass(); // school_ in grams
                     }
                     if (mode.equals("viviparity")) {
-                        spawners = SSN[cpt]; // spawners in individuals
+                        school_spawners = school.getInstantaneousAbundance(); // spawners in individuals
                     }
-                    double nEgg = sexRatio[cpt] * beta[cpt] * season * spawners;
-                    negg_tot += nEgg;
-                    weight_rand.add(nEgg, school);
+                    double school_nEgg = sexRatio[cpt] * beta[cpt] * season * school_spawners;
+                    negg_tot += school_nEgg;
+                    weight_rand.add(school_nEgg, school);
 
                 }  // end of loop over the school that belong to species i
-
                 boolean transmitGenotype = (this.getSimulation().getIndexTimeSimu() >= this.dateGenoTransmission) ? true : false;
                 this.create_reproduction_schools(cpt, negg_tot, transmitGenotype, weight_rand);
             }
