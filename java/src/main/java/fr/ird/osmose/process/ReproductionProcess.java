@@ -134,15 +134,6 @@ public class ReproductionProcess extends AbstractProcess {
             normalisationEnabled = getConfiguration().getBoolean("reproduction.normalisation.enabled");
         }
 
-        if (this.getConfiguration().isGeneticEnabled()) {
-            dateGenoTransmission = (int) getConfiguration().getDouble("population.genotype.transmission.year.start")
-                    * getConfiguration().getNStepYear();
-            if (dateGenoTransmission < this.getYearSeading()) {
-                error("The 'population.genotype.transmission.year.start' parameter must be greater/equal than the 'population.seeding.year.max' one",
-                        new Exception());
-            }
-        }
-
         // check for whether the genetic module is enabled.
         if (getConfiguration().isGeneticEnabled()) {
             runInterface = () -> run_genet();
@@ -252,6 +243,16 @@ public class ReproductionProcess extends AbstractProcess {
                     + ((float) yearMaxSeeding / getConfiguration().getNStepYear())
                     + " years, the lifespan of the longest-lived species.");
         }
+
+        if (this.getConfiguration().isGeneticEnabled()) {
+            dateGenoTransmission = (int) getConfiguration().getDouble("population.genotype.transmission.year.start")
+                    * getConfiguration().getNStepYear();
+            if (dateGenoTransmission < this.getYearSeading()) {
+                error("The 'population.genotype.transmission.year.start' parameter must be greater/equal than the 'population.seeding.year.max' one",
+                        new Exception());
+            }
+        }
+
     }
 
     @Override
