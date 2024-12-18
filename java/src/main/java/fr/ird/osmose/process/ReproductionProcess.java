@@ -263,78 +263,76 @@ public class ReproductionProcess extends AbstractProcess {
     /** Legacy reproduction run method in case the genetic module is not enabled */
     public void run_nogenet() {
 
-        int cpt;
-        String mode;
-        double spawners = 0.0f;
-
         if (getConfiguration().isBioenEnabled()) {
             error("ReproductionProcess run method not usable with the bioenergetic module", new Exception());
         }
 
-        int nSpecies = this.getNSpecies();
-
-        // spawning stock biomass per species
-        double[] SSB = new double[nSpecies];
-        double[] SSN = new double[nSpecies];
-
-        // loop over all the schools to compute SSB
-        for (School school : getSchoolSet().getSchools()) {
-            int i = school.getSpeciesIndex();
-            // increment spawning stock biomass
-            if (reproduce[i] && school.getSpecies().isSexuallyMature(school)) {
-                SSB[i] += school.getInstantaneousBiomass();
-                SSN[i] += school.getInstantaneousAbundance();
-            }
-            // increment age
-            school.incrementAge();
-            // update spawner status
-            school.setHasSpawned(true);
-        }
-
         // Loop over all species
-        for (cpt = 0; cpt < this.getNSpecies(); cpt++) {
+        for (int cpt = 0; cpt < this.getNSpecies(); cpt++) {
 
             // ignore species that do not reproduce
             if (!reproduce[cpt]) {
                 continue;
             }
 
+            int nSchool = getConfiguration().getNSchool(cpt);
+
             Species species = getSpecies(cpt);
-            // seeding process for collapsed species
-            if (getSimulation().getIndexTimeSimu() < yearMaxSeeding && SSB[cpt] == 0.) {
-                SSB[cpt] = seedingBiomass[cpt];
-                SSN[cpt] = seedingAbundance[cpt];
-            }
+            List<School> schoolset = getSchoolSet().getSchools(species);
+
             // compute number of eggs to be released
             double season = getSeason(getSimulation().getIndexTimeSimu(), species);
-            mode = modes[cpt];
-            if (mode.equals("oviparity")) {
-                spawners = 1000000 * SSB[cpt]; // spawners in grams
-            }
-            if (mode.equals("viviparity")) {
-                spawners = SSN[cpt]; // spawners in individuals
+
+            // total number of eggs for the species
+            double total_species_eggs = 0.d;
+
+            // if the seeding biomass is not null, loop over sexually mature schools
+            for (School school : schoolset) {
+
+                if ((school.getSpecies().isSexuallyMature(school)) == false) {
+                    // if school is not mature, no reproduction
+                    continue;
+                }
+
+                // get the school spawners, either in grams (for ovoviviparity)
+                // or as number of individuals
+                double school_spawners = spawnerInterface[cpt].getSpawner(school);
+
+                // convert spawners into number of eggs
+                double school_nEgg = sexRatio[cpt] * beta[cpt] * season * school_spawners;
+
+                // increment the total number of eggs
+                total_species_eggs += school_nEgg;
+
+            } // end of loop over the school that belong to species i
+
+            if((total_species_eggs == 0) && (getSimulation().getIndexTimeSimu() < yearMaxSeeding)) {
+                // if the total number of eggs is 0, i.e no mature individuals
+                // we artificially create individuals based on the seeding biomass
+                // in this case, weight_rand is never used.
+                total_species_eggs = sexRatio[cpt] * beta[cpt] * season * seedingInterface[cpt].getSeeding(cpt);
             }
 
-            double nEgg = sexRatio[cpt] * beta[cpt] * season * spawners;
-            // lay age class zero
-            int nSchool = getConfiguration().getNSchool(cpt);
-            // nschool increases with time to avoid flooding the simulation with too many
-            // schools since the beginning
-            // nSchool = Math.min(getConfiguration().getNSchool(i), nSchool *
-            // (getSimulation().getIndexTimeSimu() + 1) / (getConfiguration().getNStepYear()
-            // * 10));
-            if (nEgg == 0.d) {
+            if (total_species_eggs == 0.d) {
                 // do nothing, zero school
-            } else if (nEgg < nSchool) {
-                School school0 = new School(species, nEgg);
+            } else if (total_species_eggs < nSchool) {
+                School school0 = new School(species, total_species_eggs);
                 getSchoolSet().addReproductionSchool(school0);
-            } else if (nEgg >= nSchool) {
+            } else if (total_species_eggs >= nSchool) {
                 for (int s = 0; s < nSchool; s++) {
-                    School school0 = new School(species, nEgg / nSchool);
+                    School school0 = new School(species, total_species_eggs / nSchool);
                     getSchoolSet().addReproductionSchool(school0);
                 }
             }
-        } // end of focal species loop
+        } // end of species loop
+
+        // Finally, we increment the age and set the hasSpawned attribute
+        // Cannot do that beforehand because of the double ckeck for sexual maturity
+        for(School school : getSchoolSet().getSchools()) {
+            school.incrementAge();
+            school.setHasSpawned(true);
+        }
+
     }
 
     /** Normalize season in the case of classical Osmose run */
