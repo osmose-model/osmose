@@ -15,7 +15,7 @@
 #' @export
 #' @inheritParams run_osmose
 osmose_calibration_setup = function(input, osmose, name=NULL, data_path=NULL, type="simple", bioen=FALSE,  
-                                    control=list(), version="4.3.3", ...) {
+                                    control=list(), version="4.3.3", options=NULL, ...) {
   
   if(is.null(data_path)) {
     message("\nNo observed data has been provided, this setup will create templates for you to fill.\n")
@@ -71,10 +71,11 @@ osmose_calibration_setup = function(input, osmose, name=NULL, data_path=NULL, ty
 
   # Create new main OSMOSE configuration file -------------------------------
   
+  if(is.null(options)) options = "-Xmx3g -Xms1g" 
   calib = list()
   calib$osmose.configuration.calibration.parameters = "calibration_parameters.osm"
   calib$osmose.configuration.outputs = "output-configuration.osm"
-  calib$osmose.java.options = "-Xmx3g -Xms1g"
+  calib$osmose.java.options = options
   calib$osmose.configuration.main = file.path("../..", input)
   class(calib) = "osmose.configuration"
   write_osmose(calib, file=file.path(dir_master, "osmose-calibration.osm"))
