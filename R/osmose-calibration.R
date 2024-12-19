@@ -71,7 +71,7 @@ osmose_calibration_setup = function(input, osmose, name=NULL, data_path=NULL, ty
 
   # Create new main OSMOSE configuration file -------------------------------
   
-  if(is.null(options)) options = "-Xmx3g -Xms1g" 
+  if(is.null(options)) options = "-Xmx4g -Xms1g" 
   calib = list()
   calib$osmose.configuration.calibration.parameters = "calibration_parameters.osm"
   calib$osmose.configuration.outputs = "output-configuration.osm"
