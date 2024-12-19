@@ -174,12 +174,17 @@ public class ReproductionProcess extends AbstractProcess {
                 } else {
                     mode = "oviparity"; // default
                 }
-                sexRatio[cpt] = getConfiguration().getDouble("species.sexratio.sp" + i);
-
+                
+                if (!getConfiguration().isNull("species.sexratio.sp" + i)) {
+                    sexRatio[cpt] = getConfiguration().getDouble("species.sexratio.sp" + i);
+                } else {
+                    sexRatio[cpt] = 0.5; // default
+                }
+                
+                modes[cpt] = mode;
                 String key = (mode.equals("oviparity")) ? "relativefecundity" : "absolutefecundity";
 
                 beta[cpt] = getConfiguration().getDouble("species." + key + ".sp" + i);
-                modes[cpt] = mode;
 
                 if(mode.equals("oviparity")) {
                     spawnerInterface[cpt] = (school) -> (1e6 * school.getInstantaneousBiomass());
@@ -236,12 +241,14 @@ public class ReproductionProcess extends AbstractProcess {
             yearMaxSeeding = getConfiguration().getInt("population.seeding.year.max")
                     * getConfiguration().getNStepYear();
         } else {
-            for (int i = 0; i < nSpecies; i++) {
-                yearMaxSeeding = Math.max(yearMaxSeeding, getSpecies(i).getLifespanDt());
+            if(!getConfiguration().getBoolean("population.initialization.relativebiomass.enabled")) {
+                for (int i = 0; i < nSpecies; i++) {
+                    yearMaxSeeding = Math.max(yearMaxSeeding, getSpecies(i).getLifespanDt());
+                }
+                warning("Did not find parameter population.seeding.year.max. Osmose set it to "
+                        + ((float) yearMaxSeeding / getConfiguration().getNStepYear())
+                        + " years, the lifespan of the longest-lived species.");        
             }
-            warning("Did not find parameter population.seeding.year.max. Osmose set it to "
-                    + ((float) yearMaxSeeding / getConfiguration().getNStepYear())
-                    + " years, the lifespan of the longest-lived species.");
         }
 
         if (this.getConfiguration().isGeneticEnabled()) {
@@ -270,7 +277,7 @@ public class ReproductionProcess extends AbstractProcess {
         // Loop over all species
         for (int cpt = 0; cpt < this.getNSpecies(); cpt++) {
 
-            // ignore species that do not reproduce
+            // ignore species that do not reproduce in this time step
             if (!reproduce[cpt]) {
                 continue;
             }
@@ -289,21 +296,17 @@ public class ReproductionProcess extends AbstractProcess {
             // if the seeding biomass is not null, loop over sexually mature schools
             for (School school : schoolset) {
 
-                if ((school.getSpecies().isSexuallyMature(school)) == false) {
-                    // if school is not mature, no reproduction
-                    continue;
+                if (school.getSpecies().isSexuallyMature(school)) {
+                    // get the school spawners, either in grams (for ovoviviparity)
+                    // or as number of individuals
+                    double school_spawners = spawnerInterface[cpt].getSpawner(school);
+                    // convert spawners into number of eggs
+                    double school_nEgg = sexRatio[cpt] * beta[cpt] * season * school_spawners;
+                    // increment the total number of eggs
+                    total_species_eggs += school_nEgg;
+                    // if a positive number of eggs, indicate the school has spawned
+                    if (school_nEgg > 0) school.setHasSpawned(true);
                 }
-
-                // get the school spawners, either in grams (for ovoviviparity)
-                // or as number of individuals
-                double school_spawners = spawnerInterface[cpt].getSpawner(school);
-
-                // convert spawners into number of eggs
-                double school_nEgg = sexRatio[cpt] * beta[cpt] * season * school_spawners;
-
-                // increment the total number of eggs
-                total_species_eggs += school_nEgg;
-
             } // end of loop over the school that belong to species i
 
             if((total_species_eggs == 0) && (getSimulation().getIndexTimeSimu() < yearMaxSeeding)) {
@@ -330,7 +333,6 @@ public class ReproductionProcess extends AbstractProcess {
         // Cannot do that beforehand because of the double ckeck for sexual maturity
         for(School school : getSchoolSet().getSchools()) {
             school.incrementAge();
-            school.setHasSpawned(true);
         }
 
     }
@@ -552,21 +554,18 @@ public class ReproductionProcess extends AbstractProcess {
             // if the seeding biomass is not null, loop over sexually mature schools
             for (School school : schoolset) {
 
-                if ((school.getSpecies().isSexuallyMature(school)) == false) {
-                    // if school is not mature, no reproduction
-                    continue;
+                if (school.getSpecies().isSexuallyMature(school)) {
+                    // get the school spawners, either in grams (for ovoviviparity)
+                    // or as number of individuals
+                    school_spawners = spawnerInterface[cpt].getSpawner(school);
+                    // convert spawners into number of eggs
+                    double school_nEgg = sexRatio[cpt] * beta[cpt] * season * school_spawners;
+                    // increment the total number of eggs
+                    total_species_eggs += school_nEgg;
+                    weight_rand.add(school_nEgg, school);
+                    // if a positive number of eggs, indicate the school has spawned
+                    if (school_nEgg > 0) school.setHasSpawned(true);
                 }
-
-                // get the school spawners, either in grams (for ovoviviparity)
-                // or as number of individuals
-                school_spawners = spawnerInterface[cpt].getSpawner(school);
-
-                // convert spawners into number of eggs
-                double school_nEgg = sexRatio[cpt] * beta[cpt] * season * school_spawners;
-
-                // increment the total number of eggs
-                total_species_eggs += school_nEgg;
-                weight_rand.add(school_nEgg, school);
 
             } // end of loop over the school that belong to species i
 
@@ -587,7 +586,6 @@ public class ReproductionProcess extends AbstractProcess {
         // Cannot do that beforehand because of the double ckeck for sexual maturity
         for(School school : getSchoolSet().getSchools()) {
             school.incrementAge();
-            school.setHasSpawned(true);
         }
 
     }
