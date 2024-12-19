@@ -420,10 +420,8 @@ public class Configuration extends OLogger {
         this.checkPreyRecord();
 
         this.geneticEnabled = false;
-        if (this.bioenEnabled) {
-            String key = "module.genetics.enabled";
-            this.geneticEnabled = this.getBoolean(key);
-        }
+        String key = "module.genetics.enabled";
+        this.geneticEnabled = this.getBoolean(key);
 
         String keyincom = "simulation.incoming.flux.enabled";
         this.incomingFluxEnabled = this.getBoolean(keyincom);
@@ -443,7 +441,7 @@ public class Configuration extends OLogger {
             // if simulation.time.nstep not defined, use old parameter simulation.time.nyear
             nStep = nStepYear * getInt("simulation.time.nyear");
         }
-        
+
         writeRestart = true;
         if (!this.isNull("simulation.restart.enabled")) {
             writeRestart = this.getBoolean("simulation.restart.enabled");
@@ -472,7 +470,7 @@ public class Configuration extends OLogger {
 
         // Show the output folder
         info("Simulation restart spinup is " + spinupRestart);
-        
+
         // Show the output folder
         info("Output folder set to " + outputPathname);
 
@@ -541,7 +539,7 @@ public class Configuration extends OLogger {
         }
 
         nSchool = new int[nSpecies];
-        
+
         int n, mul, nSchoolDef, ntmp;
         nSchoolDef = 10; // roliveros: hardcoded, to review
         mul = canFind("simulation.nschool.multiplier") ? getInt("simulation.nschool.multiplier") : 1;
@@ -588,7 +586,7 @@ public class Configuration extends OLogger {
         }
 
         // barrier.n: add number of background species
-        String key = "simulation.nbackground";
+        key = "simulation.nbackground";
         int nBackground_test = 0;
         if (canFind(key)) {
             nBackground_test = getInt(key);
