@@ -92,10 +92,10 @@ public class BioenPredationMortality extends PredationMortality {
         c_rateBioen = new double[nSpecies];
 
         // Recovers the max predation rate for bioen config (not the same unit as in
-        // the standard code
+        // the standard code. UPDATE: now they have the same units! same name!
         int cpt = 0;
         for (int i : this.getConfiguration().getPredatorIndex()) {
-            predationRateBioen[cpt] = getConfiguration().getDouble("predation.ingestion.rate.max.bioen.sp" + i);
+            predationRateBioen[cpt] = getConfiguration().getDouble("predation.ingestion.rate.max.sp" + i);
             larvaePredationRateBioen[cpt] = getConfiguration().getDouble("predation.larval.ingestion.rate.increase.ratio.sp" + i);
             c_rateBioen[cpt] = getConfiguration().getDouble("predation.c.bioen.sp" + i);
             cpt++;

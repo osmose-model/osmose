@@ -75,7 +75,7 @@ public class ForagingMortality extends AbstractMortality {
         } else {
              k_for[cpt] = getConfiguration().getDouble("species.bioen.forage.k_for.sp" + i);
         }
-        I_max[cpt] = getConfiguration().getDouble("predation.ingestion.rate.max.bioen.sp" + i);
+        I_max[cpt] = getConfiguration().getDouble("predation.ingestion.rate.max.sp" + i);
             cpt++;
         }
     }
