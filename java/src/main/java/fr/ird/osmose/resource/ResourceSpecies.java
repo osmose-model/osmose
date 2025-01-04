@@ -100,10 +100,17 @@ public class ResourceSpecies implements ISpecies {
      * exceed one to avoid any numerical problem when converting from float to
      * double.
      */
-    private final double accessMax = 0.999d;
+    private final double accessMax = 0.9999d;
 
     private final int index;
     private final int offset;
+    
+    /** Use legacy computePercent in linear scale?
+     * Read parameter simulation.resource.computePercent.legacy,
+     * defaults to FALSE.
+     */
+    
+    private final boolean legacy;
 
 ///////////////
 // Constructors
@@ -126,6 +133,7 @@ public class ResourceSpecies implements ISpecies {
         sizeMin = cfg.getDouble("species.size.min.sp" + fileindex);
         sizeMax = cfg.getDouble("species.size.max.sp" + fileindex);
         trophicLevel = cfg.getFloat("species.tl.sp" + fileindex);
+        legacy = cfg.getBoolean("simulation.resources.computePercent.legacy");
         if (!cfg.isNull("species.accessibility2fish.file.sp" + fileindex)) {
             SingleTimeSeries ts = new SingleTimeSeries();
             ts.read(cfg.getFile("species.accessibility2fish.file.sp" + fileindex));
@@ -177,10 +185,18 @@ public class ResourceSpecies implements ISpecies {
      * predator can prey upon
      * @return the fraction of the resource size range that matches the size
      * range given as parameter.
+     * Assuming a power-law distribution of biomass, the distribution of biomass
+     * is uniform in log scale, reason why is better to compute the proportion 
+     * available after log transformation. The legacy method, computing the proportion
+     * in the linear scale, is provided for back compatibility.
      */
     public double computePercent(double accessibleSizeMin, double accessibleSizeMax) {
         double tempPercent;
-        tempPercent = (Math.min(sizeMax, accessibleSizeMax) - Math.max(sizeMin, accessibleSizeMin)) / (sizeMax - sizeMin);
+        if (legacy) {
+          tempPercent = (Math.min(sizeMax, accessibleSizeMax) - Math.max(sizeMin, accessibleSizeMin)) / (sizeMax - sizeMin);
+        } else {
+          tempPercent = (Math.log(Math.min(sizeMax, accessibleSizeMax)) - Math.log(Math.max(sizeMin, accessibleSizeMin))) / (Math.log(sizeMax) - Math.log(sizeMin));
+        }
         return tempPercent;
     }
 
