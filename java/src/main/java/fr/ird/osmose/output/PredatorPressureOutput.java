@@ -109,7 +109,7 @@ public class PredatorPressureOutput extends SimulationLinker implements IOutput 
             }
         }
 
-        for (BackgroundSchool school : this.getBkgSchoolSet().getAllSchools()) {
+        for (BackgroundSchool school : this.getBkgSchoolSet().getSchools()) {
             int iSpec = school.getSpeciesIndex();
             int stage = dietOutputStage.getStage(school);
             for (Prey prey : school.getPreys()) {

@@ -119,7 +119,7 @@ public class DietOutput extends SimulationLinker implements IOutput {
             }
         }
 
-        for (BackgroundSchool school : this.getBkgSchoolSet().getAllSchools()) {
+        for (BackgroundSchool school : this.getBkgSchoolSet().getSchools()) {
             double preyedBiomass = school.getPreyedBiomass();
             int iSpec = school.getSpeciesIndex();
             if (preyedBiomass > 0) {

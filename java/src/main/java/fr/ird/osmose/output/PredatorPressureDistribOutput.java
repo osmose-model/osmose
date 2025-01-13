@@ -82,7 +82,7 @@ public class PredatorPressureDistribOutput extends AbstractDistribOutput {
                     });
         });
 
-        getBkgSchoolSet().getAllSchools().forEach(predator -> {
+        getBkgSchoolSet().getSchools().forEach(predator -> {
             predator.getPreys().stream()
                     .filter(prey -> (prey.getFileSpeciesIndex() == species.getFileSpeciesIndex()))
                     .forEach(prey -> {
