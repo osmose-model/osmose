@@ -224,7 +224,7 @@ public class BioenPredationMortality extends PredationMortality {
         // output = Imax * psi (Eq 2)
         // psi = (predator.getAgeDt() < thresAge) ? theta : 1; (Eq 3)
         // theta = (Imax + (thetap - 1)*c_rateBioen)/Imax (Eq S2)
-        // Imax*theta = Imax*theta = Imax + (thetap - 1)*c_rateBioen
+        // Imax*theta = Imax + (thetap - 1)*c_rateBioen
         return ((Imax + (thetap - 1) * c_rateBioen[speciesIndex]) / getConfiguration().getNStepYear());
     }
 }

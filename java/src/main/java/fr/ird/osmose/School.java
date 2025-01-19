@@ -618,7 +618,7 @@ public class School extends AbstractSchool {
 
     /**
      * Increments the weight of the fish from given number of tons. Length is
-     * recomputed thereafter from the new weigth
+     * recomputed thereafter from the new weight
      *
      * @param dw Weight increment (in ton)
      */

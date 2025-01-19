@@ -395,8 +395,8 @@ public class MortalityProcess extends AbstractProcess {
                     trophicLevel += 1;
                     school.setTrophicLevel((float) trophicLevel);
                 }
-            }
-        }
+            } // end of trophicLevel 
+        } // end of starvation and trophicLevel update
 
         // Apply Zout mortality on schools out of the simulated domain
         for (School school : getSchoolSet().getOutSchools()) {
@@ -569,7 +569,7 @@ public class MortalityProcess extends AbstractProcess {
                 // barrier.n: adding the
                 case FORAGING:
                     if ((seqFor[i] >= ns) || (!getConfiguration().isBioenEnabled())) {
-                        // oxidative mortality for bion module and focal species only
+                        // oxidative mortality for bioen module and focal species only
                         break;
                     }
                     school = schools.get(seqFor[i]);
