@@ -157,8 +157,6 @@ public class School extends AbstractSchool {
     double ingestionTot = 0; // sum of all the food ingested during life of the
     // school
 
-
-
     // Initialisation of maturity variables.
     // by default the school is immature.
     private double ageMature = 0;

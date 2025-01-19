@@ -129,7 +129,7 @@ osmosePlots2D = function(x, species, speciesNames, start, end, initialYear, ts,
                                speciesNames = speciesNames, axes = axes, 
                                units = units, ...),
            stop(msg))
-  }else{
+  } else {
     # Plot types for ts = FALSE    
     switch(as.character(type),
            "1" = plot2DType1(x, ci = ci, horizontal = horizontal, col = col,
@@ -199,7 +199,8 @@ plot2DTsType1 = function(x, replicates, ci, times, xlim, ylim, conf,
   for(i in seq_len(ncol(x))) {
     # Extract values for spp i
     xsp = factor*x[, i, ,drop = FALSE]
-    if(is.null(ylim_fix)) ylim = c(lmin, 1.25)*range(as.numeric(xsp)) else ylim_fix*factor
+    xxsp = as.numeric(xsp)
+    if(is.null(ylim_fix)) ylim = c(lmin, 1.25)*range(xxsp[is.finite(xxsp)]) else ylim_fix*factor
     # Set an empty canvas
     plot.new()
     plot.window(xlim = xlim, ylim = ylim)
