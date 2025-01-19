@@ -599,6 +599,11 @@ public class Releases {
                     updateKey("predation.coef.ingestion.rate.max.larvae.bioen.sp", 
                         "predation.larval.ingestion.rate.increase.ratio.sp"); // to be updated.
                 }
+                
+                if(cfg.canFind("population.initialization.relativebiomass.enabled")) {
+                    updateKey("population.initialization.relativebiomass.enabled", 
+                        "module.population.initialisation.enabled"); // to be updated.
+                }   
             }
         }
     }; // end of ALL array
