@@ -53,15 +53,16 @@ import java.lang.reflect.InvocationTargetException;
 public class GrowthProcess extends AbstractProcess {
 
     private AbstractGrowth[] growth;
-    private double[][] minDelta;
+    //private double[][] minDelta;
     private double[][] maxDelta;
     private double[][]deltaMeanLength;
     private double[] criticalPredSuccess;
+    
     /**
-     * Maximum length for every species. Infinity by default. Parameter
-     * species.lmax.sp#
+     * Use growth based on predation efficienty. Parameter
+     * species.growth.predation.success.disabled.sp#
      */
-    private float[] lmax;
+    private boolean[] usePredSuccess;
 
     public GrowthProcess(int rank) {
         super(rank);
@@ -73,17 +74,43 @@ public class GrowthProcess extends AbstractProcess {
         int nSpecies = getConfiguration().getNSpecies();
         growth = new AbstractGrowth[nSpecies];
         criticalPredSuccess = new double[nSpecies];
-        minDelta = new double[nSpecies][];
+        //minDelta = new double[nSpecies][];
         maxDelta = new double[nSpecies][];
         deltaMeanLength = new double[nSpecies][];
-        lmax = new float[nSpecies];
+        usePredSuccess = new boolean[nSpecies];
 
         int cpt = 0;
         for (int fileIndex : getConfiguration().getFocalIndex()) {
             // Initialize growth function
-            String growthClassName = getConfiguration().isNull("growth.java.classname.sp" + fileIndex)
-                    ? "fr.ird.osmose.process.growth.VonBertalanffyGrowth"
-                    : getConfiguration().getString("growth.java.classname.sp" + fileIndex);
+            
+        // Control the growth model used for each species.
+        // If not provided, classic VonBertalanffy with linear for early stages is used. 
+        String growthModel = "VonBertalanffy";
+        String growthClassName = "fr.ird.osmose.process.growth.VonBertalanffyGrowth";
+        if (!getConfiguration().isNull("species.growth.model.sp" + fileIndex)) {
+            growthModel = getConfiguration().getString("species.growth.model.sp" + fileIndex);
+            switch (growthModel) {
+                case "VonBertalanffy":
+                    growthClassName = "fr.ird.osmose.process.growth.VonBertalanffyGrowth";
+                break;
+                case "VonBertalanffy0":
+                    growthClassName = "fr.ird.osmose.process.growth.VonBertalanffyGrowthExt";
+                    break;
+                case "Gompertz":
+                    growthClassName = "fr.ird.osmose.process.growth.GompertzGrowth";
+                    break;
+                case "Gompertz_simple":
+                    growthClassName = "fr.ird.osmose.process.growth.GompertzGrowthSimple";
+                    break;
+                case "Gompertz_L0":
+                    growthClassName = "fr.ird.osmose.process.growth.GompertzGrowthSimple";
+                    break;
+                default:
+                    growthClassName = "fr.ird.osmose.process.growth.VonBertalanffyGrowth";
+                    break;
+            }
+        }
+            
             String errMsg = "Failed to instantiate Growth function " + growthClassName + " for species " + getSpecies(cpt).getName();
             try {
                 growth[cpt] = (AbstractGrowth) Class.forName(growthClassName).getConstructor(Integer.TYPE, Species.class).newInstance(getRank(), getSpecies(cpt));
@@ -93,10 +120,18 @@ public class GrowthProcess extends AbstractProcess {
             // Initializes Growth function
             growth[cpt].init();
 
+            String debugMsg = "Growth function " + growthModel + " used for species " + getSpecies(cpt).getName() + ".";
+            info(debugMsg);
+
+            usePredSuccess[cpt] = !getConfiguration().getBoolean("species.growth.predation.success.disabled.sp" + fileIndex, false);
+            if (!usePredSuccess[cpt]) {
+              debugMsg = "Growth based on predation success is disabled for " + getSpecies(cpt).getName() + ".";
+              info(debugMsg);
+            }
             criticalPredSuccess[cpt] = getConfiguration().getDouble("predation.efficiency.critical.sp" + fileIndex);
             Species species = getSpecies(cpt);
             int lifespan = species.getLifespanDt();
-            minDelta[cpt] = new double[lifespan];
+            //minDelta[cpt] = new double[lifespan];
             maxDelta[cpt] = new double[lifespan];
             deltaMeanLength[cpt] = new double[lifespan];
                 
@@ -109,22 +144,13 @@ public class GrowthProcess extends AbstractProcess {
                 meanLength1 = growth[cpt].ageToLength((ageDt + 1) / (double) getConfiguration().getNStepYear());
                 deltaMeanLength[cpt][ageDt] = meanLength1 - meanLength0;
 
-                // barrier.n: patch for Fabien to limit the maximum grow rate
-                //maxDelta[i][ageDt] = deltaMeanLength[i][ageDt] + deltaMeanLength[i][ageDt];
-                minDelta[cpt][ageDt] = 0; //deltaMeanLength[cpt][ageDt] - deltaMeanLength[cpt][ageDt];
+                //minDelta[cpt][ageDt] = 0; //deltaMeanLength[cpt][ageDt] - deltaMeanLength[cpt][ageDt];
                 maxDelta[cpt][ageDt] = delta_lmax_factor * deltaMeanLength[cpt][ageDt];
             }
-            // Read maximal length
-            if (!getConfiguration().isNull("species.lmax.sp" + fileIndex)) {
-                lmax[cpt] = getConfiguration().getFloat("species.lmax.sp" + fileIndex);
-            } else {
-                lmax[cpt] =  Float.POSITIVE_INFINITY;
-            }
-            
             cpt++;
             
         }  // end of loop on focal species
-    }
+    } // end of growth.init()
 
     @Override
     public void run() {
@@ -132,14 +158,16 @@ public class GrowthProcess extends AbstractProcess {
             Species species = school.getSpecies();
             int i = species.getSpeciesIndex();
             int age = school.getAgeDt();
-            if ((age == 0) || school.isUnlocated()) {
-                // Linear growth for eggs and migrating schools
+            if ((age == 0) || school.isUnlocated() || !usePredSuccess[i]) {
+                // Linear growth for eggs, migrating schools and species
+                // with predation efficiency growth disabled.
                 school.incrementLength((float) deltaMeanLength[i][age]);
             } else {
                 // Growth based on predation success
-                if (school.getLength() < lmax[i]) {
-                    grow(school, minDelta[i][age], maxDelta[i][age]);
-                }
+                //if (school.getLength() < lmax[i]) {
+                //grow(school, minDelta[i][age], maxDelta[i][age]);
+                grow(school, 0.0, maxDelta[i][age]);
+                //}
             }
         }
     }
