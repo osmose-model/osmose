@@ -55,14 +55,16 @@ public class GrowthProcess extends AbstractProcess {
     private AbstractGrowth[] growth;
     //private double[][] minDelta;
     private double[][] maxDelta;
-    private double[][]deltaMeanLength;
+    private double[][] deltaMeanLength;
+    private double[][] deltaMeanWeight;
     private double[] criticalPredSuccess;
     
     /**
-     * Use growth based on predation efficienty. Parameter
+     * Disable growth based on predation efficiency. Parameter
      * species.growth.predation.success.disabled.sp#
      */
     private boolean[] usePredSuccess;
+    private boolean growthByLength;
 
     public GrowthProcess(int rank) {
         super(rank);
@@ -77,7 +79,10 @@ public class GrowthProcess extends AbstractProcess {
         //minDelta = new double[nSpecies][];
         maxDelta = new double[nSpecies][];
         deltaMeanLength = new double[nSpecies][];
+        deltaMeanWeight = new double[nSpecies][];
         usePredSuccess = new boolean[nSpecies];
+
+        growthByLength = !getConfiguration().getBoolean("simulation.growth.byWeight");
 
         int cpt = 0;
         for (int fileIndex : getConfiguration().getFocalIndex()) {
@@ -93,17 +98,11 @@ public class GrowthProcess extends AbstractProcess {
                 case "VonBertalanffy":
                     growthClassName = "fr.ird.osmose.process.growth.VonBertalanffyGrowth";
                 break;
-                case "VonBertalanffy0":
-                    growthClassName = "fr.ird.osmose.process.growth.VonBertalanffyGrowthExt";
-                    break;
                 case "Gompertz":
                     growthClassName = "fr.ird.osmose.process.growth.GompertzGrowth";
                     break;
-                case "Gompertz_simple":
-                    growthClassName = "fr.ird.osmose.process.growth.GompertzGrowthSimple";
-                    break;
-                case "Gompertz_L0":
-                    growthClassName = "fr.ird.osmose.process.growth.GompertzGrowthSimple";
+                case "QBD":
+                    growthClassName = "fr.ird.osmose.process.growth.QBD";
                     break;
                 default:
                     growthClassName = "fr.ird.osmose.process.growth.VonBertalanffyGrowth";
@@ -134,6 +133,7 @@ public class GrowthProcess extends AbstractProcess {
             //minDelta[cpt] = new double[lifespan];
             maxDelta[cpt] = new double[lifespan];
             deltaMeanLength[cpt] = new double[lifespan];
+            deltaMeanWeight[cpt] = new double[lifespan];
                 
             // barrier.n: patch for Fabien to limit the maximum grow rate
             double delta_lmax_factor = (getConfiguration().isNull("species.delta.lmax.factor.sp" + fileIndex)) ? 2 : getConfiguration().getDouble("species.delta.lmax.factor.sp" + fileIndex); 
@@ -143,9 +143,14 @@ public class GrowthProcess extends AbstractProcess {
                 double meanLength0 = meanLength1;
                 meanLength1 = growth[cpt].ageToLength((ageDt + 1) / (double) getConfiguration().getNStepYear());
                 deltaMeanLength[cpt][ageDt] = meanLength1 - meanLength0;
-
+                deltaMeanWeight[cpt][ageDt] = species.computeWeight((float) meanLength1) - species.computeWeight((float) meanLength0);
+                deltaMeanWeight[cpt][ageDt] *= 1e-6; // convert to tonnes
                 //minDelta[cpt][ageDt] = 0; //deltaMeanLength[cpt][ageDt] - deltaMeanLength[cpt][ageDt];
-                maxDelta[cpt][ageDt] = delta_lmax_factor * deltaMeanLength[cpt][ageDt];
+                if (growthByLength) {
+                  maxDelta[cpt][ageDt] = delta_lmax_factor * deltaMeanLength[cpt][ageDt];
+                } else {
+                  maxDelta[cpt][ageDt] = delta_lmax_factor * deltaMeanWeight[cpt][ageDt];  
+                }
             }
             cpt++;
             
@@ -161,18 +166,27 @@ public class GrowthProcess extends AbstractProcess {
             if ((age == 0) || school.isUnlocated() || !usePredSuccess[i]) {
                 // Linear growth for eggs, migrating schools and species
                 // with predation efficiency growth disabled.
-                school.incrementLength((float) deltaMeanLength[i][age]);
+                if (growthByLength) {
+                  school.incrementLength((float) deltaMeanLength[i][age]);
+                } else {
+                  school.incrementWeight((float) deltaMeanWeight[i][age]);  
+                }
+
             } else {
                 // Growth based on predation success
                 //if (school.getLength() < lmax[i]) {
                 //grow(school, minDelta[i][age], maxDelta[i][age]);
-                grow(school, 0.0, maxDelta[i][age]);
+                if (growthByLength) {
+                  growL(school, 0.0, maxDelta[i][age]);
+                } else {
+                  growW(school, 0.0, maxDelta[i][age]);
+                }
                 //}
             }
         }
     }
 
-    private void grow(School school, double minDelta, double maxDelta) {
+    private void growL(School school, double minDelta, double maxDelta) {
 
         int iSpec = school.getSpeciesIndex();
         //calculation of lengths according to predation efficiency
@@ -182,8 +196,17 @@ public class GrowthProcess extends AbstractProcess {
         }
     }
 
+    private void growW(School school, double minDelta, double maxDelta) {
+
+        int iSpec = school.getSpeciesIndex();
+        //calculation of lengths according to predation efficiency
+        if (school.getPredSuccessRate() >= criticalPredSuccess[iSpec]) {
+                double dweight = (minDelta + (maxDelta - minDelta) * ((school.getPredSuccessRate() - criticalPredSuccess[iSpec]) / (1 - criticalPredSuccess[iSpec])));
+            school.incrementWeight((float) dweight);
+        }
+    }
+
     public AbstractGrowth getGrowth(int indexSpecies) {
         return growth[indexSpecies];
     }
 }
-    
