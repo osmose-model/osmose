@@ -133,7 +133,7 @@ public class ResourceSpecies implements ISpecies {
         sizeMin = cfg.getDouble("species.size.min.sp" + fileindex);
         sizeMax = cfg.getDouble("species.size.max.sp" + fileindex);
         trophicLevel = cfg.getFloat("species.tl.sp" + fileindex);
-        legacy = cfg.getBoolean("simulation.resources.computePercent.legacy");
+        legacy = cfg.getBoolean("simulation.resources.computePercent.legacy", false);
         if (!cfg.isNull("species.accessibility2fish.file.sp" + fileindex)) {
             SingleTimeSeries ts = new SingleTimeSeries();
             ts.read(cfg.getFile("species.accessibility2fish.file.sp" + fileindex));
