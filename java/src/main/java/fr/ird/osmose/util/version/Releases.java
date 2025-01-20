@@ -604,6 +604,20 @@ public class Releases {
                     updateKey("population.initialization.relativebiomass.enabled", 
                         "module.population.initialisation.enabled"); // to be updated.
                 }   
+                
+                // Update parameters for EnergyBudget.java
+                for (int index : this.getFocalIndex()) {
+                  if(cfg.canFind("species.bioen.maturity.r.sp" + index)) {
+                      updateKey("species.bioen.maturity.r.sp" + index, "species.maturity.r.sp" + index);
+                  }   
+                  if(cfg.canFind("species.bioen.maturity.m0.sp" + index)) {
+                      updateKey("species.bioen.maturity.m0.sp" + index, "species.maturity.m0.sp" + index);
+                  }   
+                  if(cfg.canFind("species.bioen.maturity.m1.sp" + index)) {
+                      updateKey("species.bioen.maturity.m1.sp" + index, "species.maturity.m1.sp" + index);
+                  }   
+                }
+   
             }
         }
     }; // end of ALL array
