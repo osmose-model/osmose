@@ -20,7 +20,8 @@
 
 .calculateSelectivity = function(x, par) {
   
-  par$L75 = max(1.01*par$L50, par$L75)
+  if(!is.null(par$L50) & !is.null(par$L75))
+    par$L75 = max(1.01*par$L50, par$L75)
   
   out = switch(as.character(as.integer(par$type)),
                "0"  = .selectivity_edge(x=x, L50=par$L50),
@@ -171,8 +172,11 @@
 # 9: non-parametric selectivity
 .selectivity_nonpar = function(x, values=par$values, breaks=par$breaks) {
   
-  # complete
+  nBreaks = length(breaks) + 1
+  if(length(values) != nBreaks) stop("Incorrect number of breaks provided.")
   
+  ind = cut(x, breaks = c(0, breaks, Inf), labels = FALSE, right=FALSE)
+  selec = values[ind]
   names(selec) = x
   return(selec)
   

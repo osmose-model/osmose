@@ -172,7 +172,7 @@ public class FisherySelectivity extends OsmoseLinker {
         sizeSelectMethods[6] = (index, sch) -> this.getDoubleNormalSelectivity5(index, sch); // 5-par double-normal selectivity
         sizeSelectMethods[7] = (index, sch) -> this.getDoubleNormalSelectivity6(index, sch); // 6-par double-normal selectivity
         sizeSelectMethods[8] = (index, sch) -> this.getSplineSelectivity(index, sch); // Spline selectivity
-        sizeSelectMethods[9] = (index, sch) -> this.getDiscreteSelectivity(index, sch); // Non-parametric selectivity
+        sizeSelectMethods[9] = (index, sch) -> this.getNonParametricSelectivity(index, sch); // Non-parametric selectivity
 
     }
 
@@ -587,7 +587,7 @@ public class FisherySelectivity extends OsmoseLinker {
     }
 
     /**
-     * 8: Computes the splines selectivity.
+     * 8: Computes the splines selectivity
      *
      * @param school
      * @return
@@ -605,7 +605,7 @@ public class FisherySelectivity extends OsmoseLinker {
      * @param school
      * @return
      */
-    public double getDiscreteSelectivity(int index, AbstractSchool school) {
+    public double getNonParametricSelectivity(int index, AbstractSchool school) {
 
         int stage = 0;
         for (float ibreak : this.breaks) {
