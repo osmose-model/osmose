@@ -76,13 +76,19 @@ public class EconomicModule extends AbstractProcess {
     /* Computed harvested costs. [gear, species] */
     private double[][] harvestingCosts;
 
-    /** Substitution elasticity between species (alpha_i). */
+    /** Substitution elasticity between species (alpha_i). 
+     * Dim = [Species]
+    */
     private double[] speciesConsumptionElasticity;
 
-    /** Substitution elasticity between sizes within a species (mu_i). */
+    /** Substitution elasticity between sizes within a species (mu_i). 
+     * Dim = [Species]
+    */
     private double[] sizeConsumptionElasticity;
 
-    /** Species size preference (beta_i) */
+    /** Species size preference (beta_i) 
+     * Dim = [Species]
+    */
     private double[] speciesSizePreference; 
 
     /** Weight of fish consumption in total utility (gamma) */
@@ -107,6 +113,30 @@ public class EconomicModule extends AbstractProcess {
     /** Utility of fish consumption v(t) */
     private double Utility;
 
+    /** Computation steps for Prices
+     * Part 1 - gamma(beta*harvest^(1/mu))
+     * Dim = [Species][size-class]
+     */
+    private double[][] partone; 
+
+    /** Part 2 - sum(beta*harvest^((mu-1)/mu)) 
+     * Dim = [Species]
+    */
+    private double[] parttwo;
+
+    /** Part 3 - alpha*(Part 2)^((mu*(sigma-1)/(mu-1)*sigma)-1) 
+     * Dim = [Species]
+    */
+    private double[] partthree;
+
+    /** Part 4 - Utility^(1/sigma - 1/nu) */
+    private double partfour;
+
+    /** Prices of species p(i,s,t)
+     * Dim = [Species][size-class]
+     */
+    private double[][] Prices;
+
     public EconomicModule(int rank) {
         super(rank);
     }
@@ -124,7 +154,7 @@ public class EconomicModule extends AbstractProcess {
           
     // Initialisation of stock elasticity.
         cpt = 0;
-        for (int cpt : this.getFocalIndex()) {
+        for (int i : getFocalIndex()) {
             stockElasticity[cpt] = this.getConfiguration().getDouble("species.stock.elasticity.sp" + i);
             cpt++;
         }
@@ -231,13 +261,44 @@ public class EconomicModule extends AbstractProcess {
         cpt = 0;
         for (int i : getFocalIndex()) {
             // Step one = beta_i * harvested biomass
-            this.sizePrefHarvest[iSpecies][iClass] = this.speciesSizePreference[iClass]*Math.pow(this.harvestBiomass[iSpecies][iClass],((this.sizeConsumptionElasticity[cpt]-1)/this.sizeConsumptionElasticity[cpt]));
+            this.sizePrefHarvest[iSpecies][iClass] = this.speciesSizePreference[iClass]
+            *Math.pow(this.harvestBiomass[iSpecies][iClass],((this.sizeConsumptionElasticity[cpt]-1)/this.sizeConsumptionElasticity[cpt]));
             // integrates over size class
             double[] sumbetah = sizePrefHarvest[iClass];
-            this.consumerpref[iSpecies] = this.speciesConsumptionElasticity[cpt]*Math.pow(this.sumbetah[cpt],(this.sizeConsumptionElasticity[cpt]*(this.ElasticitySubstitutionSpecies-1)/this.ElasticitySubstitutionSpecies*(this.sizeConsumptionElasticity[cpt]-1)));
+            this.consumerpref[iSpecies] = this.speciesConsumptionElasticity[cpt]
+            *Math.pow(this.sumbetah[cpt],(this.sizeConsumptionElasticity[cpt]*(this.ElasticitySubstitutionSpecies-1)/this.ElasticitySubstitutionSpecies*(this.sizeConsumptionElasticity[cpt]-1)));
+            // integrates over species
             double sumparenthesis = consumerpref[iSpecies];
             this.Utility =  Math.pow(this.sumparenthesis,this.ElasticitySubstitutionSpecies/(this.ElasticitySubstitutionSpecies-1));
             cpt++;
+        }
+    }
+
+/** Computation of prices p(i,s,t) */
+    public void computePrices() {
+        int time = this.getSimulation().getIndexTimeSimu();
+        for (int iFishery = 0; iFishery < getConfiguration().getNFisheries(); iFishery++) {
+            // harvested biomass over size
+            double[][] harvestBiomass = getSimulation().getHarvestedBiomass()[iFishery]; // species
+        }
+        cpt = 0;
+        for (int i : getFocalIndex()) {
+            sclass = 0;
+            for (int j : getSizeClass())  {
+            // Part 1 - gamma(beta*harvest^(1/mu))
+                this.partone[iSpecies][iClass] = this.weightFishConsumption*(this.speciesSizePreference[sclass]*
+                Math.pow(this.harvestBiomass[cpt][sclass],(-1/this.sizeConsumptionElasticity[cpt])));
+            // Part 2 - sum(beta*harvest^((mu-1)/mu))
+                for (int k : getSizeClass())
+            // Part 3 - alpha*(Part 2)^((mu*(sigma-1)/(mu-1)*sigma)-1)
+                this.partthree[ispecies] = this.speciesConsumptionElasticity[cpt]*Math.pow(this.parttwo[cpt],
+                (this.ElasticitySubstitutionSpecies-this.sizeConsumptionElasticity[cpt])/(this.ElasticitySubstitutionSpecies
+                *(this.sizeConsumptionElasticity[cpt]-1)));
+            // Part 4 - utility^(1/sigma - 1/nu)
+                this.partfour = Math.pow(this.Utility,(1/this.ElasticitySubstitutionSpecies)-(1/this.ElasticityDemand));
+
+                this.Prices[iSpecies][iClass] = partone[cpt][sclass]*parttwo[cpt]*partthree[cpt]*partfour;
+            }
         }
     }
 
