@@ -258,19 +258,23 @@ public class EconomicModule extends AbstractProcess {
             // harvested biomass over size
             double[][] harvestBiomass = getSimulation().getHarvestedBiomass()[iFishery]; // species
         }
-        cpt = 0;
+        int cpt = 0;
         for (int i : getFocalIndex()) {
+            int iClass = 0;
+            for (int j : getSizeClass()) {
             // Step one = beta_i * harvested biomass
-            this.sizePrefHarvest[iSpecies][iClass] = this.speciesSizePreference[iClass]
-            *Math.pow(this.harvestBiomass[iSpecies][iClass],((this.sizeConsumptionElasticity[cpt]-1)/this.sizeConsumptionElasticity[cpt]));
+                this.sizePrefHarvest = this.speciesSizePreference[iClass]
+                *Math.pow(this.harvestBiomass[cpt][iClass],((this.sizeConsumptionElasticity[cpt]-1)/this.sizeConsumptionElasticity[cpt]));
             // integrates over size class
-            double[] sumbetah = sizePrefHarvest[iClass];
-            this.consumerpref[iSpecies] = this.speciesConsumptionElasticity[cpt]
-            *Math.pow(this.sumbetah[cpt],(this.sizeConsumptionElasticity[cpt]*(this.ElasticitySubstitutionSpecies-1)/this.ElasticitySubstitutionSpecies*(this.sizeConsumptionElasticity[cpt]-1)));
+                double[] sumbetah = sizePrefHarvest[iClass];
+                this.consumerpref[cpt] = this.speciesConsumptionElasticity[cpt]
+                *Math.pow(this.sumbetah[cpt],(this.sizeConsumptionElasticity[cpt]*(this.ElasticitySubstitutionSpecies-1)/this.ElasticitySubstitutionSpecies*(this.sizeConsumptionElasticity[cpt]-1)));
             // integrates over species
-            double sumparenthesis = consumerpref[iSpecies];
-            this.Utility =  Math.pow(this.sumparenthesis,this.ElasticitySubstitutionSpecies/(this.ElasticitySubstitutionSpecies-1));
-            cpt++;
+                double sumparenthesis = consumerpref[cpt];
+                this.Utility =  Math.pow(this.sumparenthesis,this.ElasticitySubstitutionSpecies/(this.ElasticitySubstitutionSpecies-1));
+                iClass++;
+                cpt++;
+            }
         }
     }
 
@@ -281,25 +285,33 @@ public class EconomicModule extends AbstractProcess {
             // harvested biomass over size
             double[][] harvestBiomass = getSimulation().getHarvestedBiomass()[iFishery]; // species
         }
-        cpt = 0;
+        int cpt = 0;
         for (int i : getFocalIndex()) {
-            sclass = 0;
+            int sclass = 0;
             for (int j : getSizeClass())  {
             // Part 1 - gamma(beta*harvest^(1/mu))
                 this.partone[iSpecies][iClass] = this.weightFishConsumption*(this.speciesSizePreference[sclass]*
                 Math.pow(this.harvestBiomass[cpt][sclass],(-1/this.sizeConsumptionElasticity[cpt])));
             // Part 2 - sum(beta*harvest^((mu-1)/mu))
-                for (int k : getSizeClass())
+                for (int k : getSizeClass()) {
+                           if(k == j) {
+                           continue;
+                           }
+                           double[][] betaharvestk = this.speciesSizePreference[k]*Math.pow(this.harvestBiomass[cpt][k],
+                           (this.sizeConsumptionElasticity[cpt]-1)/this.sizeConsumptionElasticity[cpt]);
+                           this.parttwo = betaharvestk[k];
+                        }
+                }   
             // Part 3 - alpha*(Part 2)^((mu*(sigma-1)/(mu-1)*sigma)-1)
-                this.partthree[ispecies] = this.speciesConsumptionElasticity[cpt]*Math.pow(this.parttwo[cpt],
+                this.partthree = this.speciesConsumptionElasticity[cpt]*Math.pow(this.parttwo[cpt],
                 (this.ElasticitySubstitutionSpecies-this.sizeConsumptionElasticity[cpt])/(this.ElasticitySubstitutionSpecies
                 *(this.sizeConsumptionElasticity[cpt]-1)));
             // Part 4 - utility^(1/sigma - 1/nu)
                 this.partfour = Math.pow(this.Utility,(1/this.ElasticitySubstitutionSpecies)-(1/this.ElasticityDemand));
 
-                this.Prices[iSpecies][iClass] = partone[cpt][sclass]*parttwo[cpt]*partthree[cpt]*partfour;
+                this.Prices = partone[cpt][sclass]*parttwo[cpt]*partthree[cpt]*partfour;
             }
-        }
+        
     }
 
     // /** Computation of harvesting costs. */
