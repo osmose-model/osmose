@@ -257,7 +257,7 @@ public class EconomicModule extends AbstractProcess {
         int time = this.getSimulation().getIndexTimeSimu();
         for (int iFishery = 0; iFishery < getConfiguration().getNFisheries(); iFishery++) {
             // harvested biomass over size
-            double[][] harvestedBiomass = getSimulation().getEconomicModule().getHarvestedBiomass()[iFishery]; // species
+            double[][] harvestBiomass = getSimulation().getEconomicModule().getHarvestedBiomass()[iFishery]; // species
         }
         int cpt = 0;
         for (int i : getFocalIndex()) {
@@ -265,16 +265,16 @@ public class EconomicModule extends AbstractProcess {
             for (int j : getSizeClass()) {
             // Step one = beta_i * harvested biomass
                 this.sizePrefHarvest = this.speciesSizePreference[iClass]
-                *Math.pow(this.harvestedBiomass[cpt][iClass],((this.sizeConsumptionElasticity[cpt]-1)/this.sizeConsumptionElasticity[cpt]));
+                *Math.pow(this.harvestBiomass[cpt][iClass],((this.sizeConsumptionElasticity[cpt]-1)/this.sizeConsumptionElasticity[cpt]));
             // integrates over size class
-                double[] sumbetah = 0;
+                double sumbetah = 0;
                 sumbetah = sizePrefHarvest[iClass];
                 this.consumerpref[cpt] = this.speciesConsumptionElasticity[cpt]
                 *Math.pow(this.sumbetah[cpt],(this.sizeConsumptionElasticity[cpt]*(this.ElasticitySubstitutionSpecies-1)/this.ElasticitySubstitutionSpecies*(this.sizeConsumptionElasticity[cpt]-1)));
             // integrates over species
                 double sumparenthesis = 0;
                 sumparenthesis = consumerpref[cpt];
-                this.Utility =  Math.pow(this.sumparenthesis,this.ElasticitySubstitutionSpecies/(this.ElasticitySubstitutionSpecies-1));
+                this.Utility =  Math.pow(sumparenthesis,this.ElasticitySubstitutionSpecies/(this.ElasticitySubstitutionSpecies-1));
                 iClass++;
                 cpt++;
             }
