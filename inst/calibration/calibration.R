@@ -105,13 +105,13 @@ control$ncores = ncores # the actual number of cores you have
 if(isTRUE(parallel)) {
   
   if(!isTRUE(MPI)) {
-    message(sprintf("Using doSNOW for parallelisation (%s).", getClusterOption("type")))
-    library("doParallel")
+    if(!require("doParallel")) stop("Package 'doParallel' not found")
+    message(sprintf("Using doSNOW for parallelisation (%s).", parallel:::getClusterOption("type")))
     cl = makeCluster(control$ncores)
     registerDoParallel(cl)
   } else {
+    if(!require("doSNOW")) stop("Package 'doSNOW' not found")
     message("Using MPI for parallelisation.")
-    library("doSNOW")
     cl = makeCluster()
     registerDoSNOW(cl)
   }
