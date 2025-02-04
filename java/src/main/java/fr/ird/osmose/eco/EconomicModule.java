@@ -125,27 +125,21 @@ public class EconomicModule extends AbstractProcess {
              .mapToInt(rgKey -> Integer.valueOf(rgKey.substring(rgKey.lastIndexOf(".fsh") + 4))).sorted().toArray();
           
     // Initialisation of stock elasticity.
-        cpt = 0;
         stockElasticity = new double[nSpecies];
-        for (int i : getConfiguration().getFocalIndex()) {
-            this.stockElasticity[cpt] = this.getConfiguration().getDouble("species.stock.elasticity.sp" + i);
-            cpt++;
+        for (int i = 0; i < this.getNSpecies(); i++) {
+            stockElasticity[i] = this.getConfiguration().getDouble("species.stock.elasticity.sp" + i);
         }
     
     // Initialisation of baseline costs t0 from calibration c_i0
-        cpt = 0;
         baselineCostst0 = new double[nSpecies];
-        for (int i : getConfiguration().getFocalIndex()) {
-            baselineCostst0[cpt] = this.getConfiguration().getDouble("baseline.costs.t0.sp" + i);
-            cpt++;
+        for (int i = 0; i < this.getNSpecies(); i++) {
+            baselineCostst0[i] = this.getConfiguration().getDouble("baseline.costs.t0.sp" + i);
         }
 
     // Initialisation of time trend of fish prices tau
-        cpt = 0;
         timetrend = new double[nSpecies];
-        for (int i : getConfiguration().getFocalIndex()) {
-            timetrend[cpt] = this.getConfiguration().getDouble("price.time.trend.sp" + i);
-            cpt++;
+        for (int i = 0; i < this.getNSpecies(); i++) {
+            timetrend[i] = this.getConfiguration().getDouble("price.time.trend.sp" + i);
         }
 
     // Initialisation of species consumption elasticity alpha_i
@@ -217,7 +211,7 @@ public class EconomicModule extends AbstractProcess {
     }
 
     public double getAccessibleBiomass(int iFishery, int iSpecies, int iClass) {
-        return accessibleBiomass[iFishery][iSpecies][iClass];
+        return this.accessibleBiomass[iFishery][iSpecies][iClass];
     }
 
     public double getHarvestedBiomass(int iFishery, int iSpecies, int iClass) {
@@ -232,12 +226,10 @@ public class EconomicModule extends AbstractProcess {
 
 /** Computation of baseline cost time series */
     public double[] getBaselineCosts(int nSpecies) {
-        int cpt = 0;
-        int time = this.getSimulation().getIndexTimeSimu();
-        baselineCosts = new double[nSpecies];
-        for (int i : getFocalIndex()) {
-            baselineCosts[cpt] = baselineCostst0[cpt]*Math.exp(timetrend[cpt]*time); 
-        cpt++;
+        int time = getSimulation().getIndexTimeSimu();
+        double[] baselineCosts = new double[getNSpecies()];
+        for (int i = 0; i < getNSpecies(); i++) {
+            baselineCosts[i] = baselineCostst0[i]*Math.exp(timetrend[i]*time); 
         }
     return baselineCosts;
     }
@@ -249,27 +241,36 @@ public class EconomicModule extends AbstractProcess {
 
 /** Computation of harvesting costs. */
     public double[] getHarvestingCosts(int iSpecies) {
-        int time = this.getSimulation().getIndexTimeSimu();
-        double[] baselineCosts = getBaselineCosts(iSpecies);
-        // Loop over fisheries
-        for (int iFishery = 0; iFishery < getConfiguration().getNFisheries(); iFishery++) {
-
-        // accessible biomass over size
-            double[][] accesBiomass = accessibleBiomass[iFishery]; // species
+        int iFishery = getConfiguration().getNFishery();
+        int nSpecies = getConfiguration().getNSpecies();
+        int iClass = sizeClasses.getNStage(nSpecies);
+        double[] baselineCosts= getBaselineCosts(nSpecies);
+        //double[][][] accessibleBiomass = getAccessibleBiomass(iFishery, nSpecies, iClass);
         
-        // harvested biomass over size
-            double[][] harvestBiomass = harvestedBiomass[iFishery]; // species
+        //double[][][] harvestedBiomass = getHarvestedBiomass(iFishery, nSpecies, iClass);
+        
+        double[][] accesBiomass = new double[nSpecies][iClass];
+        double[][] harvestBiomass = new double[nSpecies][iClass];
+        double[] sumHarvest = new double[nSpecies];
+        double[] sumAccess = new double[nSpecies];
+        double[] harvestingCosts = new double[nSpecies];
 
-            for (int i = 0; i < this.getNSpecies(); i++) {
+        for (int i = 0; i< iFishery; i++) {
+            for (int j = 0; j < nSpecies; j++) {
+                for (int k = 0; k < iClass; k++){
+        accessibleBiomass[i][j][k] = getAccessibleBiomass(i, j, k); 
+        harvestedBiomass[i][j][k] = getHarvestedBiomass(i, j, k);    
+        // accessible biomass and harvested biomass for each species per size class
+        accesBiomass[j][k] += accessibleBiomass[i][j][k];
+        harvestBiomass[j][k] += harvestedBiomass[i][j][k];
 
-        // integrates harvested biomass over time
-                double[] sumHarvest = new double[iSpecies];
-                sumHarvest = harvestBiomass[iSpecies];
-                double[] sumAccess = new double[iSpecies];
-                sumAccess = accesBiomass[iSpecies];
+        // accsessible and harvested biomass summed over size class
+        sumHarvest[j] += harvestBiomass[k][j];
+        sumAccess[j] += accesBiomass[k][j];
 
-                this.harvestingCosts[iSpecies] = baselineCosts[iSpecies] * sumHarvest[iSpecies]
-                         / (Math.pow(sumAccess[iSpecies], this.stockElasticity[iSpecies]));     
+        harvestingCosts[j] = baselineCosts[j] * sumHarvest[j]
+        / (Math.pow(sumAccess[j], stockElasticity[j])); 
+                }  
             }
         }
     return harvestingCosts;
