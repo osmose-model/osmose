@@ -53,7 +53,7 @@ public class HarvestingCostsOutput extends SimulationLinker implements IOutput {
 
         /** Output is the harvesting costs. Dimension is [species] */
     private double[] output;
-    private int nSpecies;
+    //private int nSpecies;
     private FileOutputStream fos[];
     private PrintWriter prw[];
     private int recordFrequency;
@@ -75,26 +75,26 @@ public class HarvestingCostsOutput extends SimulationLinker implements IOutput {
 
     }
 
-    @Override
+    //@Override
     public void reset() {
         // initialisation of the harvesting costs
-        output = new double[getNSpecies()];
-        for (int i = 0; i < getNSpecies(); i++) {
-                output = new double[i];
-        }
+        double[] output = new double[getNSpecies()];
+        //for (int i = 0; i < getNSpecies(); i++) {
+        //        output[i] = new double[i];
+        //}
     }
     
     @Override
     public void update() {
         // get harvesting costs (ispecies)
-            for (int iSpecies = 0; iSpecies < getNSpecies(); iSpecies++) {
-                    output = getSimulation().getEconomicModule().getHarvestingCosts(iSpecies);
-                }
-            }
+        for (int iSpecies = 0; iSpecies < getNSpecies(); iSpecies++) {
+            output = getSimulation().getEconomicModule().getHarvestingCosts(iSpecies);
+        }
+    }
 
     @Override
     public void write(float time) {
-        for (int iSpecies = 0; iSpecies < getNSpecies(); iSpecies++) {
+        for (int iSpecies = 0; iSpecies < getConfiguration().getNSpecies(); iSpecies++) {
                 prw[iSpecies].print(time);
                 prw[iSpecies].print(separator);
                 prw[iSpecies].print(output[iSpecies]);
@@ -137,18 +137,14 @@ public class HarvestingCostsOutput extends SimulationLinker implements IOutput {
 
             // Write headers
             prw[iSpecies].print(quote("Time"));
+            prw[iSpecies].print(separator); 
+            String name = getISpecies(iSpecies).getName();
+            prw[iSpecies].print(quote(name));
             prw[iSpecies].print(separator);
-            for (int iSpec = 0; iSpec < nSpecies - 1; iSpec++) {
-                String name = getISpecies(iSpec).getName();
-                prw[iSpec].print(quote(name));
-                prw[iSpec].print(separator);
-            }
             prw[iSpecies].println();
-
         }
 
         recordFrequency = getConfiguration().getInt("output.recordfrequency.ndt");
-
 
     }
 
