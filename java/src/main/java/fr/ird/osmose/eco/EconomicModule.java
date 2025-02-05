@@ -43,6 +43,7 @@ import fr.ird.osmose.AbstractSchool;
 import fr.ird.osmose.process.AbstractProcess;
 import fr.ird.osmose.stage.SchoolStage;
 import fr.ird.osmose.util.timeseries.SingleTimeSeries;
+import fr.ird.osmose.Configuration;
 
 public class EconomicModule extends AbstractProcess {
 
@@ -142,6 +143,13 @@ public class EconomicModule extends AbstractProcess {
             timetrend[i] = this.getConfiguration().getDouble("price.time.trend.sp" + i);
         }
 
+    // Compute baseline cost time series
+        int time = getSimulation().getIndexTimeSimu();
+        baselineCosts = new double[nSpecies];
+        for (int i = 0; i < nSpecies; i++) {
+            baselineCosts[i] = baselineCostst0[i]*Math.exp(timetrend[i]*time); 
+        }
+
     // Initialisation of species consumption elasticity alpha_i
         cpt = 0;
         speciesConsumptionElasticity = new double[nSpecies];
@@ -222,60 +230,37 @@ public class EconomicModule extends AbstractProcess {
         return this.sizeClasses.getStage(school);
     }
 
-
-
-/** Computation of baseline cost time series */
-    public double[] getBaselineCosts(int nSpecies) {
-        int time = getSimulation().getIndexTimeSimu();
-        double[] baselineCosts = new double[getNSpecies()];
-        for (int i = 0; i < getNSpecies(); i++) {
-            baselineCosts[i] = baselineCostst0[i]*Math.exp(timetrend[i]*time); 
-        }
-    return baselineCosts;
-    }
-
-    public void incrementHarvestingCosts(AbstractSchool school, double increment) {
-        int iSpecies = school.getSpeciesIndex();
-        this.harvestingCosts[iSpecies] += increment;
-    }
-
 /** Computation of harvesting costs. */
-    public double[] getHarvestingCosts(int iSpecies) {
-        int iFishery = getConfiguration().getNFishery();
+    public double getHarvestingCosts(int iSpecies) {
         int nSpecies = getConfiguration().getNSpecies();
         int iClass = sizeClasses.getNStage(nSpecies);
-        double[] baselineCosts= getBaselineCosts(nSpecies);
-        //double[][][] accessibleBiomass = getAccessibleBiomass(iFishery, nSpecies, iClass);
-        
-        //double[][][] harvestedBiomass = getHarvestedBiomass(iFishery, nSpecies, iClass);
-        
         double[][] accesBiomass = new double[nSpecies][iClass];
         double[][] harvestBiomass = new double[nSpecies][iClass];
         double[] sumHarvest = new double[nSpecies];
         double[] sumAccess = new double[nSpecies];
-        double[] harvestingCosts = new double[nSpecies];
+        this.harvestingCosts = new double[nSpecies];
 
-        for (int i = 0; i< iFishery; i++) {
+        for (int i = 0; i < getConfiguration().getNFishery(); i++) {
             for (int j = 0; j < nSpecies; j++) {
                 for (int k = 0; k < iClass; k++){
-        accessibleBiomass[i][j][k] = getAccessibleBiomass(i, j, k); 
-        harvestedBiomass[i][j][k] = getHarvestedBiomass(i, j, k);    
+        //this.accessibleBiomass[i][j][k] = getAccessibleBiomass(i, j, k); 
+        //this.harvestedBiomass[i][j][k] = getHarvestedBiomass(i, j, k);    
         // accessible biomass and harvested biomass for each species per size class
-        accesBiomass[j][k] += accessibleBiomass[i][j][k];
-        harvestBiomass[j][k] += harvestedBiomass[i][j][k];
+        accesBiomass[j][k] += this.accessibleBiomass[i][j][k];
+        harvestBiomass[j][k] += this.harvestedBiomass[i][j][k];
 
         // accsessible and harvested biomass summed over size class
         sumHarvest[j] += harvestBiomass[k][j];
         sumAccess[j] += accesBiomass[k][j];
 
-        harvestingCosts[j] = baselineCosts[j] * sumHarvest[j]
-        / (Math.pow(sumAccess[j], stockElasticity[j])); 
+        this.harvestingCosts[j] += this.baselineCosts[j] * sumHarvest[j]
+        / (Math.pow(sumAccess[j], this.stockElasticity[j])); 
                 }  
             }
         }
-    return harvestingCosts;
+    return this.harvestingCosts[iSpecies];
     }
-
+// nothing is checked starting from here
 /** Computation of Utility of fish cosumption v(t) */
     public void computeUtility() {
         int time = this.getSimulation().getIndexTimeSimu();

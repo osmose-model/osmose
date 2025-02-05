@@ -51,9 +51,8 @@ import fr.ird.osmose.util.SimulationLinker;
 
 public class HarvestingCostsOutput extends SimulationLinker implements IOutput {
 
-        /** Output is the harvesting costs. Dimension is [species] */
+    /** Output is the harvesting costs. Dimension is [species] */
     private double[] output;
-    //private int nSpecies;
     private FileOutputStream fos[];
     private PrintWriter prw[];
     private int recordFrequency;
@@ -75,20 +74,17 @@ public class HarvestingCostsOutput extends SimulationLinker implements IOutput {
 
     }
 
-    //@Override
+    @Override
     public void reset() {
         // initialisation of the harvesting costs
-        double[] output = new double[getNSpecies()];
-        //for (int i = 0; i < getNSpecies(); i++) {
-        //        output[i] = new double[i];
-        //}
+        output = new double[getNSpecies()];
     }
     
     @Override
     public void update() {
-        // get harvesting costs (ispecies)
+        // get harvesting costs (ispecies)     
         for (int iSpecies = 0; iSpecies < getNSpecies(); iSpecies++) {
-            output = getSimulation().getEconomicModule().getHarvestingCosts(iSpecies);
+            output[iSpecies] += getSimulation().getEconomicModule().getHarvestingCosts(iSpecies);
         }
     }
 
