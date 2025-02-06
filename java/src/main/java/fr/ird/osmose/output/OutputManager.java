@@ -301,7 +301,7 @@ public class OutputManager extends SimulationLinker {
         if (getConfiguration().isEconomyEnabled()) {
 
             if (getConfiguration().getBoolean("output.economic.harvesting.costs.enabled")) {
-                outputs.add(new HarvestingCostsOutput(rank));
+                outputs.add(new EconomyHarvestingCostsOutput(rank));
             }
         }
 
