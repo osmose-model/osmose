@@ -16,9 +16,8 @@
             "request": "launch",
             "mainClass": "fr.ird.osmose.Osmose",
             "projectName": "osmose",
-            "cwd": "/home/barrier/Work/osmose/alaia-ns-config",
-            "args": "-force calib_config.csv",
-
+            "cwd": "C:\\R\\osmose-ns\\Eco-OSMOSE-NS",
+            "args": "New_param_Eco_Bioen.R -Poutput.dir.path=Eco-OSMOSE-NS/output/reference_test_JAVA -Poutput.netcdf.format=netcdf3",
         }
     ]
 }
