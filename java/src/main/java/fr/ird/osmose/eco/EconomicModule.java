@@ -249,12 +249,11 @@ public class EconomicModule extends AbstractProcess {
                     // accsessible and harvested biomass summed over size class
                     sumHarvest[j] += harvestBiomass[j][k];
                     sumAccess[j] += accesBiomass[j][k];
-                    if (sumHarvest[j] == 0){
-                    this.harvestingCosts[j] = 0;
-                    }
-                    else {
-                    this.harvestingCosts[j] += this.baselineCosts[j] * sumHarvest[j]
-                            / (Math.pow(sumAccess[j], this.stockElasticity[j]));
+                    if (sumHarvest[j] == 0) {
+                        this.harvestingCosts[j] = 0;
+                    } else {
+                        this.harvestingCosts[j] += this.baselineCosts[j] * sumHarvest[j]
+                                / (Math.pow(sumAccess[j], this.stockElasticity[j]));
                     }
                 }
             }
@@ -264,81 +263,84 @@ public class EconomicModule extends AbstractProcess {
 
     // nothing is checked starting from here
     /** Computation of Utility of fish cosumption v(t) */
-    public void computeUtility() {
+    public double computeUtility() {
         int nSpecies = getConfiguration().getNSpecies();
-        int iClass = sizeClasses.getNStage(nSpecies);
+        int iClass = this.sizeClasses.getNStage(nSpecies);
         double[][] harvestBiomass = new double[nSpecies][iClass];
         double[][] sizePrefHarvest = new double[nSpecies][iClass];
         double[] sumbetah = new double[nSpecies];
         double[] consumerpref = new double[nSpecies];
         double sumparenthesis = 0;
-        AbstractSchool school;
+        this.Utility = 0;
         for (int iFishery = 0; iFishery < getConfiguration().getNFisheries(); iFishery++) {
             for (int i = 0; i < nSpecies; i++) {
                 for (int j = 0; j < iClass; j++) {
                     // harvested biomass per species per size class
-                    harvestBiomass[i][j] = harvestedBiomass[iFishery][i][j];
+                    harvestBiomass[i][j] += this.harvestedBiomass[iFishery][i][j];
                     // Step one = beta_i * harvested biomass
-                    sizePrefHarvest[i][j] = this.speciesSizePreference[i][j]
-                            * Math.pow(harvestBiomass[i][j],
-                                    ((this.sizeConsumptionElasticity[i] - 1) / this.sizeConsumptionElasticity[i]));
+                    sizePrefHarvest[i][j] += this.speciesSizePreference[i][j] * Math.pow(harvestBiomass[i][j],
+                            ((this.sizeConsumptionElasticity[i] - 1) / this.sizeConsumptionElasticity[i]));
                     // sum over size classes
-                    sumbetah[i] = sizePrefHarvest[j][i];
+                    sumbetah[i] += sizePrefHarvest[i][j];
                     // alpha_i * sum(beta_i*harvest^power)^power
-                    consumerpref[i] = this.speciesConsumptionElasticity[i]
-                            * Math.pow(sumbetah[i],
-                                    (this.sizeConsumptionElasticity[i] * (this.ElasticitySubstitutionSpecies - 1)
-                                            / this.ElasticitySubstitutionSpecies
-                                            * (this.sizeConsumptionElasticity[i] - 1)));
+                    consumerpref[i] += this.speciesConsumptionElasticity[i] * Math.pow(sumbetah[i],
+                            (this.sizeConsumptionElasticity[i] * (this.ElasticitySubstitutionSpecies - 1)
+                                    / this.ElasticitySubstitutionSpecies * (this.sizeConsumptionElasticity[i] - 1)));
                     // integrates over species
-                    sumparenthesis = consumerpref[i];
-                    this.Utility = Math.pow(sumparenthesis,
+                    sumparenthesis += consumerpref[i];
+                    this.Utility += Math.pow(sumparenthesis,
                             this.ElasticitySubstitutionSpecies / (this.ElasticitySubstitutionSpecies - 1));
                 }
             }
         }
+        return this.Utility;
     }
 
     /** Computation of prices p(i,s,t) */
     public double getPrices(int iSpecies, int nClass) {
         int nSpecies = getConfiguration().getNSpecies();
-        int iClass = sizeClasses.getNStage(nSpecies);
+        int iClass = this.sizeClasses.getNStage(nSpecies);
         double[][] harvestBiomass = new double[nSpecies][iClass];
         double[][] partone = new double[nSpecies][iClass];
-        double[][] betaharvestk = new double[nSpecies][iClass - 1];
+        double[][] betaharvestk = new double[nSpecies][iClass];
         double[] parttwo = new double[nSpecies];
         double[] partthree = new double[nSpecies];
-        double partfour = 0;
+        double partfour = 0.0;
+        this.Prices = new double[nSpecies][iClass];
         for (int iFishery = 0; iFishery < getConfiguration().getNFisheries(); iFishery++) {
             for (int i = 0; i < nSpecies; i++) {
                 for (int j = 0; j < iClass; j++) {
                     // harvested biomass over size
-                    harvestBiomass[i][j] = harvestedBiomass[iFishery][i][j];
+                    harvestBiomass[i][j] += harvestedBiomass[iFishery][i][j];
                     // Part 1 - gamma(beta*harvest^(1/mu))
-                    partone[i][j] = this.weightFishConsumption * (this.speciesSizePreference[i][j] *
-                            Math.pow(harvestBiomass[i][j], (-1 / this.sizeConsumptionElasticity[i])));
+                    partone[i][j] += this.weightFishConsumption * (this.speciesSizePreference[i][j]
+                            * Math.pow(harvestBiomass[i][j], (-1 / this.sizeConsumptionElasticity[i])));
                     // Part 2 - sum(beta*harvest^((mu-1)/mu))
                     for (int kClass = 0; kClass < iClass; kClass++) {
                         if (kClass == j) {
                             continue;
                         }
-                        betaharvestk[i][kClass] = this.speciesSizePreference[i][kClass]
+                        betaharvestk[i][kClass] += this.speciesSizePreference[i][kClass]
                                 * Math.pow(harvestBiomass[i][kClass],
                                         (this.sizeConsumptionElasticity[i] - 1) / this.sizeConsumptionElasticity[i]);
 
                         // sum over size class k
-                        parttwo[i] = betaharvestk[kClass][i];
+                        parttwo[i] += betaharvestk[i][kClass];
                     }
                     // Part 3 - alpha*(Part 2)^((mu*(sigma-1)/(mu-1)*sigma)-1)
-                    partthree[i] = this.speciesConsumptionElasticity[i] * Math.pow(parttwo[i],
+                    partthree[i] += this.speciesConsumptionElasticity[i] * Math.pow(parttwo[i],
                             (this.ElasticitySubstitutionSpecies - this.sizeConsumptionElasticity[i])
-                                    / (this.ElasticitySubstitutionSpecies
-                                            * (this.sizeConsumptionElasticity[i] - 1)));
+                                    / (this.ElasticitySubstitutionSpecies * (this.sizeConsumptionElasticity[i] - 1)));
                     // Part 4 - utility^(1/sigma - 1/nu)
-                    partfour = Math.pow(this.Utility,
+                    if (this.Utility == 0){
+                    partfour = 0;
+                    } else {
+                    partfour += Math.pow(this.Utility,
                             (1 / this.ElasticitySubstitutionSpecies) - (1 / this.ElasticityDemand));
+                    }
 
-                    this.Prices[i][j] = partone[i][j] * parttwo[i] * partthree[i] * partfour;
+
+                    this.Prices[i][j] += partone[i][j] * parttwo[i] * partthree[i] * partfour;
                 }
             }
         }
