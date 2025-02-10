@@ -128,9 +128,9 @@ public class PredationMortality extends AbstractMortality {
             // Check that the predator/prey ratios are properly set
             for (int k = 0; k < predPreySizesMin[cpt].length; k++) {
                 if (predPreySizesMax[cpt][k] > predPreySizesMin[cpt][k]) {
-                    String message = String.format("Parameter %s and %s must be reordered for index %d",
+                    String message = String.format("Parameter %s is greater than %s for stage %d, must be reordered.",
                             "predation.predPrey.sizeRatio.max.sp" + fileSpeciesIndex,
-                            "predation.predPrey.sizeRatio.max.sp" + fileSpeciesIndex, k);
+                            "predation.predPrey.sizeRatio.min.sp" + fileSpeciesIndex, k);
                     warning(message);
                     double temp = predPreySizesMax[cpt][k];
                     predPreySizesMax[cpt][k] = predPreySizesMin[cpt][k];
