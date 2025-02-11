@@ -654,6 +654,12 @@ osmose2R.v4r0 = function (path=NULL, species.names=NULL, conf=NULL, ...) {
     if(!is.null(conf)) nm = get_fisheries(conf)
     names(outputData$yieldByFisheryBySpecies) = nm
     # end of temporal
+    
+    # add fishery groups
+    xfg = .get_functional_groups(conf, "fisheries")
+    outputData$yieldByFisheryBySpecies = c(outputData$yieldByFisheryBySpecies, 
+                                           lapply(xfg, FUN=.my_list_sum, x=outputData$yieldByFisheryBySpecies))
+    # end of fishery groups
   }
 
   outputData$yieldByFishery = .add_fisheries_groups(x=outputData$yieldByFishery, conf=conf)
@@ -662,8 +668,6 @@ osmose2R.v4r0 = function (path=NULL, species.names=NULL, conf=NULL, ...) {
   outputData = .add_surveys(x=outputData$surveyAbundance, out=outputData, type="abundance", conf=conf)
   outputData = .add_surveys(x=outputData$yieldByFisheryBySpecies, out=outputData, type="yield", conf=conf)
 
-  get_par(conf, "output.species.group")
-  
   if(!is.null(conf)) {
 
     outputData = .calculate_size_residuals_byage(outputData, conf)
@@ -677,6 +681,8 @@ osmose2R.v4r0 = function (path=NULL, species.names=NULL, conf=NULL, ...) {
     outputData = .aggregate_catch_bytime(outputData, conf, type="yield")
     outputData = .aggregate_catch_byyear(outputData, conf, type="yield")
 
+    outputData$yield = .add_fisheries_groups(x=outputData$yield, conf=conf, type="species")
+    
     start = get_par(conf, "simulation.time.start")
     if(is.null(start)) start = 0
     ndt   = get_par(conf, "simulation.time.ndtPerYear")/get_par(conf, "output.recordfrequency.ndt")
@@ -873,13 +879,22 @@ osmose2R.v3r0 = function(path=NULL, species.names=NULL, ...) {
 }
 
 
-.add_fisheries_groups = function(x, conf) {
+
+.my_list_sum = function(ind, x) {
+  ii = x[ind]  
+  out = 0
+  for(i in seq_along(ii)) out = out + ii[[i]]
+  return(out)
+}
+
+
+.add_fisheries_groups = function(x, conf, type="fisheries") {
   
   if(is.null(x)) return(NULL)
   if(all(sapply(x, is.null))) return(NULL)
   if(length(x) == 0) return(NULL)
   
-  fgd = get_fg_data(conf, x=x, type="fisheries")
+  fgd = get_fg_data(conf, x=x, type=type)
   
   if(!is.null(fgd)) {
     xout = array(dim=dim(x) + c(0, dim(fgd)[2], 0))
