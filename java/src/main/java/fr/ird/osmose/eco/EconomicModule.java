@@ -76,7 +76,9 @@ public class EconomicModule extends AbstractProcess {
     private double[] speciesConsumptionElasticity;
 
     /**
-     * Substitution elasticity between sizes within a species - mu_i. Dim = [Species] */
+     * Substitution elasticity between sizes within a species - mu_i. Dim =
+     * [Species]
+     */
     private double[] sizeConsumptionElasticity;
 
     /** Species size preference - beta_i,s. Dims = [Species][Size-class] */
@@ -96,6 +98,9 @@ public class EconomicModule extends AbstractProcess {
 
     /** Prices of species p(i,s,t), Dim = [Species][size-class] */
     private double[][] Prices;
+
+    /** Fisherman's Profit Pi over time, Dim = [Species] */
+    private double[] FishermanProfit;
 
     public EconomicModule(int rank) {
         super(rank);
@@ -235,7 +240,8 @@ public class EconomicModule extends AbstractProcess {
             harvestBiomass[i] = new double[iClass];
             // Loop over size-class
             for (int j = 1; j < iClass; j++) {
-                // Loop over fisheries since accessible and harvested biomass are defined with fisheries
+                // Loop over fisheries since accessible and harvested biomass are defined with
+                // fisheries
                 for (int k = 0; k < getConfiguration().getNFisheries(); k++) {
                     // accessible biomass and harvested biomass summed over fisheries
                     accesBiomass[i][j] += this.accessibleBiomass[k][i][j];
@@ -273,7 +279,8 @@ public class EconomicModule extends AbstractProcess {
             // Define the dimension size-class, different for each species
             harvestBiomass[i] = new double[iClass];
             sizePrefHarvest[i] = new double[iClass];
-            // Loop over size-class - loop starts at 1 to exclude size class 0 that is not sold
+            // Loop over size-class - loop starts at 1 to exclude size class 0 that is not
+            // sold
             for (int j = 1; j < iClass; j++) {
                 // Loop over fisheries
                 for (int iFishery = 0; iFishery < getConfiguration().getNFisheries(); iFishery++) {
@@ -318,7 +325,8 @@ public class EconomicModule extends AbstractProcess {
             partone[i] = new double[iClass];
             betaharvestk[i] = new double[iClass];
             this.Prices[i] = new double[iClass];
-            // Loop over size-class - loop starts at 1 to exclude size class 0 that is not sold
+            // Loop over size-class - loop starts at 1 to exclude size class 0 that is not
+            // sold
             for (int j = 1; j < iClass; j++) {
                 // Loop over fisheries
                 for (int iFishery = 0; iFishery < getConfiguration().getNFisheries(); iFishery++) {
@@ -358,10 +366,33 @@ public class EconomicModule extends AbstractProcess {
                             ((1 / this.ElasticitySubstitutionSpecies) - (1 / this.ElasticityDemand)));
                 }
 
-                this.Prices[i][j] += partone[i][j] * parttwo[i] * partthree[i] * partfour;
+                this.Prices[i][j] = partone[i][j] * parttwo[i] * partthree[i] * partfour;
             }
         }
         return this.Prices[iSpecies][nClass];
+    }
+
+    /** Computation of Fisherman's profit Pi */
+    public double getFishermanProfit(int iSpecies) {
+        int nSpecies = getConfiguration().getNSpecies();
+        double[][] priceharvest = new double[nSpecies][];
+        this.FishermanProfit = new double[nSpecies];
+        double[] sumpriceharvest = new double[nSpecies];
+        for (int i = 0; i < nSpecies; i++) {
+            int iClass = sizeClasses.getNStage(i);
+            double[][] harvestBiomass = new double[nSpecies][iClass];
+            priceharvest[i] = new double[iClass];
+            for (int j = 0; j < iClass; j++) {
+                for (int iFishery = 0; iFishery < getConfiguration().getNFisheries(); iFishery++) {
+                    // harvested biomass over size
+                    harvestBiomass[i][j] += this.harvestedBiomass[iFishery][i][j];
+                }
+                priceharvest[i][j] = harvestBiomass[i][j] * this.Prices[i][j];
+                sumpriceharvest[i] += priceharvest[i][j];
+                this.FishermanProfit[i] = sumpriceharvest[i]-this.harvestingCosts[i];
+            }
+        }
+        return this.FishermanProfit[iSpecies];
     }
 
     @Override
