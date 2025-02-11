@@ -307,6 +307,10 @@ public class OutputManager extends SimulationLinker {
             if (getConfiguration().getBoolean("output.economic.fish.prices.enabled")) {
                 outputs.add(new EconomyFishPricesOutput(rank));
             }
+
+            if (getConfiguration().getBoolean("output.economic.fisherman.profit.enabled")) {
+                outputs.add(new EconomyFishermanProfitOutput(rank));
+            }
         }
 
         // Biomass
