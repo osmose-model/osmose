@@ -81,8 +81,8 @@ public class EconomyFishPricesOutput extends SimulationLinker implements IOutput
         // initialisation of the prices
         output = new double[getNSpecies()][];
         for (int i = 0; i < getNSpecies(); i++) {
-            int nClass = this.sizeClasses.getNStage(i);
-            output[i] = new double[nClass];
+            int iClass = this.sizeClasses.getNStage(i);
+            output[i] = new double[iClass];
         }
     }
 
@@ -90,8 +90,8 @@ public class EconomyFishPricesOutput extends SimulationLinker implements IOutput
     public void update() {
         // get fish prices (ispecies)(size-class)
         for (int iSpecies = 0; iSpecies < getNSpecies(); iSpecies++) {
-            for (int nClass = 0; nClass < this.sizeClasses.getNStage(iSpecies); nClass++) {
-                output[iSpecies][nClass] += getSimulation().getEconomicModule().getPrices(iSpecies, nClass);
+            for (int iClass = 0; iClass < this.sizeClasses.getNStage(iSpecies); iClass++) {
+                output[iSpecies][iClass] += getSimulation().getEconomicModule().getPrices(iSpecies, iClass);
             }
         }
     }
@@ -104,7 +104,7 @@ public class EconomyFishPricesOutput extends SimulationLinker implements IOutput
                 prw[iSpecies].print(separator);
                 prw[iSpecies].print(iClass == 0 ? 0 : this.sizeClasses.getThresholds(iSpecies, iClass - 1));
                 prw[iSpecies].print(separator);
-                prw[iSpecies].print(output[iSpecies]);
+                prw[iSpecies].print(output[iSpecies][iClass]);
                 prw[iSpecies].println();
             }
         }
@@ -131,7 +131,6 @@ public class EconomyFishPricesOutput extends SimulationLinker implements IOutput
             filename.append(File.separatorChar);
             filename.append(getConfiguration().getString("output.file.prefix"));
             filename.append("_FishPrices");
-            filename.append(sizeClasses.getType(iSpecies));
             filename.append("-");
             filename.append(getSpecies(iSpecies).getName());
             filename.append("_Simu");
