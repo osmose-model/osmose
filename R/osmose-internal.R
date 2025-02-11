@@ -683,6 +683,12 @@ osmose2R.v4r0 = function (path=NULL, species.names=NULL, conf=NULL, ...) {
 
     outputData$yield = .add_fisheries_groups(x=outputData$yield, conf=conf, type="species")
     
+    # add species groups
+    xfg = .get_functional_groups(conf, "species")
+    outputData$yieldBySpecies = c(outputData$yieldBySpecies, 
+                                           lapply(xfg, FUN=.my_list_sum, x=outputData$yieldBySpecies))
+    
+    
     start = get_par(conf, "simulation.time.start")
     if(is.null(start)) start = 0
     ndt   = get_par(conf, "simulation.time.ndtPerYear")/get_par(conf, "output.recordfrequency.ndt")
