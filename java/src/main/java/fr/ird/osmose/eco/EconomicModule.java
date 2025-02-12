@@ -271,6 +271,7 @@ public class EconomicModule extends AbstractProcess {
         double sumparenthesis = 0;
         double[][] harvestBiomass = new double[nSpecies][];
         double[][] sizePrefHarvest = new double[nSpecies][];
+        double[] power = new double[nSpecies];
         this.Utility = 0;
         // Loop over species
         for (int i = 0; i < nSpecies; i++) {
@@ -279,8 +280,7 @@ public class EconomicModule extends AbstractProcess {
             // Define the dimension size-class, different for each species
             harvestBiomass[i] = new double[iClass];
             sizePrefHarvest[i] = new double[iClass];
-            // Loop over size-class - loop starts at 1 to exclude size class 0 that is not
-            // sold
+            // Loop over size-class - loop starts at 1 to exclude size class 0
             for (int j = 1; j < iClass; j++) {
                 // Loop over fisheries
                 for (int iFishery = 0; iFishery < getConfiguration().getNFisheries(); iFishery++) {
@@ -289,14 +289,14 @@ public class EconomicModule extends AbstractProcess {
                 }
                 // Formula for v(t) is divided in multiple steps
                 // beta_i * harvested biomass
-                sizePrefHarvest[i][j] += this.speciesSizePreference[i][j - 1] * Math.pow(harvestBiomass[i][j],
+                sizePrefHarvest[i][j] = this.speciesSizePreference[i][j - 1] * Math.pow(harvestBiomass[i][j],
                         ((this.sizeConsumptionElasticity[i] - 1) / this.sizeConsumptionElasticity[i]));
                 // sum over size classes
                 sumbetah[i] += sizePrefHarvest[i][j];
                 // alpha_i * sumbetah^power
-                consumerpref[i] = this.speciesConsumptionElasticity[i] * Math.pow(sumbetah[i],
-                        (this.sizeConsumptionElasticity[i] * (this.ElasticitySubstitutionSpecies - 1)
-                                / this.ElasticitySubstitutionSpecies * (this.sizeConsumptionElasticity[i] - 1)));
+                power[i] = (this.sizeConsumptionElasticity[i] * (this.ElasticitySubstitutionSpecies - 1))
+                / (this.ElasticitySubstitutionSpecies * (this.sizeConsumptionElasticity[i] - 1));
+                consumerpref[i] = this.speciesConsumptionElasticity[i] * Math.pow(sumbetah[i], power[i]);
                 // sum over species
                 sumparenthesis += consumerpref[i];
                 this.Utility = Math.pow(sumparenthesis,
