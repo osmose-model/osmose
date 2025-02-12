@@ -640,30 +640,37 @@ osmose2R.v4r0 = function (path=NULL, species.names=NULL, conf=NULL, ...) {
 )
 
   if(!is.null(outputData$yieldByFisheryBySpecies)) {
+    outputData$yieldArray = outputData$yieldByFisheryBySpecies
     # temporal
     dmn = dimnames(outputData$biomass)
     rf = .getPar(conf, "output.recordfrequency.ndt")
-    ybf = aperm(apply(outputData$yieldByFisheryBySpecies, c(1, 3, 4), sum), c(2,1,3))
+    ybf = aperm(apply(outputData$yieldArray, c(1, 3, 4), sum), c(2,1,3))
     ybf = rowsum(ybf, group=rep(seq_len(nrow(ybf)), each=rf, length.out=nrow(ybf)))
     rownames(ybf) = dmn[[1]]
     colnames(ybf) = get_fisheries(conf)
     outputData$yieldByFishery = ybf
+    outputData$yieldByFishery = .add_fisheries_groups(x=outputData$yieldByFishery, conf=conf)
     
-    outputData$yieldByFisheryBySpecies = .reshapeFishery(outputData$yieldByFisheryBySpecies, nm=dmn, rf=rf)
-    nm = sprintf("fishery%d", seq_along(outputData$yieldByFisheryBySpecies) - 1)
-    if(!is.null(conf)) nm = get_fisheries(conf)
-    names(outputData$yieldByFisheryBySpecies) = nm
-    # end of temporal
-    
-    # add fishery groups
+    # yieldByFisheryBySpecies
+    outputData$yieldByFisheryBySpecies = .reshapeFishery(outputData$yieldArray, nm=dmn, rf=rf)
+    names(outputData$yieldByFisheryBySpecies) = get_fisheries(conf)
     xfg = .get_functional_groups(conf, "fisheries")
     outputData$yieldByFisheryBySpecies = c(outputData$yieldByFisheryBySpecies, 
                                            lapply(xfg, FUN=.my_list_sum, x=outputData$yieldByFisheryBySpecies))
-    # end of fishery groups
+    # yieldBySpeciesByFishery
+    dmn[[2]] = get_fisheries(conf)
+    outputData$yieldByBySpeciesFishery = .reshapeFishery(outputData$yieldArray, nm=dmn, rf=rf, by = "species")
+    names(outputData$yieldByBySpeciesFishery) = get_species(conf, type="focal")
+    xfg = .get_functional_groups(conf, "species")
+    outputData$yieldBySpeciesByFishery = c(outputData$yieldBySpeciesByFishery, 
+                                           lapply(xfg, FUN=.my_list_sum, x=outputData$yieldBySpeciesByFishery))
+    # end of temporal
+  } else {
+    outputData$yieldByFishery = NULL
+    outputData$yieldByFisheryBySpecies = NULL
+    outputData$yieldBySpeciesByFishery = NULL
   }
 
-  outputData$yieldByFishery = .add_fisheries_groups(x=outputData$yieldByFishery, conf=conf)
-  
   outputData = .add_surveys(x=outputData$surveyBiomass, out=outputData, type="biomass", conf=conf)
   outputData = .add_surveys(x=outputData$surveyAbundance, out=outputData, type="abundance", conf=conf)
   outputData = .add_surveys(x=outputData$yieldByFisheryBySpecies, out=outputData, type="yield", conf=conf)
@@ -678,16 +685,22 @@ osmose2R.v4r0 = function (path=NULL, species.names=NULL, conf=NULL, ...) {
     outputData = .aggregate_catch_byclass(outputData, conf, "age", "abundance")
     outputData = .aggregate_catch_byclass(outputData, conf, "age", "biomass")
 
-    outputData = .aggregate_catch_bytime(outputData, conf, type="yield")
-    outputData = .aggregate_catch_byyear(outputData, conf, type="yield")
-
+    # add species groups to yield
     outputData$yield = .add_fisheries_groups(x=outputData$yield, conf=conf, type="species")
+    outputData$yieldx = .cbind(outputData$yield, outputData$yieldByFishery)
+    # yieldBySpecies
+    outputData = .aggregate_catch_bytime(outputData, conf, type="yieldx")
+    # yieldByYear (include species groups)
+    outputData = .aggregate_catch_byyear(outputData, conf, type="yield")
+    outputData$yieldx = NULL
+    # add species groups to yield and yieldBySpecies
+    # xfg = .get_functional_groups(conf, "species")
+    # outputData$yieldBySpecies = c(outputData$yieldBySpecies, 
+    #                                        lapply(xfg, FUN=.my_list_sum, x=outputData$yieldBySpecies))
+    # end
+    # add fishery groups to yieldBySpecies
     
-    # add species groups
-    xfg = .get_functional_groups(conf, "species")
-    outputData$yieldBySpecies = c(outputData$yieldBySpecies, 
-                                           lapply(xfg, FUN=.my_list_sum, x=outputData$yieldBySpecies))
-    
+    # end
     
     start = get_par(conf, "simulation.time.start")
     if(is.null(start)) start = 0
@@ -900,21 +913,26 @@ osmose2R.v3r0 = function(path=NULL, species.names=NULL, ...) {
   if(all(sapply(x, is.null))) return(NULL)
   if(length(x) == 0) return(NULL)
   
+  # fg = .get_functional_groups(conf, type=type)
   fgd = get_fg_data(conf, x=x, type=type)
   
-  if(!is.null(fgd)) {
-    xout = array(dim=dim(x) + c(0, dim(fgd)[2], 0))
-    xout[,seq_len(ncol(x)),] = x
-    xout[, ncol(x) + seq_len(ncol(fgd)), ] = fgd
-    colnames(xout) = c(colnames(x), colnames(fgd))
-    rownames(xout) = rownames(x)
-    x = xout
-  }
+  if(!is.null(fgd)) x = .cbind(x, fgd)
   
   class(x) = c("osmose.yield", class(x))
   
   return(x)
   
+}
+
+.cbind = function(x, y) {
+  if(is.null(y)) return(x)
+  if(length(dim(x))==2) dim(x) = c(dim(x), 1)
+  xout = array(dim = dim(x) + c(0, dim(y)[2], 0))
+  xout[, seq_len(ncol(x)),] = x
+  xout[, ncol(x) + seq_len(ncol(y)), ] = y
+  colnames(xout) = c(colnames(x), colnames(y))
+  rownames(xout) = rownames(x)
+  return(xout)
 }
 
 .add_surveys = function(x, out, type, conf) {
@@ -941,12 +959,13 @@ osmose2R.v3r0 = function(path=NULL, species.names=NULL, ...) {
     } # end of !yield
     
     if(!is.null(fgd)) {
-      xout = array(dim=dim(x[[i]]) + c(0, dim(fgd)[2], 0))
-      xout[,seq_len(ncol(x[[i]])),] = x[[i]]
-      xout[, ncol(x[[i]]) + seq_len(ncol(fgd)), ] = fgd
-      colnames(xout) = c(colnames(x[[i]]), colnames(fgd))
-      rownames(xout) = rownames(x[[i]])
-      x[[i]] = xout
+      # xout = array(dim=dim(x[[i]]) + c(0, dim(fgd)[2], 0))
+      # xout[,seq_len(ncol(x[[i]])),] = x[[i]]
+      # xout[, ncol(x[[i]]) + seq_len(ncol(fgd)), ] = fgd
+      # colnames(xout) = c(colnames(x[[i]]), colnames(fgd))
+      # rownames(xout) = rownames(x[[i]])
+      # x[[i]] = xout
+      x[[i]] = .cbind(x[[i]], fgd)
     }
     
     class(x[[i]]) = c(sprintf("osmose.%s", type), class(x[[i]]))
@@ -986,12 +1005,15 @@ get_fg_data = function(conf, x, type="species") {
   }
   
   out = sapply(na.omit(unique(gp)), FUN=.find_species_in_group, gp=gp, conf=conf, type=type)
+  
   return(out)
   
 }
 
-.reshapeFishery = function(x, nm, rf) {
+.reshapeFishery = function(x, nm, rf, by="fishery") {
 
+  by = match.arg(by, c("fishery", "species"))
+  
   if(is.null(x)) return(x)
 
   # nm = attr(x, "species_names")
@@ -1002,11 +1024,14 @@ get_fg_data = function(conf, x, type="species") {
     return(xy)
   }
 
-  out = lapply(1:dim(x)[1], FUN = function(i, x) x[i,,,], x=x)
+  if(by=="fishery") out = lapply(seq_len(nrow(x)), FUN = function(i, x) x[i,,,], x=x)
+  if(by=="species") out = lapply(seq_len(ncol(x)), FUN = function(i, x) x[,i,,], x=x)
+  
   .addRep = function(x) {
     if(length(dim(x))==2) dim(x) = c(dim(x), 1)
     return(x)
   }
+  
   out = lapply(out, FUN=.addRep)
   out = lapply(out, FUN=aperm, perm=c(2,1,3))
   out = lapply(out, FUN=.agg, rf=rf)
@@ -1018,4 +1043,5 @@ get_fg_data = function(conf, x, type="species") {
   }
 
   return(out)
+  
 }

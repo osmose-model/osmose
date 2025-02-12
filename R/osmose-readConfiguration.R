@@ -83,7 +83,7 @@ get_par = function(conf, par=NULL, sp=NULL, fsh=NULL, sr=NULL, invert=FALSE, as.
 #' @param code Boolean, return the numerical code of the species or fishery?
 #' @rdname get_par
 #' @export
-get_species = function(x, type=NULL, code=FALSE, sp=NULL, nm=NULL) {
+get_species = function(x, type=NULL, code=FALSE, sp=NULL, nm=NULL, null.on.error=FALSE) {
   
   type = match.arg(type, choices = c("all", "focal", "background", "resource"))
   
@@ -101,6 +101,7 @@ get_species = function(x, type=NULL, code=FALSE, sp=NULL, nm=NULL) {
   if(!is.null(sp)) {
     isp = as.numeric(get_species(x, type=type, code = TRUE)[match(x=sp, get_species(x, type=type))])
     if(any(is.na(isp))) {
+      if(null.on.error) return(NULL)
       xsp = paste(sp[is.na(isp)], collapse=", ")
       if(type=="all") stop(sprintf("These are not species in the model: %s.", xsp))
       stop(sprintf("These are not %s species in the model: %s.", type, xsp))

@@ -190,9 +190,13 @@
   xx = list()
   for(i in seq_len(ncol(y))) {
     xi = y[, i, , drop=FALSE]
-    this = get_par(conf, sp=get_species(conf, sp=spp[i]))
-    xndt = get_par(this, "fisheries.recordfrequency.ndt")
-    
+    isp = get_species(conf, sp=spp[i], null.on.error=TRUE)
+    if(!is.null(isp)) {
+      this = get_par(conf, sp=isp)
+      xndt = get_par(this, "fisheries.recordfrequency.ndt")
+    } else {
+      xndt = NULL
+    }
     if(!is.null(xndt)) {
       indt = xndt/ndt
       rowok = (nrow(xi)%/%indt)*indt
@@ -230,18 +234,12 @@
   xx = list()
   for(i in seq_len(ncol(y))) {
     xi = y[, i, , drop=FALSE]
-    this = get_par(conf, sp=get_species(conf, sp=spp[i]))
-    # xndt = get_par(this, "fisheries.recordfrequency.ndt")
-    xndt = xdt
-    
-    if(!is.null(xndt)) {
-      indt = xndt/ndt
-      rowok = (nrow(xi)%/%indt)*indt
-      if(nrow(xi)!=rowok) xi = xi[seq_len(rowok), , ,drop=FALSE]
-      ntime = as.numeric(rownames(xi))[c(rep(FALSE, indt-1), TRUE)]
-      xi = rowsum(xi, group=rep(seq_len(rowok/indt), each=indt), na.rm=TRUE)
-      rownames(xi) = ntime
-    }
+    indt = xdt/ndt
+    rowok = (nrow(xi)%/%indt)*indt
+    if(nrow(xi)!=rowok) xi = xi[seq_len(rowok), , ,drop=FALSE]
+    ntime = as.numeric(rownames(xi))[c(rep(FALSE, indt-1), TRUE)]
+    xi = rowsum(xi, group=rep(seq_len(rowok/indt), each=indt), na.rm=TRUE)
+    rownames(xi) = ntime
     
     xx[[i]] = xi
     
