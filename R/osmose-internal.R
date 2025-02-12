@@ -958,16 +958,8 @@ osmose2R.v3r0 = function(path=NULL, species.names=NULL, ...) {
       
     } # end of !yield
     
-    if(!is.null(fgd)) {
-      # xout = array(dim=dim(x[[i]]) + c(0, dim(fgd)[2], 0))
-      # xout[,seq_len(ncol(x[[i]])),] = x[[i]]
-      # xout[, ncol(x[[i]]) + seq_len(ncol(fgd)), ] = fgd
-      # colnames(xout) = c(colnames(x[[i]]), colnames(fgd))
-      # rownames(xout) = rownames(x[[i]])
-      # x[[i]] = xout
-      x[[i]] = .cbind(x[[i]], fgd)
-    }
-    
+    if(!is.null(fgd)) x[[i]] = .cbind(x[[i]], fgd)
+
     class(x[[i]]) = c(sprintf("osmose.%s", type), class(x[[i]]))
     
   }
