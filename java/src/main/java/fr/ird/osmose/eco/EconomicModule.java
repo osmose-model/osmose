@@ -108,7 +108,7 @@ public class EconomicModule extends AbstractProcess {
     /** Social Optimum - Net Present Value (NPV) */
     private double NetPresentValue;
 
-    /** Discount rate for the Social Optimum equation - delta(t) */
+    /** Discount rate for the Social Optimum equation - delta(t) (between 0 and 0.95) */
     private double DiscountRate;
 
     public EconomicModule(int rank) {
@@ -459,9 +459,10 @@ public class EconomicModule extends AbstractProcess {
         double par = 0;
         // needs calculation for each time step
         int time = getSimulation().getIndexTimeSimu();
+        double DiscountFactor = 1 / (1 + DiscountRate);
         // Until the planning horizon is reached
         // Formula from Schenk et al. 2023
-        int PlaningHorizon = (int) (Math.round(Math.log(0.05) / Math.log(1 / (1 + DiscountRate))));
+        int PlaningHorizon = (int) (Math.round(Math.log(0.05) / Math.log(DiscountFactor)));
         // Loop over planning horizon
         for (int t = time; t <= PlaningHorizon; t++) {
             // Loop over species
@@ -473,7 +474,7 @@ public class EconomicModule extends AbstractProcess {
             totUtility = weightFishConsumption * (ElasticityDemand / (ElasticityDemand - 1))
                     * Math.pow(this.Utility, (ElasticityDemand - 1) / ElasticityDemand);
 
-            par = DiscountRate * (totUtility - totharvestingcost);
+            par = DiscountFactor * (totUtility - totharvestingcost);
             // add the value of each time step until planning horizon is reached
             this.NetPresentValue += par;
         }
