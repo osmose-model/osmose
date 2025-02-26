@@ -90,7 +90,7 @@ public class EconomyFishPricesOutput extends SimulationLinker implements IOutput
     public void update() {
         // get fish prices (ispecies)(size-class)
         for (int iSpecies = 0; iSpecies < getNSpecies(); iSpecies++) {
-            for (int iClass = 0; iClass < this.sizeClasses.getNStage(iSpecies); iClass++) {
+            for (int iClass = 1; iClass < this.sizeClasses.getNStage(iSpecies); iClass++) {
                 output[iSpecies][iClass] += getSimulation().getEconomicModule().getPrices(iSpecies, iClass);
             }
         }
