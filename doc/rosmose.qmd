@@ -9,11 +9,11 @@ In this section, the pre/post processing tools of the
 :caption: 'Contents:'
 :maxdepth: 2
 
-rosmose/libload.md
-rosmose/param_load.md
-rosmose/run_model.md
-rosmose/read_output.md
-rosmose/plot_output.md
+rosmose/libload.qmd
+rosmose/param_load.qmd
+rosmose/run_model.qmd
+rosmose/read_output.qmd
+rosmose/plot_output.qmd
 ```
 
 % .. include:: rosmose/fishing_data.txt

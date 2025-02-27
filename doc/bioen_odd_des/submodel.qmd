@@ -4,10 +4,10 @@
 :caption: 'Contents:'
 :maxdepth: 1
 
-submodel/energy_uptake.md
-submodel/maintenance.md
-submodel/new_tissue.md
-submodel/maturation.md
-submodel/reproduction.md
-submodel/mortality.md
+submodel/energy_uptake.qmd
+submodel/maintenance.qmd
+submodel/new_tissue.qmd
+submodel/maturation.qmd
+submodel/reproduction.qmd
+submodel/mortality.qmd
 ```

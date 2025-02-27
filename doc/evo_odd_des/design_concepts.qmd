@@ -18,7 +18,7 @@ and somatic mass or length at maturation $w_m(i)$ and $L_m(i)$) as well as starv
 emerge from the combination of evolving traits’ values, energy intake from size-based opportunistic predation and physiological or plastic responses of bioenergetics to experienced sea water temperature and dissolved oxygen concentration (Figure 2).
 
 ```{eval-rst}
-.. mermaid:: _static/mermaid/trait_variations.md
+.. mermaid:: _static/mermaid/trait_variations.qmd
     :caption: Ev-OSMOSE processes describing trait variations from loci to population level (pink) and the causes impacting trait values (blue).
     :align: center
 ```

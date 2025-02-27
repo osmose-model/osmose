@@ -6,8 +6,8 @@ In this section, a detailed description of the Osmose model is provided.
 :caption: 'Contents:'
 :maxdepth: 1
 
-osmose/grid.md
-osmose/ltl.md
-osmose/bkg.md
-osmose/forcing.md
+osmose/grid.qmd
+osmose/ltl.qmd
+osmose/bkg.qmd
+osmose/forcing.qmd
 ```

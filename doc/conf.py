@@ -56,14 +56,14 @@ mermaid_pdfcrop = 'pdfcrop'
 mermaid_output_format = 'png'
 
 bibtex_bibfiles = ['_static/biblio.bib']
-bibtex_reference_style = 'author_year'
+#bibtex_reference_style = 'author_year'
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
 
 # The suffix(es) of source filenames.
 # You can specify multiple suffix as a list of string:
-source_suffix = {'.md': 'myst-nb'}
+source_suffix = {'.qmd': 'myst-nb'}
 
 myst_enable_extensions = [
     "amsmath",
@@ -131,7 +131,7 @@ todo_emit_warnings = True
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
 # This patterns also effect to html_static_path and html_extra_path
-exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store', 'alias.md', 'index_private.md', 'index_public.md', 'calib.md', 'misc.md', 'README.md']
+exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store', 'alias.qmd', 'index_private.qmd', 'index_public.qmd', 'calib.qmd', 'misc.qmd', 'README.qmd']
 exclude_patterns += glob(os.path.join('calib', '*md'))
 exclude_patterns += glob(os.path.join('misc', '*md'))
 exclude_patterns += glob(os.path.join('rosmose', '*md'))
