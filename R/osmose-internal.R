@@ -659,8 +659,8 @@ osmose2R.v4r0 = function (path=NULL, species.names=NULL, conf=NULL, ...) {
                                            lapply(xfg, FUN=.my_list_sum, x=outputData$yieldByFisheryBySpecies))
     # yieldBySpeciesByFishery
     dmn[[2]] = get_fisheries(conf)
-    outputData$yieldByBySpeciesFishery = .reshapeFishery(outputData$yieldArray, nm=dmn, rf=rf, by = "species")
-    names(outputData$yieldByBySpeciesFishery) = get_species(conf, type="focal")
+    outputData$yieldBySpeciesFishery = .reshapeFishery(outputData$yieldArray, nm=dmn, rf=rf, by = "species")
+    names(outputData$yieldBySpeciesFishery) = get_species(conf, type="focal")
     xfg = .get_functional_groups(conf, "species")
     outputData$yieldBySpeciesByFishery = c(outputData$yieldBySpeciesByFishery, 
                                            lapply(xfg, FUN=.my_list_sum, x=outputData$yieldBySpeciesByFishery))

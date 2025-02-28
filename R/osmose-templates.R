@@ -64,7 +64,7 @@ osmose_template = function(input, file, what="initialisation", control=list(), .
 #' osmose_tidy(input=configFile)}
 osmose_tidy = function(input, key="reference") {
   
-  on.exit(rm(".testx.R"))
+  on.exit(if(file.exists(".testx.R")) rm(".testx.R"))
   
   osmose:::.tidy_conf(input=input, file = ".testx.R", checks=FALSE)
   test = read_osmose(input=".testx.R")
@@ -475,7 +475,7 @@ gpar = function(conf, par=NULL, sp=NULL, fsh=NULL, sr=NULL, invert=FALSE, as.is=
   
   tcat("Reproduction: relative fecundity", file=file, section=FALSE)
   pars = gpar(conf, "species.relativefecundity", sort=TRUE)
-  write_osmose(pars, file=file, append = TRUE, justify=TRUE, digits=1)
+  write_osmose(pars, file=file, append = TRUE, justify=TRUE)
   
   tcat("Reproduction: species egg size", file=file, section=FALSE)
   pars = gpar(conf, "species.egg.size", sort=TRUE)
