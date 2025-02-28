@@ -87,12 +87,14 @@ public class OutputManager extends SimulationLinker {
 
     // List of the indicators
     final private List<IOutput> outputs;
+    final private List<IOutputbis> outputsbis;
 
     private final static boolean NO_WARNING = false;
 
     public OutputManager(int rank) {
         super(rank);
         outputs = new ArrayList<>();
+        outputsbis = new ArrayList<>();
     }
 
     public void init() {
@@ -267,16 +269,6 @@ public class OutputManager extends SimulationLinker {
             outputs.add(new SpatialSizeSpeciesOutput(rank, ageDistrib));
         }
 
-        if (getConfiguration().isEconomyEnabled()) {
-            if (getConfiguration().getBoolean("output.fishing.accessible.biomass")) {
-                outputs.add(new FishingAccessBiomassOutput(rank));
-            }
-
-            if (getConfiguration().getBoolean("output.fishing.harvested.biomass")) {
-                outputs.add(new FishingHarvestedBiomassDistribOutput(rank));
-            }
-        }
-
         // Fisheries output
         if (getConfiguration().isFisheryEnabled()) {
 
@@ -297,8 +289,16 @@ public class OutputManager extends SimulationLinker {
             }
         }
 
-        // Emy economic output
+        // Emy economic model output
         if (getConfiguration().isEconomyEnabled()) {
+
+            if (getConfiguration().getBoolean("output.fishing.accessible.biomass")) {
+                outputs.add(new FishingAccessBiomassOutput(rank));
+            }
+
+            if (getConfiguration().getBoolean("output.fishing.harvested.biomass")) {
+                outputs.add(new FishingHarvestedBiomassDistribOutput(rank));
+            }
 
             if (getConfiguration().getBoolean("output.economic.harvesting.costs.enabled")) {
                 outputs.add(new EconomyHarvestingCostsOutput(rank));
@@ -314,6 +314,10 @@ public class OutputManager extends SimulationLinker {
 
             if (getConfiguration().getBoolean("output.economic.profit.margin.enabled")) {
                 outputs.add(new EconomyProfitMarginOutput(rank));
+            }
+
+            if (getConfiguration().getBoolean("output.economic.net.present.value.enabled")) {
+                outputsbis.add(new EconomyNetPresentValueOutput(rank));
             }
         }
 
