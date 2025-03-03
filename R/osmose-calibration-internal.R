@@ -16,10 +16,10 @@
     iage = as.numeric(colnames(xi))
     dage = mean(diff(iage))
     iage = iage + 0.5*dage
-    isize = VB(age=iage, this, method=1)
-    isize = array(rep(isize, each=nrow(xi)), dim=dim(xi))
-    out[[i]] = log((isize + tiny)/(xi + tiny))
-    out1[[i]] = isize
+    isize = VB(age=iage, this, method=1) # replace with integrated size
+    xii = as.numeric(colMeans(xi, na.rm=TRUE))
+    out[[i]] = log((isize + tiny)/(xii + tiny))
+    out1[[i]] = array(rep(isize, each=nrow(xi)), dim=dim(xi))
   }
   
   names(out) = names(xx)
@@ -46,7 +46,9 @@
   spp = names(L)
   ndt = get_par(conf, "simulation.time.ndtPerYear")/get_par(conf, "output.recordfrequency.ndt$")
   
-  out = list()
+  out  = list()
+  out1 = list()
+  out2 = list()
   
   for(i in seq_along(spp)) {
     
@@ -56,19 +58,30 @@
     y  = L[[isp]]
     
     mnat = xx$Mpred + xx$Mstar + xx$Mnat
-    mnat = mnat[,seq_len(ncol(y)),, drop=FALSE]
+    mnat = mnat[, seq_len(ncol(y)), , drop=FALSE]
     
     mp = calculateMortality(conf, sp=get_species(conf, sp=isp))
+    # should we use size or age-based mortality?
     mproxy = array(mp$M[cut(as.numeric(y), breaks=mp$size, labels=FALSE)],
                    dim=dim(y))/ndt
-    mdeviate = log((mnat + tiny)/(mproxy + tiny))
-    out[[i]] = mdeviate[,-1, , drop=FALSE]
-    
+    mnati = colMeans(mnat, na.rm=TRUE)
+    mproxyi = colMeans(mproxy, na.rm=TRUE)
+    mdeviate = log((mnati + tiny)/(mproxyi + tiny))
+    # out[[i]] = mdeviate[,-1, , drop=FALSE] # remove larval mortality
+    out[[i]] = mdeviate[-1] # remove larval mortality
+    out1[[i]] = mproxy
+    out2[[i]] = mnat
   }
   
-  names(out) = spp
-  class(out) = c("osmose.residualMortalityByAge", "list")
+  names(out)  = spp
+  names(out1) = spp
+  names(out2) = spp
+  class(out)  = c("osmose.residualMortalityByAge", "list")
+  class(out1) = c("osmose.expectedMortalityByAge", "list")
+  class(out2) = c("osmose.naturalMortalityByAge", "list")
   x$residualMortalityByAge = out
+  x$expectedMortalityByAge = out1
+  x$naturalMortalityByAge = out2
   
   return(x)
   
@@ -190,10 +203,9 @@
   xx = list()
   for(i in seq_len(ncol(y))) {
     xi = y[, i, , drop=FALSE]
-    isp = get_species(conf, sp=spp[i], null.on.error=TRUE)
+    isp = get_codes(spp[i], conf)
     if(!is.null(isp)) {
-      this = get_par(conf, sp=isp)
-      xndt = get_par(this, "fisheries.recordfrequency.ndt")
+      xndt = max(sapply(isp, FUN=.get_rf, conf=conf, type=attr(isp, "xtype")))
     } else {
       xndt = NULL
     }
@@ -216,9 +228,9 @@
   
   names(xx) = spp
   class(xx) = "osmose.yieldBySpecies"
-  x[["yieldBySpecies"]] = xx
+  # x[["yieldBySpecies"]] = xx
   
-  return(x)
+  return(xx)
   
 }
 
@@ -257,6 +269,41 @@
   
   return(x)
   
+}
+
+.get_rf = function(sp, conf, type) {
+  type = match.arg(type, c("species", "fisheries"))
+  if(type=="species") this = get_par(conf, sp=sp)
+  if(type=="fisheries") this = get_par(conf, fsh=sp)
+  xndt = get_par(this, "fisheries.recordfrequency.ndt")
+  return(xndt)
+}
+
+get_codes = function(sp, conf) {
+  out = .get_codes(sp=sp, conf=conf, type="species")
+  if(!is.null(out)) attr(out, "xtype") = "species"
+  if(is.null(out)) {
+    out = .get_codes(sp=sp, conf=conf, type="fisheries")
+    if(!is.null(out)) attr(out, "xtype") = "fisheries"
+  }
+  return(out)
+}
+
+.get_codes = function(sp, conf, type="species") {
+  code = .get_group_code(conf, sp, type=type)
+  if(is.null(code)) {
+    fg = .get_functional_groups(conf, type=type)
+    if(is.null(fg[[sp]])) return(NULL)
+    code = .get_group_code(conf, sp=fg[[sp]], type=type) 
+  }
+  return(code)
+}
+
+.get_group_code = function(conf, sp, type="species") {
+  type = match.arg(type, c("species", "fisheries"))
+  if(type=="species") code = get_species(conf, sp=sp, null.on.error=TRUE)
+  if(type=="fisheries") code = get_fisheries(conf, fsh=sp, null.on.error=TRUE)
+  return(code)
 }
 
 .write_yield_files = function(x, conf, path) {
