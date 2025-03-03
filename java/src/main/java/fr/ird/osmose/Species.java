@@ -41,6 +41,8 @@
 
 package fr.ird.osmose;
 
+import java.util.Random;
+
 import org.apache.commons.math3.distribution.NormalDistribution;
 
 /**
@@ -129,6 +131,8 @@ public class Species implements ISpecies {
 
     private double betaBioen;
 
+    private Random rdDraft;
+
     private interface StarvationInterface  {
         public boolean isStarvationEnabled(School school);
     }
@@ -165,6 +169,20 @@ public class Species implements ISpecies {
           eggDensity = 1.025f;
         }
 
+        boolean fixedSeed = false;
+        String key = "simulation.fixedseed.enabled";
+        if (!cfg.isNull(key)) {
+            fixedSeed = cfg.getBoolean(key);
+        }
+
+        if (fixedSeed) {
+            int nSpecies = cfg.getNSpecies();
+            long seed = (13L * nSpecies) * (index + 1);
+            rdDraft = new Random(seed);
+        } else {
+            rdDraft = new Random();
+        }
+
         // If the economic module is on, then we read the file containing the prices for different
         // size classes.
         // if(cfg.isEconomyEnabled()) {
@@ -195,7 +213,7 @@ public class Species implements ISpecies {
                   sizeMaturity = Float.MAX_VALUE;
               }
             }
-            
+
             starvationInterface = (School sch) -> this.isStarvationEnabledNoBioen(sch);
             eggSize = cfg.getFloat("species.egg.size.sp" + fileIndex);
 
@@ -219,7 +237,7 @@ public class Species implements ISpecies {
             // if no parameter exists, species become larva when ageDt = 1
             betaBioen = 1;
         }
-        
+
         // barrier.n: added for bioenergetic purposes.
         if (cfg.isBioenEnabled()) {
             zlayer = cfg.getInt("species.zlayer.sp" + fileIndex);
@@ -227,7 +245,7 @@ public class Species implements ISpecies {
 
         // If the key is found, then the age switch in years is converted into
         // time-step.
-        String key = "species.first.feeding.age.sp" + fileIndex;
+        key = "species.first.feeding.age.sp" + fileIndex;
         if (cfg.canFind(key)) {
             float age_adult = cfg.getFloat(key);
             this.firstFeedingAgeDt = (int) Math.round(age_adult * cfg.getNStepYear());
@@ -311,7 +329,7 @@ public class Species implements ISpecies {
         //double eggDensity = 1.025 // average seawater density g/cm3, volume = (pi/6)*size^3
         return (float) (Math.pow(6 * weight / (Math.PI * eggDensity), (1 / 3)));
     }
-    
+
     /**
      * Returns the lifespan of the species. Parameter <i>species.lifespan.sp#</i>
      *
@@ -358,14 +376,14 @@ public class Species implements ISpecies {
      * Returns the size of an egg. Parameter <i>species.egg.size.sp#</i>
      *
      * @return the size of an egg in centimeter
-     * @note (roliveros): bioen method use an allometry estimated for adults. 
-     * A better approach would be assuming an spherical egg, and the fact that 
-     * most fish eggs are slightly denser than seawater (around 1.025 g/cm³ 
-     * for seawater of typical salinity), allowing them to remain suspended at 
-     * certain depths rather than sinking or floating. With this, the volume of 
-     * the egg would be := (4/3)*pi*(size/2)^3 = (pi/6)*size^3, and its 
+     * @note (roliveros): bioen method use an allometry estimated for adults.
+     * A better approach would be assuming an spherical egg, and the fact that
+     * most fish eggs are slightly denser than seawater (around 1.025 g/cm³
+     * for seawater of typical salinity), allowing them to remain suspended at
+     * certain depths rather than sinking or floating. With this, the volume of
+     * the egg would be := (4/3)*pi*(size/2)^3 = (pi/6)*size^3, and its
      * weight := 1.025*(pi/6)*size^3. Based on this, we get bPower=3 and c~=0.5367.
-     * This is implemented in computeEggLength() now. 
+     * This is implemented in computeEggLength() now.
      */
     public float getEggSize() {
         Configuration cfg = Osmose.getInstance().getConfiguration();
@@ -392,7 +410,7 @@ public class Species implements ISpecies {
               double Ft  = maturityDistrib.cumulativeProbability(school.getLength());
               double Fti = maturityDistrib.cumulativeProbability(school.getLengthIniStep());
               double prob = (Ft - Fti) / (1 - Fti);
-              output = Math.random() < prob;
+              output = rdDraft.nextDouble() < prob;
            } else {
               output = (school.getLength() >= sizeMaturity) || (school.getAge() >= ageMaturity);
            }
