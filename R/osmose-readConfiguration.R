@@ -120,7 +120,7 @@ get_species = function(x, type=NULL, code=FALSE, sp=NULL, nm=NULL, null.on.error
 
 #' @rdname get_par
 #' @export
-get_fisheries = function(x, code=FALSE, fsh=NULL, nm=NULL) {
+get_fisheries = function(x, code=FALSE, fsh=NULL, nm=NULL, null.on.error=FALSE) {
   
   if(!is.null(fsh) & !is.null(nm)) stop("Only 'fsh' or 'nm' must be provided.")
   
@@ -136,6 +136,7 @@ get_fisheries = function(x, code=FALSE, fsh=NULL, nm=NULL) {
   if(!is.null(fsh)) {
     isp = as.numeric(get_fisheries(x, code=TRUE)[match(x=fsh, get_fisheries(x))])
     if(any(is.na(isp))) {
+      if(null.on.error) return(NULL)
       xsp = paste(fsh[is.na(isp)], collapse=", ")
       stop(sprintf("These are not fisheries in the model: %s.", xsp))
     }
