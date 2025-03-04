@@ -205,7 +205,8 @@
     xi = y[, i, , drop=FALSE]
     isp = get_codes(spp[i], conf)
     if(!is.null(isp)) {
-      xndt = max(sapply(isp, FUN=.get_rf, conf=conf, type=attr(isp, "xtype")))
+      xndt = unlist(sapply(isp, FUN=.get_rf, conf=conf, type=attr(isp, "xtype")))
+      if(!is.null(xndt)) xndt = max(xndt, na.rm=TRUE)
     } else {
       xndt = NULL
     }
