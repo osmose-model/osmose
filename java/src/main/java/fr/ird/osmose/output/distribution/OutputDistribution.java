@@ -114,11 +114,11 @@ public class OutputDistribution extends OsmoseLinker {
         }
 
         // Minimal class of the distribution
-        float min;
+        float min = -999;
         // Maximal class of the distribution
-        float max;
+        float max = -999;
         // Increment between two contiguous classes of the distribution
-        float incr;
+        float incr = -999;
         boolean useClass = false;
         float[] classValues = new float[1];
 
@@ -126,18 +126,20 @@ public class OutputDistribution extends OsmoseLinker {
             if (!getConfiguration().isNull(getKeyClassSpecies())) {
                 useClass = true;
                 classValues = getConfiguration().getArrayFloat(getKeyClassSpecies());
+            } else {
+                min = getConfiguration().getFloat(getKeyMinSpecies());
+                max = getConfiguration().getFloat(getKeyMaxSpecies());
+                incr = getConfiguration().getFloat(getKeyIncrSpecies());
             }
-            min = getConfiguration().getFloat(getKeyMinSpecies());
-            max = getConfiguration().getFloat(getKeyMaxSpecies());
-            incr = getConfiguration().getFloat(getKeyIncrSpecies());
         } else if (distribExist()) {
             if (!getConfiguration().isNull(getKeyClass())) {
                 useClass = true;
                 classValues = getConfiguration().getArrayFloat(getKeyClass());
+            } else {
+                min = getConfiguration().getFloat(getKeyMin());
+                max = getConfiguration().getFloat(getKeyMax());
+                incr = getConfiguration().getFloat(getKeyIncr());
             }
-            min = getConfiguration().getFloat(getKeyMin());
-            max = getConfiguration().getFloat(getKeyMax());
-            incr = getConfiguration().getFloat(getKeyIncr());
         } else {
             min = getDefaultMin();
             max = getDefaultMax();
