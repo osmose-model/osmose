@@ -1,5 +1,11 @@
 # OSMOSE Release Notes
 
+## Osmose 4.4.1
+
+### Parameter changes
+
+### New features
+
 ## Osmose 4.4.0
 
 ### Parameter changes

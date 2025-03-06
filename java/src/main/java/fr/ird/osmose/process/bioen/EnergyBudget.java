@@ -45,6 +45,7 @@ import fr.ird.osmose.process.AbstractProcess;
 import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import fr.ird.osmose.Species;
 
 /**
  *
@@ -79,6 +80,11 @@ public class EnergyBudget extends AbstractProcess {
         oxygen_function.init();
 
     }
+	
+	// Add for migrating school
+	private double[] c_rateBioen;
+	private double[] W0; // weigth of indicidual at age = species.larvae.growth.threshold.age.sp ; only for migration species. We can compute automaticaly if prameters was no provide with von berta parameters and length weight coefficients. But can be specified if more reliable data 
+	
 
     @Override
     public void init() {
@@ -101,7 +107,7 @@ public class EnergyBudget extends AbstractProcess {
         cpt = 0;
         r = new double[nSpecies];
         for (int i : getConfiguration().getFocalIndex()) {
-            key = String.format("species.bioen.maturity.r.sp%d", i);
+            key = String.format("species.maturity.r.sp%d", i);
             r[cpt] = this.getConfiguration().getDouble(key);
             cpt++;
         }
@@ -110,7 +116,7 @@ public class EnergyBudget extends AbstractProcess {
         cpt = 0;
         m0 = new double[nSpecies];
         for (int i : getConfiguration().getFocalIndex()) {
-            key = String.format("species.bioen.maturity.m0.sp%d", i);
+            key = String.format("species.maturity.m0.sp%d", i);
             m0[cpt] = this.getConfiguration().getDouble(key);   // barrier.n: conversion from mm to cm
             cpt++;
         }
@@ -119,7 +125,7 @@ public class EnergyBudget extends AbstractProcess {
         m1 = new double[nSpecies];
         cpt = 0;
         for (int i : getConfiguration().getFocalIndex()) {
-            key = String.format("species.bioen.maturity.m1.sp%d", i);
+            key = String.format("species.maturity.m1.sp%d", i);
             m1[cpt] = this.getConfiguration().getDouble(key);  // barrier.n: conversion from mm to cm
             cpt++;
         }
@@ -137,7 +143,7 @@ public class EnergyBudget extends AbstractProcess {
         cpt = 0;
         larvaePredationRateBioen = new double[nSpecies];
         for (int i : getConfiguration().getFocalIndex()) {
-            key = String.format("predation.coef.ingestion.rate.max.larvae.bioen.sp%d", i);
+            key = String.format("predation.larval.ingestion.rate.increase.ratio.sp%d", i);
             larvaePredationRateBioen[cpt] = this.getConfiguration().getDouble(key);
             cpt++;
         }
@@ -151,6 +157,22 @@ public class EnergyBudget extends AbstractProcess {
             cpt++;
         }
         
+		// Add for migrating school
+		c_rateBioen = new double[nSpecies];
+        cpt = 0;
+        for (int i : getConfiguration().getFocalIndex()) {
+            key = String.format("predation.c.bioen.sp%d", i);
+            c_rateBioen[cpt] = this.getConfiguration().getDouble(key);
+            cpt++;
+        }
+		
+		W0 = new double[nSpecies];
+        cpt = 0;
+        for (int i : getConfiguration().getFocalIndex()) {
+            key = String.format("species.weight.at.larvae.growth.threshold.age.sp%d", i);
+            W0[cpt] = this.getConfiguration().getDouble(key);
+            cpt++;
+        }
     }
 
     /**
@@ -165,29 +187,43 @@ public class EnergyBudget extends AbstractProcess {
 
         // Loop over all the alive schools
         for (School school : getSchoolSet().getAliveSchools()) {
-            this.getEgross(school);   // computes E_gross, stored in the attribute.
-            this.getMaintenance(school);   // computes E_maintanance
+			
+			// Add for migrating school
+			if (school.isOut()) {
+				
+				this.getDw_mig(school);
+				
+				
+			} else {
+				
+				this.updateEgross(school);   // computes E_gross, stored in the attribute.
+				this.updateMaintenance(school);   // computes E_maintanance
 
-            school.updateIngestionTot(school.getIngestion(), school.getInstantaneousAbundance());
+				school.updateIngestionTot(school.getIngestion(), school.getInstantaneousAbundance());
 
-            try {
-                this.getMaturation(school);   // computes maturation properties for the species.
-            } catch (Exception ex) {
-                Logger.getLogger(EnergyBudget.class.getName()).log(Level.SEVERE, null, ex);
-            }
+				try {
+					this.getMaturation(school);   // computes maturation properties for the species.
+				} catch (Exception ex) {
+					Logger.getLogger(EnergyBudget.class.getName()).log(Level.SEVERE, null, ex);
+				}
 
-            school.setENet(school.getEGross() - school.getEMaint());
-            this.computeEnetFaced(school);
+        // set net energy
+				school.setENet(school.getEGross() - school.getEMaint());
+				
+				this.computeEnetFaced(school);
             
-            try {
-                this.getRho(school);   // computes the rho function
-            } catch (Exception ex) {
-                Logger.getLogger(EnergyBudget.class.getName()).log(Level.SEVERE, null, ex);
-            }
+				try {
+					this.getRho(school);   // computes the rho function
+				} catch (Exception ex) {
+					Logger.getLogger(EnergyBudget.class.getName()).log(Level.SEVERE, null, ex);
+				}
 
-            this.getDw(school);   // computes E_growth (somatic growth)
-            this.getDg(school);   // computes the increase in gonadic weight
-        }
+				this.getDw(school);   // computes E_growth (somatic growth)
+				this.getDg(school);   // computes the increase in gonadic weight
+			}
+		}
+			
+            
     }
 
     /**
@@ -196,7 +232,7 @@ public class EnergyBudget extends AbstractProcess {
      * @param school
      * @return
      */
-    public void getMaintenance(School school) {
+    public void updateMaintenance(School school) {
 
         int ispec = school.getSpeciesIndex();
 
@@ -204,7 +240,6 @@ public class EnergyBudget extends AbstractProcess {
         // barrier.n: weight is converted into g.
         double output = this.c_m[ispec] * Math.pow(school.getWeight() * 1e6f, school.getBetaBioen()) * temp_function.get_Arrhenius(school);
         output /= this.getConfiguration().getNStepYear();   // if csmr is in year^-1, convert back into time step value
-
         // multiply the maintenance flow by the number of fish in the school
         // barrier.n: converted back into ton
         output *= school.getInstantaneousAbundance() * 1e-6f;
@@ -218,9 +253,10 @@ public class EnergyBudget extends AbstractProcess {
      * @param school
      * @return
      */
-    public void getEgross(School school) {
+    public void updateEgross(School school) {
         int ispec = school.getSpeciesIndex();
-        school.setEGross(school.getIngestion() * this.assimilation[ispec] * temp_function.getPhiT(school) * oxygen_function.getFO2(school));
+        double output = school.getIngestion() * this.assimilation[ispec] * temp_function.getPhiT(school) * oxygen_function.getFO2(school);
+        school.setEGross(output);
     }
 
     /**
@@ -300,6 +336,77 @@ public class EnergyBudget extends AbstractProcess {
             school.incrementWeight((float) dgrowth);
         }
     }
+	
+	// Add for migrating
+	public void getDw_mig(School school) {
+		
+		int ispec = school.getSpeciesIndex();
+		double ageThreshold = school.getSpecies().getLarvaeThresDt()/getConfiguration().getNStepYear();
+		double age = school.getAge() - ageThreshold;
+		double ageMat = school.getAgeMat() - ageThreshold;
+		double growth_mig_a1;
+		double growth_mig_a2;
+		double dgrowth_mig;
+		double rho = school.getRho();
+		
+		if(school.getAge() < ageThreshold) {
+			
+			// Total weight of an egg
+			growth_mig_a1 = school.getSpecies().getEggWeight();
+			
+			// Total weight of an individual at ageThreshold 
+			
+			growth_mig_a2 = this.W0[ispec];
+			
+			
+			// Delta growth per year 
+			dgrowth_mig = (growth_mig_a2-growth_mig_a1)/(ageThreshold* getConfiguration().getNStepYear());
+	
+		} else {
+			
+			// Total weight of an individual of current school age
+			if (age<=ageMat) {
+				growth_mig_a1 = 
+				 Math.pow(
+							Math.pow(this.W0[ispec], 1*(1-school.getBetaBioen())) + c_rateBioen[ispec]*(1-school.getBetaBioen())*(age/Math.pow(1, 1-school.getBetaBioen())),
+							1/(1*(1-school.getBetaBioen()))
+							);
+			} else {
+				growth_mig_a1 = 
+				 Math.pow(
+							Math.pow(Math.pow(this.W0[ispec], 1*(1-school.getBetaBioen()))*(1+(1-school.getBetaBioen())*r[ispec]), ageMat-age)+(c_rateBioen[ispec]/(r[ispec]*Math.pow(1,1-school.getBetaBioen())))*(1-(1-(1-school.getBetaBioen())*r[ispec]*ageMat)*Math.pow(1+(1-school.getBetaBioen())*r[ispec], ageMat-age))
+							, 1/(1*(1-school.getBetaBioen()))
+						);
+			}
+		
+			// Total weight of an individual of school age +1
+			if ((age+1)<=ageMat) {
+				growth_mig_a2 =  
+				 Math.pow(
+							Math.pow(this.W0[ispec], 1*(1-school.getBetaBioen())) + c_rateBioen[ispec]*(1-school.getBetaBioen())*((age+1)/Math.pow(1, 1-school.getBetaBioen())),
+							1/(1*(1-school.getBetaBioen()))
+							);
+			} else {
+				
+				growth_mig_a2 =  
+				 Math.pow(
+							Math.pow(Math.pow(this.W0[ispec], 1*(1-school.getBetaBioen()))*(1+(1-school.getBetaBioen())*r[ispec]), ageMat-(age+1))+(c_rateBioen[ispec]/(r[ispec]*Math.pow(1,1-school.getBetaBioen())))*(1-(1-(1-school.getBetaBioen())*r[ispec]*ageMat)*Math.pow(1+(1-school.getBetaBioen())*r[ispec], ageMat-(age+1)))
+							, 1/(1*(1-school.getBetaBioen()))
+						);
+			}
+		
+			// Delta growth per time step 
+			dgrowth_mig = (growth_mig_a2-growth_mig_a1)/getConfiguration().getNStepYear();
+			
+			
+		}
+
+        if (school.isAlive()) {
+            // increments the weight
+            school.incrementWeight((float) ((dgrowth_mig*(1-rho))/1e6f));
+			school.incrementGonadWeight((float) ((dgrowth_mig*rho)/1e6f));
+        }
+    }
 
     /**
      * Returns the gonadic weight increment (Equation 12). In this function,
@@ -319,6 +426,7 @@ public class EnergyBudget extends AbstractProcess {
             school.incrementGonadWeight((float) output);
         }
     }
+	
 
     /**
      * Returns the proportion of net energy allocated to somatic growth

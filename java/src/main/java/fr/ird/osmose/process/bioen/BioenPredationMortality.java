@@ -22,7 +22,7 @@
  * Ricardo OLIVEROS RAMOS (ricardo.oliveros@gmail.com)
  * Philippe VERLEY (philippe.verley@ird.fr)
  * Laure VELEZ (laure.velez@ird.fr)
- * Nicolas Barrier (nicolas.barrier@ird.fr)
+ * Nicolas BARRIER (nicolas.barrier@ird.fr)
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -92,11 +92,11 @@ public class BioenPredationMortality extends PredationMortality {
         c_rateBioen = new double[nSpecies];
 
         // Recovers the max predation rate for bioen config (not the same unit as in
-        // the standard code
+        // the standard code. UPDATE: now they have the same units! same name!
         int cpt = 0;
         for (int i : this.getConfiguration().getPredatorIndex()) {
-            predationRateBioen[cpt] = getConfiguration().getDouble("predation.ingestion.rate.max.bioen.sp" + i);
-            larvaePredationRateBioen[cpt] = getConfiguration().getDouble("predation.coef.ingestion.rate.max.larvae.bioen.sp" + i);
+            predationRateBioen[cpt] = getConfiguration().getDouble("predation.ingestion.rate.max.sp" + i);
+            larvaePredationRateBioen[cpt] = getConfiguration().getDouble("predation.larval.ingestion.rate.increase.ratio.sp" + i);
             c_rateBioen[cpt] = getConfiguration().getDouble("predation.c.bioen.sp" + i);
             cpt++;
         }
@@ -137,6 +137,7 @@ public class BioenPredationMortality extends PredationMortality {
             // maximum biomass that a single fish can eat during the time step subdt
             // barrier.n: weight is converted into g here
             // this is the (Imax * w^beta) variable 
+            
             double maxBiomassToPredate = getMaxPredationRate(predator) * Math.pow(predator.getWeight() * 1e6f, predator.getBetaBioen()) / subdt;
 
             // multiply the biomass eaten by one fish by the number of fishes to get the maximum biomass that the
@@ -195,31 +196,35 @@ public class BioenPredationMortality extends PredationMortality {
             return predationRateBioen[speciesIndex];
         }
 
-        // recovers the thresshold age (stored on Dt)
+        // recovers the threshold age (stored on Dt)
         int thresAge = this.getSpecies(speciesIndex).getLarvaeThresDt();
         
-        double factor = 1;
+        double thetap = 1;
 
         try {
-            factor = (predator.getAgeDt() < thresAge) ? larvaePredationRateBioen[speciesIndex] : 1;
+            thetap = (predator.getAgeDt() < thresAge) ? larvaePredationRateBioen[speciesIndex] : 1;
         } catch (NullPointerException ex) {
             String message = "Cannot find larvaePredationRateBioen for species " + speciesIndex;
             error(message, ex);
         }
 
-        double output = 0.d;
+        double Imax = 0.d;
 
         if (predator instanceof School) {
             String key = "imax";
             try {
-                output = ((School) predator).existsTrait(key) ? ((School) predator).getTrait(key) : predationRateBioen[speciesIndex];
+                Imax = ((School) predator).existsTrait(key) ? ((School) predator).getTrait(key) : predationRateBioen[speciesIndex];
             } catch (Exception ex) {
                 Logger.getLogger(BioenPredationMortality.class.getName()).log(Level.SEVERE, null, ex);
             }
         } else {
-            output = predationRateBioen[speciesIndex];
+            Imax = predationRateBioen[speciesIndex];
         }
-
-        return ((output + (factor - 1) * c_rateBioen[speciesIndex]) / getConfiguration().getNStepYear());
+        
+        // output = Imax * psi (Eq 2)
+        // psi = (predator.getAgeDt() < thresAge) ? theta : 1; (Eq 3)
+        // theta = (Imax + (thetap - 1)*c_rateBioen)/Imax (Eq S2)
+        // Imax*theta = Imax + (thetap - 1)*c_rateBioen
+        return ((Imax + (thetap - 1) * c_rateBioen[speciesIndex]) / getConfiguration().getNStepYear());
     }
 }

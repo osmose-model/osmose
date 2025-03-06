@@ -1,7 +1,7 @@
 Package: osmose
 Type: Package
 Title: OSMOSE: Modelling Exploited Marine Ecosystems
-Version: 4.4.0.9007
+Version: 4.4.1.9017
 Date: 2023-05-20
 Authors@R: 
     c(person(given = "Nicolas",
@@ -65,7 +65,7 @@ Encoding: UTF-8
 Depends: 
   R (>= 3.5.0)
 Imports: 
-  calibrar (>= 0.3),
+  calibrar (>= 0.9),
   fields,
   graphics,
   grDevices,
@@ -83,4 +83,4 @@ LazyData: FALSE
 BugReports: https://github.com/osmose-model/osmose/issues
 SystemRequirements: Java (>= 8)
 VignetteBuilder: knitr
-RoxygenNote: 7.2.3
+RoxygenNote: 7.3.2

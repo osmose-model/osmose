@@ -95,18 +95,19 @@ update_ltl = function(input, filename=NULL, absolute=TRUE) {
   # get path from config
   
   # Reads the CSV parameter files
-  param = readOsmoseConfiguration(input, absolute=absolute)
+  param = .readOsmoseConfiguration(input, absolute=absolute)
   if(is.null(filename)) {
-    filename = param$ltl$netcdf$file
+    filename = get_par(param, "ltl.netcdf.file")
     if(is.null(filename)) {
-      message("old LTL filename parameter not found in configuration file, nothing to do.")
+      message("old LTL filename parameter ('ltl.netcdf.file') not found in configuration file, nothing to do.")
       return(invisible())
     }
   }
   
   # recovers the index for plk as 
-  pltindex = names(param$species$name)
-  nspecies = strtoi(param$simulation$nspecies)
+  # pltindex = names(get_par(param, "species.name"))
+  pltindex = get_species(param, code=TRUE)
+  nspecies = strtoi(get_par(param, "simulation.nspecies"))
   index = (nspecies + 1):length(pltindex)
   pltindex = pltindex[index]
   
@@ -170,19 +171,20 @@ update_ltl = function(input, filename=NULL, absolute=TRUE) {
   # Loop over all the plankton classes to initialise variables in the NetCDF
   list_vars = c()
   for(i in 1:n_ltl_file) {
-    ltl_var = param$species$name[[pltindex[i]]]
+    # ltl_var = get_par(param, "species.name")[[pltindex[i]]]
+    ltl_var = get_par(get_par(param, sp=as.integer(pltindex[i])), "species.name")
     var_nc = ncvar_def(ltl_var, biomass_units, dims, longname=ltl_var)
     list_vars[[i]] = var_nc
   }
 
-  
   # Opens the output NetCDF file
   ncout = nc_create(tmp, list_vars)
   
   # loops over all the LTL classes and write data into 
   # the file
   for(i in 1:n_ltl_file) {
-    ltl_var = param$species$name[[pltindex[i]]]
+    # ltl_var = param$species$name[[pltindex[i]]]
+    ltl_var = get_par(get_par(param, sp=as.integer(pltindex[i])), "species.name")
     ncvar_put(ncout, ltl_var, biomass[, , i, ])
   }
   

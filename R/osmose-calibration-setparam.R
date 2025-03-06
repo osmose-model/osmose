@@ -124,10 +124,11 @@
   
   if(!isTRUE(bioen)) {
     # estimating delta.lmax for classical OSMOSE growth
-    pars = list()
+    pars = get_par(conf, "species.delta.lmax.factor.sp", as.is=TRUE)
+    if(is.null(pars)) pars = list()
     for(isp in get_species(conf, type="focal", code=TRUE)) {
       nn = sprintf("species.delta.lmax.factor.sp%s", isp)
-      pars[[nn]] = 2
+      if(is.null(pars[[nn]])) pars[[nn]] = 2
     }
     class(pars) = "osmose.configuration"
     
@@ -178,7 +179,7 @@
     ifsh = nmc[i]
     msg = sprintf("\n-- Fishery %s: %s\n", nmc[i], nmf[i])
     mcat(msg, file=allfiles, append = TRUE)
-    this = get_par(conf, sprintf("fsh%s", ifsh))
+    this = get_par(conf, sprintf("fsh%s$", ifsh))
     pars = get_par(get_par(this, "fisheries.rate.base.fsh", as.is=TRUE), "shift", invert=TRUE, as.is=TRUE)
     pars = transform_par(pars, FUN=log)
     
@@ -218,7 +219,7 @@
       
       write_osmose(pars, file=guess_file, append = TRUE)
       write_osmose(set_par(pars, 0), file=min_file, append = TRUE)
-      write_osmose(set_par(pars, ceiling(0.3*L50)), file=max_file, append = TRUE)
+      write_osmose(set_par(pars, ceiling(1*L50)), file=max_file, append = TRUE)
       write_osmose(set_par(pars, 4), file=phase_file, append = TRUE)
       
     }

@@ -58,7 +58,7 @@ public class YieldNDistribOutput_Netcdf extends AbstractDistribOutput_Netcdf {
 
     @Override
     public void update() {
-        for (School school : getSchoolSet().getAliveSchools()) {
+        for (School school : getSchoolSet().getSchools()) {
             int classSchool = getClass(school);
             if (classSchool >= 0) {
                 values[school.getFileSpeciesIndex()][getClass(school)] += school.getNdead(MortalityCause.FISHING);

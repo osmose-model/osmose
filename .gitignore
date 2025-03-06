@@ -130,3 +130,5 @@ doc/odd_des/Osmose-ODD-Description.tex
 
 suppressions.txt
 
+sandbox
+build*

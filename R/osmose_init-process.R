@@ -173,6 +173,7 @@ calculateMLF = function(conf, sp) {
 
 .get_matsize = function(this, method=3) {
   matsize = .getPar(this, "species.maturity.size")
+  if(is.null(matsize)) matsize = .getPar(this, "species.maturity.l50")
   if(is.null(matsize)) {
     matsize = VB(.getPar(this, "species.maturity.age"), this, method=method)
   }

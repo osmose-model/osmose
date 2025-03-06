@@ -339,8 +339,9 @@ public class Releases {
                     // spatial
                     updateKey("mortality.natural.spatial.distrib.file.sp" + i, "mortality.additional.spatial.distrib.file.sp" + i);
                 }
-            }
-        }, new Release("4.2.6") {
+            }}, 
+        //    
+        new Release("4.2.6") {
             @Override
             void updateParameters() {
 
@@ -352,7 +353,7 @@ public class Releases {
 
             }
         },
-
+        //
         new Release("4.3.0") {
             @Override
             void updateParameters() {
@@ -527,34 +528,31 @@ public class Releases {
                 if(cfg.canFind("fisheries.enabled")) {
                     updateKey("fisheries.enabled", "process.multispecies.fisheries.enabled");
                 }
+
                 if(cfg.canFind("output.fishery.enabled")) {
                     updateKey("output.fishery.enabled", "output.fisheries.enabled");
                 }
+
                 if(cfg.canFind("output.fishery.byage.enabled")) {
                     updateKey("output.fishery.byage.enabled", "output.fisheries.byage.enabled");
                 }
+
                 if(cfg.canFind("output.fishery.bysize.enabled")) {
                     updateKey("output.fishery.bysize.enabled", "output.fisheries.bysize.enabled");
                 }
+
                 // restart parameters
                 if(cfg.canFind("output.restart.enabled")) {
                     updateKey("output.restart.enabled", "simulation.restart.enabled");
                 }
+
                 if(cfg.canFind("output.restart.spinup")) {
                     updateKey("output.restart.spinup", "simulation.restart.spinup.nyear");
                 }
+
                 if(cfg.canFind("output.restart.recordFrequency.ndt")) {
                     updateKey("output.restart.recordFrequency.ndt", "simulation.restart.recordFrequency.ndt");
                 }
-
-            }
-        },
-
-        new Release("4.4.0") {
-            @Override
-            void updateParameters() {
-
-                Configuration cfg = this.getConfiguration();
 
                 if (cfg.canFind("output.spatial.fishery.enabled")) {
                     updateKey("output.spatial.fishery.enabled", "output.spatial.fisheries.enabled");
@@ -571,6 +569,55 @@ public class Releases {
                 if (cfg.canFind("output.fishery.bysize.enabled")) {
                     updateKey("output.fishery.bysize.enabled", "output.fisheries.bysize.enabled");
                 }
+
+                if (cfg.canFind("process.multispecies.fisheries.enabled")) {
+                    updateKey("process.multispecies.fisheries.enabled", "module.multispecies.fisheries.enabled");
+                }
+
+                if (cfg.canFind("simulation.bioen.enabled")) {
+                    updateKey("simulation.bioen.enabled", "module.bioenergetics.enabled");
+                }
+
+                if (cfg.canFind("simulation.genetic.enabled")) {
+                    updateKey("simulation.genetic.enabled", "module.genetics.enabled");
+                }
+
+                if (cfg.canFind("economy.enabled")) {
+                    updateKey("economy.enabled", "module.bioeconomics.enabled");
+                }
+            }
+        },
+        
+        new Release("4.4.1") {
+            @Override
+            void updateParameters() {
+
+                Configuration cfg = this.getConfiguration();
+
+                // update parameter names
+                if(cfg.canFind("predation.coef.ingestion.rate.max.larvae.bioen.sp")) {
+                    updateKey("predation.coef.ingestion.rate.max.larvae.bioen.sp", 
+                        "predation.larval.ingestion.rate.increase.ratio.sp"); // to be updated.
+                }
+                
+                if(cfg.canFind("population.initialization.relativebiomass.enabled")) {
+                    updateKey("population.initialization.relativebiomass.enabled", 
+                        "module.population.initialisation.enabled"); // to be updated.
+                }   
+                
+                // Update parameters for EnergyBudget.java
+                for (int index : this.getFocalIndex()) {
+                  if(cfg.canFind("species.bioen.maturity.r.sp" + index)) {
+                      updateKey("species.bioen.maturity.r.sp" + index, "species.maturity.r.sp" + index);
+                  }   
+                  if(cfg.canFind("species.bioen.maturity.m0.sp" + index)) {
+                      updateKey("species.bioen.maturity.m0.sp" + index, "species.maturity.m0.sp" + index);
+                  }   
+                  if(cfg.canFind("species.bioen.maturity.m1.sp" + index)) {
+                      updateKey("species.bioen.maturity.m1.sp" + index, "species.maturity.m1.sp" + index);
+                  }   
+                }
+   
             }
         }
     }; // end of ALL array

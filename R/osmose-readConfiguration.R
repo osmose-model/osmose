@@ -83,7 +83,7 @@ get_par = function(conf, par=NULL, sp=NULL, fsh=NULL, sr=NULL, invert=FALSE, as.
 #' @param code Boolean, return the numerical code of the species or fishery?
 #' @rdname get_par
 #' @export
-get_species = function(x, type=NULL, code=FALSE, sp=NULL, nm=NULL) {
+get_species = function(x, type=NULL, code=FALSE, sp=NULL, nm=NULL, null.on.error=FALSE) {
   
   type = match.arg(type, choices = c("all", "focal", "background", "resource"))
   
@@ -101,6 +101,7 @@ get_species = function(x, type=NULL, code=FALSE, sp=NULL, nm=NULL) {
   if(!is.null(sp)) {
     isp = as.numeric(get_species(x, type=type, code = TRUE)[match(x=sp, get_species(x, type=type))])
     if(any(is.na(isp))) {
+      if(null.on.error) return(NULL)
       xsp = paste(sp[is.na(isp)], collapse=", ")
       if(type=="all") stop(sprintf("These are not species in the model: %s.", xsp))
       stop(sprintf("These are not %s species in the model: %s.", type, xsp))
@@ -119,7 +120,7 @@ get_species = function(x, type=NULL, code=FALSE, sp=NULL, nm=NULL) {
 
 #' @rdname get_par
 #' @export
-get_fisheries = function(x, code=FALSE, fsh=NULL, nm=NULL) {
+get_fisheries = function(x, code=FALSE, fsh=NULL, nm=NULL, null.on.error=FALSE) {
   
   if(!is.null(fsh) & !is.null(nm)) stop("Only 'fsh' or 'nm' must be provided.")
   
@@ -135,6 +136,7 @@ get_fisheries = function(x, code=FALSE, fsh=NULL, nm=NULL) {
   if(!is.null(fsh)) {
     isp = as.numeric(get_fisheries(x, code=TRUE)[match(x=fsh, get_fisheries(x))])
     if(any(is.na(isp))) {
+      if(null.on.error) return(NULL)
       xsp = paste(fsh[is.na(isp)], collapse=", ")
       stop(sprintf("These are not fisheries in the model: %s.", xsp))
     }
@@ -301,6 +303,8 @@ read.cal = function(conf, sp) {
   a = .getPar(this, "species.length2weight.condition.factor")
   b = .getPar(this, "species.length2weight.allometric.power")
   
+  taxa = .getPar(this, "species.taxa")
+  
   file = .getPar(this, "fisheries.catchatlength.file")
   msg = sprintf("Only one catch-at-length file must be provided for %s.", spname)
   if(length(file)>1) stop(msg)
@@ -449,13 +453,18 @@ read.cal = function(conf, sp) {
   if(irat < 0.97) msg = c(msg, msg3)
   
   err = NULL
-  if(ratio < 0.7) err = c(err, msg1)
-  if(lmax_pop/Linf < 0.7) err = c(err, msg2)
-  if(irat < 0.7) err = c(err, msg3)
+  
+  cond0 = ratio < 0.7 
+  cond1 = (lmax_pop/Linf < 0.7) & !(taxa %in% c("cephalopods"))
+  cond2 = irat < 0.7
+  
+  if(cond0) err = c(err, msg1)
+  if(cond1) err = c(err, msg2)
+  if(cond2) err = c(err, msg3)
   
   MSG = c(MSG, msg)
   
-  if((ratio < 0.7) | (lmax_pop/Linf < 0.7) | (irat < 0.7))
+  if(cond0 | cond1 | cond2)
     stop(paste(c("Inconsistent data supplied for the initialisation. Please check:", err), 
                collapse="\n"), call. = FALSE)
   
@@ -470,7 +479,7 @@ read.biomass = function(conf, sp) {
   
   this = .getPar(conf, sp=sp)
   ndt = conf$simulation.time.ndtperyear 
-  T = ndt*conf$simulation.time.nyear
+  T = .read_nstep(conf)
   biofile = .getPar(this, "observed.biomass.file")
   if(is.null(biofile)) {
     message(sprintf("Observed biomass has not been provided for species %d, using 'observed.biomass.guess' instead.", sp))
@@ -483,23 +492,41 @@ read.biomass = function(conf, sp) {
   ivar= .getPar(this, "species.name")
   ndtbio = .getPar(this, "observed.biomass.ndtPerYear")
   if(is.null(ndtbio)) stop("Parameter 'observed.biomass.ndtPerYear' is missing.")
+  if(nrow(bioref) < ndtbio) 
+    stop(sprintf("Less than one year of data in %s, check observed.biomass.ndtPerYear.sp%d=%d", 
+                 biofile, sp, ndtbio), call. = FALSE)
+  test = ((nrow(bioref)/ndtbio) %% 1) != 0
+  if(test) stop(sprintf("Incomplete year suplied in file %s, please check.", biofile), call. = FALSE)
   ix = .time.conv(ndtbio, ndt, nrow(bioref), T)
   biomass = bioref[ix$ind, ivar]/q
   return(biomass)
   
 }
 
+.read_nstep = function(conf) {
+  T = .getPar(conf, "time.nstep")
+  if(!is.null(T)) return(T)
+  ndt = .getPar(conf, "simulation.time.ndtperyear") 
+  T = ndt*.getPar(conf, "simulation.time.nyear")
+  return(T)
+}
+
 read.yield = function(conf, sp) {
   
   this = .getPar(conf, sp=sp)
   ndt = conf$simulation.time.ndtperyear 
-  T = ndt*conf$simulation.time.nyear
+  T = .read_nstep(conf)
   biofile = .getPar(this, "fisheries.yield.file")
   if(is.null(biofile)) stop("Landings have not been provided.")
   bioref = .readCSV(biofile)
   ivar= .getPar(this, "species.name")
   ndtbio = .getPar(this, "fisheries.yield.ndtPerYear")
   if(is.null(ndtbio)) stop("Parameter 'fisheries.yield.ndtPerYear' is missing.")
+  if(nrow(bioref) < ndtbio) 
+    stop(sprintf("Less than one year of data in %s, check fisheries.yield.ndtPerYear.sp%d=%d", 
+                 biofile, sp, ndtbio), call. = FALSE)
+  test = ((nrow(bioref)/ndtbio) %% 1) != 0
+  if(test) stop(sprintf("Incomplete year suplied in file %s, please check.", biofile), call. = FALSE)
   ix = .time.conv(ndtbio, ndt, nrow(bioref), T)
   biomass = ix$w*bioref[ix$ind, ivar]
   

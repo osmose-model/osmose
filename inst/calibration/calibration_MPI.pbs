@@ -8,7 +8,9 @@ cd $PBS_O_WORKDIR
 # activate osmose environment
 source /usr/share/Modules/3.2.10/init/csh
 setenv R_LIBS /home1/datawork/rioliver/libs/R/lib
-module load R nco
+module load R/3.6.3-intel-cc-17.0.2.174
+module load java/openjdk-16.0.2
+module load nco
 
 setenv mpiproc `cat $PBS_NODEFILE | wc -l`
 

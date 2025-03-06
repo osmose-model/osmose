@@ -22,7 +22,7 @@
  * Ricardo OLIVEROS RAMOS (ricardo.oliveros@gmail.com)
  * Philippe VERLEY (philippe.verley@ird.fr)
  * Laure VELEZ (laure.velez@ird.fr)
- * Nicolas Barrier (nicolas.barrier@ird.fr)
+ * Nicolas BARRIER  (nicolas.barrier@ird.fr)
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -157,13 +157,12 @@ public class School extends AbstractSchool {
     double ingestionTot = 0; // sum of all the food ingested during life of the
     // school
 
-
-
     // Initialisation of maturity variables.
-    // by default the school is imature.
+    // by default the school is immature.
     private double ageMature = 0;
     private double sizeMature = 0;
     private boolean isMature = false;
+    private boolean hasSpawned = false;
 
     private double e_net_faced; // mean net energy faced during life
     private double nEggs;  // number of eggs that is released by the school
@@ -619,7 +618,7 @@ public class School extends AbstractSchool {
 
     /**
      * Increments the weight of the fish from given number of tons. Length is
-     * recomputed thereafter from the new weigth
+     * recomputed thereafter from the new weight
      *
      * @param dw Weight increment (in ton)
      */
@@ -663,6 +662,21 @@ public class School extends AbstractSchool {
     }
 
     /**
+     * Returns true if the individual has spawned.
+     *
+     * @return
+     */
+    public boolean hasSpawned() {
+        return this.hasSpawned;
+    }
+
+    /**
+     * Set whether the individual has spawned.
+     */
+    public void setHasSpawned(boolean spawned) {
+        this.hasSpawned = spawned;
+    }
+    /**
      * Returns the age at maturity (only used for outputs).
      *
      * @return
@@ -672,7 +686,7 @@ public class School extends AbstractSchool {
     }
 
     /**
-     * Returns the age at maturity (only used for outputs).
+     * Returns the size at maturity (only used for outputs).
      *
      * @return
      */
@@ -690,7 +704,7 @@ public class School extends AbstractSchool {
     }
 
     /**
-     * Sets the age at maturity (only used for outputs).
+     * Sets the size at maturity (only used for outputs).
      *
      * @param sizemat
      */

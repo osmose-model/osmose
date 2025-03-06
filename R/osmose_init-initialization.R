@@ -391,7 +391,10 @@ init_sofia = function(input, file=NULL, test=FALSE, sp=NULL, ...) {
   M = calculateMortality(conf, sp)
   Ma = M$M[cut(age, breaks = M$age, labels = FALSE)]
   
-  xn = which.max(size >= .getPar(this, "observed.biomass.cutoff.size")) - 1
+  cutoff = .getPar(this, "observed.biomass.cutoff.size")
+  if(is.null(cutoff)) 
+    stop(sprintf("Parameter 'observed.biomass.cutoff.size.sp%d' has not been provided.", sp), call. = FALSE)
+  xn = which.max(size >= cutoff) - 1
   
   ini = exp(-cumsum(c(0,Ma[-length(Ma)]/ndt)))
   inibio = 1e-6*sum(ini*weight)
@@ -521,7 +524,9 @@ init_sofia = function(input, file=NULL, test=FALSE, sp=NULL, ...) {
   M = calculateMortality(conf, sp)
   Ma = M$M[cut(age, breaks = M$age, labels = FALSE)]
   
-  xn = which.max(size >= .getPar(this, "observed.biomass.cutoff.size")) - 1
+  cutoff = .getPar(this, "observed.biomass.cutoff.size")
+  if(is.null(cutoff)) stop(sprintf("Parameter 'observed.biomass.cutoff.size.sp%d' has not been provided.", sp), call. = FALSE)
+  xn = which.max(size >= cutoff) - 1
   
   if(is.null(sim)) {
     

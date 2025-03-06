@@ -19,7 +19,14 @@ get_par(
   linear = FALSE
 )
 
-get_species(x, type = NULL, code = FALSE, sp = NULL, nm = NULL)
+get_species(
+  x,
+  type = NULL,
+  code = FALSE,
+  sp = NULL,
+  nm = NULL,
+  null.on.error = FALSE
+)
 
 get_fisheries(x, code = FALSE, fsh = NULL, nm = NULL)
 

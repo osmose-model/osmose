@@ -132,9 +132,13 @@ public class BackgroundSpecies extends OsmoseLinker implements ISpecies {
         // Initialiaze the index of the Background species
         this.fileindex = fileindex;
 
-        if(getConfiguration().isBioenEnabled()) {
-            String key = String.format("species.beta.sp%d", fileindex);
-            betaBioen = cfg.getDouble(key);
+        // not exclusive of bioenergetics anymore, default to 1
+        String ikey = String.format("species.beta.sp%d", fileindex);
+        if (cfg.canFind(ikey)) {
+            betaBioen = cfg.getDouble(ikey);
+        } else {
+            // if no parameter exists, species become larva when ageDt = 1
+            betaBioen = 1;
         }
 
         // Initialization of parameters

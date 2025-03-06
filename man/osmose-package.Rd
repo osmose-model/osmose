@@ -50,6 +50,14 @@ vignettes.
 \href{http://www.osmose-model.org/}{Official website}
 \href{https://documentation.osmose-model.org/index.html}{Documentation website}
 }
+\seealso{
+Useful links:
+\itemize{
+  \item \url{http://www.osmose-model.org/}
+  \item Report bugs at \url{https://github.com/osmose-model/osmose/issues}
+}
+
+}
 \author{
 Yunne-Jai Shin
 

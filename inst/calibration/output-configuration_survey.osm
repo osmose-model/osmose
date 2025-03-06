@@ -6,6 +6,7 @@ output.yield.biomass.enabled = TRUE
 output.yield.abundance.bySize.enabled = TRUE
 output.meanSize.byAge.enabled = TRUE
 output.mortality.perSpecies.byage.enabled = TRUE
+output.fisheries.enabled = TRUE
 
 # all the rest set to FALSE to save time during the calibration
 output.restart.enabled = FALSE

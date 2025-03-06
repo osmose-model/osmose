@@ -22,7 +22,7 @@
  * Ricardo OLIVEROS RAMOS (ricardo.oliveros@gmail.com)
  * Philippe VERLEY (philippe.verley@ird.fr)
  * Laure VELEZ (laure.velez@ird.fr)
- * Nicolas Barrier (nicolas.barrier@ird.fr)
+ * Nicolas BARRIER (nicolas.barrier@ird.fr)
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -40,6 +40,10 @@
  */
 
 package fr.ird.osmose;
+
+import java.util.Random;
+
+import org.apache.commons.math3.distribution.NormalDistribution;
 
 /**
  * This class represents a species. It is characterised by the following
@@ -99,6 +103,12 @@ public class Species implements ISpecies {
      */
     private final float ageMaturity;
     /**
+     * Use stochastic reproduction or not, using maturity ogive</i>
+     */
+    private boolean stochasticReproduction;
+    private double matL50, matL75, matsd;
+    private NormalDistribution maturityDistrib;
+    /**
      * Size (cm) of eggs. Parameter <i>species.egg.size.sp#</i>
      */
     private final float eggSize;
@@ -106,6 +116,7 @@ public class Species implements ISpecies {
      * Weight (gram) of eggs. Parameter <i>species.egg.weight.sp#</i>
      */
     private final float eggWeight;
+    private final float eggDensity; // used in bioen
 
     private int zlayer = 0;
 
@@ -118,7 +129,9 @@ public class Species implements ISpecies {
     /** Threshold for moving from larvaeToAdults. */
     private final int larvaeToAdultsAgeDt;
 
-    private double beta_bioen;
+    private double betaBioen;
+
+    private Random rdDraft;
 
     private interface StarvationInterface  {
         public boolean isStarvationEnabled(School school);
@@ -150,6 +163,25 @@ public class Species implements ISpecies {
 
         c = cfg.getFloat("species.length2weight.condition.factor.sp" + fileIndex);
         bPower = cfg.getFloat("species.length2weight.allometric.power.sp" + fileIndex);
+        if(cfg.canFind("species.egg.density.sp" + fileIndex)) {
+          eggDensity = cfg.getFloat("species.egg.density.sp" + fileIndex);
+        } else {
+          eggDensity = 1.025f;
+        }
+
+        boolean fixedSeed = false;
+        String key = "simulation.fixedseed.enabled";
+        if (!cfg.isNull(key)) {
+            fixedSeed = cfg.getBoolean(key);
+        }
+
+        if (fixedSeed) {
+            int nSpecies = cfg.getNSpecies();
+            long seed = (13L * nSpecies) * (index + 1);
+            rdDraft = new Random(seed);
+        } else {
+            rdDraft = new Random();
+        }
 
         // If the economic module is on, then we read the file containing the prices for different
         // size classes.
@@ -163,12 +195,23 @@ public class Species implements ISpecies {
             // If not bioen, initialize age at maturity
             // used for reproduction process and egg size
             // used for growth
-            if (!cfg.isNull("species.maturity.size.sp" + fileIndex)) {
-                sizeMaturity = cfg.getFloat("species.maturity.size.sp" + fileIndex);
-                ageMaturity = Float.MAX_VALUE;
+            if (cfg.canFind("species.maturity.l50.sp" + fileIndex)) {
+              stochasticReproduction = true;
+              matL50 = cfg.getDouble("species.maturity.l50.sp" + fileIndex);
+              matL75 = cfg.getDouble("species.maturity.l75.sp" + fileIndex);
+              matsd = (matL75 - matL50) / 0.674489750196082;
+              maturityDistrib = new NormalDistribution(matL50, matsd);
+              sizeMaturity = Float.MAX_VALUE;
+              ageMaturity  = Float.MAX_VALUE;
             } else {
-                ageMaturity = cfg.getFloat("species.maturity.age.sp" + fileIndex);
-                sizeMaturity = Float.MAX_VALUE;
+              stochasticReproduction = false;
+              if (cfg.canFind("species.maturity.size.sp" + fileIndex)) {
+                  sizeMaturity = cfg.getFloat("species.maturity.size.sp" + fileIndex);
+                  ageMaturity  = Float.MAX_VALUE;
+              } else {
+                  ageMaturity = cfg.getFloat("species.maturity.age.sp" + fileIndex);
+                  sizeMaturity = Float.MAX_VALUE;
+              }
             }
 
             starvationInterface = (School sch) -> this.isStarvationEnabledNoBioen(sch);
@@ -186,16 +229,23 @@ public class Species implements ISpecies {
         float agemax = cfg.getFloat("species.lifespan.sp" + fileIndex);
         lifespan = (int) Math.round(agemax * cfg.getNStepYear());
 
+        // not exclusive of bioenergetics anymore, default to 1
+        String ikey = String.format("species.beta.sp%d", fileIndex);
+        if (cfg.canFind(ikey)) {
+            betaBioen = cfg.getDouble(ikey);
+        } else {
+            // if no parameter exists, species become larva when ageDt = 1
+            betaBioen = 1;
+        }
+
         // barrier.n: added for bioenergetic purposes.
         if (cfg.isBioenEnabled()) {
             zlayer = cfg.getInt("species.zlayer.sp" + fileIndex);
-            String key = String.format("species.beta.sp%d", fileIndex);
-            beta_bioen = cfg.getDouble(key);
         }
 
         // If the key is found, then the age switch in years is converted into
         // time-step.
-        String key = "species.first.feeding.age.sp" + fileIndex;
+        key = "species.first.feeding.age.sp" + fileIndex;
         if (cfg.canFind(key)) {
             float age_adult = cfg.getFloat(key);
             this.firstFeedingAgeDt = (int) Math.round(age_adult * cfg.getNStepYear());
@@ -239,7 +289,7 @@ public class Species implements ISpecies {
     }
 
     public double getBetaBioen() {
-        return this.beta_bioen;
+        return this.betaBioen;
     }
 
     public int getDepthLayer() {
@@ -273,6 +323,11 @@ public class Species implements ISpecies {
      */
     public float computeLength(float weight) {
         return (float) (Math.pow(weight / c, (1 / bPower)));
+    }
+
+    public float computeEggLength(float weight) {
+        //double eggDensity = 1.025 // average seawater density g/cm3, volume = (pi/6)*size^3
+        return (float) (Math.pow(6 * weight / (Math.PI * eggDensity), (1 / 3)));
     }
 
     /**
@@ -321,10 +376,18 @@ public class Species implements ISpecies {
      * Returns the size of an egg. Parameter <i>species.egg.size.sp#</i>
      *
      * @return the size of an egg in centimeter
+     * @note (roliveros): bioen method use an allometry estimated for adults.
+     * A better approach would be assuming an spherical egg, and the fact that
+     * most fish eggs are slightly denser than seawater (around 1.025 g/cm³
+     * for seawater of typical salinity), allowing them to remain suspended at
+     * certain depths rather than sinking or floating. With this, the volume of
+     * the egg would be := (4/3)*pi*(size/2)^3 = (pi/6)*size^3, and its
+     * weight := 1.025*(pi/6)*size^3. Based on this, we get bPower=3 and c~=0.5367.
+     * This is implemented in computeEggLength() now.
      */
     public float getEggSize() {
         Configuration cfg = Osmose.getInstance().getConfiguration();
-        float output = cfg.isBioenEnabled() ? this.computeLength(eggWeight) : this.eggSize;
+        float output = cfg.isBioenEnabled() ? this.computeEggLength(eggWeight) : this.eggSize;
         return output;
     }
 
@@ -339,9 +402,24 @@ public class Species implements ISpecies {
 
     public boolean isSexuallyMature(School school) {
         if (Osmose.getInstance().getConfiguration().isBioenEnabled()) {
-            throw new UnsupportedOperationException("isSexualluMature not supported in Osmose-PHYSIO");
+            throw new UnsupportedOperationException("isSexuallyMature not supported in the bionergetics module");
         } else {
-            return (school.getLength() >= sizeMaturity) || (school.getAge() >= ageMaturity);
+           if(school.isMature()) return true; // once mature, always mature
+           boolean output;
+           if (stochasticReproduction) {
+              double Ft  = maturityDistrib.cumulativeProbability(school.getLength());
+              double Fti = maturityDistrib.cumulativeProbability(school.getLengthIniStep());
+              double prob = (Ft - Fti) / (1 - Fti);
+              output = rdDraft.nextDouble() < prob;
+           } else {
+              output = (school.getLength() >= sizeMaturity) || (school.getAge() >= ageMaturity);
+           }
+           if (output) {
+              school.setAgeMat(school.getAge());
+              school.setSizeMat(school.getLength());
+              school.setIsMature(true);
+           }
+           return school.isMature();
         }
     }
 

@@ -15,7 +15,7 @@
 #' @export
 #' @inheritParams run_osmose
 osmose_calibration_setup = function(input, osmose, name=NULL, data_path=NULL, type="simple", bioen=FALSE,  
-                                    control=list(), version="4.3.3", ...) {
+                                    control=list(), version="4.3.3", options=NULL, ...) {
   
   if(is.null(data_path)) {
     message("\nNo observed data has been provided, this setup will create templates for you to fill.\n")
@@ -26,6 +26,9 @@ osmose_calibration_setup = function(input, osmose, name=NULL, data_path=NULL, ty
   wd = getwd()
   on.exit(setwd(wd))
   
+  skip_tests = control$skip_tests
+  if(is.null(skip_tests)) skip_tests = FALSE 
+    
   type = match.arg(type, choices=c("simple", "survey"))
   
   control$method = type
@@ -71,10 +74,11 @@ osmose_calibration_setup = function(input, osmose, name=NULL, data_path=NULL, ty
 
   # Create new main OSMOSE configuration file -------------------------------
   
+  if(is.null(options)) options = "-Xmx4g -Xms1g" 
   calib = list()
   calib$osmose.configuration.calibration.parameters = "calibration_parameters.osm"
   calib$osmose.configuration.outputs = "output-configuration.osm"
-  calib$osmose.java.options = "-Xmx3g -Xms1g"
+  calib$osmose.java.options = options
   calib$osmose.configuration.main = file.path("../..", input)
   class(calib) = "osmose.configuration"
   write_osmose(calib, file=file.path(dir_master, "osmose-calibration.osm"))
@@ -219,26 +223,31 @@ osmose_calibration_setup = function(input, osmose, name=NULL, data_path=NULL, ty
   
   # Calibration test --------------------------------------------------------
   
-  .calibration_test_1(simulated, observed, setup)
+  if(!skip_tests) {
+
+    .calibration_test_1(simulated, observed, setup)
+    
+    fn = calibration_objFn(model=run_model, setup=setup, observed=observed, 
+                           conf=conf, osmose=osmose, is_a_test=TRUE)
+    setwd(dir_master)
+    value = try(fn(par_guess))
+    setwd(wd)
+    test3 = !inherits(value, "try-error")
+    
+    if(test3) {
+      message("Pre-calibration test: PASSED. Objective function is properly created.\n")
+    } else {
+      message("Pre-calibration test: FAILED. Your model function (i.e. run_model) is not working properly.")
+      stop("Test failed.")
+    }
   
-  fn = calibration_objFn(model=run_model, setup=setup, observed=observed, 
-                         conf=conf, osmose=osmose, is_a_test=TRUE)
-  setwd(dir_master)
-  value = try(fn(par_guess))
-  setwd(wd)
-  test3 = !inherits(value, "try-error")
-  if(test3) {
-    message("Pre-calibration test: PASSED. Objective function is properly created.\n")
-  } else {
-    message("Pre-calibration test: FAILED. Your model function (i.e. run_model) is not working properly.")
-    stop("Test failed.")
+    setwd(wd)
+    
   }
   
   if(is.null(data_path))
     message(sprintf("The data templates provided in '%s' need to be filled with your data.", dir_data))
   
-  setwd(wd)
-
   return(invisible(control$dir))
   
 }

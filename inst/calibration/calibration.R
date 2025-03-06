@@ -11,8 +11,16 @@
 
 if(!exists(".args", mode = "character")) .args = commandArgs(trailingOnly=TRUE)
 
-library("osmose")
+message("\n--------- ", date(), "\n")
+message(R.version.string)
+message(sprintf("\tR_LIBS      = %s\n\tR_LIBS_USER = %s", Sys.getenv("R_LIBS"), Sys.getenv("R_LIBS_USER")))
 library("calibrar")
+message(sprintf("\tcalibrar version %s loaded.", packageVersion("calibrar")))
+library("osmose")
+message(sprintf("\tosmose version %s loaded.", packageVersion("osmose")))
+
+nodes = readLines(Sys.getenv("PBS_NODEFILE"))
+message(sprintf("\nUsing nodes: %s\n", paste(nodes, collapse=", ")))
 
 control_file   = .get_command_argument(.args, "calibration.control", default=".calibrarrc")
 if(is.null(control_file)) stop("A control file must be specified ('--calibration.control=file')")
@@ -33,13 +41,19 @@ root = basename(getwd()) # here
 run_path = sprintf("../.run_%s", root)
 if(!dir.exists(run_path)) dir.create(run_path)
 if(!file.exists(osmose)) stop("OSMOSE executable '.osmose.jar' not found.")
-file.copy(from=osmose, to=file.path(run_path, osmose), overwrite = TRUE)
+
+.cancopy = file.copy(from=osmose, to=file.path(run_path, osmose), overwrite = TRUE)
+message(sprintf("Copying OSMOSE executable: %s", as.character(.cancopy)))
+if(isFALSE(.cancopy)) stop("Cannot copy OSMOSE executable.")
 
 # check for some defaults if missing
 if(is.null(control$verbose)) control$verbose = TRUE
 control$parallel = (ncores > 1)
 
-conf = read_osmose("master/osmose-calibration.osm")
+message(sprintf("Running calibration in %s with %d cores.", 
+                ifelse(control$parallel, "parallel", "sequential"), ncores))
+
+conf = read_osmose(input = "master/osmose-calibration.osm")
 model = get_par(conf, "output.file.prefix")
 
 # explicit some variables
@@ -62,7 +76,6 @@ par_phase = read_osmose(input=sprintf("osmose-%s-parphase.osm", model))
 # read observed data
 if(!file.exists(obs_file)) stop(sprintf("Observed data ('%s') not found.", obs_file))
 observed = readRDS(obs_file)
-# observed = calibration_data(setup=setup, path=data_path, verbose=verbose)
 
 # create objective function
 osmose = file.path("..", osmose) # to make it relative to master
@@ -92,33 +105,40 @@ control$ncores = ncores # the actual number of cores you have
 if(isTRUE(parallel)) {
   
   if(!isTRUE(MPI)) {
-    library("doParallel")
+    if(!require("doParallel")) stop("Package 'doParallel' not found")
+    message(sprintf("Using doSNOW for parallelisation (%s).", parallel:::getClusterOption("type")))
     cl = makeCluster(control$ncores)
     registerDoParallel(cl)
   } else {
-    library("doSNOW")
+    if(!require("doSNOW")) stop("Package 'doSNOW' not found")
+    message("Using MPI for parallelisation.")
     cl = makeCluster()
     registerDoSNOW(cl)
   }
   
   e = new.env()
-  e$conf = conf
+  e$conf      = conf
   e$is_a_test = is_a_test
-  e$osmose = osmose
+  e$osmose    = osmose
   
   clusterExport(cl, c("conf", "is_a_test", "osmose"), envir = e)
-  clusterEvalQ(cl, library("calibrar"))
-  clusterEvalQ(cl, library("osmose"))
+  message("Loading calibrar in the cluster...")
+  l0 = clusterEvalQ(cl, library("calibrar"))
+  message("Loading OSMOSE in the cluster...")
+  l1 = clusterEvalQ(cl, library("osmose"))
   
 }
 
 # launch the calibration!
-opt = calibrate(par=par_guess, fn=objfn, method=method,
+opt = try(calibrate(par=par_guess, fn=objfn, method=method,
                 lower=par_min, 
                 upper=par_max, 
                 phases=par_phase,
                 replicates=replicates,
-                control=control)
+                control=control,
+                parallel=parallel))
 
+if(inherits(opt, "try-error")) 
+  message("Error while running the calibration.")
 # tidy up
 if(isTRUE(parallel)) stopCluster(cl)

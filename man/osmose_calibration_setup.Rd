@@ -13,6 +13,7 @@ osmose_calibration_setup(
   bioen = FALSE,
   control = list(),
   version = "4.3.3",
+  options = NULL,
   ...
 )
 }
@@ -32,6 +33,8 @@ choose the name of the calibration folder and control$run for the scratch folder
 
 \item{version}{OSMOSE version. Integer (2, 3, etc.) or releases ('v3r2') are
 accepted.}
+
+\item{options}{Java options (e.g. -Xmx2048m to increase memory limit).}
 
 \item{...}{Additional arguments of current no use.}
 

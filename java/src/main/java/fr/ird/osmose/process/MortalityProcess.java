@@ -22,7 +22,7 @@
  * Ricardo OLIVEROS RAMOS (ricardo.oliveros@gmail.com)
  * Philippe VERLEY (philippe.verley@ird.fr)
  * Laure VELEZ (laure.velez@ird.fr)
- * Nicolas Barrier (nicolas.barrier@ird.fr)
+ * Nicolas BARRIER (nicolas.barrier@ird.fr)
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -138,7 +138,6 @@ public class MortalityProcess extends AbstractProcess {
     private static Random random;
     /*
      * Subdivise the main time step in smaller time steps for applying mortality.
-     * Should only be 1 so far, still problems to fix.
      */
     private int subdt;
 
@@ -396,8 +395,8 @@ public class MortalityProcess extends AbstractProcess {
                     trophicLevel += 1;
                     school.setTrophicLevel((float) trophicLevel);
                 }
-            }
-        }
+            } // end of trophicLevel 
+        } // end of starvation and trophicLevel update
 
         // Apply Zout mortality on schools out of the simulated domain
         for (School school : getSchoolSet().getOutSchools()) {
@@ -570,7 +569,7 @@ public class MortalityProcess extends AbstractProcess {
                 // barrier.n: adding the
                 case FORAGING:
                     if ((seqFor[i] >= ns) || (!getConfiguration().isBioenEnabled())) {
-                        // oxidative mortality for bion module and focal species only
+                        // oxidative mortality for bioen module and focal species only
                         break;
                     }
                     school = schools.get(seqFor[i]);

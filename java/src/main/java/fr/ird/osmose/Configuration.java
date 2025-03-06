@@ -414,16 +414,14 @@ public class Configuration extends OLogger {
         // barrier.n: reads the parameter that defines whether
         // the bioen module should be used.
         // String keybioen = "simulation.use.bioen";
-        String keybioen = "simulation.bioen.enabled";
+        String keybioen = "module.bioenergetics.enabled";
         this.bioenEnabled = this.getBoolean(keybioen);
 
         this.checkPreyRecord();
 
         this.geneticEnabled = false;
-        if (this.bioenEnabled) {
-            String key = "simulation.genetic.enabled";
-            this.geneticEnabled = this.getBoolean(key);
-        }
+        String key = "module.genetics.enabled";
+        this.geneticEnabled = this.getBoolean(key);
 
         String keyincom = "simulation.incoming.flux.enabled";
         this.incomingFluxEnabled = this.getBoolean(keyincom);
@@ -443,7 +441,7 @@ public class Configuration extends OLogger {
             // if simulation.time.nstep not defined, use old parameter simulation.time.nyear
             nStep = nStepYear * getInt("simulation.time.nyear");
         }
-        
+
         writeRestart = true;
         if (!this.isNull("simulation.restart.enabled")) {
             writeRestart = this.getBoolean("simulation.restart.enabled");
@@ -472,7 +470,7 @@ public class Configuration extends OLogger {
 
         // Show the output folder
         info("Simulation restart spinup is " + spinupRestart);
-        
+
         // Show the output folder
         info("Output folder set to " + outputPathname);
 
@@ -541,28 +539,24 @@ public class Configuration extends OLogger {
         }
 
         nSchool = new int[nSpecies];
-        if (findKeys("simulation.nschool.sp*").size() == nSpecies) {
-            int cpt = 0;
-            for (int i : this.focalIndex) {
-                nSchool[cpt] = getInt("simulation.nschool.sp" + i);
-                cpt++;
-            }
-        } else if (canFind("simulation.nschool")) {
-            int n = getInt("simulation.nschool");
-            for (int i = 0; i < nSpecies; i++) {
-                nSchool[i] = n;
-            }
-        } else {
-            for (int i = 0; i < nSpecies; i++) {
-                nSchool[i] = 10;
-            }
+
+        int n, mul, nSchoolDef, ntmp;
+        nSchoolDef = 10; // roliveros: hardcoded, to review
+        mul = canFind("simulation.nschool.multiplier") ? getInt("simulation.nschool.multiplier") : 1;
+        n   = canFind("simulation.nschool") ? getInt("simulation.nschool") : nSchoolDef;
+
+        int cpt = 0;
+        for (int i : this.focalIndex) {
+              ntmp = canFind("simulation.nschool.sp" + i) ? getInt("simulation.nschool.sp" + i) : n;
+              nSchool[cpt] = mul*ntmp;
+              cpt++;
         }
 
         // Create the grid
         initGrid();
 
         // Create the species
-        int cpt = 0;
+        cpt = 0;
         species = new Species[nSpecies];
         for (int fileIndex : this.focalIndex) {
             // Species are now instanciated from the fileIndex and the species index (cpt in
@@ -592,7 +586,7 @@ public class Configuration extends OLogger {
         }
 
         // barrier.n: add number of background species
-        String key = "simulation.nbackground";
+        key = "simulation.nbackground";
         int nBackground_test = 0;
         if (canFind(key)) {
             nBackground_test = getInt(key);
@@ -622,8 +616,8 @@ public class Configuration extends OLogger {
         }
 
         // Fisheries
-        boolean fisheryEnabled = getBoolean("process.multispecies.fisheries.enabled");
-        this.isEconomyEnabled = getBoolean("economy.enabled");
+        boolean fisheryEnabled = getBoolean("module.multispecies.fisheries.enabled");
+        this.isEconomyEnabled = getBoolean("module.bioeconomics.enabled");
 
         // true if fishingMortality is enabled or not (v3 or v4)
         if (!isNull("simulation.fishing.mortality.enabled")) {
