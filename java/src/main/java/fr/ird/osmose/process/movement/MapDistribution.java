@@ -44,6 +44,7 @@ package fr.ird.osmose.process.movement;
 import fr.ird.osmose.Cell;
 import fr.ird.osmose.util.GridMap;
 import fr.ird.osmose.School;
+import fr.ird.osmose.process.bioen.WeightedRandomDraft;
 import fr.ird.osmose.util.MapSet;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -67,6 +68,9 @@ public class MapDistribution extends AbstractSpatialDistribution {
     private float[] maxProbaPresence;
     private float randomWalkProba;
     private int rank;
+    private GetMapDistribution getMapDistribution;
+
+    private WeightedRandomDraft<Cell> weightedDistribution;
 
     /*
      * Ranges of movement in cell during one Osmose time step
@@ -81,6 +85,22 @@ public class MapDistribution extends AbstractSpatialDistribution {
 
     @Override
     public void init() {
+
+        // Init a weighted distribution object
+        weightedDistribution = new WeightedRandomDraft<>(rank, "movement");
+        weightedDistribution.init();
+
+        getMapDistribution = ((school, iStepSimu) -> legacyDistribution(school, iStepSimu));
+        String key = "movement.distribution.method.sp" + iSpeciesFile;
+        String method = getConfiguration().getString(key);
+        if (method == "map") {
+            getMapDistribution = ((school, iStepSimu) -> legacyDistribution(school, iStepSimu));
+        } else if (method == "map_fixed") {
+            getMapDistribution = ((school, iStepSimu) -> legacyFixedDistribution(school, iStepSimu));
+        } else {
+            error("Movemement method not found for species " + Integer.toString(iSpecies), new Exception());
+        }
+
 
         boolean fixedSeed = false;
         if (!getConfiguration().isNull("simulation.fixedseed.enabled")) {
@@ -140,6 +160,11 @@ public class MapDistribution extends AbstractSpatialDistribution {
     }
 
     private void mapsDistribution(School school, int iStepSimu) {
+        getMapDistribution.mapDistribution(school, iStepSimu);
+    }
+
+    // Original method in Osmose, full redistribution of schhools
+    private void legacyDistribution(School school, int iStepSimu) {
 
         int age = school.getAgeDt();
 
@@ -148,10 +173,9 @@ public class MapDistribution extends AbstractSpatialDistribution {
         GridMap map = maps.getMap(indexMap);
 
         /*
-         * Check whether the map has changed from previous cohort
-         * and time-step.
-         * For cohort zero and first time-step of the simulation we can
-         * assert sameMap = false;
+         * Check whether the map has changed from previous cohort and time-step. For
+         * cohort zero and first time-step of the simulation we can assert sameMap =
+         * false;
          */
         boolean sameMap = false;
         if (age > 0 && iStepSimu > 0) {
@@ -164,9 +188,9 @@ public class MapDistribution extends AbstractSpatialDistribution {
         // Move the school
         if (!sameMap || school.isUnlocated()) {
             /*
-             * Random distribution in a map, either because the map has
-             * changed from previous cohort and time-step, or because the
-             * school was unlocated due to migration.
+             * Random distribution in a map, either because the map has changed from
+             * previous cohort and time-step, or because the school was unlocated due to
+             * migration.
              */
             int maxIter = 10000;
             int nIter = -1;
@@ -175,7 +199,7 @@ public class MapDistribution extends AbstractSpatialDistribution {
             double proba;
             do {
                 nIter++;
-                if(nIter >= maxIter) {
+                if (nIter >= maxIter) {
                     StringBuilder bld = new StringBuilder();
                     bld.append("The maximum number of iterations for map distribution has been reached\n");
                     String outFmt = String.format("Check movements for species %s", school.getSpecies().getName());
@@ -186,7 +210,8 @@ public class MapDistribution extends AbstractSpatialDistribution {
                 }
                 indexCell = (int) Math.round((nCells - 1) * rd1.nextDouble());
                 proba = map.getValue(getGrid().getCell(indexCell));
-            } while (proba <= 0.d || proba < rd2.nextDouble() * maxProbaPresence[indexMap] || Double.isNaN(proba) || getGrid().getCell(indexCell).isLand());
+            } while (proba <= 0.d || proba < rd2.nextDouble() * maxProbaPresence[indexMap] || Double.isNaN(proba)
+                    || getGrid().getCell(indexCell).isLand());
             school.moveToCell(getGrid().getCell(indexCell));
         } else {
             
@@ -200,9 +225,81 @@ public class MapDistribution extends AbstractSpatialDistribution {
         }
     }
 
+    // Fixed distribution.
+    private void legacyFixedDistribution(School school, int iStepSimu) {
+
+        int age = school.getAgeDt();
+
+        // Get current map and max probability of presence
+        int indexMap = maps.getIndexMap(school.getAgeDt(), iStepSimu);
+        GridMap map = maps.getMap(indexMap);
+
+        /*
+         * Check whether the map has changed from previous cohort and time-step. For
+         * cohort zero and first time-step of the simulation we can assert sameMap =
+         * false;
+         */
+        boolean sameMap = false;
+        if (age > 0 && iStepSimu > 0) {
+            int previousIndexMap = maps.getIndexMap(age - 1, iStepSimu - 1);
+            if (indexMap == previousIndexMap) {
+                sameMap = true;
+            }
+        }
+
+        // Move the school
+        if (!sameMap || school.isUnlocated()) {
+            /*
+             * Random distribution in a map, either because the map has changed from
+             * previous cohort and time-step, or because the school was unlocated due to
+             * migration.
+             */
+
+            // get the updated probability value
+            // before hand, check whether the school is located to avoid error due to access cell with index -1
+            if (!school.isUnlocated() && !Float.isNaN(map.getValue(school.getCell())) && map.getValue(school.getCell()) > 0) {
+                // if the value is not nan and > 0, random walk
+                randomWalk(school, map);
+            } else {
+
+                // if proba is 0, then we move the school
+                // Init the weighted random draft
+                weightedDistribution.reset();
+                for (Cell cell : getGrid().getCells()) {
+                    if(cell.isLand()) {
+                        continue;
+                    }
+                    weightedDistribution.add(map.getValue(cell), cell);
+                }
+
+                Cell cell = weightedDistribution.next();
+                school.moveToCell(cell);
+            }
+
+        } else {
+            randomWalk(school, map);
+        }
+    }
+
+    private void randomWalk(School school, GridMap map) {
+
+        Cell cellSchool = school.getCell();
+        // 1. Get all surrounding cells
+        weightedDistribution.reset();
+        for (Cell cell : getGrid().getNeighbourCells(cellSchool, range)) {
+            if(cell.isLand()) {
+                continue;
+            }
+            weightedDistribution.add(map.getValue(cell), cell);
+        }
+
+        Cell cell = weightedDistribution.next();
+        school.moveToCell(cell);
+
+    }
+
     /**
-     * Get the adjacent cells of a given school that are contained in the given
-     * map.
+     * Get the adjacent cells of a given school that are contained in the given map.
      *
      * @param school
      * @param map
@@ -240,8 +337,10 @@ public class MapDistribution extends AbstractSpatialDistribution {
     /**
      * Randomly choose a cell among the given list of cells.
      *
-     * @param cells, a list of cells
-     * @param rd, a random generator
+     * @param cells,
+     *            a list of cells
+     * @param rd,
+     *            a random generator
      * @return a cell from the list of cells.
      */
     private Cell randomDeal(List<Cell> cells, Random rd) {

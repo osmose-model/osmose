@@ -1,21 +1,15 @@
 package fr.ird.osmose;
 
-import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import java.io.File;
-import java.nio.file.Files;
-import java.nio.file.StandardCopyOption;
 import java.util.HashMap;
 import java.util.logging.Level;
 
-import org.checkerframework.checker.units.qual.s;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 
 import fr.ird.osmose.process.mortality.fishery.FisherySelectivity;
-import fr.ird.osmose.util.AccessibilityManager;
 
 /**
  * Test the management of accessibility matrix, i.e. whether time-varying

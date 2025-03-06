@@ -1244,6 +1244,9 @@ public class Configuration extends OLogger {
      */
     public String resolve(String filename, String relativeTo) {
         String pathname = filename;
+        if(relativeTo == "command line") {
+            relativeTo = mainFilename;
+        }
         try {
             File file = new File(relativeTo);
             pathname = new File(file.toURI().resolve(filename)).getAbsolutePath();
