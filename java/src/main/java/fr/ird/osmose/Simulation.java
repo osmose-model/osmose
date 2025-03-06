@@ -419,4 +419,8 @@ public class Simulation extends OsmoseLinker {
         return this.economicModule;
     }
 
+    public int getRank() {
+        return this.rank;
+    }
+
 }
