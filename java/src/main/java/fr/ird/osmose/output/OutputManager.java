@@ -65,6 +65,7 @@ import java.util.ArrayList;
 import java.util.List;
 import fr.ird.osmose.output.spatial.SpatialAbundanceOutput;
 import fr.ird.osmose.output.spatial.SpatialBiomassOutput;
+import fr.ird.osmose.output.spatial.SpatialByClassOutput;
 import fr.ird.osmose.output.spatial.SpatialYieldOutput;
 import fr.ird.osmose.output.spatial.SpatialYieldNOutput;
 import fr.ird.osmose.output.spatial.SpatialTLOutput;
@@ -786,6 +787,35 @@ public class OutputManager extends SimulationLinker {
                         (school -> school.isMature()), (schoolset -> schoolset.getAliveSchools()), "Mean traits of parent schools, ponderated by number of eggs"));
             }
         }
+
+        if (getConfiguration().getBoolean("output.spatial.biomass.bysize.enabled")) {
+            for (int i = 0; i < getNSpecies(); i++) {
+                outputs.add(new SpatialByClassOutput(rank, "biomass", "Spatial distribution", i, DistributionType.SIZE,
+                        (school -> school.getInstantaneousBiomass()), true, true));
+            }
+        }
+
+        if (getConfiguration().getBoolean("output.spatial.abundance.bysize.enabled")) {
+            for (int i = 0; i < getNSpecies(); i++) {
+                outputs.add(new SpatialByClassOutput(rank, "abundance", "Spatial distribution", i, DistributionType.SIZE,
+                        (school -> school.getInstantaneousAbundance()), true, true));
+            }
+        }
+
+        if (getConfiguration().getBoolean("output.spatial.biomass.byage.enabled")) {
+            for (int i = 0; i < getNSpecies(); i++) {
+                outputs.add(new SpatialByClassOutput(rank, "biomass", "Spatial distribution", i, DistributionType.AGE,
+                        (school -> school.getInstantaneousBiomass()), true, true));
+            }
+        }
+
+        if (getConfiguration().getBoolean("output.spatial.abundance.byage.enabled")) {
+            for (int i = 0; i < getNSpecies(); i++) {
+                outputs.add(new SpatialByClassOutput(rank, "abundance", "Spatial distribution", i,
+                        DistributionType.AGE, (school -> school.getInstantaneousAbundance()), true, true));
+            }
+        }
+
 
         /*
          * Initialize indicators

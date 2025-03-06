@@ -267,7 +267,7 @@ public abstract class AbstractSpatialOutput extends SimulationLinker implements 
         }
     }
 
-    private String getFilename() {
+    public String getFilename() {
         File path = new File(getConfiguration().getOutputPathname());
         StringBuilder filename = new StringBuilder(path.getAbsolutePath());
         filename.append(File.separatorChar);
