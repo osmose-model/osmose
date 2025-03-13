@@ -298,6 +298,26 @@ public class OutputManager extends SimulationLinker {
             }
         }
 
+        // Emy economic output
+        if (getConfiguration().isEconomyEnabled()) {
+
+            if (getConfiguration().getBoolean("output.economic.harvesting.costs.enabled")) {
+                outputs.add(new EconomyHarvestingCostsOutput(rank));
+            }
+
+            if (getConfiguration().getBoolean("output.economic.fish.prices.enabled")) {
+                outputs.add(new EconomyFishPricesOutput(rank));
+            }
+
+            if (getConfiguration().getBoolean("output.economic.fisherman.profit.enabled")) {
+                outputs.add(new EconomyFishermanProfitOutput(rank));
+            }
+
+            if (getConfiguration().getBoolean("output.economic.profit.margin.enabled")) {
+                outputs.add(new EconomyProfitMarginOutput(rank));
+            }
+        }
+
         // Biomass
         if (getConfiguration().getBoolean("output.biomass.enabled")) {
             outputs.add(new SpeciesOutput(rank, null, "biomass",
