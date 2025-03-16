@@ -113,6 +113,15 @@
   write_osmose(set_par(pars, scale=0.8, lower=-4), file=min_file, append = TRUE)
   write_osmose(set_par(pars, scale=1.2, upper=+4), file=max_file, append = TRUE)
   write_osmose(set_par(pars, 3), file=phase_file, append = TRUE)
+  
+  pars = get_par(conf, "predation.ingestion.rate.max.sp", as.is=TRUE)
+  pars = transform_par(pars, FUN=log10)
+  
+  write_osmose(pars, file=guess_file, append = TRUE)
+  write_osmose(set_par(pars, scale=0.8, lower=0), file=min_file, append = TRUE)
+  write_osmose(set_par(pars, scale=1.2, upper=2), file=max_file, append = TRUE)
+  write_osmose(set_par(pars, -1), file=phase_file, append = TRUE)
+  
   return(invisible(TRUE))
 }
 
@@ -150,13 +159,6 @@
   phase_file = allfiles["phase"]
   
   mcat("\n#---- Bioenergetics\n", file=allfiles, append = TRUE)
-  
-  pars = get_par(conf, "predation.ingestion.rate.max.bioen.sp", as.is=TRUE)
-  
-  write_osmose(pars, file=guess_file, append = TRUE)
-  write_osmose(set_par(pars, scale=0.8, lower=0), file=min_file, append = TRUE)
-  write_osmose(set_par(pars, scale=1.2, upper=+20), file=max_file, append = TRUE)
-  write_osmose(set_par(pars, 1), file=phase_file, append = TRUE)
   
   return(invisible(NULL))
 }
