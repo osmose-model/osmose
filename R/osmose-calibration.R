@@ -1,20 +1,19 @@
 
 #' Set up a new calibration for an OSMOSE model
 #'
+#' @param name Name for the calibration trial.
+#' @param data_path Path to data files to observations.
 #' @param type Type or calibration. Currently only 'simple' is available.
-#' @param bioen Are we calibrating a Bioen-OSMOSE model?
 #' @param control A list with additional control arguments. Notably, control$dir to
 #' choose the name of the calibration folder and control$run for the scratch folder 
 #' (to 'run' OSMOSE during the calibration. Full paths are ignored, only basename is kept).
-#' @param test Boolean, test the calibration? FALSE by default. You can run the same test later using
-#' the function \code{\link{osmose_calibration_test}}.
 #' @param ... Additional arguments of current no use.
 #'
 #' @return Side effects: Create all the files you need for your calibration. Returns, invisibily,
 #' the path to the calibration directory.
 #' @export
 #' @inheritParams run_osmose
-osmose_calibration_setup = function(input, osmose, name=NULL, data_path=NULL, type="simple", bioen=FALSE,  
+osmose_calibration_setup = function(input, osmose, name=NULL, data_path=NULL, type="simple",  
                                     control=list(), version="4.3.3", options=NULL, ...) {
   
   if(is.null(data_path)) {
@@ -33,6 +32,8 @@ osmose_calibration_setup = function(input, osmose, name=NULL, data_path=NULL, ty
   
   control$method = type
   conf = read_osmose(input=input)
+  bioen = get_par(conf, "module.bioenergetics.enabled")
+  if(is.null(bioen)) bioen=FALSE
   
   if(!file.exists(osmose)) stop(sprintf("Could not find your 'osmose' executable (%s)", osmose))
   if(!is.null(name)) {
@@ -327,5 +328,67 @@ osmose_calibration_test = function(path, setup=NULL) {
 }
 
 
+#' Process outputs for calibration from an OSMOSE object
+#'
+#' @param output An object created by the \code{read_osmose} function.
+#'
+#' @returns A list with the variables needed for a basic calibration of OSMOSE.
+#' @export
+#'
+#' @examples
+#' #' \dontrun{
+#' output = read_osmose(".")
+#' calib_output = osmose_calibration_outputs(output)
+#' }
+osmose_calibration_outputs = function(output) {
+  
+  surveyNames = grep(names(output), pattern="biomass\\.", value=TRUE)
+  surveys = lapply(surveyNames, FUN=function(what) get_var(object=output, what=what, how="list", no.error = TRUE, drop=FALSE))
+  names(surveys) = surveyNames
+  surveys = unlist(surveys, recursive=FALSE)
+  
+  if(is.null(surveys)) {
+    surveys = get_var(output, "biomass", how="list", no.error = TRUE)
+    names(surveys) = paste("biomass", names(surveys), sep=".")
+  }
+  
+  cal_output = c(surveys, 
+                 landings   = get_var(output, "observed.landings", how="list", no.error = TRUE),
+                 catchatlength = get_var(output, "yieldNBySize", how="list", no.error = TRUE),
+                 growth = get_var(output, "residualSizeByAge", no.error = TRUE),
+                 mortality = get_var(output, "residualMortalityByAge", no.error = TRUE)
+  )
+  
+  return(cal_output)  
+}
 
 
+#' Run a model as set up for a calibration trial
+#'
+#' @returns A list with the simulated data used for calibration
+#' @export
+#'
+#' @inheritParams osmose_calibration_setup
+osmose_calibration_runmodel = function(input, osmose, name, version="4.3.3") {
+  
+  wd = getwd()
+  on.exit(setwd(wd))
+  
+  conf = read_osmose(input=input)
+  
+  dir = if(is.null(name)) "calibration" else sprintf("calibration_%s", name)
+  dir_master = file.path(dir, "master")  
+  
+  bsn = sprintf("osmose-%s", get_par(conf, "output.file.prefix"))
+  guess_file = file.path(dir, paste(bsn, "-parguess.osm", sep=""))
+  par_guess = read_osmose(input=guess_file)
+  
+  source(file.path(dir, "run_model.R"), local=TRUE)
+  
+  setwd(dir_master)
+  simulated = try(run_model(par=par_guess, conf=conf, osmose=osmose, is_a_test=FALSE, version=version))
+  setwd(wd)
+  
+  return(simulated)
+  
+}
