@@ -10,6 +10,7 @@
   
   out = list()
   out1 = list()
+  out2 = list()
   for(i in seq_along(xx)) {
     xi = xx[[i]]
     this = get_par(conf, sp=isp[i])
@@ -17,19 +18,23 @@
     dage = mean(diff(iage))
     iage = iage + 0.5*dage
     isize = VB(age=iage, this, method=1) # replace with integrated size
-    xii = as.numeric(colMeans(xi, na.rm=TRUE))
+    xii = as.numeric(apply(xi, 2, mean, na.rm=TRUE))
     out[[i]] = log((isize + tiny)/(xii + tiny))
-    out1[[i]] = array(rep(isize, each=nrow(xi)), dim=dim(xi))
+    out1[[i]] = setNames(isize, nm=iage-0.5*dage) #array(rep(isize, each=nrow(xi)), dim=dim(xi))
+    out2[[i]] = setNames(xii, nm=iage-0.5*dage) 
   }
   
-  names(out) = names(xx)
+  names(out)  = names(xx)
   names(out1) = names(xx)
+  names(out2) = names(xx)
   
   class(out) = c("osmose.residualSizeByAge", "list")
   class(out1) = c("osmose.expectedSizeByAge", "list")
+  class(out2) = c("osmose.averageSizeByAge", "list")
   
   x$residualSizeByAge = out
   x$expectedSizeByAge = out1
+  x$averageSizeByAge = out2
   
   return(x)
   
@@ -60,14 +65,17 @@
     mnat = xx$Mpred + xx$Mstar + xx$Mnat
     mnat = mnat[, seq_len(ncol(y)), , drop=FALSE]
     
+    iage = as.numeric(colnames(y))
+    dage = mean(diff(iage))
+    iage = iage + 0.5*dage
+    
     mp = calculateMortality(conf, sp=get_species(conf, sp=isp))
     # should we use size or age-based mortality?
-    mproxy = array(mp$M[cut(as.numeric(y), breaks=mp$size, labels=FALSE)],
-                   dim=dim(y))/ndt
-    mnati = colMeans(mnat, na.rm=TRUE)
-    mproxyi = colMeans(mproxy, na.rm=TRUE)
-    mdeviate = log((mnati + tiny)/(mproxyi + tiny))
-    # out[[i]] = mdeviate[,-1, , drop=FALSE] # remove larval mortality
+    mproxy = mp$M[cut(iage, breaks=mp$age, labels=FALSE)]
+    # mproxy = array(mp$M[cut(as.numeric(y), breaks=mp$size, labels=FALSE)],
+    #                dim=dim(y))/ndt
+    mnati = as.numeric(apply(mnat, 2, mean, na.rm=TRUE))*ndt
+    mdeviate = log((mnati + tiny)/(mproxy + tiny))
     out[[i]] = mdeviate[-1] # remove larval mortality
     out1[[i]] = mproxy
     out2[[i]] = mnat
@@ -650,4 +658,13 @@ get_codes = function(sp, conf) {
   npar = max(out)
   mult = sapply(out, FUN=function(x) max(pretty(npar/x)))
   return(pmin(reltol*mult, 1e-1))
+}
+
+.timing = function(.t0, t0, t1, tr, file) {
+  .t1 = Sys.time()
+  tf = as.integer(difftime(.t1, .t0, units = "secs"))
+  cat(sprintf("%s, %s, %s, %s, %s, %s\n", 
+              basename(getwd()), tf, format(.t0, "%H:%M:%S"), t0, t1, tr), 
+      file=file, append=TRUE)
+  return(invisible())
 }
