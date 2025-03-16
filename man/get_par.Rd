@@ -28,7 +28,7 @@ get_species(
   null.on.error = FALSE
 )
 
-get_fisheries(x, code = FALSE, fsh = NULL, nm = NULL)
+get_fisheries(x, code = FALSE, fsh = NULL, nm = NULL, null.on.error = FALSE)
 
 get_surveys(x, code = FALSE, sr = NULL, nm = NULL)
 }

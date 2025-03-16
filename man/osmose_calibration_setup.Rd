@@ -10,7 +10,6 @@ osmose_calibration_setup(
   name = NULL,
   data_path = NULL,
   type = "simple",
-  bioen = FALSE,
   control = list(),
   version = "4.3.3",
   options = NULL,
@@ -23,9 +22,11 @@ osmose_calibration_setup(
 \item{osmose}{Path to a OSMOSE .jar executable. By default (NULL), uses the stable
 jar for the current version.}
 
-\item{type}{Type or calibration. Currently only 'simple' is available.}
+\item{name}{Name for the calibration trial.}
 
-\item{bioen}{Are we calibrating a Bioen-OSMOSE model?}
+\item{data_path}{Path to data files to observations.}
+
+\item{type}{Type or calibration. Currently only 'simple' is available.}
 
 \item{control}{A list with additional control arguments. Notably, control$dir to
 choose the name of the calibration folder and control$run for the scratch folder 
@@ -37,9 +38,6 @@ accepted.}
 \item{options}{Java options (e.g. -Xmx2048m to increase memory limit).}
 
 \item{...}{Additional arguments of current no use.}
-
-\item{test}{Boolean, test the calibration? FALSE by default. You can run the same test later using
-the function \code{\link{osmose_calibration_test}}.}
 }
 \value{
 Side effects: Create all the files you need for your calibration. Returns, invisibily,
