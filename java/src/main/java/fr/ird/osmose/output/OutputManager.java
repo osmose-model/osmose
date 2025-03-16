@@ -22,7 +22,7 @@
  * Ricardo OLIVEROS RAMOS (ricardo.oliveros@gmail.com)
  * Philippe VERLEY (philippe.verley@ird.fr)
  * Laure VELEZ (laure.velez@ird.fr)
- * Nicolas Barrier (nicolas.barrier@ird.fr)
+ * Nicolas BARRIER (nicolas.barrier@ird.fr)
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -284,8 +284,16 @@ public class OutputManager extends SimulationLinker {
                 outputs.add(new SpatialFisheryOutput(rank));
             }
 
-            if (getConfiguration().getBoolean("output.fisheries.enabled")) {
-                outputs.add(new FisheryOutput(rank));
+            if (getConfiguration().getBoolean("output.fisheries.yield.biomass.enabled")) {
+                outputs.add(new FisheryOutputYield(rank));
+            }
+            
+            if (getConfiguration().getBoolean("output.fisheries.yield.abundance.enabled")) {
+                outputs.add(new FisheryOutputYieldN(rank));
+            }
+            
+            if (getConfiguration().getBoolean("output.fisheries.accessiblebiomass.enabled")) {
+                outputs.add(new FisheryOutputAccessibleBiomass(rank));
             }
 
             if (getConfiguration().getBoolean("output.fisheries.byage.enabled")) {

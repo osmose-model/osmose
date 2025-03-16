@@ -664,18 +664,20 @@ public class MortalityProcess extends AbstractProcess {
                             // Percentage values of discarded fish. The remaining go to fishery.
                             double discardRate = gear.getDiscardRate(fishedSchool);
                             double nFished = (1 - discardRate) * nDead;
-                            double nDiscared = discardRate * nDead;
+                            double nDiscarded = discardRate * nDead;
 
                             if (economyEnabled) {
                                 // store the harvested biomass by size class by species for fishing gear.
                                 getSimulation().getEconomicModule().incrementHarvestedBiomass(iFishery, fishedSchool, nDead);
                             }
 
-                            fishedSchool.fishedBy(iFishery, fishedSchool.abd2biom(nFished));
-                            fishedSchool.discardedBy(iFishery, fishedSchool.abd2biom(nDiscared));
+                            //fishedSchool.fishedBy(iFishery, fishedSchool.abd2biom(nFished));
+                            fishedSchool.fishedNBy(iFishery, nFished);
+                            //fishedSchool.discardedBy(iFishery, fishedSchool.abd2biom(nDiscarded));
+                            fishedSchool.discardedNBy(iFishery, nDiscarded);
 
                             fishedSchool.incrementNdead(MortalityCause.FISHING, nFished);
-                            fishedSchool.incrementNdead(MortalityCause.DISCARDS, nDiscared);
+                            fishedSchool.incrementNdead(MortalityCause.DISCARDS, nDiscarded);
 
                             // make sure a different fishery is called every time
                             // it is just a trick since we do not have case FISHERY1,

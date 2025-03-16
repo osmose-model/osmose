@@ -44,7 +44,6 @@ package fr.ird.osmose.output.spatial;
 import fr.ird.osmose.util.io.IOTools;
 import fr.ird.osmose.Cell;
 import fr.ird.osmose.School;
-import fr.ird.osmose.output.FisheryOutput;
 import fr.ird.osmose.output.IOutput;
 import fr.ird.osmose.util.SimulationLinker;
 import java.io.File;
@@ -301,7 +300,7 @@ public class SpatialFisheryOutput extends SimulationLinker implements IOutput {
             // nc.write(nc.findVariable("accessible_biomass"), new int[] { index, 0, 0, 0, 0 }, arrAccessBiomass);
             index++;
         } catch (IOException | InvalidRangeException ex) {
-            Logger.getLogger(FisheryOutput.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(SpatialFisheryOutput.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
 
