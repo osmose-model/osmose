@@ -22,7 +22,7 @@
  * Ricardo OLIVEROS RAMOS (ricardo.oliveros@gmail.com)
  * Philippe VERLEY (philippe.verley@ird.fr)
  * Laure VELEZ (laure.velez@ird.fr)
- * Nicolas Barrier (nicolas.barrier@ird.fr)
+ * Nicolas BARRIER (nicolas.barrier@ird.fr)
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -71,8 +71,10 @@ public class BackgroundSchool extends AbstractSchool {
         this.bkgSpecies = species;
         abundanceHasChanged = false;
         preys = new HashMap<>();
-        fishedBiomass = new double[getConfiguration().getNFishery()];
-        discardedBiomass = new double[getConfiguration().getNFishery()];
+        //fishedBiomass = new double[getConfiguration().getNFishery()];
+        fishedAbundance = new double[getConfiguration().getNFishery()];
+        //discardedBiomass = new double[getConfiguration().getNFishery()];
+        discardedAbundance = new double[getConfiguration().getNFishery()];
         accessibleBiomassToFishery = new double[getConfiguration().getNFishery()];
         this.classIndex = classIndex;
         this.moveToCell(cell);
@@ -90,8 +92,11 @@ public class BackgroundSchool extends AbstractSchool {
         this.bkgSpecies = species;
         abundanceHasChanged = false;
         preys = new HashMap<>();
-        fishedBiomass = new double[getConfiguration().getNFishery()];
-        discardedBiomass = new double[getConfiguration().getNFishery()];
+        //fishedBiomass = new double[getConfiguration().getNFishery()];
+        fishedAbundance = new double[getConfiguration().getNFishery()];
+        //discardedBiomass = new double[getConfiguration().getNFishery()];
+        discardedAbundance = new double[getConfiguration().getNFishery()];
+        accessibleBiomassToFishery = new double[getConfiguration().getNFishery()];
         this.classIndex = classIndex;
         this.setOffGrid();
     }
@@ -107,8 +112,10 @@ public class BackgroundSchool extends AbstractSchool {
         preys.clear();
         preyedBiomass = 0.d;
         predSuccessRate = 0.f;
-        reset(fishedBiomass);
-        reset(discardedBiomass);
+        //reset(fishedBiomass);
+        reset(fishedAbundance);
+        //reset(discardedBiomass);
+        reset(discardedAbundance);
         reset(this.accessibleBiomassToFishery);
     }
 
