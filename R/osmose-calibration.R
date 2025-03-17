@@ -150,7 +150,8 @@ osmose_calibration_setup = function(input, osmose, name=NULL, data_path=NULL, ty
   # copy files according to calibration type
   # run_model:
   if(!file.exists(file.path(control$dir, "run_model.R"))) {
-    runmodeltmp = system.file(sprintf("calibration/run_model_%s.R", control$method), package="osmose")
+    # runmodeltmp = system.file(sprintf("calibration/run_model_%s.R", control$method), package="osmose")
+    runmodeltmp = system.file("calibration/run_model.R", package="osmose")
     file.copy(from=runmodeltmp, to=file.path(control$dir, "run_model.R"), overwrite = TRUE)
   } else {
     message("A 'run_model.R' script was found, conserving it.\n")
