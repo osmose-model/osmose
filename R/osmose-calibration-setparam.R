@@ -99,10 +99,13 @@
   write_osmose(set_par(pars, 1), file=phase_file, append = TRUE)
   
   knots = get_par(conf, "mortality.additional.larva.knots", as.is=TRUE)
+  viv = get_par(conf, "species.reproducion.mode", as.is=TRUE)
   
   pars = list()
   for(isp in get_species(conf, type="focal", code=TRUE)) {
-    iknots = get_par(knots, sp=as.numeric(isp), as.is=TRUE)
+    irmod = get_par(viv, sp=as.numeric(isp))
+    if(irmod=="viviparity") next
+    iknots = get_par(knots, sp=as.numeric(isp))
     if(is.null(iknots)) iknots = nyear + 1
     nn = sprintf("osmose.user.larval.deviate.log.sp%s", isp)
     pars[[nn]] = rep(0, iknots)
