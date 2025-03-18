@@ -158,7 +158,8 @@ osmose_calibration_setup = function(input, osmose, name=NULL, data_path=NULL, ty
   }
   
   # output configuration file
-  outtmp = sprintf("calibration/output-configuration_%s.osm", control$method)
+  # outtmp = sprintf("calibration/output-configuration_%s.osm", control$method)
+  outtmp = "calibration/output-configuration.osm"
   outputtmp = system.file(outtmp, package="osmose")
   file.copy(from=outputtmp, to=file.path(dir_master, "output-configuration.osm"), overwrite = TRUE)  
   
@@ -193,7 +194,9 @@ osmose_calibration_setup = function(input, osmose, name=NULL, data_path=NULL, ty
     # if not data_path provided, create templates.
     if(!dir.exists(dir_data)) dir.create(dir_data, recursive=TRUE)
     biomass_file = .write_biomass_files(output, conf, path=dir_data, what="biomass")
-    yield_files  = .write_yield_files(output, conf, path=dir_data)
+    yield_files  = .write_yield_files(output, conf, path=dir_data, what="yield")
+    landings_files  = .write_yield_files(output, conf, path=dir_data, what="landings")
+    discards_files  = .write_yield_files(output, conf, path=dir_data, what="discards")
     cal_files    = .write_cal_files(output, conf, path=dir_data)
 
     survey_files = NULL
@@ -204,7 +207,9 @@ osmose_calibration_setup = function(input, osmose, name=NULL, data_path=NULL, ty
                          .write_biomass_files(output, conf, path=dir_data, what=iSurvey))
       }
     }
-    observed_files = c(biomass_file, survey_files, yield_files, cal_files)
+    observed_files = c(biomass_file, survey_files, 
+                       yield_files, landings_files, discards_files, 
+                       cal_files)
     # create calibration settings
     cal_settings = .create_calibration_settings(output=simulated, files=observed_files, type=control$method)
     if(file.exists(settings_file)) {
@@ -370,7 +375,7 @@ osmose_calibration_outputs = function(output) {
 #' @export
 #'
 #' @inheritParams osmose_calibration_setup
-osmose_calibration_runmodel = function(input, osmose, name, version="4.3.3") {
+osmose_calibration_runmodel = function(input, osmose, name, version="4.3.3", debug=FALSE) {
   
   wd = getwd()
   on.exit(setwd(wd))
@@ -385,6 +390,8 @@ osmose_calibration_runmodel = function(input, osmose, name, version="4.3.3") {
   par_guess = read_osmose(input=guess_file)
   
   source(file.path(dir, "run_model.R"), local=TRUE)
+  
+  if(isTRUE(debug)) debug(run_model)
   
   setwd(dir_master)
   simulated = try(run_model(par=par_guess, conf=conf, osmose=osmose, is_a_test=FALSE, version=version))
