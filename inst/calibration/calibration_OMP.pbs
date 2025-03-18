@@ -23,6 +23,6 @@ module load nco
 # Load conda environment (if available)
 #conda activate r4
 
-# Run R in parallel mode.
+# Run R script in parallel mode
 time Rscript .calibration.R --ncores=56 --omp --nht >>& mycalibration.log
 

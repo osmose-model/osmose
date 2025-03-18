@@ -16,7 +16,7 @@ cd $PBS_O_WORKDIR
 setenv R_LIBS /home1/datawork/$USER/libs/R/lib
 
 # Load modules (if available)
-module load R 
+module load R
 module load java
 module load nco
 
