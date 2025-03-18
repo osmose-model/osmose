@@ -199,9 +199,9 @@
   
 }  
 
-.aggregate_catch_bytime = function(x, conf, type) {
+.aggregate_catch_bytime = function(x, conf, type, ignore.ndt=TRUE) {
   
-  ndt = get_par(conf, "output.recordfrequency")
+  ndt = if(isTRUE(ignore.ndt)) 1 else get_par(conf, "output.recordfrequency")
   start = get_par(conf, "simulation.time.start")
   if(is.null(start)) start = 0
   
@@ -315,7 +315,7 @@ get_codes = function(sp, conf) {
   return(code)
 }
 
-.write_yield_files = function(x, conf, path) {
+.write_yield_files = function(x, conf, path, what="yield") {
   
   model = get_par(conf, "output.file.prefix")
   start = get_par(conf, "simulation.time.start")
@@ -324,7 +324,7 @@ get_codes = function(sp, conf) {
     start = 1900
   }
   
-  tsize = sapply(x$yieldBySpecies, nrow)
+  tsize = sapply(x$observed.landings, nrow) # all uses the same structure as observed.landings
   tt = table(tsize)
   it = as.numeric(names(tt))
   j = 1
@@ -335,8 +335,8 @@ get_codes = function(sp, conf) {
   for(i in seq_along(it)) {
     
     spnames = names(tsize)[tsize==it[i]]
-    year = start + .getYear(x$yieldBySpecies[[spnames[1]]])
-    period = .getTimeIndex(x$yieldBySpecies[[spnames[1]]])
+    year = start + .getYear(x$observed.landings[[spnames[1]]])
+    period = .getTimeIndex(x$observed.landings[[spnames[1]]])
     
     freq = it[i]/length(unique(year))
     pnames = c(year=1, semester=2, quarter=4, month=12)
@@ -356,14 +356,14 @@ get_codes = function(sp, conf) {
     out[, 1] = year
     if(pname!="year") out[, 2] = period
     
-    fname = sprintf("%s_yield_%s.csv", model, pname)  
+    fname = sprintf("%s_%s_%s.csv", model, what, pname)  
     files[spnames] = fname
     
     write_osmose(out, file=file.path(path, fname), row.names = FALSE, col.names = TRUE)
     
   }
   
-  names(files) = paste("yield", names(files), sep=".")
+  names(files) = paste(what, names(files), sep=".")
   
   return(invisible(files))
   
@@ -531,13 +531,14 @@ get_codes = function(sp, conf) {
 
 .create_calibration_settings_survey = function(output, files) {
   
-  cal_type = c(biomass="lnorm4", yield="lnorm2", catchatlength="multinom", 
+  cal_type = c(biomass="lnorm2", yield="lnorm2", landings="lnorm2", discards="lnorm2", 
+               catchatlength="multinom", 
                mortality="penalty", growth="penalty", random="re")
   
-  cal_cv = c(biomass=0.25, yield=0.05, catchatlength=1, 
+  cal_cv = c(biomass=0.25, yield=0.05, landings=0.05, discards=0.1, catchatlength=1, 
              mortality=1/sqrt(2), growth=1/sqrt(2), random=0.5)
   
-  cal_useData = c(biomass=TRUE, yield=TRUE, catchatlength=TRUE, 
+  cal_useData = c(biomass=TRUE, yield=TRUE, landings=TRUE, discards=TRUE, catchatlength=TRUE, 
                   mortality=FALSE, growth=FALSE, penalty=FALSE, random=FALSE)
   
   cal_novarid = c("catchatlength", "growth", "mortality", "random")
