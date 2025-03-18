@@ -57,9 +57,6 @@ public class EconomicModule extends AbstractProcess {
     /** Time trend on prices - tau_i - from calibration. Dim = [Species] */
     private double[] timetrend;
 
-    /** Baseline costs time series - c(i,t). Dim = [Species] */
-    private double[] baselineCosts;
-
     /** Total accessible biomass. Dims = [fisheries, species, size-class] */
     private double[][][] accessibleBiomass;
 
@@ -105,14 +102,6 @@ public class EconomicModule extends AbstractProcess {
     /** Profit margin pi. Dim = [Species] */
     private double[] ProfitMargin;
 
-    /** Social Optimum - Net Present Value (NPV) */
-    private double NetPresentValue;
-
-    /**
-     * Discount rate for the Social Optimum equation - delta(t) (between 0 and 0.95)
-     */
-    private double DiscountRate;
-
     public EconomicModule(int rank) {
         super(rank);
     }
@@ -144,18 +133,13 @@ public class EconomicModule extends AbstractProcess {
             timetrend[i] = this.getConfiguration().getDouble("price.time.trend.sp" + i);
         }
 
-        // Compute baseline cost time series
-        int time = getSimulation().getIndexTimeSimu();
-        baselineCosts = new double[nSpecies];
-        for (int i = 0; i < nSpecies; i++) {
-            baselineCosts[i] = baselineCostst0[i] * Math.exp(timetrend[i] * time);
-        }
+
 
         // Initialisation of species consumption elasticity alpha_i
         cpt = 0;
         speciesConsumptionElasticity = new double[nSpecies];
         for (int i : getConfiguration().getFocalIndex()) {
-            this.speciesConsumptionElasticity[cpt] = this.getConfiguration()
+            speciesConsumptionElasticity[cpt] = this.getConfiguration()
                     .getDouble("species.consumption.elasticity.sp" + i);
             cpt++;
         }
@@ -164,7 +148,7 @@ public class EconomicModule extends AbstractProcess {
         cpt = 0;
         sizeConsumptionElasticity = new double[nSpecies];
         for (int i : getConfiguration().getFocalIndex()) {
-            this.sizeConsumptionElasticity[cpt] = this.getConfiguration()
+            sizeConsumptionElasticity[cpt] = this.getConfiguration()
                     .getDouble("species.sizeconsumption.elasticity.sp" + i);
             cpt++;
         }
@@ -173,7 +157,7 @@ public class EconomicModule extends AbstractProcess {
         cpt = 0;
         speciesSizePreference = new double[nSpecies][];
         for (int i : getConfiguration().getFocalIndex()) {
-            this.speciesSizePreference[cpt] = this.getConfiguration().getArrayDouble("species.size.preference.sp" + i);
+            speciesSizePreference[cpt] = this.getConfiguration().getArrayDouble("species.size.preference.sp" + i);
             cpt++;
         }
 
@@ -186,8 +170,6 @@ public class EconomicModule extends AbstractProcess {
         // Initialisation elasticity of demand for fish nu
         this.ElasticityDemand = getConfiguration().getDouble("elasticity.demand.fish");
 
-        // Initialisation of the discount rate delta
-        this.DiscountRate = getConfiguration().getDouble("discount.rate");
     }
 
     public void clearAccessibleBiomass() {
@@ -200,14 +182,6 @@ public class EconomicModule extends AbstractProcess {
                 this.accessibleBiomass[i][j] = new double[nClass];
                 this.harvestedBiomass[i][j] = new double[nClass];
             }
-        }
-    }
-
-    public void clearHarvestingCosts() {
-        int nSpecies = this.getNSpecies();
-        this.harvestingCosts = new double[nSpecies];
-        for (int i = 0; i < nSpecies; i++) {
-            this.harvestingCosts = new double[i];
         }
     }
 
@@ -239,14 +213,19 @@ public class EconomicModule extends AbstractProcess {
     /** Computation of harvesting costs. */
     public double getHarvestingCosts(int iSpecies) {
         // make sure all the parameters and variables are defined
+        int time = getSimulation().getIndexTimeSimu();
+        double timestart = getConfiguration().getDouble("output.start.year")*24;
         int nSpecies = getConfiguration().getNSpecies();
         double[] sumHarvest = new double[nSpecies];
         double[] sumAccess = new double[nSpecies];
         double[][] accesBiomass = new double[nSpecies][];
         double[][] harvestBiomass = new double[nSpecies][];
+        double[] baselineCosts = new double[nSpecies];
         this.harvestingCosts = new double[nSpecies];
         // Loop over species
         for (int i = 0; i < nSpecies; i++) {
+            // Compute baseline cost time series
+            baselineCosts[i] = baselineCostst0[i] * Math.exp(timetrend[i] * (time - timestart));
             // Define size-class for each species
             int iClass = sizeClasses.getNStage(i);
             // Gives the size of the size-class dimension based on each species
@@ -268,8 +247,8 @@ public class EconomicModule extends AbstractProcess {
                 if (sumHarvest[i] == 0) {
                     this.harvestingCosts[i] = 0;
                 } else {
-                    this.harvestingCosts[i] += this.baselineCosts[i] * sumHarvest[i]
-                            / (Math.pow(sumAccess[i], this.stockElasticity[i]));
+                    this.harvestingCosts[i] = baselineCosts[i] * (sumHarvest[i]
+                            / (Math.pow(sumAccess[i], stockElasticity[i])));
                 }
             }
         }
@@ -277,7 +256,7 @@ public class EconomicModule extends AbstractProcess {
     }
 
     /** Computation of Utility of fish cosumption v(t) */
-    public double computeUtility() {
+    public double getUtility() {
         // make sure all the parameters and variables are defined
         int nSpecies = getConfiguration().getNSpecies();
         double[] sumbetah = new double[nSpecies];
@@ -315,7 +294,7 @@ public class EconomicModule extends AbstractProcess {
             // sum over species
             sumparenthesis += consumerpref[i];
             this.Utility = Math.pow(sumparenthesis,
-                    this.ElasticitySubstitutionSpecies / (this.ElasticitySubstitutionSpecies - 1));
+                    (this.ElasticitySubstitutionSpecies / (this.ElasticitySubstitutionSpecies - 1)));
 
         }
         return this.Utility;
@@ -329,14 +308,15 @@ public class EconomicModule extends AbstractProcess {
         double[] partthree = new double[nSpecies];
         double[][] partone = new double[nSpecies][];
         double[][] betaharvestk = new double[nSpecies][];
+        double[][] harvestBiomass = new double[nSpecies][];
         double partfour = 0;
         this.Prices = new double[nSpecies][];
-        this.Utility = computeUtility();
+        this.Utility = getUtility();
         // Loop over species
         for (int i = 0; i < nSpecies; i++) {
             // Recover number of size classes for each species
             int iClass = sizeClasses.getNStage(i);
-            double[][] harvestBiomass = new double[nSpecies][iClass];
+            harvestBiomass[i] = new double[iClass];
             partone[i] = new double[iClass];
             betaharvestk[i] = new double[iClass];
             this.Prices[i] = new double[iClass];
@@ -358,7 +338,7 @@ public class EconomicModule extends AbstractProcess {
                 }
                 // Part 2 - sum(beta*harvest^((mu-1)/mu))
                 betaharvestk[i][j] = this.speciesSizePreference[i][j - 1] * Math.pow(harvestBiomass[i][j],
-                        (this.sizeConsumptionElasticity[i] - 1) / this.sizeConsumptionElasticity[i]);
+                        ((this.sizeConsumptionElasticity[i] - 1) / this.sizeConsumptionElasticity[i]));
                 // sum over size-class k
                 parttwo[i] += betaharvestk[i][j];
 
@@ -386,11 +366,12 @@ public class EconomicModule extends AbstractProcess {
         double[][] priceharvest = new double[nSpecies][];
         this.FishermanProfit = new double[nSpecies];
         double[] sumpriceharvest = new double[nSpecies];
+        double[][] harvestBiomass = new double[nSpecies][];
         // Loop over species
         for (int i = 0; i < nSpecies; i++) {
             // Define the number of size-class for each species
             int iClass = sizeClasses.getNStage(i);
-            double[][] harvestBiomass = new double[nSpecies][iClass];
+            harvestBiomass[i] = new double[iClass];
             priceharvest[i] = new double[iClass];
             // Loop over size-class
             for (int j = 0; j < iClass; j++) {
@@ -399,10 +380,10 @@ public class EconomicModule extends AbstractProcess {
                     harvestBiomass[i][j] += this.harvestedBiomass[iFishery][i][j];
                 }
                 // Make sure we don't have NaN in output
-                if (harvestBiomass[i][j] == 0) {
-                    priceharvest[i][j] = 0;
-                } else {
+                if (harvestBiomass[i][j] > 0) {
                     priceharvest[i][j] = harvestBiomass[i][j] * this.Prices[i][j];
+                } else {
+                    priceharvest[i][j] = 0;
                 }
                 // Sum p(i,s,t)*h(i,s,t) over size-class
                 sumpriceharvest[i] += priceharvest[i][j];
@@ -444,36 +425,6 @@ public class EconomicModule extends AbstractProcess {
             this.ProfitMargin[i] = (sumpriceharvest[i] - this.harvestingCosts[i]) / sumpriceharvest[i];
         }
         return this.ProfitMargin[iSpecies];
-    }
-
-    /** Computation of Social optimum (Net Present Value) */
-    public double getNetPresentValue() {
-        int nSpecies = getConfiguration().getNSpecies();
-        double totharvestingcost = 0;
-        double totUtility = 0;
-        double par = 0;
-        // needs calculation for each time step
-        int time = getSimulation().getIndexTimeSimu();
-        double DiscountFactor = 1 / (1 + DiscountRate);
-        // Until the planning horizon is reached
-        // Formula from Schenk et al. 2023
-        int PlaningHorizon = (int) (Math.round(Math.log(0.05) / Math.log(DiscountFactor)));
-        // Loop over planning horizon
-        for (int t = time; t <= PlaningHorizon; t++) {
-            // Loop over species
-            for (int i = 0; i < nSpecies; i++) {
-                // Sum harvesting costs over species
-                totharvestingcost += this.harvestingCosts[i];
-            }
-            // total utility of fish cosumption
-            totUtility = weightFishConsumption * (ElasticityDemand / (ElasticityDemand - 1))
-                    * Math.pow(this.Utility, (ElasticityDemand - 1) / ElasticityDemand);
-
-            par = DiscountFactor * (totUtility - totharvestingcost);
-            // add the value of each time step until planning horizon is reached
-            this.NetPresentValue += par;
-        }
-        return this.NetPresentValue;
     }
 
     @Override

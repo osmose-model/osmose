@@ -84,7 +84,7 @@ public class EconomyProfitMarginOutput extends SimulationLinker implements IOutp
     public void update() {
         // get harvesting costs (ispecies)
         for (int iSpecies = 0; iSpecies < getNSpecies(); iSpecies++) {
-            output[iSpecies] += getSimulation().getEconomicModule().getProfitMargin(iSpecies);
+            output[iSpecies] = getSimulation().getEconomicModule().getProfitMargin(iSpecies);
         }
     }
 

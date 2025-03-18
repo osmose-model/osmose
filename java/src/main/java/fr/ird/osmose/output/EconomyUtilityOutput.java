@@ -50,20 +50,27 @@ import java.util.logging.Logger;
 
 import fr.ird.osmose.util.SimulationLinker;
 
-public class EconomyNetPresentValueOutput extends SimulationLinker implements IOutputbis {
+public class EconomyUtilityOutput extends SimulationLinker implements IOutput {
 
     private double output;
     private PrintWriter prw;
     private FileOutputStream fos;
+    private int recordFrequency;
 
-    public EconomyNetPresentValueOutput(int rank) {
+    /**
+     * CSV separator
+     */
+    private final String separator;
+
+    public EconomyUtilityOutput(int rank) {
         super(rank);
+        separator = getConfiguration().getOutputSeparator();
     }
 
-    // @Override
-    // public void initStep() {
-    // TODO Auto-generated method stub
-    // }
+    @Override
+    public void initStep() {
+        // TODO Auto-generated method stub
+    }
 
     @Override
     public void reset() {
@@ -72,25 +79,31 @@ public class EconomyNetPresentValueOutput extends SimulationLinker implements IO
 
     @Override
     public void update() {
-        output = getSimulation().getEconomicModule().getNetPresentValue();
+        output = getSimulation().getEconomicModule().getUtility();
     }
 
     @Override
-    public void write() {
+    public void write(float time) {
+        prw.print(time);
+        prw.print(separator);
         prw.print(output);
-        //prw.println();
+        prw.println();
+    }
+
+    @Override
+    public boolean isTimeToWrite(int iStepSimu) {
+        return (((iStepSimu + 1) % recordFrequency) == 0);
     }
 
     @Override
     public void init() {
-        //fos = new FileOutputStream[];
 
         // Create parent directory
         File path = new File(getConfiguration().getOutputPathname());
         StringBuilder filename = new StringBuilder("Econ");
         filename.append(File.separatorChar);
         filename.append(getConfiguration().getString("output.file.prefix"));
-        filename.append("_NetPresentValue");
+        filename.append("_Utility");
         filename.append("_Simu");
         filename.append(getRank());
         filename.append(".csv");
@@ -106,8 +119,13 @@ public class EconomyNetPresentValueOutput extends SimulationLinker implements IO
         prw = new PrintWriter(fos, true);
 
         // Write headers
-        // prw[iSpecies].print(separator);
+        prw.print(quote("Time"));
+        prw.print(separator);
+        prw.print(quote("Utility"));
+        prw.print(separator);
+        prw.println();
 
+        recordFrequency = getConfiguration().getInt("output.recordfrequency.ndt");
     }
 
     @Override

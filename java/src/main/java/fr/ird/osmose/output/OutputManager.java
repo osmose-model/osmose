@@ -87,14 +87,12 @@ public class OutputManager extends SimulationLinker {
 
     // List of the indicators
     final private List<IOutput> outputs;
-    final private List<IOutputbis> outputsbis;
 
     private final static boolean NO_WARNING = false;
 
     public OutputManager(int rank) {
         super(rank);
         outputs = new ArrayList<>();
-        outputsbis = new ArrayList<>();
     }
 
     public void init() {
@@ -316,8 +314,8 @@ public class OutputManager extends SimulationLinker {
                 outputs.add(new EconomyProfitMarginOutput(rank));
             }
 
-            if (getConfiguration().getBoolean("output.economic.net.present.value.enabled")) {
-                outputsbis.add(new EconomyNetPresentValueOutput(rank));
+            if (getConfiguration().getBoolean("output.economic.utility.enabled")) {
+                outputs.add(new EconomyUtilityOutput(rank));
             }
         }
 

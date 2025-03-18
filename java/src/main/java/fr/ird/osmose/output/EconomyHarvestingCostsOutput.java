@@ -83,7 +83,7 @@ public class EconomyHarvestingCostsOutput extends SimulationLinker implements IO
     public void update() {
         // get harvesting costs (ispecies)
         for (int iSpecies = 0; iSpecies < getNSpecies(); iSpecies++) {
-            output[iSpecies] += getSimulation().getEconomicModule().getHarvestingCosts(iSpecies);
+            output[iSpecies] = getSimulation().getEconomicModule().getHarvestingCosts(iSpecies);
         }
     }
 
