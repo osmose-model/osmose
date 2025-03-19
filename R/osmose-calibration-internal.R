@@ -487,8 +487,8 @@ get_codes = function(sp, conf) {
 .create_calibration_settings = function(output, files, type) {
   
   out = switch(type, 
-         "simple" = .create_calibration_settings_simple(output, files),
-         "survey" = .create_calibration_settings_survey(output, files),
+         "simple" = ..create_calibration_settings(output, files),
+         "survey" = ..create_calibration_settings(output, files),
          stop("Unrecognized 'type' for calibration.")
          )
   
@@ -496,18 +496,54 @@ get_codes = function(sp, conf) {
 
   }
 
+..create_calibration_settings = function(output, files) {
+  
+  cal_type = c(biomass="lnorm2", yield="lnorm2", landings="lnorm2", discards="lnorm2", 
+               catchatlength="multinom", 
+               mortality="normp", growth="normp", penalty="penalty", random="re")
+  
+  cal_cv = c(biomass=0.25, yield=0.05, landings=0.05, discards=0.1, catchatlength=1, 
+             mortality=1, growth=0.1, penalty=1/sqrt(2), random=1/sqrt(2))
+  
+  cal_useData = c(biomass=TRUE, yield=TRUE, landings=TRUE, discards=TRUE, catchatlength=TRUE, 
+                  mortality=FALSE, growth=FALSE, penalty=FALSE, random=FALSE)
+  
+  cal_novarid = c("catchatlength", "growth", "mortality", "penalty", "random")
+  
+  cal_settings = data.frame(variable=names(output))
+  cal_settings$itype = sapply(strsplit(names(output), split = "\\."), FUN="[", i=1)
+  cal_settings$spp   = sapply(strsplit(names(output), split = "\\."), FUN=tail, n=1)
+  #cal_settings$sname = sapply(strsplit(names(output), split = "\\."), FUN="[", i=2)
+  cal_settings$type  = cal_type[cal_settings$itype]
+  cal_settings$calibrate = TRUE
+  cal_settings$cv = cal_cv[cal_settings$itype]
+  cal_settings$use_data = cal_useData[cal_settings$itype]
+  cal_settings$file = files[cal_settings$variable]
+  cal_settings$varid = cal_settings$spp
+  cal_settings$varid[cal_settings$itype %in% cal_novarid] = NA
+  
+  cal_settings$nrows = NA
+  
+  cal_settings$itype = NULL
+  #cal_settings$sname = NULL
+  cal_settings$spp = NULL
+  
+  return(cal_settings)
+  
+}
+
 .create_calibration_settings_simple = function(output, files) {
   
   cal_type = c(biomass="lnorm3", yield="lnorm2", catchatlength="multinom", 
-               mortality="penalty", growth="penalty", random="re")
+               mortality="penalty2", growth="penalty2", penalty="penalty", random="re")
   
   cal_cv = c(biomass=0.25, yield=0.05, catchatlength=1, 
-             mortality=1/sqrt(2), growth=1/sqrt(2), random=0.5)
+             mortality=1/sqrt(2), growth=1/sqrt(2), penalty=1/sqrt(2), random=1)
   
   cal_useData = c(biomass=TRUE, yield=TRUE, catchatlength=TRUE, 
                   mortality=FALSE, growth=FALSE, penalty=FALSE, random=FALSE)
   
-  cal_novarid = c("catchatlength", "growth", "mortality", "random")
+  cal_novarid = c("catchatlength", "growth", "mortality", "penalty", "random")
   
   cal_settings = data.frame(variable=names(output))
   cal_settings$itype = sapply(strsplit(names(output), split = "\\."), FUN="[", i=1)
@@ -533,15 +569,15 @@ get_codes = function(sp, conf) {
   
   cal_type = c(biomass="lnorm2", yield="lnorm2", landings="lnorm2", discards="lnorm2", 
                catchatlength="multinom", 
-               mortality="penalty", growth="penalty", random="re")
+               mortality="penalty2", growth="penalty2", penalty="penalty", random="re")
   
   cal_cv = c(biomass=0.25, yield=0.05, landings=0.05, discards=0.1, catchatlength=1, 
-             mortality=1/sqrt(2), growth=1/sqrt(2), random=0.5)
+             mortality=1/sqrt(2), growth=1/sqrt(2), penalty=1/sqrt(2), random=1)
   
   cal_useData = c(biomass=TRUE, yield=TRUE, landings=TRUE, discards=TRUE, catchatlength=TRUE, 
                   mortality=FALSE, growth=FALSE, penalty=FALSE, random=FALSE)
   
-  cal_novarid = c("catchatlength", "growth", "mortality", "random")
+  cal_novarid = c("catchatlength", "growth", "mortality", "penalty", "random")
   
   cal_settings = data.frame(variable=names(output))
   cal_settings$itype = sapply(strsplit(names(output), split = "\\."), FUN="[", i=1)
