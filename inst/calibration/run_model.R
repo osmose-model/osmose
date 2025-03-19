@@ -59,8 +59,8 @@ run_model = function(par, conf, osmose, is_a_test=FALSE, version="4.3.3", option
 
   write_osmose(par, file='calibration_parameters.osm')
 
-  names(larval_deviates)  = paste("larval", get_species(conf, nm=names(larval_deviates)), sep="_")
-  names(fishing_deviates) = paste("F", get_fisheries(conf, nm=names(fishing_deviates)), sep="_")
+  names(larval_deviates)  = paste("M.larva", get_species(conf, nm=names(larval_deviates)), sep=".")
+  names(fishing_deviates) = paste("F.byperiod", get_fisheries(conf, nm=names(fishing_deviates)), sep=".")
 
   # run osmose!
   if(!isTRUE(is_a_test)) {
@@ -98,7 +98,7 @@ run_model = function(par, conf, osmose, is_a_test=FALSE, version="4.3.3", option
   }
 
   # create final output list, including random effects
-  cal_output = c(cal_output, random=larval_deviates, random=fishing_deviates, random)
+  cal_output = c(cal_output, random, random=larval_deviates, random=fishing_deviates)
   
   # save timing information.
   osmose:::.timing(.t0=.t0, t0=t0, t1=t1, tr=tr, file="../timing.log")
