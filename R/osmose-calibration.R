@@ -27,7 +27,10 @@ osmose_calibration_setup = function(input, osmose, name=NULL, data_path=NULL, ty
   
   skip_tests = control$skip_tests
   if(is.null(skip_tests)) skip_tests = FALSE 
-    
+  
+  cleanup = control$cleanup
+  if(is.null(cleanup)) cleanup = TRUE 
+  
   type = match.arg(type, choices=c("simple", "survey"))
   
   control$method = type
@@ -42,7 +45,14 @@ osmose_calibration_setup = function(input, osmose, name=NULL, data_path=NULL, ty
   
   run = if(is.null(name)) ".run" else sprintf(".run_%s", name)
   dir = if(is.null(name)) "calibration" else sprintf("calibration_%s", name)
-  if(!dir.exists(dir)) dir.create(dir)
+  
+  success = !cleanup
+  if(!dir.exists(dir)) {
+    # if the directory does not exist, clean up everything on exit
+    on.exit(if(!success) unlink(dir, recursive = TRUE))
+    dir.create(dir)
+  }
+    
   # make a local copy of osmose into the calibration directory
   nosmose = ".osmose.jar"
   file.copy(from=osmose, to=file.path(dir, nosmose))
@@ -128,7 +138,7 @@ osmose_calibration_setup = function(input, osmose, name=NULL, data_path=NULL, ty
   # Template files ----------------------------------------------------------
   
   # copy this files as they are
-  files = c("calibration_MPI.pbs", "calibration_OMP.pbs", "calibration_sequentiel.pbs")
+  files = dir(pattern="calibration_.*", path=file.path(system.file(package="osmose"),"calibration")) 
   for(ifile in files) {
     ofile = system.file(file.path("calibration", ifile), package="osmose")
     file.copy(from=ofile, to=control$dir, overwrite = TRUE)
@@ -228,11 +238,16 @@ osmose_calibration_setup = function(input, osmose, name=NULL, data_path=NULL, ty
   observed = calibration_data(setup, path=dir_data) # it will read from data_path if provided
   saveRDS(observed, file=file.path(control$dir, "observed.rds")) # saving the new object
   
+  success = TRUE
+  
+  if(is.null(data_path))
+    message(sprintf("The data templates provided in '%s' need to be filled with your data.", dir_data))
+  
   # Calibration test --------------------------------------------------------
   
+  .calibration_test_1(simulated, observed, setup)
+  
   if(!skip_tests) {
-
-    .calibration_test_1(simulated, observed, setup)
     
     fn = calibration_objFn(model=run_model, setup=setup, observed=observed, 
                            conf=conf, osmose=osmose, is_a_test=TRUE)
@@ -251,9 +266,6 @@ osmose_calibration_setup = function(input, osmose, name=NULL, data_path=NULL, ty
     setwd(wd)
     
   }
-  
-  if(is.null(data_path))
-    message(sprintf("The data templates provided in '%s' need to be filled with your data.", dir_data))
   
   return(invisible(control$dir))
   
@@ -358,11 +370,14 @@ osmose_calibration_outputs = function(output) {
     names(surveys) = paste("biomass", names(surveys), sep=".")
   }
   
+  growth = sapply(get_var(output, "residualSizeByAge", no.error = TRUE), calibrar:::penalty, obs=NULL)
+  mortality = sapply(get_var(output, "residualMortalityByAge", no.error = TRUE), calibrar:::penalty, obs=NULL, n=10)
+  
   cal_output = c(surveys, 
                  landings   = get_var(output, "observed.landings", how="list", no.error = TRUE),
                  catchatlength = get_var(output, "yieldNBySize", how="list", no.error = TRUE),
-                 growth = get_var(output, "residualSizeByAge", no.error = TRUE),
-                 mortality = get_var(output, "residualMortalityByAge", no.error = TRUE)
+                 growth.penalty = list(growth),
+                 mortality.penalty = list(mortality)
   )
   
   return(cal_output)  
