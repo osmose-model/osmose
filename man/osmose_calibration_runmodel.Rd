@@ -4,7 +4,13 @@
 \alias{osmose_calibration_runmodel}
 \title{Run a model as set up for a calibration trial}
 \usage{
-osmose_calibration_runmodel(input, osmose, name, version = "4.3.3")
+osmose_calibration_runmodel(
+  input,
+  osmose,
+  name,
+  version = "4.3.3",
+  debug = FALSE
+)
 }
 \arguments{
 \item{input}{Filename of the main configuration file}
