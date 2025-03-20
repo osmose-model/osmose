@@ -383,6 +383,20 @@ init_sofia = function(input, file=NULL, test=FALSE, sp=NULL, ...) {
   rF = fecundity[1:ndt]/sum(fecundity[1:ndt])
   bioguess = .bioguess(x=dat, ndt=ndt)
 
+  if(bioguess==0) {
+    # species not starting in the simulation
+    output = list(pop=rep(0, C), catch=rep(0, C), R=0, 
+                  biomass=rep(0, ndt), yield=rep(0, ndt), F=rep(0, ndt),
+                  dist = rep(0, C), distB = rep(0, C), 
+                  selectivity=rep(0, C), age=age, size=size,
+                  Fguess=0, observed=list(biomass=0, yield=rep(0, ndt)),
+                  bins=list(age=age_bins, size=size_bins), harvested=FALSE, larvalM=0)
+    
+    class(output) = c("osmose.init", class(output))
+    
+    return(output)
+  }
+  
   trans = rebinning(CAL$bins, VB(age_bins, this, method=3))
   cal = CAL$mat %*% trans
   weight = a*size^b
@@ -395,31 +409,20 @@ init_sofia = function(input, file=NULL, test=FALSE, sp=NULL, ...) {
   if(is.null(cutoff)) 
     stop(sprintf("Parameter 'observed.biomass.cutoff.size.sp%d' has not been provided.", sp), call. = FALSE)
   xn = which.max(size >= cutoff) - 1
+  ixn = seq_len(C)
+  ixn = if(xn>0) tail(ixn, -xn) else ixn # ixn:= is observed for biomass computation
   
-  ini = exp(-cumsum(c(0,Ma[-length(Ma)]/ndt)))
-  inibio = 1e-6*sum(ini*weight)
-  R = as.numeric(ndt)*(bioguess/inibio)
-  ini = R*ini/sum(ini)
-  
-  if(bioguess==0) {
-    # species not starting in the simulation
-    output = list(pop=rep(0, C), catch=rep(0, C), R=0, 
-                  biomass=rep(0, ndt), yield=rep(0, ndt), F=rep(0, ndt),
-                  dist = rep(0, C), distB = rep(0, C), 
-                  selectivity=rep(0, C), age=age, size=size,
-                  Fguess=0, observed=list(biomass=bioguess, yield=yield_obs[1:ndt]),
-                  bins=list(age=age_bins, size=size_bins), harvested=FALSE, larvalM=0)
-    
-    class(output) = c("osmose.init", class(output))
-    
-    return(output)
-  }
+  surv = exp(-cumsum(c(0,Ma[-length(Ma)]/ndt))) # improve with recruitment seasonality
+  irF = rep(rF, length=length(surv)) # relative fecundity over lifespan
+  inibio = 1e-6*rev(irF)*surv*rep(weight, length=length(surv)) # tonnes
+  R = (bioguess/sum(inibio[ixn]))
+  inir = rev(irF)*surv # R:= annual recruitment
   
   for(ix in 1:5) {
     
     pop = matrix(0, nrow=T, ncol=C)
     catch = matrix(NA, nrow=T, ncol=C)
-    pop[1, ] = ini
+    pop[1, ] = R*inir
     pop[ , 1] = R*rep(rF, length=T)
     
     for(t in 1:T) {
@@ -431,12 +434,10 @@ init_sofia = function(input, file=NULL, test=FALSE, sp=NULL, ...) {
       if(t!=T) pop[t+1, 2:C] = head(END, -1)   
     }
     
-    ixn = seq_len(ncol(pop))
-    ixn = if(xn>0) tail(ixn, -xn) else ixn 
-    biopop = 1e-6*t(t(pop)*weight)[, ixn]
-    biomass = rowSums(biopop)
+    biopop = 1e-6*t(t(pop)*weight) # biomass in tonnes
+    biomass = rowSums(biopop[, ixn]) # exclude stages below cutoff
     bioref = mean(tail(biomass, ndt))
-    yield   = 1e-6*rowSums(t(t(catch)*weight))
+    yield   = 1e-6*rowSums(t(t(catch)*weight)) # in tonnes
     
     Fguess = tail(yield_obs, ndt)/tail(biomass, ndt)
     Fseason = Fguess/sum(Fguess)
@@ -471,7 +472,12 @@ init_sofia = function(input, file=NULL, test=FALSE, sp=NULL, ...) {
   
   matsize = .get_matsize(this)
   isMature = size >= matsize
-  eggs   = sum(1e6*fecundity[1:ndt]*t(t(output$pop)*isMature), na.rm=TRUE)
+  
+  mode = .getPar(this, "species.reproduction.mode")
+  if(is.null(mode)) mode = "oviparity"
+  if(mode=="viviparity") weight = 1e-6
+  
+  eggs   = sum(fecundity[1:ndt]*t(t(output$pop)*isMature*(1e6*weight)), na.rm=TRUE)
   larvae = output$R
   Mlarval = -log(larvae/eggs)
   
@@ -527,16 +533,26 @@ init_sofia = function(input, file=NULL, test=FALSE, sp=NULL, ...) {
   cutoff = .getPar(this, "observed.biomass.cutoff.size")
   if(is.null(cutoff)) stop(sprintf("Parameter 'observed.biomass.cutoff.size.sp%d' has not been provided.", sp), call. = FALSE)
   xn = which.max(size >= cutoff) - 1
+  ixn = seq_len(C)
+  ixn = if(xn>0) tail(ixn, -xn) else ixn # ixn:= is observed for biomass computation
   
   if(is.null(sim)) {
     
     sel = .getSelectivity(size, this) # creado con parametros
     Fseason = yield_obs[1:ndt]/sum(yield_obs[1:ndt])
     if(all(is.nan(Fseason))) Fseason = rep(1, length(Fseason))/length(Fseason)
-    ini = exp(-cumsum(c(0,Ma[-length(Ma)]/ndt)))
-    inibio = 1e-6*sum(ini*weight)
-    R = as.numeric(ndt)*(bioguess/inibio)
-    xdist = R*ini/sum(ini)
+    
+    # ini = exp(-cumsum(c(0,Ma[-length(Ma)]/ndt)))
+    # inibio = 1e-6*sum(ini*weight)
+    # R = as.numeric(ndt)*(bioguess/inibio)
+    # xdist = R*ini/sum(ini)
+    
+    surv = exp(-cumsum(c(0,Ma[-length(Ma)]/ndt))) # improve with recruitment seasonality
+    irF = rep(rF, length=length(surv)) # relative fecundity over lifespan
+    inibio = 1e-6*rev(irF)*surv*rep(weight, length=length(surv)) # tonnes
+    R = (bioguess/sum(inibio[ixn]))
+    inir = rev(irF)*surv # R:= annual recruitment
+    xdist = R*inir
     
     sim = list(R=R, Fguess=sum(yield_obs[1:ndt]/bioguess))
     
@@ -555,6 +571,7 @@ init_sofia = function(input, file=NULL, test=FALSE, sp=NULL, ...) {
   
     Fseason = sim$F
     xdist = sim$dist
+    inir = xdist/sim$R
     
   }
   
@@ -568,7 +585,7 @@ init_sofia = function(input, file=NULL, test=FALSE, sp=NULL, ...) {
     
     pop = matrix(0, nrow=T, ncol=C)
     catch = matrix(NA, nrow=T, ncol=C)
-    pop[1, ] = xdist
+    pop[1, ] = R*inir
     pop[ , 1] = R*rep(rF, length=T)
     
     for(t in 1:T) {
@@ -580,8 +597,6 @@ init_sofia = function(input, file=NULL, test=FALSE, sp=NULL, ...) {
       if(t!=T) pop[t+1, 2:C] = head(tmp, -1)   
     }
     
-    ixn = seq_len(ncol(pop))
-    ixn = if(xn>0) tail(ixn, -xn) else ixn 
     biopop = 1e-6*t(t(pop)*weight)[, ixn]
     biomass = rowSums(biopop)
     yield   = 1e-6*rowSums(t(t(catch)*weight))
@@ -625,15 +640,19 @@ init_sofia = function(input, file=NULL, test=FALSE, sp=NULL, ...) {
   
   matsize = .get_matsize(this)
   isMature = size >= matsize
-  eggs   = sum(1e6*fecundity[1:ndt]*t(t(output$pop)*isMature), na.rm=TRUE)
   
+  mode = .getPar(this, "species.reproduction.mode")
+  if(is.null(mode)) mode = "oviparity"
+  if(mode=="viviparity") weight = 1e-6
+  
+  eggs   = sum(fecundity[1:ndt]*t(t(output$pop)*isMature*(1e6*weight)), na.rm=TRUE)
   larvae = output$R
   Mlarval = -log(larvae/eggs)
   
   msgL = sprintf("Estimated larval mortality (%0.2f) for %s is too low, check fecundity.",
                  ndt*Mlarval, get_par(this, par="species.name"))
   
-  if(Mlarval < 5) message(msgL)
+  if((Mlarval < 5) && (mode=="oviparity")) message(msgL)
   
   output$larvalM = Mlarval
   

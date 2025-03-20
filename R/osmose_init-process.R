@@ -151,6 +151,8 @@ calculateMLF = function(conf, sp) {
   if(any(is.na(weight))) stop(msg, call. = FALSE)
   
   repfile = .getPar(this, "reproduction.season.file")
+  mode = .getPar(this, "species.reproduction.mode")
+  if(is.null(mode)) mode = "oviparity"
   
   fecundity = read.fecundity(conf = conf, sp=sp)
   
@@ -164,7 +166,8 @@ calculateMLF = function(conf, sp) {
                    max(size), matsize)
     stop(paste(msg0, msg1, collapse="/n"), call. = FALSE)
   }
-    
+  
+  if(mode=="viviparity") weight=1 # MLF use absolute fecundity
   MLF = .calculateMLF(fecundity, isMature, weight)
   
   return(MLF)
