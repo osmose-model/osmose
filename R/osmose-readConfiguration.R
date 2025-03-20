@@ -388,7 +388,7 @@ read.cal = function(conf, sp) {
   units[is.na(units)] = 1 # assume unbiased when landing data is not available.
   
   newmat = newmat*units
-  
+  onewmat = newmat
   # check for incomplete rows
   
   allna = apply(newmat, 1, FUN = function(x) all(is.na(x)))
@@ -396,8 +396,7 @@ read.cal = function(conf, sp) {
   if(any(allna)) {
     
     calmean = colMeans(newmat, na.rm=TRUE)
-    newmat[allna, ] = calmean
-
+    for(i in which(allna)) newmat[i, ] = calmean
     wmat = t(t(newmat)*W2)
     ilandings = 1e-6*rowSums(wmat)
     ilandings[ilandings==0] = 1
