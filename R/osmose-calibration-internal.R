@@ -500,7 +500,7 @@ get_codes = function(sp, conf) {
   
   cal_type = c(biomass="lnorm2", yield="lnorm2", landings="lnorm2", discards="lnorm2", 
                catchatlength="multinom", 
-               mortality="normp", growth="normp", penalty="penalty", random="re")
+               mortality="normp", growth="normp", penalty="normp", random="re")
   
   cal_cv = c(biomass=0.25, yield=0.05, landings=0.05, discards=0.1, catchatlength=1, 
              mortality=1, growth=0.1, penalty=1/sqrt(2), random=1/sqrt(2))

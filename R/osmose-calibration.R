@@ -376,8 +376,8 @@ osmose_calibration_outputs = function(output) {
   cal_output = c(surveys, 
                  landings   = get_var(output, "observed.landings", how="list", no.error = TRUE),
                  catchatlength = get_var(output, "yieldNBySize", how="list", no.error = TRUE),
-                 growth.penalty = list(growth),
-                 mortality.penalty = list(mortality)
+                 growth.penalty.vonbertalanffy = list(growth),
+                 mortality.penalty.caddy = list(mortality)
   )
   
   return(cal_output)  
