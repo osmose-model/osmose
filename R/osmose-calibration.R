@@ -333,7 +333,7 @@ osmose_calibration_test = function(path, setup=NULL) {
   # calibration test 3: parallel
   
   message("CALIBRATION TEST 2: Can we run a calibration in parallel mode (multi-thread)?.\n\n")
-  .args = c(arg0, "--test", "--ncores=28")
+  .args = c(arg0, "--test", "--ncores=8", "--omp", "--nht")
   source(script, local=TRUE)
   message("CALIBRATION TEST 3: PASSED! \n  Calibration is running in parallel.\n\n")
   message("This means all the files and inputs are being properly exported to the virtual cluster.")
