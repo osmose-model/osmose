@@ -170,8 +170,10 @@ get_osmose_parameter = function(par, conf, nm) {
 
 write_osmose_parameter = function(conf, par, FUN=NULL, files, scale, lower, upper, delta, default) {
   
-  if(!is.null(FUN)) nmfun = deparse(substitute(FUN))
-  FUN = match.fun(FUN)
+  if(!is.null(FUN)) {
+    nmfun = deparse(substitute(FUN))
+    FUN = match.fun(FUN)
+  } 
   guess_file = files["guess"] 
   min_file   = files["min"]
   max_file   = files["max"]
