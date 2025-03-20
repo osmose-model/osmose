@@ -63,6 +63,8 @@ run_model = function(par, conf, osmose, is_a_test=FALSE, version="4.3.3", option
   names(fishing_deviates) = paste("F.byperiod", get_fisheries(conf, nm=names(fishing_deviates)), sep=".")
 
   # run osmose!
+  t0 = 0
+  t1 = 0
   if(!isTRUE(is_a_test)) {
     ro = run_osmose(input='osmose-calibration.osm', output='output', osmose=osmose, 
                version = version, options=options, verbose=FALSE)
