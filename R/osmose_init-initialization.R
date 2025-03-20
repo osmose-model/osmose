@@ -337,6 +337,9 @@ init_sofia = function(input, file=NULL, test=FALSE, sp=NULL, ...) {
       stop(sprintf("Parameter 'simulation.nschool.sp%d' not found.", sp))
     sim$larvalM = ndt*sim$larvalM # transform to annual rate, asummed 'by time-step'
     add_larvae = is.null(get_par(this, "mortality.additional.larva.rate.sp"))
+    mode = get_par(this, "species.reproduction.mode.sp")
+    if(is.null(mode)) mode = "oviparity"
+    sim$is_vivipare = (mode == "viviparity")
     sim$osmose  = .initial_length_dist(sim, sp, add_larvae)
     pars[[iSpName]] = as.matrix(sim$osmose)
     out[[iSpName]] = sim
@@ -481,7 +484,7 @@ init_sofia = function(input, file=NULL, test=FALSE, sp=NULL, ...) {
   larvae = output$R
   Mlarval = -log(larvae/eggs)
   
-  output$larvalM = Mlarval
+  output$larvalM = max(Mlarval, 1, na.rm=TRUE)
   
   class(output) = c("osmose.init",class(output))
   return(output)
@@ -654,7 +657,7 @@ init_sofia = function(input, file=NULL, test=FALSE, sp=NULL, ...) {
   
   if((Mlarval < 5) && (mode=="oviparity")) message(msgL)
   
-  output$larvalM = Mlarval
+  output$larvalM = max(Mlarval, 1, na.rm=TRUE)
   
   mB = mean(output$biomass/output$observed$biomass, na.rm=TRUE)
   mY = mean(output$yield/output$observed$yield, na.rm=TRUE)
@@ -718,7 +721,8 @@ llw = function(cv) 1/(2*cv^2)
           round(sim$larvalM, 5))
   dim(out) = c(length(out), 1)
   
-  lpatt = if(add_larvae) "mortality.additional.larva.rate.sp%d" else "initialization.additional.larva.rate.sp%d"
+  check = add_larvae & (!sim$is_vivipare)
+  lpatt = if(check) "mortality.additional.larva.rate.sp%d" else "initialization.additional.larva.rate.sp%d"
   out = as.data.frame(out)
   rownames(out) = sprintf(c("population.initialization.biomass.sp%d",
                             "population.initialization.relativebiomass.sp%d",
