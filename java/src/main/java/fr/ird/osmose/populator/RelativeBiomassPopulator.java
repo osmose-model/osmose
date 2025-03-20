@@ -307,6 +307,11 @@ public class RelativeBiomassPopulator extends AbstractPopulator {
             school0.incrementGonadWeight(gonadWeight);
         }
 
+        // Fix by Nicolas: instance genotype for newly created schools
+        if(getConfiguration().isGeneticEnabled()) {
+            school0.instance_genotype(getSimulation().getRank());
+        }
+
         return school0;
 
     }
