@@ -111,6 +111,7 @@
 }
 
 .set_param_growth = function(allfiles, conf, bioen) {
+  
   guess_file = allfiles["guess"] 
   min_file = allfiles["min"]
   max_file = allfiles["max"]
@@ -125,12 +126,18 @@
       if(is.null(pars[[nn]])) pars[[nn]] = 2
     }
     class(pars) = "osmose.configuration"
-    phase = get_par_phase(conf, "species.delta.lmax.factor", default=2)
+    conf = get_par(conf, "species.delta.lmax.factor.sp", as.is=TRUE, invert = TRUE)
+    conf = c(conf, pars) # now conf have all species.delta.lmax
+
+    write_osmose_parameter(conf, par="species.delta.lmax.factor",  
+                           files=allfiles, scale=c(0.7, 1.3), lower=1, upper=2.5, delta=1, default=2)
     
-    write_osmose(pars, file=guess_file, append = TRUE)
-    write_osmose(set_par(pars, lower=1), file=min_file, append = TRUE)
-    write_osmose(set_par(pars, upper=3), file=max_file, append = TRUE)
-    write_osmose(set_par(pars, phase), file=phase_file, append = TRUE)
+    # phase = get_par_phase(conf, "species.delta.lmax.factor", default=2)
+    # 
+    # write_osmose(pars, file=guess_file, append = TRUE)
+    # write_osmose(set_par(pars, lower=1), file=min_file, append = TRUE)
+    # write_osmose(set_par(pars, upper=3), file=max_file, append = TRUE)
+    # write_osmose(set_par(pars, phase), file=phase_file, append = TRUE)
     
   } else {
     # bioen parameters
