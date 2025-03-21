@@ -24,4 +24,4 @@ export R_LIBS=/home/$USER/R/x86_64-pc-linux-gnu-library/4.4
 #conda activate r4
 
 # Run R script in parallel mode
-time Rscript .calibration.R --ncores=30 --omp --nht >>& mycalibration.log
+time Rscript .calibration.R --ncores=90 --omp --nht &>> mycalibration.log
