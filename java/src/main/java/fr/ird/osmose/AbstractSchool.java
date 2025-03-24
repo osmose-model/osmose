@@ -278,7 +278,7 @@ public abstract class AbstractSchool extends GridPoint implements IAggregation {
      * @return the fished biomass in tons
      */
     public double getDiscardedBiomass(int fisheryIndex) {
-        return discardedBiomass[fisheryIndex];
+        return abd2biom(discardedAbundance[fisheryIndex]);
     }
 
     public double getDiscardedAbundance(int fisheryIndex) {
