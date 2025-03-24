@@ -93,9 +93,9 @@ public class MapDistribution extends AbstractSpatialDistribution {
         getMapDistribution = ((school, iStepSimu) -> legacyDistribution(school, iStepSimu));
         String key = "movement.distribution.method.sp" + iSpeciesFile;
         String method = getConfiguration().getString(key);
-        if (method == "map") {
+        if (method == "maps") {
             getMapDistribution = ((school, iStepSimu) -> legacyDistribution(school, iStepSimu));
-        } else if (method == "map_fixed") {
+        } else if (method == "maps_fixed") {
             getMapDistribution = ((school, iStepSimu) -> legacyFixedDistribution(school, iStepSimu));
         } else {
             error("Movemement method not found for species " + Integer.toString(iSpecies), new Exception());
@@ -137,7 +137,7 @@ public class MapDistribution extends AbstractSpatialDistribution {
         } else {
             range = 1;
         }
-        
+
         if (!getConfiguration().isNull("movement.randomwalk.prob.sp" + iSpeciesFile)) {
             randomWalkProba = getConfiguration().getFloat("movement.randomwalk.prob.sp" + iSpeciesFile);
         } else {
@@ -214,7 +214,7 @@ public class MapDistribution extends AbstractSpatialDistribution {
                     || getGrid().getCell(indexCell).isLand());
             school.moveToCell(getGrid().getCell(indexCell));
         } else {
-            
+
             double testMove = rd1.nextDouble();  // valeur entre 0 et 1
             if (testMove >= randomWalkProba) {
                 // Random move in adjacent cells contained in the map.
@@ -326,11 +326,11 @@ public class MapDistribution extends AbstractSpatialDistribution {
                 accessibleCells.add(neighbour);
             }
         }
-        
+
         if(accessibleCells.isEmpty()) {
             accessibleCells.add(cell);
         }
-        
+
         return accessibleCells;
     }
 

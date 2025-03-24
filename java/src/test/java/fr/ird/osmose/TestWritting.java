@@ -123,7 +123,7 @@ public class TestWritting {
         cmd.put("simulation.nsimulation", "1");
         cmd.put("simulation.time.nyear", "1");
 
-        cmd.put("module.bioeconomics.enabled", "true");
+        cmd.put("module.bioeconomics.enabled", "false");
         cmd.put("economic.output.stage.structure", "weight");
 
         cmd.put("output.biomass.enabled", "true");
