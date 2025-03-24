@@ -1,10 +1,10 @@
-/* 
- * 
+/*
+ *
  * OSMOSE (Object-oriented Simulator of Marine Ecosystems)
  * http://www.osmose-model.org
- * 
+ *
  * Copyright (C) IRD (Institut de Recherche pour le Développement) 2009-2020
- * 
+ *
  * Osmose is a computer program whose purpose is to simulate fish
  * populations and their interactions with their biotic and abiotic environment.
  * OSMOSE is a spatial, multispecies and individual-based model which assumes
@@ -15,7 +15,7 @@
  * processes of fish life cycle (growth, explicit predation, additional and
  * starvation mortalities, reproduction and migration) and fishing mortalities
  * (Shin and Cury 2001, 2004).
- * 
+ *
  * Contributor(s):
  * Yunne SHIN (yunne.shin@ird.fr),
  * Morgane TRAVERS (morgane.travers@ifremer.fr)
@@ -23,20 +23,20 @@
  * Philippe VERLEY (philippe.verley@ird.fr)
  * Laure VELEZ (laure.velez@ird.fr)
  * Nicolas BARRIER (nicolas.barrier@ird.fr)
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation (version 3 of the License). Full description
  * is provided on the LICENSE file.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
- * 
+ *
  */
 
 package fr.ird.osmose.process.mortality.additional;
@@ -63,9 +63,15 @@ public class AnnualLarvaMortality extends AbstractMortalitySpecies {
         this.stage0 = stage0;
     }
 
+    // Adding constructor for making tests work
+    // This mimics the default behavior
+    public AnnualLarvaMortality(int rank, Species species) {
+        this(rank, species, "larva");
+    }
+
     @Override
     public void init() {
-        
+
         int nStepYear = getConfiguration().getNStepYear();
         // reading base mortality rate
         String keyShift = String.format("mortality.additional.%s.rate.shift.sp%d", this.stage0, getFileSpeciesIndex());
@@ -83,7 +89,7 @@ public class AnnualLarvaMortality extends AbstractMortalitySpecies {
         mortRateSeries = new ByRegimeTimeSeries(keyShift, keyVal);
         mortRateSeries.init();
         double[] mortRateBase = mortRateSeries.getValues();
-        
+
         //if(getConfiguration().isNull(keyValLog)) {
         //    // If the key for log values is Null, assume fishing mort in standard mode
         //    mortRateSeries = new ByRegimeTimeSeries(keyShift, keyVal);
@@ -93,16 +99,16 @@ public class AnnualLarvaMortality extends AbstractMortalitySpecies {
         //    mortRateSeries = new ByRegimeTimeSeries(keyShift, keyValLog);
         //    useLog = true;
         //}
-        
+
         //mortRateSeries.init();
         //double[] mortRateBase = mortRateSeries.getValues();
-        
+
         //if (useLog) {
         //    for (int i = 0; i < mortRateBase.length; i++) {
         //        mortRateBase[i] = Math.exp(mortRateBase[i]);
         //    }
         //}
-        
+
         // reading multiplier
         double multiplier;
         String keyMul = String.format("mortality.additional.%s.rate.multiplier.sp%d", this.stage0, getFileSpeciesIndex());
@@ -111,17 +117,17 @@ public class AnnualLarvaMortality extends AbstractMortalitySpecies {
         } else {
             multiplier = getConfiguration().getDouble(keyMul);
         }
-        
+
         // reading season
         String keySeason = String.format("mortality.additional.%s.rate.seasonality", this.stage0);
         SeasonTimeSeries season = new SeasonTimeSeries(keySeason, "sp" + getFileSpeciesIndex());
         season.init();
         double[] seasonValues = season.getValues();
-        
+
         // computing final mortality rate
         mortRate = new double[getConfiguration().getNStep()];
         for(int i = 0; i < getConfiguration().getNStep(); i++) {
-            mortRate[i] = multiplier * mortRateBase[i] * seasonValues[i] / nStepYear;   
+            mortRate[i] = multiplier * mortRateBase[i] * seasonValues[i] / nStepYear;
         }
     }
 
@@ -129,8 +135,8 @@ public class AnnualLarvaMortality extends AbstractMortalitySpecies {
     public double getRate(School school) {
         return mortRate[getSimulation().getIndexTimeSimu()];
     }
-    
+
     public double[] getRates() {
-        return mortRate;   
+        return mortRate;
     }
 }
