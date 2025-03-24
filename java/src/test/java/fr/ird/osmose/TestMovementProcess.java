@@ -49,7 +49,7 @@ public class TestMovementProcess {
         // Adding HashMap to overwrite default setting
         HashMap<String, String> cmd = new HashMap<>();
 
-        cmd.put("movement.distribution.method.sp0", "legacy_fixed");
+        cmd.put("movement.distribution.method.sp0", "map_fixed");
         cmd.put("movement.initialAge.map0", "0");
         cmd.put("movement.lastAge.map0", "2");
         cmd.put("movement.file.map0", "maps/test1.csv");
