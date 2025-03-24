@@ -105,7 +105,7 @@ public class TestAdditionalMortality {
         double[] actual = mort2larva.getRates();
         double[] expected = new double[cfg.getNStep()];
         for (int i = 0; i < expected.length; i++) {
-            expected[i] = 100.;
+            expected[i] = 100. / cfg.getNStepYear();
         }
 
         assertArrayEquals(expected, actual, 1e-5);
