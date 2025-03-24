@@ -503,21 +503,21 @@ public class Configuration extends OLogger {
 
         // barrier.n: new way to count the number of species, resource and background
         // based on types.
-        nSpecies = (int) this.findKeys("species.type.sp*").stream().filter((k) -> (getString(k).equals("focal")))
+        nSpecies = (int) this.findKeys("species.type.sp*").stream().filter((k) -> (getString(k).equalsIgnoreCase("focal")))
                 .count();
-        nResource = (int) this.findKeys("species.type.sp*").stream().filter(k -> getString(k).equals("resource"))
+        nResource = (int) this.findKeys("species.type.sp*").stream().filter(k -> getString(k).equalsIgnoreCase("resource"))
                 .count();
-        nBackground = (int) this.findKeys("species.type.sp*").stream().filter(k -> getString(k).equals("background"))
+        nBackground = (int) this.findKeys("species.type.sp*").stream().filter(k -> getString(k).equalsIgnoreCase("background"))
                 .count();
 
         // Extract the species indexes for the focal, backgroud and resource species.
-        this.focalIndex = this.findKeys("species.type.sp*").stream().filter(k -> getString(k).equals("focal"))
+        this.focalIndex = this.findKeys("species.type.sp*").stream().filter(k -> getString(k).equalsIgnoreCase("focal"))
                 .mapToInt(rgKey -> Integer.valueOf(rgKey.substring(rgKey.lastIndexOf(".sp") + 3))).sorted().toArray();
 
-        this.bkgIndex = this.findKeys("species.type.sp*").stream().filter(k -> getString(k).equals("background"))
+        this.bkgIndex = this.findKeys("species.type.sp*").stream().filter(k -> getString(k).equalsIgnoreCase("background"))
                 .mapToInt(rgKey -> Integer.valueOf(rgKey.substring(rgKey.lastIndexOf(".sp") + 3))).sorted().toArray();
 
-        this.rscIndex = this.findKeys("species.type.sp*").stream().filter(k -> getString(k).equals("resource"))
+        this.rscIndex = this.findKeys("species.type.sp*").stream().filter(k -> getString(k).equalsIgnoreCase("resource"))
                 .mapToInt(rgKey -> Integer.valueOf(rgKey.substring(rgKey.lastIndexOf(".sp") + 3))).sorted().toArray();
 
         // Check that the number of focal species match the number of focal types

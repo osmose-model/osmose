@@ -93,9 +93,9 @@ public class MapDistribution extends AbstractSpatialDistribution {
         getMapDistribution = ((school, iStepSimu) -> legacyDistribution(school, iStepSimu));
         String key = "movement.distribution.method.sp" + iSpeciesFile;
         String method = getConfiguration().getString(key);
-        if (method == "maps") {
+        if (method.equalsIgnoreCase("maps")) {
             getMapDistribution = ((school, iStepSimu) -> legacyDistribution(school, iStepSimu));
-        } else if (method == "maps_fixed") {
+        } else if (method.equalsIgnoreCase("maps_fixed")) {
             getMapDistribution = ((school, iStepSimu) -> legacyFixedDistribution(school, iStepSimu));
         } else {
             error("Movemement method not found for species " + Integer.toString(iSpecies), new Exception());
