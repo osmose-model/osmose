@@ -228,7 +228,7 @@ public abstract class AbstractSchool extends GridPoint implements IAggregation {
     //public void fishedBy(int fisheryIndex, double fishedBiomass) {
     //    this.fishedBiomass[fisheryIndex] += fishedBiomass;
     //}
-    
+
     @Override
     public void fishedNBy(int fisheryIndex, double fishedAbundance) {
         this.fishedAbundance[fisheryIndex] += fishedAbundance;
@@ -238,7 +238,7 @@ public abstract class AbstractSchool extends GridPoint implements IAggregation {
     //public void discardedBy(int fisheryIndex, double fishedBiomass) {
     //    this.discardedBiomass[fisheryIndex] += fishedBiomass;
     //}
-    
+
     @Override
     public void discardedNBy(int fisheryIndex, double fishedAbundance) {
         this.discardedAbundance[fisheryIndex] += fishedAbundance;
@@ -264,13 +264,13 @@ public abstract class AbstractSchool extends GridPoint implements IAggregation {
      * @return the fished biomass in tons
      */
     public double getFishedBiomass(int fisheryIndex) {
-        return fishedBiomass[fisheryIndex];
+        return abd2biom(fishedAbundance[fisheryIndex]);
     }
 
     public double getFishedAbundance(int fisheryIndex) {
         return fishedAbundance[fisheryIndex];
     }
-    
+
     /**
      * Gets the biomass of the school discarded by a given fishery.
      *
@@ -278,9 +278,9 @@ public abstract class AbstractSchool extends GridPoint implements IAggregation {
      * @return the fished biomass in tons
      */
     public double getDiscardedBiomass(int fisheryIndex) {
-        return discardedBiomass[fisheryIndex];
+        return abd2biom(discardedAbundance[fisheryIndex]);
     }
-    
+
     public double getDiscardedAbundance(int fisheryIndex) {
         return discardedAbundance[fisheryIndex];
     }
