@@ -63,13 +63,10 @@ run_model = function(par, conf, osmose, is_a_test=FALSE, version="4.3.3", option
   names(fishing_deviates) = paste("F.byperiod", get_fisheries(conf, nm=names(fishing_deviates)), sep=".")
 
   # run osmose!
-  t0 = 0
-  t1 = 0
+  t0 = t1 = 0 # init times
   if(!isTRUE(is_a_test)) {
-    ro = run_osmose(input='osmose-calibration.osm', output='output', osmose=osmose, 
-               version = version, options=options, verbose=FALSE)
-    t0 = ro$elapsed
-    t1 = 0
+    t0 = run_osmose(input='osmose-calibration.osm', output='output', osmose=osmose, 
+               version = version, options=options, verbose=FALSE)$elapsed
   }
   
   output = read_osmose(path='output', version=version, null.on.error=TRUE)
@@ -82,15 +79,13 @@ run_model = function(par, conf, osmose, is_a_test=FALSE, version="4.3.3", option
     # Those are caused by the ghosts in the machine (DATARMOR). To please them, we will run the 
     # model again, and see.
     if(!isTRUE(is_a_test)) {
-      ro = run_osmose(input='osmose-calibration.osm', output='output', osmose=osmose,
-                 version = version, options=options, verbose=FALSE)
-      t1 = ro$elapsed
+      t1 = run_osmose(input='osmose-calibration.osm', output='output', osmose=osmose,
+                 version = version, options=options, verbose=FALSE)$elapsed
     }
     
     output = read_osmose(path='output', version=version, null.on.error=TRUE)
     cal_output = osmose_calibration_outputs(output)
     tr = tr + output$elapsed
-    
   }
   
   # if is still NULL, we will let calibrar to deal with it.

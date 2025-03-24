@@ -77,7 +77,7 @@
 #' @export
 run_osmose = function(input, parameters = NULL, output = NULL, log = "osmose.log",
                       version = "4.3.3", osmose = NULL, java = "java",
-                      options = NULL, verbose = TRUE, clean = TRUE, force = FALSE){
+                      options = NULL, verbose = TRUE, clean = TRUE, force = FALSE) {
 
   package_version = packageVersion("osmose")
 
