@@ -22,7 +22,7 @@
  * Ricardo OLIVEROS RAMOS (ricardo.oliveros@gmail.com)
  * Philippe VERLEY (philippe.verley@ird.fr)
  * Laure VELEZ (laure.velez@ird.fr)
- * Nicolas Barrier (nicolas.barrier@ird.fr)
+ * Nicolas BARRIER (nicolas.barrier@ird.fr)
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -68,9 +68,6 @@ public interface IAggregation extends IMarineOrganism {
      */
     public double getBiomass();
 
-    /** Get the first feeding age. */
-    public int getFirstFeedingAgeDt();
-
     /**
      * The instantaneous biomass of the aggregation during the time step. The
      * Instantaneous biomass is the biomass at the beginning of the time step
@@ -98,6 +95,9 @@ public interface IAggregation extends IMarineOrganism {
      */
     public double getInstantaneousAbundance();
 
+    /** Get the first feeding age. */
+    public int getFirstFeedingAgeDt();
+    
     /**
      * Increment the number of dead individuals at current time step, for a
      * given mortality cause.
@@ -131,9 +131,11 @@ public interface IAggregation extends IMarineOrganism {
      * @param fisheryIndex, the fishery index
      * @param fishedBiomass, fished biomass in tons
      */
-    public void fishedBy(int fisheryIndex, double fishedBiomass);
+    //public void fishedBy(int fisheryIndex, double fishedBiomass);
+    public void fishedNBy(int fisheryIndex, double fishedAbundance);
 
-    public void discardedBy(int fisheryIndex, double fishedBiomass);
+    //public void discardedBy(int fisheryIndex, double fishedBiomass);
+    public void discardedNBy(int fisheryIndex, double fishedBiomass);
 
     public void resetAccessiblePreyIndex();
 

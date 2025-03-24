@@ -454,7 +454,7 @@ osmose_demo = function(path = NULL, config = c("gog", "eec_4.3.0"), extra_args=N
 #'# plot output data
 #'plot(data)
 #'}
-osmose_calib_demo = function(path = NULL) {
+osmose_calibration_demo = function(path = NULL) {
 
   # if no path has been provided, create a path from the working dir.
   if(is.null(path)) path = getwd()
@@ -474,4 +474,10 @@ osmose_calib_demo = function(path = NULL) {
   demo$file = "calibrate.R"
 
   return(demo)
+}
+
+#' @export
+osmose_calib_demo = function(path=NULL) {
+  .Deprecated(osmose_calibration_demo)
+  osmose_calibration_demo(path=path)
 }

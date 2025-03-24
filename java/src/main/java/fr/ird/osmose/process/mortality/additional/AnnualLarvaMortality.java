@@ -55,10 +55,12 @@ import fr.ird.osmose.util.timeseries.SeasonTimeSeries;
 public class AnnualLarvaMortality extends AbstractMortalitySpecies {
 
     // Larval mortality rate expressed in [time_step^-1]
+    final private String stage0;
     private double[] mortRate;
 
-    public AnnualLarvaMortality(int rank, Species species) {
+    public AnnualLarvaMortality(int rank, Species species, String stage0) {
         super(rank, species);
+        this.stage0 = stage0;
     }
 
     @Override
@@ -66,48 +68,53 @@ public class AnnualLarvaMortality extends AbstractMortalitySpecies {
         
         int nStepYear = getConfiguration().getNStepYear();
         // reading base mortality rate
-        String keyShift = String.format("mortality.additional.larva.rate.shift.sp%d", getFileSpeciesIndex());
-        String keyVal = String.format("mortality.additional.larva.rate.sp%d", getFileSpeciesIndex());
-        String keyValLog = String.format("mortality.additional.larva.rate.log.sp%d", getFileSpeciesIndex());
+        String keyShift = String.format("mortality.additional.%s.rate.shift.sp%d", this.stage0, getFileSpeciesIndex());
+        String keyVal = String.format("mortality.additional.%s.rate.sp%d", this.stage0, getFileSpeciesIndex());
+        //String keyValLog = String.format("mortality.additional.larva.rate.log.sp%d", getFileSpeciesIndex());
 
         // test if only one of the two values exists
-        if (!getConfiguration().isNull(keyValLog) && !getConfiguration().isNull(keyVal)) {
-            String message = String.format("Both %s and %s parameters are defined. Choose only one.\n", keyValLog, keyVal);
-            error(message, new Exception());
-        }
+        //if (!getConfiguration().isNull(keyValLog) && !getConfiguration().isNull(keyVal)) {
+        //    String message = String.format("Both %s and %s parameters are defined. Choose only one.\n", keyValLog, keyVal);
+        //    error(message, new Exception());
+        //}
 
-        boolean useLog;
+        //boolean useLog;
         ByRegimeTimeSeries mortRateSeries;
-        if(getConfiguration().isNull(keyValLog)) {
-            // If the key for log values is Null, assume fishing mort in standard mode
-            mortRateSeries = new ByRegimeTimeSeries(keyShift, keyVal);
-            useLog = false;
-        } else {
-            // If the key for log values is not null, assume fishing mort in log
-            mortRateSeries = new ByRegimeTimeSeries(keyShift, keyValLog);
-            useLog = true;
-        }
-        
+        mortRateSeries = new ByRegimeTimeSeries(keyShift, keyVal);
         mortRateSeries.init();
         double[] mortRateBase = mortRateSeries.getValues();
         
-        if (useLog) {
-            for (int i = 0; i < mortRateBase.length; i++) {
-                mortRateBase[i] = Math.exp(mortRateBase[i]);
-            }
-        }
+        //if(getConfiguration().isNull(keyValLog)) {
+        //    // If the key for log values is Null, assume fishing mort in standard mode
+        //    mortRateSeries = new ByRegimeTimeSeries(keyShift, keyVal);
+        //    useLog = false;
+        //} else {
+        //    // If the key for log values is not null, assume fishing mort in log
+        //    mortRateSeries = new ByRegimeTimeSeries(keyShift, keyValLog);
+        //    useLog = true;
+        //}
+        
+        //mortRateSeries.init();
+        //double[] mortRateBase = mortRateSeries.getValues();
+        
+        //if (useLog) {
+        //    for (int i = 0; i < mortRateBase.length; i++) {
+        //        mortRateBase[i] = Math.exp(mortRateBase[i]);
+        //    }
+        //}
         
         // reading multiplier
         double multiplier;
-        if (getConfiguration().isNull("mortality.additional.larva.rate.multiplier.sp" + getFileSpeciesIndex())) {
+        String keyMul = String.format("mortality.additional.%s.rate.multiplier.sp%d", this.stage0, getFileSpeciesIndex());
+        if (getConfiguration().isNull(keyMul)) {
             multiplier = 1;
         } else {
-            multiplier = getConfiguration()
-                    .getDouble("mortality.additional.larva.rate.multiplier.sp" + getFileSpeciesIndex());
+            multiplier = getConfiguration().getDouble(keyMul);
         }
         
         // reading season
-        SeasonTimeSeries season = new SeasonTimeSeries("mortality.additional.larva.rate.seasonality", "sp" + getFileSpeciesIndex());
+        String keySeason = String.format("mortality.additional.%s.rate.seasonality", this.stage0);
+        SeasonTimeSeries season = new SeasonTimeSeries(keySeason, "sp" + getFileSpeciesIndex());
         season.init();
         double[] seasonValues = season.getValues();
         

@@ -1,21 +1,41 @@
 
 run_model = function(par, conf, osmose, is_a_test=FALSE, version="4.3.3", options="-Xmx3g -Xms1g", ...) {
   
+  .t0 = Sys.time() # timing
   nspp = get_species(conf, type="focal", code=TRUE)
   nfsh = get_fisheries(conf, code=TRUE)
   ndtperyear = get_par(conf, 'simulation.time.ndtperyear')
   nyear      = get_par(conf, 'simulation.time.nyear')
   ndt = nyear*ndtperyear
   
+  # get deviates to compute random effects
   larval_deviates  = get_par(par, 'osmose.user.larval.deviate.log')
   fishing_deviates = get_par(par, 'fisheries.rate.byperiod.log')
   
+  # recover parameters modelled by groups
+  nms = get_par(conf, "calibration.*.bygroup$", unlist=TRUE)
+  nms = names(nms)[which(nms)]
+  nms = gsub(nms, pattern="^calibration.", replacement="")
+  nms = gsub(nms, pattern=".bygroup$", replacement="")
+  random = NULL
+  if(length(nms)>0) {
+    for(nm in nms) {
+      par = osmose:::get_osmose_parameter(par=par, conf=conf, nm=nm)
+      irandom = paste0("random.", nm)
+      random = c(random, get_par(par, irandom, as.is=TRUE))
+      par = get_par(par, irandom, invert = TRUE, as.is=TRUE)
+    }
+  }
+  
+  # create interannual variability in larval mortality
   for(isp in nspp) {
     nn = sprintf('mortality.additional.larva.rate.seasonality.sp%s', isp)
     ldev = get_par(larval_deviates, sp=as.numeric(isp))
+    if(is.null(ldev)) next
     par[[nn]] = exp(calibrar::spline_par(ldev, n=ndt)$x)  
   }
   
+  # fishing selectivity
   d75 = get_par(par, "selectivity.delta75.fsh") # all of them
   l50 = get_par(par, "selectivity.l50.fsh") # all of them
   L50 = get_par(conf, "selectivity.l50.fsh")
@@ -30,7 +50,7 @@ run_model = function(par, conf, osmose, is_a_test=FALSE, version="4.3.3", option
   }  
   
   ### BEGIN USER ADDED
-  
+
   ### END USER ADDED
   
   # remove all osmose.user parameters and clean-up
@@ -39,24 +59,20 @@ run_model = function(par, conf, osmose, is_a_test=FALSE, version="4.3.3", option
 
   write_osmose(par, file='calibration_parameters.osm')
 
-  names(larval_deviates)  = paste("larval", get_species(conf, nm=names(larval_deviates)), sep="_")
-  names(fishing_deviates) = paste("F", get_fisheries(conf, nm=names(fishing_deviates)), sep="_")
+  names(larval_deviates)  = paste("M.larva", get_species(conf, nm=names(larval_deviates)), sep=".")
+  names(fishing_deviates) = paste("F.byperiod", get_fisheries(conf, nm=names(fishing_deviates)), sep=".")
 
   # run osmose!
   if(!isTRUE(is_a_test)) {
-    run_osmose(input='osmose-calibration.osm', output='output', osmose=osmose, 
+    ro = run_osmose(input='osmose-calibration.osm', output='output', osmose=osmose, 
                version = version, options=options, verbose=FALSE)
+    t0 = ro$elapsed
+    t1 = 0
   }
   
   output = read_osmose(path='output', version=version, null.on.error=TRUE)
-  
-  
-  cal_output = c(biomass = get_var(output, "biomass", how="list", no.error = TRUE),
-                 yield   = get_var(output, "yieldBySpecies", how="list", no.error = TRUE),
-                 catchatlength = get_var(output, "yieldNBySize", how="list", no.error = TRUE),
-                 mortality = get_var(output, "residualSizeByAge", how="list", no.error = TRUE),
-                 growth = get_var(output, "residualMortalityByAge", how="list", no.error = TRUE)
-                 )
+  cal_output = osmose_calibration_outputs(output)
+  tr = output$elapsed
   
   if(is.null(cal_output)) {
     # sometimes, you get a 'no-write' error. Restarting the calibration usually fix the problem.
@@ -64,18 +80,14 @@ run_model = function(par, conf, osmose, is_a_test=FALSE, version="4.3.3", option
     # Those are caused by the ghosts in the machine (DATARMOR). To please them, we will run the 
     # model again, and see.
     if(!isTRUE(is_a_test)) {
-      run_osmose(input='osmose-calibration.osm', output='output', osmose=osmose, 
+      ro = run_osmose(input='osmose-calibration.osm', output='output', osmose=osmose,
                  version = version, options=options, verbose=FALSE)
+      t1 = ro$elapsed
     }
     
     output = read_osmose(path='output', version=version, null.on.error=TRUE)
-    
-    cal_output = c(biomass = get_var(output, "biomass", how="list", no.error = TRUE),
-                   yield   = get_var(output, "yieldBySpecies", how="list", no.error = TRUE),
-                   catchatlength = get_var(output, "yieldNBySize", how="list", no.error = TRUE),
-                   mortality = get_var(output, "residualSizeByAge", how="list", no.error = TRUE),
-                   growth = get_var(output, "residualMortalityByAge", how="list", no.error = TRUE)
-                   )
+    cal_output = osmose_calibration_outputs(output)
+    tr = tr + output$elapsed
     
   }
   
@@ -85,7 +97,11 @@ run_model = function(par, conf, osmose, is_a_test=FALSE, version="4.3.3", option
     return(invisible(cal_output))
   }
 
-  cal_output = c(cal_output, random=larval_deviates, random=fishing_deviates)
+  # create final output list, including random effects
+  cal_output = c(cal_output, random, random=larval_deviates, random=fishing_deviates)
+  
+  # save timing information.
+  osmose:::.timing(.t0=.t0, t0=t0, t1=t1, tr=tr, file="../timing.log")
   
   return(invisible(cal_output))
   

@@ -22,7 +22,7 @@
  * Ricardo OLIVEROS RAMOS (ricardo.oliveros@gmail.com)
  * Philippe VERLEY (philippe.verley@ird.fr)
  * Laure VELEZ (laure.velez@ird.fr)
- * Nicolas Barrier (nicolas.barrier@ird.fr)
+ * Nicolas BARRIER (nicolas.barrier@ird.fr)
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -42,7 +42,6 @@
 package fr.ird.osmose.output;
 
 import fr.ird.osmose.util.io.IOTools;
-import fr.ird.osmose.output.distribution.OutputDistribution;
 import fr.ird.osmose.util.SimulationLinker;
 import java.io.File;
 import java.io.IOException;
@@ -64,7 +63,7 @@ import ucar.nc2.write.NetcdfFormatWriter;
  *
  * @author Nicolas Barrier
  */
-public class FisheryOutputDistrib extends SimulationLinker implements IOutput {
+public class FisheryOutputAccessibleBiomass extends SimulationLinker implements IOutput {
 
     /*
      * Number of fisheries.
@@ -80,22 +79,15 @@ public class FisheryOutputDistrib extends SimulationLinker implements IOutput {
      * NetCDF time index.
      */
     private int index = 0;
-
-    private int nClass;
-
-    OutputDistribution distrib;
-
     /*
      * Array containing the fisheries catches by species and by fisheries.
      * Output has (species, fisheries) dimensions.
      */
-    private double[][][] biomass;
-    private double[][][] discards;
-    private double[][][] accessibleBiomass;
+    private double[][] accessibleBiomass;
 
-    public FisheryOutputDistrib(int rank, OutputDistribution distrib) {
+    public FisheryOutputAccessibleBiomass(int rank) {
         super(rank);
-        this.distrib = distrib;
+
     }
 
     @Override
@@ -104,11 +96,7 @@ public class FisheryOutputDistrib extends SimulationLinker implements IOutput {
         // initializes the number of fisheries
         nFishery = getConfiguration().getNFishery();
         int nSpecies = this.getNSpecies() + this.getNBkgSpecies();
-        nClass = distrib.getNClass();
-
-        biomass = new double[nSpecies][nFishery][nClass];
-        discards = new double[nSpecies][nFishery][nClass];
-        accessibleBiomass = new double[nSpecies][nFishery][nClass];
+        accessibleBiomass = new double[nSpecies][nFishery];
 
         Nc4Chunking chunker = getConfiguration().getChunker();
 
@@ -124,13 +112,10 @@ public class FisheryOutputDistrib extends SimulationLinker implements IOutput {
          */
         Dimension speciesDim = bNc.addDimension("species", getNSpecies() + this.getNBkgSpecies());
         Dimension fisheriesDim = bNc.addDimension("fishery", nFishery);
-        Dimension classDim = bNc.addDimension("class", nClass);
-
         Dimension timeDim = bNc.addUnlimitedDimension("time");
 
         String attr = this.getSpeciesNames();
         String fisheryNames = this.getFisheriesNames();
-        String classNames = this.getClassNames();
 
         /*
          * Add variables
@@ -140,31 +125,12 @@ public class FisheryOutputDistrib extends SimulationLinker implements IOutput {
         timeVarBuilder.addAttribute(new Attribute("calendar", "360_day"));
         timeVarBuilder.addAttribute(new Attribute("description", "time ellapsed, in days, since the beginning of the simulation"));
 
-        Variable.Builder<?> biomassVarBuilder = bNc.addVariable("landings", DataType.FLOAT, new ArrayList<>(Arrays.asList(timeDim, speciesDim, fisheriesDim, classDim)));
-        biomassVarBuilder.addAttribute(new Attribute("units", "ton"));
-        biomassVarBuilder.addAttribute(new Attribute("description", "landings, in tons, by species and by fishery"));
-        biomassVarBuilder.addAttribute(new Attribute("_FillValue", -99.f));
-        biomassVarBuilder.addAttribute(new Attribute("species_names", attr));
-        biomassVarBuilder.addAttribute(new Attribute("fisheries_names", fisheryNames));
-        biomassVarBuilder.addAttribute(new Attribute("class_names", classNames));
-
-        Variable.Builder<?> discardsVarBuilder = bNc.addVariable("discards", DataType.FLOAT, new ArrayList<>(Arrays.asList(timeDim, speciesDim, fisheriesDim, classDim)));
-        discardsVarBuilder.addAttribute(new Attribute("units", "ton"));
-        discardsVarBuilder.addAttribute(new Attribute("description", "discards, in tons, by species and by fishery"));
-        discardsVarBuilder.addAttribute(new Attribute("_FillValue", -99.f));
-        discardsVarBuilder.addAttribute(new Attribute("species_names", attr));
-        discardsVarBuilder.addAttribute(new Attribute("fisheries_names", fisheryNames));
-        discardsVarBuilder.addAttribute(new Attribute("class_names", classNames));
-
-        Variable.Builder<?> accessibleBiomassVarBuilder = bNc.addVariable("accessible_biomass", DataType.FLOAT, new ArrayList<>(Arrays.asList(timeDim, speciesDim, fisheriesDim, classDim)));
+        Variable.Builder<?> accessibleBiomassVarBuilder = bNc.addVariable("accessible_biomass", DataType.FLOAT, new ArrayList<>(Arrays.asList(timeDim, speciesDim, fisheriesDim)));
         accessibleBiomassVarBuilder.addAttribute(new Attribute("units", "ton"));
         accessibleBiomassVarBuilder.addAttribute(new Attribute("description", "accessible biomass, in tons, by species and by fishery"));
         accessibleBiomassVarBuilder.addAttribute(new Attribute("_FillValue", -99.f));
         accessibleBiomassVarBuilder.addAttribute(new Attribute("species_names", attr));
         accessibleBiomassVarBuilder.addAttribute(new Attribute("fisheries_names", fisheryNames));
-        accessibleBiomassVarBuilder.addAttribute(new Attribute("class_names", classNames));
-
-
 
         try {
             /*
@@ -173,7 +139,7 @@ public class FisheryOutputDistrib extends SimulationLinker implements IOutput {
             nc = this.bNc.build();
 
         } catch (IOException ex) {
-            Logger.getLogger(FisheryOutputDistrib.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(FisheryOutputAccessibleBiomass.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
 
@@ -204,9 +170,7 @@ public class FisheryOutputDistrib extends SimulationLinker implements IOutput {
     @Override
     public void reset() {
         int nSpecies = this.getNSpecies() + this.getNBkgSpecies();
-        biomass = new double[nSpecies][nFishery][nClass];
-        discards = new double[nSpecies][nFishery][nClass];
-        accessibleBiomass = new double[nSpecies][nFishery][nClass];
+        accessibleBiomass = new double[nSpecies][nFishery];
     }
 
     @Override
@@ -215,22 +179,15 @@ public class FisheryOutputDistrib extends SimulationLinker implements IOutput {
         //getSchoolSet().getAliveSchools().forEach((school) -> {
         getSchoolSet().getSchools().forEach((school) -> {
             int iSpecies = school.getSpeciesIndex();
-            int iClass = distrib.getClass(school);
             for (int iFishery = 0; iFishery < nFishery; iFishery++) {
-                biomass[iSpecies][iFishery][iClass] += school.getFishedBiomass(iFishery);
-                discards[iSpecies][iFishery][iClass] += school.getDiscardedBiomass(iFishery);
-                accessibleBiomass[iSpecies][iFishery][iClass] += school.getAccessibleBiomass(iFishery);
+                accessibleBiomass[iSpecies][iFishery] += school.getAccessibleBiomass(iFishery);
             }
         });
 
-
         this.getBkgSchoolSet().getSchools().forEach((bkgSch) -> {
             int iSpecies = bkgSch.getSpeciesIndex();
-            int iClass = distrib.getClass(bkgSch);
             for (int iFishery = 0; iFishery < nFishery; iFishery++) {
-                biomass[iSpecies][iFishery][iClass] += bkgSch.getFishedBiomass(iFishery);
-                discards[iSpecies][iFishery][iClass] += bkgSch.getDiscardedBiomass(iFishery);
-                accessibleBiomass[iSpecies][iFishery][iClass] += bkgSch.getAccessibleBiomass(iFishery);
+                accessibleBiomass[iSpecies][iFishery] += bkgSch.getAccessibleBiomass(iFishery);
             }
         }
         );
@@ -243,17 +200,10 @@ public class FisheryOutputDistrib extends SimulationLinker implements IOutput {
         // Write into NetCDF file
         int nSpecies = getNSpecies();
         int nBackground = this.getNBkgSpecies();
-        ArrayFloat.D4 arrBiomass = new ArrayFloat.D4(1, nSpecies + nBackground, nFishery, nClass);
-        ArrayFloat.D4 arrDiscards = new ArrayFloat.D4(1, nSpecies + nBackground, nFishery, nClass);
-        ArrayFloat.D4 arrAccessBiomass = new ArrayFloat.D4(1, nSpecies + nBackground, nFishery, nClass);
+        ArrayFloat.D3 arrAccessBiomass = new ArrayFloat.D3(1, nSpecies + nBackground, nFishery);
         for (int iSpecies = 0; iSpecies < nSpecies + nBackground; iSpecies++) {
             for (int iFishery = 0; iFishery < nFishery; iFishery++) {
-                for (int iClass = 0; iClass < nClass; iClass++) {
-                    arrBiomass.set(0, iSpecies, iFishery, iClass, (float) biomass[iSpecies][iFishery][iClass]);
-                    arrDiscards.set(0, iSpecies, iFishery, iClass, (float) discards[iSpecies][iFishery][iClass]);
-                    arrAccessBiomass.set(0, iSpecies, iFishery, iClass,
-                            (float) accessibleBiomass[iSpecies][iFishery][iClass]);
-                }
+                arrAccessBiomass.set(0, iSpecies, iFishery, (float) accessibleBiomass[iSpecies][iFishery]);
             }
         }
 
@@ -263,12 +213,10 @@ public class FisheryOutputDistrib extends SimulationLinker implements IOutput {
         //System.out.println("NetCDF saving time " + index + " - " + time);
         try {
             nc.write(nc.findVariable("time"), new int[]{index}, arrTime);
-            nc.write(nc.findVariable("landings"), new int[]{index, 0, 0, 0}, arrBiomass);
-            nc.write(nc.findVariable("discards"), new int[]{index, 0, 0, 0}, arrDiscards);
-            nc.write(nc.findVariable("accessible_biomass"), new int[]{index, 0, 0, 0}, arrAccessBiomass);
+            nc.write(nc.findVariable("accessible_biomass"), new int[]{index, 0, 0}, arrAccessBiomass);
             index++;
         } catch (IOException | InvalidRangeException ex) {
-            Logger.getLogger(FisheryOutputDistrib.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(FisheryOutputAccessibleBiomass.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
 
@@ -277,8 +225,7 @@ public class FisheryOutputDistrib extends SimulationLinker implements IOutput {
         StringBuilder filename = new StringBuilder(path.getAbsolutePath());
         filename.append(File.separatorChar);
         filename.append(getConfiguration().getString("output.file.prefix"));
-        filename.append("_yieldByFishery");
-        filename.append("DistribBy").append(distrib.getType()). append("_Simu");
+        filename.append("_accessibleBiomassByFishery_Simu");
         filename.append(getRank());
         filename.append(".nc.part");
         return filename.toString();
@@ -347,23 +294,6 @@ public class FisheryOutputDistrib extends SimulationLinker implements IOutput {
         }
 
         return output;
-
-    }
-
-
-    private String getClassNames() {
-
-        StringBuilder strBuild = new StringBuilder();
-        strBuild.append(distrib.getType()).append(":");
-        strBuild.append(0);
-        strBuild.append(",");
-        for(int i = 1; i < distrib.getNClass() - 1; i++) {
-            strBuild.append(distrib.getThreshold(i - 1));
-            strBuild.append(",");
-        }
-        strBuild.append(distrib.getThreshold(distrib.getNClass() - 1 - 1));
-
-        return strBuild.toString();
 
     }
 

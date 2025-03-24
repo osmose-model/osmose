@@ -131,8 +131,10 @@ public abstract class AbstractSchool extends GridPoint implements IAggregation {
     protected boolean abundanceHasChanged;
 
     protected double[] fishedBiomass;
+    protected double[] fishedAbundance;
 
     protected double[] discardedBiomass;
+    protected double[] discardedAbundance;
 
     protected double[] accessibleBiomassToFishery;
 
@@ -222,14 +224,24 @@ public abstract class AbstractSchool extends GridPoint implements IAggregation {
         this.preyedBiomass += preyedBiom;
     }
 
+    //@Override
+    //public void fishedBy(int fisheryIndex, double fishedBiomass) {
+    //    this.fishedBiomass[fisheryIndex] += fishedBiomass;
+    //}
+    
     @Override
-    public void fishedBy(int fisheryIndex, double fishedBiomass) {
-        this.fishedBiomass[fisheryIndex] += fishedBiomass;
+    public void fishedNBy(int fisheryIndex, double fishedAbundance) {
+        this.fishedAbundance[fisheryIndex] += fishedAbundance;
     }
 
+    //@Override
+    //public void discardedBy(int fisheryIndex, double fishedBiomass) {
+    //    this.discardedBiomass[fisheryIndex] += fishedBiomass;
+    //}
+    
     @Override
-    public void discardedBy(int fisheryIndex, double fishedBiomass) {
-        this.discardedBiomass[fisheryIndex] += fishedBiomass;
+    public void discardedNBy(int fisheryIndex, double fishedAbundance) {
+        this.discardedAbundance[fisheryIndex] += fishedAbundance;
     }
 
     public void incrementAccessibleBiomass(int fisheryIndex, double fishedBiomass) {
@@ -255,6 +267,10 @@ public abstract class AbstractSchool extends GridPoint implements IAggregation {
         return fishedBiomass[fisheryIndex];
     }
 
+    public double getFishedAbundance(int fisheryIndex) {
+        return fishedAbundance[fisheryIndex];
+    }
+    
     /**
      * Gets the biomass of the school discarded by a given fishery.
      *
@@ -264,7 +280,10 @@ public abstract class AbstractSchool extends GridPoint implements IAggregation {
     public double getDiscardedBiomass(int fisheryIndex) {
         return discardedBiomass[fisheryIndex];
     }
-
+    
+    public double getDiscardedAbundance(int fisheryIndex) {
+        return discardedAbundance[fisheryIndex];
+    }
     /**
      * Gets the biomass of the school discarded by a given fishery.
      *

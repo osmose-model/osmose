@@ -542,17 +542,17 @@ read.yield = function(conf, sp) {
 read.fecundity = function(conf, sp) {
   
   this = .getPar(conf, sp=sp)
-  opar = .getPar(this, "reproduction.fecundity.sp")
+  opar = .getPar(this, "reproduction.fecundity.sp") # output already created
   if(!is.null(opar)) return(opar)
+  mode = .getPar(this, "species.reproduction.mode")
+  if(is.null(mode)) mode = "oviparity"
+  fectype = if(mode=="oviparity") "relativefecundity" else "absolutefecundity"
   repfile = .getPar(this, "reproduction.season.file")
   fecundity = as.numeric(unlist(.readCSV(repfile, row.names = 1)))
-  sfec = sum(fecundity) 
-  if(abs(sfec-1)< 1e-2) {
-    # warning("Using relative fecundities.")
-    relfec = .getPar(this, "species.relativefecundity")
-    if(relfec < 1e-16) stop(sprintf("Null relative fecundity for sp%s, please check.", sp), call. = FALSE) 
-    fecundity = relfec*fecundity
-  }
+  relfec = .getPar(this, sprintf("species.%s", fectype))
+  if(relfec < 1e-16) stop(sprintf("Null relative or absolute fecundity for sp%s, please check.", sp), call. = FALSE) 
+  fecundity = relfec*fecundity
+  
   return(fecundity)
   
 }

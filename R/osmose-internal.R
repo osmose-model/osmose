@@ -240,6 +240,8 @@
 
            # fisheries
            yieldByFisheryBySpecies = .read_osmose_ncdf(files=files, path=path, varid=varid, ...),
+           yieldNByFisheryBySpecies = .read_osmose_ncdf(files=files, path=path, varid=varid, ...),
+           accessibleBiomassByFishery = .read_osmose_ncdf(files=files, path=path, varid=varid, ...),
 
            #bioen
            sizeMature = .read_1D(files=files, path=path, ...),
@@ -607,8 +609,10 @@ osmose2R.v4r0 = function (path=NULL, species.names=NULL, conf=NULL, ...) {
                     yieldByAge = readOsmoseFiles(path = path, type = "yieldDistribByAge"),
                     yieldNByAge = readOsmoseFiles(path = path, type = "yieldNDistribByAge"),
                     landingsArray = readOsmoseFiles(path = path, type = "yieldByFisheryBySpecies", varid="landings", ext="nc"),
-                    # discardsArray = readOsmoseFiles(path = path, type = "yieldByFisheryBySpecies", varid="discards", ext="nc"),
-                    # accessibleBiomass = readOsmoseFiles(path = path, type = "yieldByFisheryBySpecies", varid="accessible_biomass", ext="nc"),
+                    landingsNArray = readOsmoseFiles(path = path, type = "yieldNByFisheryBySpecies", varid="landings", ext="nc"),
+                    discardsArray = readOsmoseFiles(path = path, type = "yieldByFisheryBySpecies", varid="discards", ext="nc"),
+                    discardsNArray = readOsmoseFiles(path = path, type = "yieldNByFisheryBySpecies", varid="discards", ext="nc"),
+                    accessibleBiomassArray = readOsmoseFiles(path = path, type = "accessibleBiomassByFishery", varid="accessible_biomass", ext="nc"),
 
                     # survey outputs
                     surveyBiomass = readOsmoseFiles(path = path, type = "biomass", bySpecies = TRUE),
@@ -659,33 +663,16 @@ osmose2R.v4r0 = function (path=NULL, species.names=NULL, conf=NULL, ...) {
                                      .aggregate_catch_bytime(outputData, conf, type="landingsByFishery"),
                                      .aggregate_catch_bytime(outputData, conf, type="landingsByFisheryGroups"))
     ### DISCARDS
-    
-    ### ACCESSIBLE BIOMASS
-    # temporal
-    # dmn = dimnames(outputData$biomass)
-    # rf = .getPar(conf, "output.recordfrequency.ndt")
-    # # ybf = aperm(apply(outputData$yieldArray, c(1, 3, 4), sum), c(2,1,3))
-    # ybf = apply(outputData$yieldArray, c(1, 3, 4), sum)
-    # ybf = rowsum(ybf, group=rep(seq_len(nrow(ybf)), each=rf, length.out=nrow(ybf)))
-    # rownames(ybf) = dmn[[1]]
-    # colnames(ybf) = get_fisheries(conf)
-    # outputData$yieldByFishery = ybf
-    # outputData$yieldByFishery = .add_fisheries_groups(x=outputData$yieldByFishery, conf=conf)
-    # 
-    # # yieldByFisheryBySpecies
-    # outputData$yieldByFisheryBySpecies = .reshapeFishery(outputData$yieldArray, rf=rf)
-    # names(outputData$yieldByFisheryBySpecies) = get_fisheries(conf)
-    # xfg = .get_functional_groups(conf, "fisheries")
-    # outputData$yieldByFisheryBySpecies = c(outputData$yieldByFisheryBySpecies, 
-    #                                        lapply(xfg, FUN=.my_list_sum, x=outputData$yieldByFisheryBySpecies))
-    # # yieldBySpeciesByFishery
-    # dmn[[2]] = get_fisheries(conf)
-    # outputData$yieldBySpeciesByFishery = .reshapeFishery(outputData$yieldArray, rf=rf, by = "species")
-    # names(outputData$yieldBySpeciesByFishery) = get_species(conf, type="focal")
-    # xfg = .get_functional_groups(conf, "species")
-    # outputData$yieldBySpeciesByFishery = c(outputData$yieldBySpeciesByFishery, 
-    #                                        lapply(xfg, FUN=.my_list_sum, x=outputData$yieldBySpeciesByFishery))
-    # end of temporal
+    outputData$discardsBySpeciesByFishery = .reshapeFishery(outputData$discardsArray, rf=rf, by="species")
+    outputData$discardsByFisheryBySpecies = .reshapeFishery(outputData$discardsArray, rf=rf, by="fishery")
+    outputData$discardsBySpecies =  .reshapeFishery(outputData$discardsArray, rf=rf, by="species", aggregate=TRUE)
+    outputData$discardsByFishery =  .reshapeFishery(outputData$discardsArray, rf=rf, by="fishery", aggregate=TRUE)
+    outputData$discardsBySpeciesGroups = .add_fisheries_groups(outputData$discardsBySpecies, conf, type="species", merge=FALSE) 
+    outputData$discardsByFisheryGroups = .add_fisheries_groups(outputData$discardsByFishery, conf, type="fisheries", merge=FALSE)
+    outputData$observed.discards = c(.aggregate_catch_bytime(outputData, conf, type="discardsBySpecies"),
+                                     .aggregate_catch_bytime(outputData, conf, type="discardsBySpeciesGroups"),
+                                     .aggregate_catch_bytime(outputData, conf, type="discardsByFishery"),
+                                     .aggregate_catch_bytime(outputData, conf, type="discardsByFisheryGroups"))
   } else {
     ### LANDINGS
     outputData$landingsBySpeciesByFishery = NULL
@@ -696,7 +683,23 @@ osmose2R.v4r0 = function (path=NULL, species.names=NULL, conf=NULL, ...) {
     outputData$landingsByFisheryGroups = NULL
     outputData$observed.landings = NULL
     ### DISCARDS
+    outputData$discardsBySpeciesByFishery = NULL
+    outputData$discardsByFisheryBySpecies = NULL
+    outputData$discardsBySpecies = NULL  
+    outputData$discardsByFishery = NULL
+    outputData$discardsBySpeciesGroups = NULL 
+    outputData$discardsByFisheryGroups = NULL
+    outputData$observed.discards = NULL
+  }
+
+  if(!is.null(outputData$accessibleBiomassArray)) {
     ### ACCESSIBLE BIOMASS
+    outputData$accessibleBiomassByFishery = .reshapeFishery(outputData$accessibleBiomassArray, rf=rf, by="species")
+    outputData$accessibleBiomassBySpecies = .reshapeFishery(outputData$accessibleBiomassArray, rf=rf, by="fishery")
+  } else {
+    ### ACCESSIBLE BIOMASS
+    outputData$accessibleBiomassByFishery = NULL
+    outputData$accessibleBiomassBySpecies = NULL
   }
 
   # surveys as independent outputs
@@ -964,7 +967,8 @@ osmose2R.v3r0 = function(path=NULL, species.names=NULL, ...) {
       src = get_surveys(conf, sr=names(x)[i])
       spc = get_par(conf, par=sprintf("surveys.targetspecies.sr%d", src))
       
-      fgd = get_fg_data(conf, x=x[[i]], type="species")
+      # fgd = get_fg_data(conf, x=x[[i]], type="species")
+      fgd = NULL # we are not adding species groups to surveys for now. 
       
       if(!is.null(spc)) {
         spx = get_species(conf, nm=sprintf("sp%d", spc))

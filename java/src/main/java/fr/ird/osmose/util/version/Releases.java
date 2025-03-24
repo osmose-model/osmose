@@ -43,9 +43,6 @@ package fr.ird.osmose.util.version;
 import au.com.bytecode.opencsv.CSVReader;
 import au.com.bytecode.opencsv.CSVWriter;
 import fr.ird.osmose.Configuration;
-import fr.ird.osmose.output.FisheryOutput;
-import fr.ird.osmose.output.FisheryOutputDistrib;
-import fr.ird.osmose.output.spatial.SpatialFisheryOutput;
 import fr.ird.osmose.util.Separator;
 import java.io.FileReader;
 import java.io.FileWriter;
@@ -617,7 +614,6 @@ public class Releases {
                       updateKey("species.bioen.maturity.m1.sp" + index, "species.maturity.m1.sp" + index);
                   }   
                 }
-   
             }
         }
     }; // end of ALL array

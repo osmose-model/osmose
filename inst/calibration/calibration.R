@@ -2,8 +2,12 @@
 #  
 # Arguments for the script
 #
-# --ncores=n                 : 'n' is the number of cores. Better to be passed automatically from PBS script.
-# --mpi                      : Use MPI.
+# --ncores=n                 : 'n' is the number of cores. If ommited, it will take it from the PBS.
+#                              Useful to set it up when using OMP (avoid using logical) or using replicates
+#                              from OSMOSE. In MPI, matches the number of MPI processes, sub OMP are for
+#                              OSMOSE replicates.
+# --omp                      : Use OMP.
+# --nht                      : Do not use hyper-threading. Only half of cores are effectively used.
 # --test                     : boolean, is it a test? Does not run OSMOSE if is a test (save time!).
 # --run_model=file           : 'file' is sourced to find the 'run_model' function.
 # --replicates=n             : 'n' is the number of replicates, controlled from the 'calibrar' package.
@@ -26,12 +30,16 @@ control_file   = .get_command_argument(.args, "calibration.control", default=".c
 if(is.null(control_file)) stop("A control file must be specified ('--calibration.control=file')")
 is_a_test      = .get_command_argument(.args, "test")
 run_model_file = .get_command_argument(.args, "run_model", default="run_model.R")
-ncores         = .get_command_argument(.args, "ncores", default=1)
-MPI            = .get_command_argument(.args, "mpi")
+ncores         = .get_command_argument(.args, "ncores", default=length(nodes))
+OMP            = .get_command_argument(.args, "omp")
+nht            = .get_command_argument(.args, "nht")
 replicates     = .get_command_argument(.args, "replicates", default=1)
+MPI            = !OMP
+if(isTRUE(MPI)) nht = FALSE # hyper-threading FALSE by default when using MPI
+nht = ifelse(nht, 2, 1)
 
-control = .read_configuration(control_file)
-osmose = ".osmose.jar"
+control  = .read_configuration(control_file)
+osmose   = ".osmose.jar"
 obs_file = "observed.rds"
 
 # check for mandatory arguments
@@ -55,7 +63,10 @@ message(sprintf("Running calibration in %s with %d cores.",
 
 conf = read_osmose(input = "master/osmose-calibration.osm")
 model = get_par(conf, "output.file.prefix")
-
+osm_ncpu = get_par(conf, "simulation.ncpu")
+if(is.null(osm_ncpu) || !is.numeric(osm_ncpu)) osm_ncpu=1
+if(osm_ncpu > 1) nht=1 # if OSMOSE runs in parallel, use hyper-threading
+  
 # explicit some variables
 verbose   = control$verbose
 parallel  = control$parallel
@@ -100,18 +111,19 @@ restart_file = if(is_a_test) "osmose-test" else sprintf("osmose-%s", model)
 control$master = "master" # directory that will be copied
 control$run = run_path   # run directory
 control$restart.file = restart_file # name of the restart file
-control$ncores = ncores # the actual number of cores you have
+eff_cores = floor((ncores - 1)/nht/osm_ncpu)
+control$ncores = eff_cores # the actual number of cores you have
 
 if(isTRUE(parallel)) {
   
   if(!isTRUE(MPI)) {
-    if(!require("doParallel")) stop("Package 'doParallel' not found")
-    message(sprintf("Using doSNOW for parallelisation (%s).", parallel:::getClusterOption("type")))
+    message(sprintf("Using doSNOW for parallelisation (%s).", getClusterOption("type")))
+    library("doParallel")
     cl = makeCluster(control$ncores)
     registerDoParallel(cl)
   } else {
-    if(!require("doSNOW")) stop("Package 'doSNOW' not found")
-    message("Using MPI for parallelisation.")
+    message("Using MPI for parallelisation. If you want to use OMP for running OSMOSE, configure it manually.")
+    library("doSNOW")
     cl = makeCluster()
     registerDoSNOW(cl)
   }

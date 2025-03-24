@@ -8,10 +8,11 @@ set_par(
   x,
   value = NULL,
   scale = 1,
+  delta = 0,
   lower = NULL,
   upper = NULL,
-  delta = 0,
   digits = 3,
+  auto = FALSE,
   ...
 )
 }
@@ -19,6 +20,18 @@ set_par(
 \item{x}{The osmose.configuration list.}
 
 \item{value}{The parameter value to replace.}
+
+\item{scale}{All values in x are multiplied by this 'scale' units.}
+
+\item{delta}{All values in x are shifted by this delta' units.}
+
+\item{lower}{Minimum possible value after transformations (value and scale)}
+
+\item{upper}{Maximum possible value after transformations (value and scale)}
+
+\item{digits}{Maximum number of digits in the result}
+
+\item{auto}{If auto=TRUE, scale is NOT applied to deviates and delta is ONLY applied to deviates.}
 
 \item{...}{Additional arguments}
 }
