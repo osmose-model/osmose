@@ -218,8 +218,9 @@ read_osmose = function(path = NULL, input = NULL, version = "4.3.2",
   .t0 = Sys.time()
   # If both path and input are NULL, then show an error message
   if(is.null(path) & is.null(input)) stop("No output folder or configuration file has been provided.")
+  if(length(path)>1) stop("Only one path must be provided.")
 
-  # use first argument as path and input if not specified.
+  # check first argument, it might be an input file and not a path.
   if(!is.null(path) & is.null(input)) {
     if(!file.exists(path)) stop(sprintf("Path '%s' not found here (%s)", path, getwd()))
     if(!file.info(path)$isdir) {
@@ -228,6 +229,11 @@ read_osmose = function(path = NULL, input = NULL, version = "4.3.2",
     }
   }
 
+  # check if path is a calibration folder
+  if(.is_calibration_dir(path)) {
+    return(.read_osmose_calibration(path=path))
+  }
+  
   # If config is not NULL, then read it
   recursive = TRUE
   if(is.null(input)) {

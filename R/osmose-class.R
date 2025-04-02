@@ -168,6 +168,14 @@ get_var.NULL = function(object, ...) {
   return(NULL)
 }
 
+#' @rdname get_var
+#' @export
+get_var.osmose.calibration = function(object, what, how, ...) {
+  
+  x = object[[what]]
+  return(x)
+  
+}
 
 #' Print information for an \code{osmose} object
 #'

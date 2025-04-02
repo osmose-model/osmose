@@ -705,3 +705,57 @@ get_codes = function(sp, conf) {
       file=file, append=TRUE)
   return(invisible())
 }
+
+
+# Read calibration outputs ------------------------------------------------
+
+.is_calibration_dir = function(path) {
+  if(is.null(path)) return(FALSE)
+  check = all(c("observed.rds", "run_model.R", "master") %in% dir(path))
+  if(!check) return(FALSE)
+  c0 = sum(grepl(pattern="parguess", x=dir(path)))
+  c1 = sum(grepl(pattern="calibration_settings", x=dir(path)))
+  c2 = sum(grepl(pattern="parmax|parmin|parphase", x=dir(path)))
+  if(c0 < 1) return(FALSE)
+  if(c1 < 1) return(FALSE)
+  if(c2 < 1) return(FALSE)
+  return(TRUE)
+}
+
+.read_osmose_calibration = function(path) {
+  
+  files = dir(path, full.names = TRUE)
+  output = list()
+  output$parguess = read_osmose(grep(pattern="parguess", x=files, value=TRUE))
+  output$parphase = read_osmose(grep(pattern="parphase", x=files, value=TRUE))
+  output$parmin = read_osmose(grep(pattern="parmin", x=files, value=TRUE))
+  output$parmax = read_osmose(grep(pattern="parmax", x=files, value=TRUE))
+  output$settings = calibrar::calibration_setup(grep(pattern="calibration_settings", x=files, value=TRUE))
+  output$observed = readRDS(grep(pattern="observed.rds", x=files, value=TRUE))
+  
+  restart.file = grep(pattern=".restart$", x=files, value=TRUE)
+  if(length(restart.file)>1) stop("More than one restart file found.")
+  if(length(restart.file)==1) {
+    res = readRDS(restart.file)
+    output$phase = NA
+    output$generation = res$opt$gen
+    ind = seq_len(output$generation)
+    output$fitness = res$trace$fitness[ind, ]
+    if(is.null(colnames(output$fitness))) colnames(output$fitness) = names(res$opt$weights)
+    output$par = res$trace$par[ind, ]
+    colnames(output$par) = names(res$opt$upper)
+    output$value = res$trace$value[ind]
+    
+    bestpar = res$opt$MU
+    names(bestpar) = names(res$opt$upper)
+    bestpar = as.list(bestpar)
+    class(bestpar) = c("osmose.configuration")
+    output$best = bestpar
+  }
+  
+  class(output) = "osmose.calibration"
+  return(output)
+  
+}
+
+
