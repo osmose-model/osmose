@@ -181,8 +181,10 @@
     phase = get_par_phase(conf, "fisheries.rate.base", default=2)
     
     write_osmose(pars, file=guess_file, append = TRUE)
-    write_osmose(set_par(pars, delta=-3), file=min_file, append = TRUE)
-    write_osmose(set_par(pars, delta=+3), file=max_file, append = TRUE)
+    write_osmose(set_par(pars, delta=-3, upper=-10), file=min_file, append = TRUE)
+    write_osmose(set_par(pars, delta=+3, lower=0.5), file=max_file, append = TRUE)
+    # write_osmose(set_par(pars, scale=0.8, lower=-10), file=min_file, append = TRUE)
+    # write_osmose(set_par(pars, scale=1.2, upper=0.5), file=max_file, append = TRUE)
     write_osmose(set_par(pars, value=phase), file=phase_file, append = TRUE)
     
     pars = get_par(this, "fisheries.rate.byperiod.fsh", as.is=TRUE)
