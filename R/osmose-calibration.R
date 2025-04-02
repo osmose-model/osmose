@@ -392,11 +392,13 @@ osmose_calibration_outputs = function(output) {
 
 #' Run a model as set up for a calibration trial
 #'
-#' @returns A list with the simulated data used for calibration
+#' @param par A list or osmose.configuration object containing OSMOSE parameters
+#' @param debug Do you want to debug the run_model function?
+#' @returns A list with the simulated data used for calibration.
 #' @export
 #'
 #' @inheritParams osmose_calibration_setup
-osmose_calibration_runmodel = function(input, osmose, name, version="4.3.3", debug=FALSE) {
+osmose_calibration_runmodel = function(input, osmose, name, version="4.3.3", par=NULL, debug=FALSE) {
   
   wd = getwd()
   on.exit(setwd(wd))
@@ -404,11 +406,25 @@ osmose_calibration_runmodel = function(input, osmose, name, version="4.3.3", deb
   conf = read_osmose(input=input)
   
   dir = if(is.null(name)) "calibration" else sprintf("calibration_%s", name)
-  dir_master = file.path(dir, "master")  
+  dir_master = file.path(dir, "master") 
+  if(!dir.exists(dir)) stop(sprintf("Calibration folder %d does not exists.", dir))
+  if(!dir.exists(dir_master)) stop(sprintf("Calibration master folder %d does not exists.", dir_master))
   
   bsn = sprintf("osmose-%s", get_par(conf, "output.file.prefix"))
   guess_file = file.path(dir, paste(bsn, "-parguess.osm", sep=""))
+  if(!file.exists(guess_file)) stop(sprintf("Guess file was not found in %s", dir))
   par_guess = read_osmose(input=guess_file)
+  
+  if(!is.null(par)) {
+    check = inherits(par, "osmose.configuration") | inherits(par, "list")
+    if(!check) stop("'par' must be of class 'list' or 'osmose.configuration'.")
+    check = names(bb)==""
+    if(any(check)) {
+      warning("Removing unnamed elements of 'par'.")
+      par[which(check)] = NULL
+    }
+    par_guess[names(par)] = par
+  }
   
   source(file.path(dir, "run_model.R"), local=TRUE)
   
@@ -416,7 +432,12 @@ osmose_calibration_runmodel = function(input, osmose, name, version="4.3.3", deb
   
   setwd(dir_master)
   simulated = try(run_model(par=par_guess, conf=conf, osmose=osmose, is_a_test=FALSE, version=version))
+  if(inherits(simulated, "try-error")) stop("Error while running run_model.")
   setwd(wd)
+  
+  message(sprintf("OSMOSE outputs written in '%s'.", dir_master))
+  
+  class(simulated) = "osmose.runmodel"
   
   return(simulated)
   
