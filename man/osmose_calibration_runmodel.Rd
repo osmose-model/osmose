@@ -9,6 +9,7 @@ osmose_calibration_runmodel(
   osmose,
   name,
   version = "4.3.3",
+  par = NULL,
   debug = FALSE
 )
 }
@@ -22,9 +23,13 @@ jar for the current version.}
 
 \item{version}{OSMOSE version. Integer (2, 3, etc.) or releases ('v3r2') are
 accepted.}
+
+\item{par}{A list or osmose.configuration object containing OSMOSE parameters}
+
+\item{debug}{Do you want to debug the run_model function?}
 }
 \value{
-A list with the simulated data used for calibration
+A list with the simulated data used for calibration.
 }
 \description{
 Run a model as set up for a calibration trial

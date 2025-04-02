@@ -4,6 +4,7 @@
 \alias{get_var.osmose}
 \alias{get_var.list}
 \alias{get_var.NULL}
+\alias{get_var.osmose.calibration}
 \alias{get_var}
 \title{Get variable from an \code{osmose}-like object.}
 \usage{
@@ -34,6 +35,8 @@
 )
 
 \method{get_var}{`NULL`}(object, ...)
+
+\method{get_var}{osmose.calibration}(object, what, how, ...)
 
 get_var(object, what, how, ...)
 }
