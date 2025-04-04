@@ -140,11 +140,10 @@ public class ResourceSpecies implements ISpecies {
         sizeMin = cfg.getDouble("species.size.min.sp" + fileindex);
         sizeMax = cfg.getDouble("species.size.max.sp" + fileindex);
         trophicLevel = cfg.getFloat("species.tl.sp" + fileindex);
-        //legacy = cfg.getBoolean("simulation.resources.computePercent.legacy", false);
 
         if(cfg.isNull("simulation.resources.computePercent.legacy")) {
             // check the case when the parameter is not defined (insure backward compatibility)
-            legacy = false;
+            legacy = true;
         } else {
             legacy = cfg.getBoolean("simulation.resources.computePercent.legacy");
         }
