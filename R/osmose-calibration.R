@@ -274,13 +274,15 @@ osmose_calibration_setup = function(input, osmose, name=NULL, data_path=NULL, ty
 #' Run an OSMOSE calibration test.
 #'
 #' @param path Path to the main calibration directory.
-#' @param script Name of the calibratio script. The default is 'launch_calibration.R' as
+#' @param script Name of the calibration script. The default is 'launch_calibration.R' as
+#' @param parallel.only Run directly parallelisation test.
 #' automatically created by \code{\link{osmose_calibration_setup}}.
 #'
 #' @return TRUE is the test is completed.
 #' @export
+#' @inheritParams osmose_calibration_setup
 #'
-osmose_calibration_test = function(path, setup=NULL) {
+osmose_calibration_test = function(path, setup=NULL, script=NULL, parallel.only=FALSE) {
   
   wd = getwd()
   on.exit(setwd(wd))
@@ -291,9 +293,9 @@ osmose_calibration_test = function(path, setup=NULL) {
   if(!dir.exists(path)) stop(msg)
   setwd(path)
   
-  script  = ".calibration.R"
   options = ".calibrartest"
   
+  if(is.null(script)) script = ".calibration.R"
   if(!file.exists(script)) stop(sprintf("Calibration script file '%s' does not exist in '%s'.", script, path))
   
   if(is.null(setup)) {
@@ -324,16 +326,20 @@ osmose_calibration_test = function(path, setup=NULL) {
   
   # calibration test 2: sequential  
   
-  message("CALIBRATION TEST 2: Can we run a calibration in sequential mode (single-thread)?.\n\n")
-  .args = c(arg0, "--test", "--ncores=1")
-  source(script, local=TRUE)
-  message("CALIBRATION TEST 2: PASSED! \n  Calibration is running in sequential mode.\n\n")
-  message("This means all the files and inputs are in the right place.")
+  if(!parallel.only) {
+    message("CALIBRATION TEST 2: Can we run a calibration in sequential mode (single-thread)?.\n\n")
+    .args = c(arg0, "--test", "--ncores=1")
+    source(script, local=TRUE)
+    message("CALIBRATION TEST 2: PASSED! \n  Calibration is running in sequential mode.\n\n")
+    message("This means all the files and inputs are in the right place.")
+  } else {
+    message("CALIBRATION TEST 2: SKIPPED! \n\n")
+  }
   
   # calibration test 3: parallel
   
-  message("CALIBRATION TEST 2: Can we run a calibration in parallel mode (multi-thread)?.\n\n")
-  .args = c(arg0, "--test", "--ncores=28")
+  message("CALIBRATION TEST 3: Can we run a calibration in parallel mode (multi-thread)?.\n\n")
+  .args = c(arg0, "--test", "--ncores=8", "--omp", "--nht")
   source(script, local=TRUE)
   message("CALIBRATION TEST 3: PASSED! \n  Calibration is running in parallel.\n\n")
   message("This means all the files and inputs are being properly exported to the virtual cluster.")

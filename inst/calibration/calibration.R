@@ -23,7 +23,9 @@ message(sprintf("\tcalibrar version %s loaded.", packageVersion("calibrar")))
 library("osmose")
 message(sprintf("\tosmose version %s loaded.", packageVersion("osmose")))
 
-nodes = readLines(Sys.getenv("PBS_NODEFILE"))
+nodefile = Sys.getenv("PBS_NODEFILE")
+nodes = if(nodefile=="") "localhost" else readLines(nodefile)
+
 message(sprintf("\nUsing nodes: %s\n", paste(nodes, collapse=", ")))
 
 control_file   = .get_command_argument(.args, "calibration.control", default=".calibrarrc")
@@ -117,13 +119,13 @@ control$ncores = eff_cores # the actual number of cores you have
 if(isTRUE(parallel)) {
   
   if(!isTRUE(MPI)) {
-    message(sprintf("Using doSNOW for parallelisation (%s).", getClusterOption("type")))
-    library("doParallel")
+    if(!require("doParallel")) stop("Package 'doParallel' not found")
+    message(sprintf("Using doParallel for parallelisation (%s).", parallel:::getClusterOption("type")))
     cl = makeCluster(control$ncores)
     registerDoParallel(cl)
   } else {
+    if(!require("doSNOW")) stop("Package 'doSNOW' not found")
     message("Using MPI for parallelisation. If you want to use OMP for running OSMOSE, configure it manually.")
-    library("doSNOW")
     cl = makeCluster()
     registerDoSNOW(cl)
   }

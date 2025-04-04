@@ -9,8 +9,8 @@
 # change to work directory
 cd $SLURM_SUBMIT_DIR
 
-
-
+export PBS_NODEFILE=$(mktemp)  # Create a temporary file for the node list
+scontrol show hostnames $SLURM_JOB_NODELIST > "$PBS_NODEFILE"
 
 # export R_LIBS with the desired version of osmose and calibrar
 export R_LIBS=/home/$USER/R/x86_64-pc-linux-gnu-library/4.4
@@ -24,4 +24,4 @@ export R_LIBS=/home/$USER/R/x86_64-pc-linux-gnu-library/4.4
 #conda activate r4
 
 # Run R script in parallel mode
-time Rscript .calibration.R >>& mycalibration.log
+time Rscript .calibration.R &>> mycalibration.log

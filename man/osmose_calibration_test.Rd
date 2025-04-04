@@ -4,12 +4,19 @@
 \alias{osmose_calibration_test}
 \title{Run an OSMOSE calibration test.}
 \usage{
-osmose_calibration_test(path, setup = NULL)
+osmose_calibration_test(
+  path,
+  setup = NULL,
+  script = NULL,
+  parallel.only = FALSE
+)
 }
 \arguments{
 \item{path}{Path to the main calibration directory.}
 
-\item{script}{Name of the calibratio script. The default is 'launch_calibration.R' as
+\item{script}{Name of the calibration script. The default is 'launch_calibration.R' as}
+
+\item{parallel.only}{Run directly parallelisation test.
 automatically created by \code{\link{osmose_calibration_setup}}.}
 }
 \value{

@@ -363,7 +363,7 @@ read.cal = function(conf, sp) {
   }
   
   ix = .time.conv(ndtcal, ndt, nrow(mat), T)
-  bins = c(length_classes, length_classes[length(length_classes)] + dbin)
+  bins = c(length_classes, length_classes[length(length_classes)] + dbin)  - 0.5*dbin
   bins = pmax(0, bins)
   
   isize = pmax(bins, .getPar(this, "egg.size")) 
@@ -388,7 +388,7 @@ read.cal = function(conf, sp) {
   units[is.na(units)] = 1 # assume unbiased when landing data is not available.
   
   newmat = newmat*units
-  
+  onewmat = newmat
   # check for incomplete rows
   
   allna = apply(newmat, 1, FUN = function(x) all(is.na(x)))
@@ -396,8 +396,7 @@ read.cal = function(conf, sp) {
   if(any(allna)) {
     
     calmean = colMeans(newmat, na.rm=TRUE)
-    newmat[allna, ] = calmean
-
+    for(i in which(allna)) newmat[i, ] = calmean
     wmat = t(t(newmat)*W2)
     ilandings = 1e-6*rowSums(wmat)
     ilandings[ilandings==0] = 1
@@ -427,7 +426,7 @@ read.cal = function(conf, sp) {
   Linf = .getPar(this, "species.Linf")
   
   marks = length_classes[seq_len(Lmax)]
-  bins = c(marks, marks[length(marks)] + dbin)
+  bins = c(marks, marks[length(marks)] + dbin) - 0.5*dbin
   bins = pmax(0, bins)
   
   newmat = newmat[, seq_len(Lmax)]
@@ -455,7 +454,7 @@ read.cal = function(conf, sp) {
   err = NULL
   
   cond0 = ratio < 0.7 
-  cond1 = (lmax_pop/Linf < 0.7) & !(taxa %in% c("cephalopods"))
+  cond1 = (lmax_pop/Linf < 0.7) & !(taxa %in% c("cephalopods", "crustaceans"))
   cond2 = irat < 0.7
   
   if(cond0) err = c(err, msg1)
