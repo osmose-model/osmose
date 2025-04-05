@@ -1011,6 +1011,15 @@ get_fg_data = function(conf, x, type="species") {
   gp = get_par(conf, code, unlist=TRUE)
   if(is.null(gp)) return(NULL)
   
+  allv = NULL
+  if(type=="species") allv = get_species(conf, type="focal", code=TRUE)
+  if(type=="fisheries") allv = get_fisheries(conf, code=TRUE)
+
+  if(!is.null(allv)) {
+    ind = names(gp) %in% sprintf("%s%s", code, allv)
+    gp = gp[which(ind)]
+  }
+
   .find_species_in_group = function(y, gp, conf, type) {
     nmg = gsub(names(gp[which(gp==y)]), pattern=code, replacement="")
     xout = NULL
