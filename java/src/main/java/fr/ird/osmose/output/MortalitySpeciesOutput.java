@@ -111,8 +111,8 @@ public class MortalitySpeciesOutput extends AbstractDistribOutput {
                 if (Z > 0) {
                     for (int iDeath = 0; iDeath < nCause; iDeath++) {
                         mortalityRates[iDeath][iClass] += Z * nDead[iDeath][iClass] / nDeadTot;
-                        msg = String.format("Z = %.3f, nDeadTot = %.3f, nDead=%.3f, abundance=%.3f",Z,nDeadTot,nDead[iDeath][iClass],abundanceStage[iClass]);
-                        if(Double.isInfinite(mortalityRates[iDeath][iClass])) info(msg);                    
+                        //msg = String.format("Z = %.3f, nDeadTot = %.3f, nDead=%.3f, abundance=%.3f",Z,nDeadTot,nDead[iDeath][iClass],abundanceStage[iClass]);
+                        //if(Double.isInfinite(mortalityRates[iDeath][iClass])) info(msg);                    
                     }
                 }
             }
