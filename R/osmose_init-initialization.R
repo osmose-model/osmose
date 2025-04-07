@@ -676,15 +676,6 @@ init_sofia = function(input, file=NULL, test=FALSE, sp=NULL, ...) {
 
 # Internal ----------------------------------------------------------------
 
-
-lnorm2 = function(obs, sim, tiny=1e-2, ...) {
-  if(all(!is.finite(sim))) return(Inf)
-  obs = log(obs + tiny)
-  sim = log(sim + tiny)
-  nlogLike = sum((obs-sim)^2, na.rm=TRUE)
-  return(nlogLike)
-}
-
 llw = function(cv) 1/(2*cv^2)
 
 .initial_length_dist = function(sim, sp, add_larvae) {

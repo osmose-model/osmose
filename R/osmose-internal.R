@@ -721,6 +721,20 @@ osmose2R.v4r0 = function (path=NULL, species.names=NULL, conf=NULL, ...) {
     # yieldByYear (include species groups)
     outputData = .aggregate_catch_byyear(outputData, conf, type="yield")
     
+    # calibration penalties
+    
+    if(!is.null(get_par(conf, "calibration.biomass.penalty.collapse"))) {
+      if(isTRUE(get_par(conf, "calibration.biomass.penalty.collapse"))) {
+        outputData$penalty.collapse = sqrt(get_minmaxt(outputData, conf, lower=TRUE))
+      }
+    }
+    
+    if(!is.null(get_par(conf, "calibration.biomass.penalty.outburst"))) {
+      if(isTRUE(get_par(conf, "calibration.biomass.penalty.outburst"))) {
+        outputData$penalty.outburst = sqrt(get_minmaxt(outputData, conf, lower=FALSE))
+      }
+    }
+    
     start = get_par(conf, "simulation.time.start")
     if(is.null(start)) start = 0
     ndt   = get_par(conf, "simulation.time.ndtPerYear")/get_par(conf, "output.recordfrequency.ndt")

@@ -759,3 +759,40 @@ get_codes = function(sp, conf) {
 }
 
 
+# Penalties ---------------------------------------------------------------
+
+lnorm2 = function(obs, sim, tiny=1e-2, ...) {
+  if(all(!is.finite(sim))) return(Inf)
+  obs = log(obs + tiny)
+  sim = log(sim + tiny)
+  nlogLike = sum((obs-sim)^2, na.rm=TRUE)
+  return(nlogLike)
+}
+
+lnorm2p = function(obs, sim, tiny=1e-2, lower=TRUE, ...) {
+  if(all(is.na(obs))) stop("All observed values are NA.")
+  obs = log(obs + tiny)
+  sim = log(sim + tiny)
+  nlogLike = (obs-sim)^2
+  if(isTRUE(lower)) return(sum(ifelse(sim < obs, nlogLike, 0), na.rm=TRUE))
+  return(sum(ifelse(sim > obs, nlogLike, 0), na.rm=TRUE))
+}
+
+get_minmaxt = function(outputData, conf, lower=TRUE) {
+  
+  type = if(isTRUE(lower)) "min" else "max"
+  default = if(isTRUE(lower)) 0 else Inf
+  
+  bio = get_var(outputData, "biomass", how = "list", expected = TRUE)
+  code = get_species(conf, type="focal", code=TRUE)
+  pars = sprintf("calibration.biomass.%s.sp%s", type, code)
+  pmin = setNames(conf[pars], nm=pars)
+  pmin = lapply(pmin, FUN=function(x) if(is.null(x)) default else x)
+  names(pmin) = get_species(conf, nm=names(pmin))
+  pmin = pmin[names(bio)]
+  minp = mapply(lnorm2p, obs=pmin, sim=bio, MoreArgs=list(lower=lower))
+  
+  return(minp)
+  
+}
+
