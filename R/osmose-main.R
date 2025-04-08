@@ -481,9 +481,3 @@ osmose_calibration_demo = function(path = NULL) {
 
   return(demo)
 }
-
-#' @export
-osmose_calib_demo = function(path=NULL) {
-  .Deprecated(osmose_calibration_demo)
-  osmose_calibration_demo(path=path)
-}

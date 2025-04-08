@@ -1,7 +1,7 @@
 Package: osmose
 Type: Package
 Title: OSMOSE: Modelling Exploited Marine Ecosystems
-Version: 4.4.1.9021
+Version: 4.4.1.9022
 Date: 2023-05-20
 Authors@R: 
     c(person(given = "Nicolas",
@@ -56,9 +56,9 @@ Description: The multispecies and individual-based model (IBM) 'OSMOSE'
   which undergo major processes of fish life cycle (growth, explicit predation, 
   natural and starvation mortalities, reproduction and migration) and fishing 
   exploitation. The model needs basic biological parameters that are often 
-  available for a wide range of species, and which can be found in 'FishBase' 
-  for instance (see <http://www.fishbase.org/search.php>), and fish spatial 
-  distribution data. This package provides tools to build and run simulations 
+  available for a wide range of species, and which can be found in 'FishBase', 
+  and fish spatial distribution data. 
+  This package provides tools to build and run simulations 
   using the 'OSMOSE' model.
 License: GPL-3 + file LICENSE
 Encoding: UTF-8
