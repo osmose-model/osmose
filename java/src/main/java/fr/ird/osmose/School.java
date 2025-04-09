@@ -910,4 +910,35 @@ public class School extends AbstractSchool {
         return 0;
     }
 
+    public void updateBioenMaturation() throws Exception {
+
+        // If the school is mature, nothing is done and returns 1
+        if (this.isMature()) {
+            return;
+        }
+
+        String key = "m0";
+        double m0_temp = this.existsTrait(key) ? this.getTrait(key) : this.species.getMaturityM0();
+
+        key = "m1";
+        double m1_temp = this.existsTrait(key) ? this.getTrait(key) : this.species.getMaturityM1();
+
+        // If the this is not mature yet, maturation is computed following equation 8
+        double age = this.getAge();  // returns the age in years
+        double length = this.getLength();   // warning: length in cm.
+        double llim = m0_temp + m1_temp * age ;   // computation of a maturity
+
+        int output = (length >= llim) ? 1 : 0;
+        if (output == 1) {
+            this.setAgeMat(age);
+            this.setSizeMat(length);
+            this.setIsMature(true);
+        }
+
+        return;
+
+    }
+
+
+
 }

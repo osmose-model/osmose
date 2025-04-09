@@ -302,15 +302,27 @@ public class RelativeBiomassPopulator extends AbstractPopulator {
 
         // In school constructor, weight is provided in g.
         School school0 = new School(species, nEgg, (float) length, (float) weight, (int) ageDt);
-        if(this.isBioenEnabled) {
-            float gonadWeight = (float) (weight * gonadicIndex[iSpecies] * 1e-6f);  // convert gonadic weight in tons
-            school0.incrementGonadWeight(gonadWeight);
-        }
 
         // Fix by Nicolas: instance genotype for newly created schools
-        if(getConfiguration().isGeneticEnabled()) {
+        // Need to be before the check of maturity
+        if (getConfiguration().isGeneticEnabled()) {
             school0.instance_genotype(getSimulation().getRank());
         }
+
+        if (this.isBioenEnabled) {
+            try {
+                // Update maturation based on age and length
+                school0.updateBioenMaturation();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            if (school0.isMature()) {
+                float gonadWeight = (float) (weight * gonadicIndex[iSpecies] * 1e-6f); // convert gonadic weight in tons
+                school0.incrementGonadWeight(gonadWeight);
+            }
+        }
+
+
 
         return school0;
 

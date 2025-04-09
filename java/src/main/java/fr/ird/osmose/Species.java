@@ -133,6 +133,8 @@ public class Species implements ISpecies {
 
     private Random rdDraft;
 
+    private double m0, m1;
+
     private interface StarvationInterface  {
         public boolean isStarvationEnabled(School school);
     }
@@ -223,6 +225,13 @@ public class Species implements ISpecies {
             ageMaturity = Float.MAX_VALUE;
             eggSize = Float.MAX_VALUE;
             starvationInterface = (School sch) -> this.isStarvationEnabledBioen(sch);
+
+            key = String.format("species.maturity.m0.sp%d" + fileIndex);
+            m0 = cfg.getDouble(key);   // barrier.n: conversion from mm to cm
+
+            key = String.format("species.maturity.m1.sp%d" + fileIndex);
+            m1 = cfg.getDouble(key);   // barrier.n: conversion from mm to cm
+
         }
 
         eggWeight = cfg.getFloat("species.egg.weight.sp" + fileIndex);
@@ -440,5 +449,13 @@ public class Species implements ISpecies {
     // public ByClassTimeSeries getPrices() {
     //     return prices;
     // }
+
+    public double getMaturityM0() {
+        return this.m0;
+    }
+
+    public double getMaturityM1() {
+        return this.m1;
+    }
 
 }
