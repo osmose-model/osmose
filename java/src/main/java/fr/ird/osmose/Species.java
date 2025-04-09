@@ -226,10 +226,10 @@ public class Species implements ISpecies {
             eggSize = Float.MAX_VALUE;
             starvationInterface = (School sch) -> this.isStarvationEnabledBioen(sch);
 
-            key = String.format("species.maturity.m0.sp%d" + fileIndex);
+            key = String.format("species.maturity.m0.sp" + fileIndex);
             m0 = cfg.getDouble(key);   // barrier.n: conversion from mm to cm
 
-            key = String.format("species.maturity.m1.sp%d" + fileIndex);
+            key = String.format("species.maturity.m1.sp" + fileIndex);
             m1 = cfg.getDouble(key);   // barrier.n: conversion from mm to cm
 
         }
