@@ -69,10 +69,10 @@ public class EnergyBudget extends AbstractProcess {
     private double[] larvaePredationRateBioen;
 
     private double[] assimilation;
-    private double[] q;
-    private double[] tmin;
-    private double[] tmax;
-    private double[] topt;
+    private double[] netenergy_scaling;
+    private double[] temperature_tmin;
+    private double[] temperature_tmax;
+    private double[] temperature_topt;
 
     @FunctionalInterface
     private interface GetENet {
@@ -111,10 +111,10 @@ public class EnergyBudget extends AbstractProcess {
 
         c_m = new double[nSpecies];
         assimilation = new double[nSpecies];
-        q = new double[nSpecies];
-        tmin = new double[nSpecies];
-        tmax = new double[nSpecies];
-        topt = new double[nSpecies];
+        netenergy_scaling = new double[nSpecies];
+        temperature_tmin = new double[nSpecies];
+        temperature_tmax = new double[nSpecies];
+        temperature_topt = new double[nSpecies];
         EnetComputer = new GetENet[nSpecies];
 
         cpt = 0;
@@ -130,19 +130,19 @@ public class EnergyBudget extends AbstractProcess {
 
             } else {
 
-                EnetComputer[cpt] = (School school) -> computeEnetSimplified(school);
+                EnetComputer[cpt] = (School school) -> computeEnetLite(school);
 
                 key = String.format("species.netenergy.scaling.sp%d", i);
-                q[cpt] = this.getConfiguration().getDouble(key);
+                netenergy_scaling[cpt] = this.getConfiguration().getDouble(key);
 
                 key = String.format("species.temperature.tmin.sp%d", i);
-                tmin[cpt] = this.getConfiguration().getDouble(key);
+                temperature_tmin[cpt] = this.getConfiguration().getDouble(key);
 
                 key = String.format("species.temperature.tmax.sp%d", i);
-                tmax[cpt] = this.getConfiguration().getDouble(key);
+                temperature_tmax[cpt] = this.getConfiguration().getDouble(key);
 
                 key = String.format("species.temperature.topt.sp%d", i);
-                topt[cpt] = this.getConfiguration().getDouble(key);
+                temperature_topt[cpt] = this.getConfiguration().getDouble(key);
 
             }
 
@@ -230,9 +230,9 @@ public class EnergyBudget extends AbstractProcess {
 
     }
 
-    public void computeEnetSimplified(School school) {
+    public void computeEnetLite(School school) {
         int ispec = school.getSpeciesIndex();
-        double Enet = q[ispec] * this.assimilation[ispec] * school.getIngestion() *  computeLiteTempFunction(school)
+        double Enet = netenergy_scaling[ispec] * this.assimilation[ispec] * school.getIngestion() *  computeLiteTempFunction(school)
                 * oxygen_function.getFO2(school);
         school.setENet(Enet);
     }
@@ -240,10 +240,12 @@ public class EnergyBudget extends AbstractProcess {
     public double computeLiteTempFunction(School school) {
         int ispec = school.getSpeciesIndex();
         double temperature = temp_function.getTemp(school);
-        if((temperature < tmin[ispec]) || (temperature > tmax[ispec])) {
+        if((temperature < temperature_tmin[ispec]) || (temperature > temperature_tmax[ispec])) {
             return 0;
         } else {
-            return ((temperature - tmin[ispec]) * (temperature - tmax[ispec])) / ((temperature - tmin[ispec]) * (temperature - tmax[ispec]) - Math.pow(temperature - topt[ispec], 2));
+            double numerator = (temperature - temperature_tmin[ispec]) * (temperature - temperature_tmax[ispec]);
+            double denominator = numerator - Math.pow(temperature - temperature_topt[ispec], 2);
+            return numerator / denominator;
         }
 
     }
