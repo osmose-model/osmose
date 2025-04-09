@@ -45,7 +45,6 @@ import fr.ird.osmose.process.AbstractProcess;
 import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import fr.ird.osmose.Species;
 
 /**
  *
@@ -81,7 +80,6 @@ public class EnergyBudget extends AbstractProcess {
 
     private GetENet[] EnetComputer;
 
-
     public EnergyBudget(int rank) throws IOException {
 
         super(rank);
@@ -96,10 +94,9 @@ public class EnergyBudget extends AbstractProcess {
     // Add for migrating school
     private double[] c_rateBioen;
     private double[] W0; // weigth of indicidual at age = species.larvae.growth.threshold.age.sp ; only
-                         // for migration species. We can compute automaticaly if prameters was no
+                         // for migration species. We can compute automaticaly if parameters was no
                          // provide with von berta parameters and length weight coefficients. But can be
                          // specified if more reliable data
-
 
     @Override
     public void init() {
@@ -122,8 +119,9 @@ public class EnergyBudget extends AbstractProcess {
 
             key = String.format("species.bioenergetics.model.sp%d", i);
 
-            // if the bioen enet method is not set or is legacy, use the classical Osmose bioen
-            if(getConfiguration().isNull(key) || getConfiguration().getString(key).equals("full")) {
+            // if the bioen enet method is not set or is legacy, use the classical Osmose
+            // bioen
+            if (getConfiguration().isNull(key) || getConfiguration().getString(key).equals("full")) {
                 EnetComputer[cpt] = (School school) -> computeEnetLegacy(school);
                 key = String.format("species.bioen.maint.energy.c_m.sp%d", i);
                 c_m[cpt] = this.getConfiguration().getDouble(key);
@@ -194,7 +192,7 @@ public class EnergyBudget extends AbstractProcess {
             cpt++;
         }
 
-        // Recovers the assimilation parameter  for focal + background species
+        // Recovers the assimilation parameter for focal + background species
         assimilation = new double[nSpecies];
         cpt = 0;
         for (int i : getConfiguration().getFocalIndex()) {
@@ -232,15 +230,15 @@ public class EnergyBudget extends AbstractProcess {
 
     public void computeEnetLite(School school) {
         int ispec = school.getSpeciesIndex();
-        double Enet = netenergy_scaling[ispec] * this.assimilation[ispec] * school.getIngestion() *  computeLiteTempFunction(school)
-                * oxygen_function.getFO2(school);
+        double Enet = netenergy_scaling[ispec] * this.assimilation[ispec] * school.getIngestion()
+                * computeLiteTempFunction(school) * oxygen_function.getFO2(school);
         school.setENet(Enet);
     }
 
     public double computeLiteTempFunction(School school) {
         int ispec = school.getSpeciesIndex();
         double temperature = temp_function.getTemp(school);
-        if((temperature < temperature_tmin[ispec]) || (temperature > temperature_tmax[ispec])) {
+        if ((temperature < temperature_tmin[ispec]) || (temperature > temperature_tmax[ispec])) {
             return 0;
         } else {
             double numerator = (temperature - temperature_tmin[ispec]) * (temperature - temperature_tmax[ispec]);
@@ -279,7 +277,6 @@ public class EnergyBudget extends AbstractProcess {
                 } catch (Exception ex) {
                     Logger.getLogger(EnergyBudget.class.getName()).log(Level.SEVERE, null, ex);
                 }
-
 
                 this.computeEnetFaced(school);
 
