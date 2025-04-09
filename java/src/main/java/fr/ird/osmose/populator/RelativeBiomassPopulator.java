@@ -303,7 +303,7 @@ public class RelativeBiomassPopulator extends AbstractPopulator {
         // In school constructor, weight is provided in g.
         School school0 = new School(species, nEgg, (float) length, (float) weight, (int) ageDt);
         if(this.isBioenEnabled) {
-            float gonadWeight = (float) (weight * gonadicIndex[iSpecies]);  //
+            float gonadWeight = (float) (weight * gonadicIndex[iSpecies] * 1e-6f);  // convert gonadic weight in tons
             school0.incrementGonadWeight(gonadWeight);
         }
 
