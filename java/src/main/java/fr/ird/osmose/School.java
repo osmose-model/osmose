@@ -227,8 +227,8 @@ public class School extends AbstractSchool {
     public School(Species species, float x, float y, double abundance, float length, float weight, int ageDt, float trophicLevel, float gonadWeight) {
         this.abundance = abundance;
         instantaneousAbundance = abundance;
-        this.weight = weight * 1.e-6f;
-        this.gonadWeight = gonadWeight * 1.e-6f;
+        this.weight = weight * 1.e-6f;  // weight is converted from g to tons
+        this.gonadWeight = gonadWeight * 1.e-6f;  // gonadic weight is converted from g to tons
         biomass = instantaneousBiomass = abundance * (this.weight + this.gonadWeight);
         abundanceHasChanged = false;
         this.trophicLevel = trophicLevel;
@@ -792,7 +792,7 @@ public class School extends AbstractSchool {
     public void setRho(double value) {
         this.rho = value;
     }
-    
+
 
     public void incrementEnet(double d) {
         this.e_net += d;
