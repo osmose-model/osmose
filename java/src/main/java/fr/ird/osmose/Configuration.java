@@ -1752,7 +1752,7 @@ public class Configuration extends OLogger {
             shuffle = getBoolean(key, false);
         }
 
-        Nc4Chunking.Strategy strategy = Nc4Chunking.Strategy.none;
+        Nc4Chunking.Strategy strategy = Nc4Chunking.Strategy.standard;
         key = "output.netcdf.chunk";
         if (!this.isNull(key)) {
             switch (getString(key)) {
@@ -1766,7 +1766,7 @@ public class Configuration extends OLogger {
                     strategy = Nc4Chunking.Strategy.none;
                     break;
                 default:
-                    strategy = Nc4Chunking.Strategy.none;
+                    strategy = Nc4Chunking.Strategy.standard;
             }
         }
 
