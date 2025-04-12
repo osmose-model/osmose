@@ -227,7 +227,7 @@ get_surveys = function(x, code=FALSE, sr=NULL, nm=NULL) {
     return(separator)
   }
   
-  if(length(file)!=1) stop("You can only read one file at the time.")
+  if(length(file)!=1) stop("You can only read one file at the time: ", paste(file, collapse=", "), ".")
   file = if(!is.null(attr(file, "path"))) file.path(attr(file, "path"), file) else file
   
   config = readLines(file) # read lines

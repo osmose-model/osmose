@@ -422,7 +422,7 @@ osmose_calibration_runmodel = function(input, osmose, name, version="4.3.3", par
   if(!is.null(par)) {
     check = inherits(par, "osmose.configuration") | inherits(par, "list")
     if(!check) stop("'par' must be of class 'list' or 'osmose.configuration'.")
-    check = names(bb)==""
+    check = names(par)==""
     if(any(check)) {
       warning("Removing unnamed elements of 'par'.")
       par[which(check)] = NULL
