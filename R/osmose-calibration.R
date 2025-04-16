@@ -360,7 +360,7 @@ osmose_calibration_test = function(path, setup=NULL, script=NULL, parallel.only=
 #' @export
 #'
 #' @examples
-#' #' \dontrun{
+#' \dontrun{
 #' output = read_osmose(".")
 #' calib_output = osmose_calibration_outputs(output)
 #' }
