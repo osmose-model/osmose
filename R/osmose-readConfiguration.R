@@ -242,11 +242,11 @@ get_surveys = function(x, code=FALSE, sr=NULL, nm=NULL) {
 
 .setupInitialization = function(conf) {
   
-  nsp = .getPar(conf, "simulation.nspecies")
+  nsp = get_par(conf, "simulation.nspecies")
   
-  spind = .getPar(conf, "species.type") == "focal"
+  spind = get_par(conf, "species.type") == "focal"
   spind = gsub(names(spind)[which(spind)], pattern="species.type.sp", replacement = "") 
-  spnames = .getPar(conf, "species.name")[sprintf("species.name.sp%s", spind)]
+  spnames = get_par(conf, "species.name")[sprintf("species.name.sp%s", spind)]
   spind = as.numeric(spind)
   
   for(sp in spind) {
@@ -256,7 +256,7 @@ get_surveys = function(x, code=FALSE, sr=NULL, nm=NULL) {
     sim$biomass   = read.biomass(conf, sp)
     sim$yield     = read.yield(conf, sp)
     sim$fecundity = read.fecundity(conf, sp)
-    sim$bioguess  = .getPar(.getPar(conf, sp=sp), "observed.biomass.guess")
+    sim$bioguess  = get_par(get_par(conf, sp=sp), "observed.biomass.guess")
     isp = sprintf("osmose.initialization.data.sp%d", sp)
     conf[[isp]]   = sim
     
@@ -271,14 +271,14 @@ read.cal = function(conf, sp) {
   
   MSG = NULL
   
-  this = .getPar(conf, sp=sp)
+  this = get_par(conf, sp=sp)
   ndt = conf$simulation.time.ndtperyear
   T   = conf$simulation.time.nyear*ndt
   
-  spname = .getPar(this, "species.name")
+  spname = get_par(this, "species.name")
   landings = read.yield(conf, sp)
   
-  start = .getPar(conf, par="simulation.time.start")
+  start = get_par(conf, par="simulation.time.start")
   if(is.null(start)) start = attr(landings, "start")
   
   time = start + seq(from=0.5/ndt, by=1/ndt, length=T)
@@ -287,7 +287,7 @@ read.cal = function(conf, sp) {
   
   if(!isTRUE(harvested)) {
     
-    Linf = .getPar(this, "species.linf")
+    Linf = get_par(this, "species.linf")
     bins = pretty(c(0, 0.9*Linf), n=15)
     dbin = unique(diff(bins))
     length_classes = 0.5*head(bins, -1) + 0.5*tail(bins, -1)
@@ -300,12 +300,12 @@ read.cal = function(conf, sp) {
     
   }
   
-  a = .getPar(this, "species.length2weight.condition.factor")
-  b = .getPar(this, "species.length2weight.allometric.power")
+  a = get_par(this, "species.length2weight.condition.factor")
+  b = get_par(this, "species.length2weight.allometric.power")
   
-  taxa = .getPar(this, "species.taxa")
+  taxa = get_par(this, "species.taxa")
   
-  file = .getPar(this, "fisheries.catchatlength.file")
+  file = get_par(this, "fisheries.catchatlength.file")
   msg = sprintf("Only one catch-at-length file must be provided for %s.", spname)
   if(length(file)>1) stop(msg)
   if(is.null(file)) return(NULL)
@@ -332,7 +332,7 @@ read.cal = function(conf, sp) {
   
   mat = as.matrix(out[, as.character(length_classes)])
 
-  ndtcal = .getPar(this, "fisheries.catchatlength.ndtPerYear")
+  ndtcal = get_par(this, "fisheries.catchatlength.ndtPerYear")
   msg = sprintf("Parameter 'fisheries.catchatlength.ndtPerYear.sp%d' is missing.", sp)
   if(is.null(ndtcal)) stop(msg)  
   nT = conf$simulation.time.nyear*ndtcal 
@@ -350,7 +350,7 @@ read.cal = function(conf, sp) {
     msg = sprintf("Positive catch but no catch-at-length data in %s's file is provided, all %ss.", spname, typ)
     stop(msg, call. = FALSE)
     
-    Linf = .getPar(this, "species.linf")
+    Linf = get_par(this, "species.linf")
     bins = pretty(c(0, 0.9*Linf), n=15)
     dbin = unique(diff(bins))
     length_classes = 0.5*head(bins, -1) + 0.5*tail(bins, -1)
@@ -366,7 +366,7 @@ read.cal = function(conf, sp) {
   bins = c(length_classes, length_classes[length(length_classes)] + dbin)  - 0.5*dbin
   bins = pmax(0, bins)
   
-  isize = pmax(bins, .getPar(this, "egg.size")) 
+  isize = pmax(bins, get_par(this, "egg.size")) 
   
   L1 = head(isize, -1)
   L2 = tail(isize, -1)
@@ -422,8 +422,8 @@ read.cal = function(conf, sp) {
   imax = which.max(cumsum(colSums(wmat, na.rm=TRUE))/sum(wmat, na.rm=TRUE) > 0.999)
   lmax_cal = length_classes[imax]
   
-  Amax = .getPar(this, "species.lifespan")
-  Linf = .getPar(this, "species.Linf")
+  Amax = get_par(this, "species.lifespan")
+  Linf = get_par(this, "species.Linf")
   
   marks = length_classes[seq_len(Lmax)]
   bins = c(marks, marks[length(marks)] + dbin) - 0.5*dbin
@@ -440,9 +440,9 @@ read.cal = function(conf, sp) {
   
   # validation
   msg1 = sprintf("Maximum length for %s in the model (%0.1f cm at %d years) is lower than maximum reported size in landings (%0.2fcm), check catch-at-length data.",
-                 .getPar(this, "species.name"), lmax_pop, as.integer(Amax), lmax_cal)
+                 get_par(this, "species.name"), lmax_pop, as.integer(Amax), lmax_cal)
   msg2 = sprintf("Maximum length for %s in the model (%0.1f cm at %d years) is %0.1f%% of Linf (%0.1fcm), check growth parameters.",
-                 .getPar(this, "species.name"), lmax_pop, as.integer(Amax), 100*lmax_pop/Linf, Linf)
+                 get_par(this, "species.name"), lmax_pop, as.integer(Amax), 100*lmax_pop/Linf, Linf)
   msg3 = sprintf("Only %0.1f%% of landings are used! Check catch-at-length data and growth parameters.",
                  100*irat)
   
@@ -476,20 +476,20 @@ read.cal = function(conf, sp) {
 
 read.biomass = function(conf, sp) {
   
-  this = .getPar(conf, sp=sp)
+  this = get_par(conf, sp=sp)
   ndt = conf$simulation.time.ndtperyear 
   T = .read_nstep(conf)
-  biofile = .getPar(this, "observed.biomass.file")
+  biofile = get_par(this, "observed.biomass.file")
   if(is.null(biofile)) {
     message(sprintf("Observed biomass has not been provided for species %d, using 'observed.biomass.guess' instead.", sp))
     return(NULL)
   }
     
-  q = .getPar(this, "observed.biomass.q")
+  q = get_par(this, "observed.biomass.q")
   if(is.null(q)) q = 1
   bioref = .readCSV(biofile)
-  ivar= .getPar(this, "species.name")
-  ndtbio = .getPar(this, "observed.biomass.ndtPerYear")
+  ivar= get_par(this, "species.name")
+  ndtbio = get_par(this, "observed.biomass.ndtPerYear")
   if(is.null(ndtbio)) stop("Parameter 'observed.biomass.ndtPerYear' is missing.")
   if(nrow(bioref) < ndtbio) 
     stop(sprintf("Less than one year of data in %s, check observed.biomass.ndtPerYear.sp%d=%d", 
@@ -503,23 +503,23 @@ read.biomass = function(conf, sp) {
 }
 
 .read_nstep = function(conf) {
-  T = .getPar(conf, "time.nstep")
+  T = get_par(conf, "time.nstep")
   if(!is.null(T)) return(T)
-  ndt = .getPar(conf, "simulation.time.ndtperyear") 
-  T = ndt*.getPar(conf, "simulation.time.nyear")
+  ndt = get_par(conf, "simulation.time.ndtperyear") 
+  T = ndt*get_par(conf, "simulation.time.nyear")
   return(T)
 }
 
 read.yield = function(conf, sp) {
   
-  this = .getPar(conf, sp=sp)
+  this = get_par(conf, sp=sp)
   ndt = conf$simulation.time.ndtperyear 
   T = .read_nstep(conf)
-  biofile = .getPar(this, "fisheries.yield.file")
+  biofile = get_par(this, "fisheries.yield.file")
   if(is.null(biofile)) stop("Landings have not been provided.")
   bioref = .readCSV(biofile)
-  ivar= .getPar(this, "species.name")
-  ndtbio = .getPar(this, "fisheries.yield.ndtPerYear")
+  ivar= get_par(this, "species.name")
+  ndtbio = get_par(this, "fisheries.yield.ndtPerYear")
   if(is.null(ndtbio)) stop("Parameter 'fisheries.yield.ndtPerYear' is missing.")
   if(nrow(bioref) < ndtbio) 
     stop(sprintf("Less than one year of data in %s, check fisheries.yield.ndtPerYear.sp%d=%d", 
@@ -540,15 +540,15 @@ read.yield = function(conf, sp) {
 
 read.fecundity = function(conf, sp) {
   
-  this = .getPar(conf, sp=sp)
-  opar = .getPar(this, "reproduction.fecundity.sp") # output already created
+  this = get_par(conf, sp=sp)
+  opar = get_par(this, "reproduction.fecundity.sp") # output already created
   if(!is.null(opar)) return(opar)
-  mode = .getPar(this, "species.reproduction.mode")
+  mode = get_par(this, "species.reproduction.mode")
   if(is.null(mode)) mode = "oviparity"
   fectype = if(mode=="oviparity") "relativefecundity" else "absolutefecundity"
-  repfile = .getPar(this, "reproduction.season.file")
+  repfile = get_par(this, "reproduction.season.file")
   fecundity = as.numeric(unlist(.readCSV(repfile, row.names = 1)))
-  relfec = .getPar(this, sprintf("species.%s", fectype))
+  relfec = get_par(this, sprintf("species.%s", fectype))
   if(relfec < 1e-16) stop(sprintf("Null relative or absolute fecundity for sp%s, please check.", sp), call. = FALSE) 
   fecundity = relfec*fecundity
   

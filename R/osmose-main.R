@@ -129,7 +129,7 @@ run_osmose = function(input, parameters = NULL, output = NULL, log = "osmose.log
   if(is.null(output)){
     # If output is NULL, file output path is used.
     outDir = ""
-    output = .getPar(conf, "output.dir.path")
+    output = get_par(conf, "output.dir.path")
     input_dir = dirname(input)
     output = file.path(input_dir, output)
   } else {
@@ -161,7 +161,7 @@ run_osmose = function(input, parameters = NULL, output = NULL, log = "osmose.log
   .t1 = Sys.time()
   seconds = as.integer(difftime(.t1, .t0, units = "secs"))
 
-  prefix = .getPar(conf, "output.file.prefix")
+  prefix = get_par(conf, "output.file.prefix")
   if(is.null(prefix)) prefix = "osmose"
 
   conf = .add_to_configuration(conf)

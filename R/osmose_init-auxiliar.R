@@ -9,12 +9,12 @@
 #'
 osmose_grid = function(conf, center=TRUE, ...) {
   
-  lat = c(.getPar(conf, "grid.lowright.lat"),
-          .getPar(conf, "grid.upleft.lat"))
-  lon = c(.getPar(conf, "grid.upleft.lon"),
-          .getPar(conf, "grid.lowright.lon"))
-  dx = diff(lon)/.getPar(conf, "ncolumn")
-  dy = diff(lat)/.getPar(conf, "nline")
+  lat = c(get_par(conf, "grid.lowright.lat"),
+          get_par(conf, "grid.upleft.lat"))
+  lon = c(get_par(conf, "grid.upleft.lon"),
+          get_par(conf, "grid.lowright.lon"))
+  dx = diff(lon)/get_par(conf, "ncolumn")
+  dy = diff(lat)/get_par(conf, "nline")
   
   # Create a rectangular grid given lat, lon and dxy.
   # No correction by Earth curvature
