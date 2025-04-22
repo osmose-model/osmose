@@ -83,7 +83,7 @@
                           files=allfiles, scale=c(0.8, 1.2), lower=-1, upper=+3, delta=1, default=1)
    
   knots = get_par(conf, "mortality.additional.larva.knots", as.is=TRUE)
-  viv   = get_par(conf, "species.reproducion.mode", as.is=TRUE)
+  viv   = get_par(conf, "species.reproduction.mode", as.is=TRUE)
   
   pars = list()
   for(isp in get_species(conf, type="focal", code=TRUE)) {
