@@ -13,17 +13,19 @@ run_model = function(par, conf, osmose, is_a_test=FALSE, version="4.3.3", option
   fishing_deviates = get_par(par, 'fisheries.rate.byperiod.log')
   
   # recover parameters modelled by groups
-  nms = get_par(conf, "calibration.*.bygroup$", unlist=TRUE)
-  nms = names(nms)[which(nms)]
-  nms = gsub(nms, pattern="^calibration.", replacement="")
-  nms = gsub(nms, pattern=".bygroup$", replacement="")
   random = NULL
-  if(length(nms)>0) {
-    for(nm in nms) {
-      par = osmose:::get_osmose_parameter(par=par, conf=conf, nm=nm)
-      irandom = paste0("random.", nm)
-      random = c(random, get_par(par, irandom, as.is=TRUE))
-      par = get_par(par, irandom, invert = TRUE, as.is=TRUE)
+  nms = get_par(conf, "calibration.*.bygroup$", unlist=TRUE)
+  if(!is.null(nms)) {
+    nms = names(nms)[which(nms)]
+    if(length(nms)>0) {
+      nms = gsub(nms, pattern="^calibration.", replacement="")
+      nms = gsub(nms, pattern=".bygroup$", replacement="")
+      for(nm in nms) {
+        par = osmose:::get_osmose_parameter(par=par, conf=conf, nm=nm)
+        irandom = paste0("random.", nm)
+        random = c(random, get_par(par, irandom, as.is=TRUE))
+        par = get_par(par, irandom, invert = TRUE, as.is=TRUE)
+      }
     }
   }
   
