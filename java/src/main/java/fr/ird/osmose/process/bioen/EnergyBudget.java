@@ -493,11 +493,12 @@ public class EnergyBudget extends AbstractProcess {
      */
     public void getDg(School school) {
 
+        int ispec = school.getSpeciesIndex();
         double output = 0;
         double enet = school.getENet();
         double rho = school.getRho();
         if ((enet > 0) && school.isAlive()) {
-            output = rho * enet;
+            output = rho * eta[ispec] * enet;
             output /= school.getInstantaneousAbundance();
             school.incrementGonadWeight((float) output);
         }
@@ -520,11 +521,12 @@ public class EnergyBudget extends AbstractProcess {
 
         // If the organism is imature, all the net energy goes to the somatic growth.
         // else, only a 1-rho fraction goes to somatic growth
-        double rho = (!school.isMature()) ? 0
-                : r_temp * school.getWeight() * 1e6f / (etaSpecies * school.get_enet_faced());
         //double rho = (!school.isMature()) ? 0
         //        : r_temp / (etaSpecies * school.get_enet_faced())
         //                * Math.pow(school.getWeight() * 1e6f, 1 - school.getBetaBioen());
+        double rho = (!school.isMature()) ? 0
+                : r_temp / (school.get_enet_faced())
+                        * Math.pow(school.getWeight() * 1e6f, 1 - school.getBetaBioen());
         rho = ((rho < 0) ? 0 : rho); // 0 if rho<0
         rho = ((rho > 1) ? 1 : rho); // 1 if rho>1
 
