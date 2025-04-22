@@ -693,8 +693,9 @@ get_codes = function(sp, conf) {
   out = cumsum(out[ind])
   if(length(out)!=nphase) stop("Incompatible phases configuration.")
   npar = max(out)
-  mult = sapply(out, FUN=function(x) max(pretty(npar/x)))
-  return(pmin(reltol*mult, 1e-1))
+  mult = 5*sapply(out, FUN=function(x) max(pretty(npar/x)))
+  mult[length(mult)] = 1 
+  return(pmin(reltol*mult, 2.5e-2))
 }
 
 .timing = function(.t0, t0, t1, tr, file) {

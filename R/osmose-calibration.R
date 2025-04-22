@@ -58,7 +58,7 @@ osmose_calibration_setup = function(input, osmose, name=NULL, data_path=NULL, ty
   file.copy(from=osmose, to=file.path(dir, nosmose))
   osmose = file.path("..", nosmose)
   
-  reltol = if(is.null(control$reltol)) 5e-5 else control$reltol
+  reltol = if(is.null(control$reltol)) 5e-4 else control$reltol
   
   # Create dir and file names -----------------------------------------------
   
