@@ -28,7 +28,7 @@ set_par = function(x, value=NULL, scale=1, delta=0, lower=NULL, upper=NULL, digi
   xauto2 = rep(1, length(val))
   if(isTRUE(auto)) {
     xauto2 = rep(0, length(val))
-    xind = grep(names(val), pattern="deviate")
+    xind = grep(names(val), pattern="\\.byspecies\\.|\\.deviate\\.")
     xauto1[xind] = 0
     xauto2[xind] = 1
   }
@@ -85,9 +85,9 @@ replicate_par = function(x, n) {
 get_par2 = function(conf, par) {
   bg = get_par(conf, sprintf("calibration.%s.bygroup", par))
   if(isTRUE(bg)) {
-    usedev = get_par(conf, sprintf("calibration.%s.usedeviates", par))
-    if(is.null(usedev)) usedev = TRUE
-    out = get_calibration_parameters(conf, par, usedev=usedev)
+    byspp = get_par(conf, sprintf("calibration.%s.byspecies", par))
+    if(is.null(byspp)) byspp = TRUE
+    out = get_calibration_parameters(conf, par, byspp=byspp)
     if(is.null(out)) out = get_par(conf, sprintf("%s.sp", par), as.is=TRUE)
   } else {
     out = get_par(conf, sprintf("%s.sp", par), as.is=TRUE)
@@ -101,7 +101,7 @@ get_par_phase = function(conf, par, default=-1) {
   return(phase)
 }
 
-get_calibration_parameters = function(conf, par, usedev=TRUE) {
+get_calibration_parameters = function(conf, par, byspp=TRUE) {
   
   gg = get_par(conf, sprintf("%s.group.sp", par), unlist=TRUE)
   if(is.null(gg)) return(NULL)
@@ -124,9 +124,9 @@ get_calibration_parameters = function(conf, par, usedev=TRUE) {
   dat0$ind = as.numeric(gsub(dat0$code, pattern="sp", replacement=""))
   dat0 = dat0[order(dat0$ind), ]
   pmiss = setNames(dat$par, nm=dat$code)[miss]
-  if(!isTRUE(usedev)) dat0$deviate = 1
+  if(!isTRUE(byspp)) dat0$deviate = 1
   
-  out = c(as.list(setNames(dat0$deviate, nm=sprintf("%s.deviate.%s", par, dat0$code))),
+  out = c(as.list(setNames(dat0$deviate, nm=sprintf("%s.byspecies.%s", par, dat0$code))),
           as.list(setNames(means, nm=sprintf("%s.base.sp%s", par, names(means)))),
           as.list(setNames(pmiss, nm=sprintf("%s.%s", par, names(pmiss)))))
   class(out) = c("osmose.configuration", class(out))
@@ -140,9 +140,16 @@ get_osmose_parameter = function(par, conf, nm) {
   if(is.null(Lbase)) return(par)
   par = get_par(par, nm, invert=TRUE, as.is=TRUE)
   Lall = get_par(Lall, ".base.", invert = TRUE, as.is=TRUE)
-  Ldev = get_par(Lall, ".deviate.", unlist=TRUE)
-  Lall = get_par(Lall, ".deviate", invert = TRUE, as.is=TRUE)
   
+  Ldev = get_par(Lall, ".byspecies.", unlist=TRUE)
+  if(is.null(Ldev)) {
+    Ldev = get_par(Lall, ".deviate.", unlist=TRUE)
+    names(Ldev) = gsub(names(Ldev), pattern=".deviate.", replacement=".byspecies.")
+    Lall = get_par(Lall, ".deviate.", invert = TRUE, as.is=TRUE)
+  } else {
+    Lall = get_par(Lall, ".byspecies.", invert = TRUE, as.is=TRUE)
+  }
+    
   gg = get_par(conf, sprintf("%s.group.sp", nm), unlist=TRUE)
   names(Lbase) = gsub(names(Lbase), pattern=sprintf("%s.base.sp", nm), replacement="")
   lgg = setNames(Lbase[gg], nm=names(gg))
@@ -150,7 +157,7 @@ get_osmose_parameter = function(par, conf, nm) {
   dat0 = data.frame(code=sprintf("sp%s", get_species(conf, type="focal", code=TRUE)))
   datg = data.frame(code=gsub(names(gg), pattern=paste0(nm, ".group."), replacement=""),
                     base=lgg, group=gg)
-  datl = data.frame(code=gsub(names(Ldev), pattern=paste0(nm, ".deviate."), replacement=""),
+  datl = data.frame(code=gsub(names(Ldev), pattern=paste0(nm, ".byspecies."), replacement=""),
                     deviate=Ldev)
   dat0 = merge(dat0, datg, all.x=TRUE)
   dat0 = merge(dat0, datl, all.x=TRUE)
