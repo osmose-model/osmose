@@ -95,7 +95,7 @@ public class BioenMeanEnergyNet extends AbstractOutput {
     }
 
     @Override
-    String getDescription() {
+    protected String getDescription() {
         return "Mean energy net rate (grams.grams^-beta) (grams net usable per gram of predator)";
     }
 

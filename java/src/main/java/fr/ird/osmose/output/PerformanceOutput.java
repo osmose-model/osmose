@@ -99,7 +99,7 @@ public class PerformanceOutput extends AbstractOutput {
     }
 
     @Override
-    String getDescription() {
+    protected String getDescription() {
         String output = "Returns the mean CPU time and memory usage for one time-step";
         return output;
     }

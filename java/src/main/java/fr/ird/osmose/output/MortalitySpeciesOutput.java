@@ -68,7 +68,7 @@ public class MortalitySpeciesOutput extends AbstractDistribOutput {
     }
 
     @Override
-    String getDescription() {
+    protected String getDescription() {
         return "Predation (Mpred), Starvation (Mstarv), Additional mortality (Madd), Fishing (F) & Out-of-domain (Z) mortality rates per time step of saving and per size class. Z is the total mortality for migratory fish outside the simulation grid. To get annual mortality rates, sum the mortality rates within one year.";
     }
 
@@ -103,7 +103,7 @@ public class MortalitySpeciesOutput extends AbstractDistribOutput {
                 for (int iDeath = 0; iDeath < nCause; iDeath++) {
                     nDeadTot += nDead[iDeath][iClass];
                 }
-                // Adding 1e-6 for numerical stability. It will only impact when 
+                // Adding 1e-6 for numerical stability. It will only impact when
                 // nDeatTot == abundanceStage[iClass]. Then Z=23.025 instead Inf,
                 // extremely minor effect otherwise (when nDeatTot -> abundanceStage[iClass])
                 double Z = Math.log((abundanceStage[iClass] + 1e-6) / ((abundanceStage[iClass] - nDeadTot) + 1e-6));
@@ -112,7 +112,7 @@ public class MortalitySpeciesOutput extends AbstractDistribOutput {
                     for (int iDeath = 0; iDeath < nCause; iDeath++) {
                         mortalityRates[iDeath][iClass] += Z * nDead[iDeath][iClass] / nDeadTot;
                         //msg = String.format("Z = %.3f, nDeadTot = %.3f, nDead=%.3f, abundance=%.3f",Z,nDeadTot,nDead[iDeath][iClass],abundanceStage[iClass]);
-                        //if(Double.isInfinite(mortalityRates[iDeath][iClass])) info(msg);                    
+                        //if(Double.isInfinite(mortalityRates[iDeath][iClass])) info(msg);
                     }
                 }
             }

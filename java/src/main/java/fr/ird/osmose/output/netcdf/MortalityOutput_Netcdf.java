@@ -249,7 +249,7 @@ public class MortalityOutput_Netcdf extends AbstractOutput_Netcdf {
     }
 
     @Override
-    String getDescription() {
+    protected String getDescription() {
         return ("Mortality rate"); //To change body of generated methods, choose Tools | Templates.
     }
 

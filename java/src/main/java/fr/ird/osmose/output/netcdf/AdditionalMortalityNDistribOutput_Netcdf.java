@@ -83,7 +83,7 @@ public class AdditionalMortalityNDistribOutput_Netcdf extends AbstractDistribOut
     }
 
     @Override
-    String getDescription() {
+    protected String getDescription() {
         StringBuilder description = new StringBuilder();
         description.append("Distribution of additional mortality by ");
         description.append(getType().getDescription());
