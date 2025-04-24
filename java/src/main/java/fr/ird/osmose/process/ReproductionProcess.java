@@ -67,6 +67,7 @@ public class ReproductionProcess extends AbstractProcess {
      * Distribution of the spawning throughout the year
      */
     private double[][] seasonSpawning;
+    private double[][] seasonSpawningBioen;
     /*
      * Percentage of female in the population
      */
@@ -160,8 +161,14 @@ public class ReproductionProcess extends AbstractProcess {
                 seasonSpawning[cpt] = new double[] { 1.d / getConfiguration().getNStepYear() };
             }
             cpt++;
-        }
+        } // end of reading seasonSpawning
 
+        // recompute seasonality for bioen egg release from gonads
+        if (getConfiguration().isBioenEnabled()) {
+          //bioenSeason();
+        }
+        
+        
         cpt = 0;
         for (int i : getConfiguration().getFocalIndex()) {
             float sum = 0;
@@ -405,6 +412,74 @@ public class ReproductionProcess extends AbstractProcess {
         } // end of species loop
     } // end of method
 
+    /** Normalize season in the case of classical Osmose run */
+    protected void bioenSeason() {
+
+        for (int iSpec = 0; iSpec < getNSpecies(); iSpec++) {
+
+            int length = seasonSpawning[iSpec].length;
+
+            // no normalisation done if length == 1 (assumes
+            // evenly distributed reproduction
+            if (length == 1) {
+                continue;
+            }
+
+            // If time series if of length nStep/year (i.e. 24 for instance)
+            // one single normalisation is made for the series
+            if (length == getConfiguration().getNStepYear()) {
+
+                double sum = 0;
+
+                // computes the sum over the vector
+                for (double val : seasonSpawning[iSpec]) {
+                    sum += val;
+                }
+
+                // if the sum is not 0 and if the sum different than 1, normalisation
+                if ((sum > 0) && (sum != 1)) {
+                    for (int cpt = 0; cpt < length; cpt++) {
+                        seasonSpawning[iSpec][cpt] /= sum;
+                    }
+                }
+            }
+
+            // If the lenght of the time series is > nstepYear (i.e. values by years)
+            else if (length > getConfiguration().getNStepYear()) {
+
+                int start = 0;
+                int end = getConfiguration().getNStepYear();
+
+                // number of years = length / nstepyear. For instance, if length=48, nstep year=
+                // 24, nyears = 2
+                int nyears = length / getConfiguration().getNStepYear();
+
+                // Loop over the years
+                for (int iyear = 0; iyear < nyears; iyear++) {
+
+                    double sum = 0;
+
+                    // computes the sum
+                    for (int cpt = start; cpt < end; cpt++) {
+                        sum += seasonSpawning[iSpec][cpt];
+                    }
+
+                    // if the sum is not 0 and if the sum different than 1, normalisation
+                    if ((sum > 0) && (sum != 1)) {
+                        for (int cpt = start; cpt < end; cpt++) {
+                            seasonSpawning[iSpec][cpt] /= sum;
+                        }
+                    }
+
+                    // increment of the start/end indexes
+                    end += getConfiguration().getNStepYear();
+                    start += getConfiguration().getNStepYear();
+
+                } // end of year for loop
+            } // end of if condition on length
+        } // end of species loop
+    } // end of method
+
     protected double getSeason(int iStepSimu, Species species) {
 
         int iSpec = species.getSpeciesIndex();
@@ -417,6 +492,11 @@ public class ReproductionProcess extends AbstractProcess {
         } else {
             iStep = getSimulation().getIndexTimeYear();
         }
+        
+        if (getConfiguration().isBioenEnabled()) {
+          //return seasonSpawningBioen[iSpec][iStep];
+        }
+        
         return seasonSpawning[iSpec][iStep];
     }
 
