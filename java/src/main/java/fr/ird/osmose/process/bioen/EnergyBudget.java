@@ -212,9 +212,11 @@ public class EnergyBudget extends AbstractProcess {
 
         W0 = new double[nSpecies];
         cpt = 0;
+        double w0;
         for (int i : getConfiguration().getFocalIndex()) {
             key = String.format("species.weight.at.larvae.growth.threshold.age.sp%d", i);
-            W0[cpt] = this.getConfiguration().getDouble(key);
+            w0 = this.getConfiguration().canFind(key) ? this.getConfiguration().getDouble(key) : 0; 
+            W0[cpt] = w0;
             cpt++;
         }
     }
