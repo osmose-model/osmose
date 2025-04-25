@@ -77,6 +77,7 @@ public class AlleleFrequencyOutput extends SimulationLinker implements IOutput {
     @Override
     public void reset() {
         number_of_occurrences = new double[ntrait][nlocus_max][nvalue_max];
+        normalization = new double[ntrait][nlocus_max];
     }
 
     @Override
@@ -357,6 +358,11 @@ public class AlleleFrequencyOutput extends SimulationLinker implements IOutput {
         if(this.alleleFrequencyOutputEnabled) {
             try {
                 alleleFrequencyOutputnc.close();
+                String strFilePart = this.getFilenameAlleleFrequency();
+                String strFileBase = strFilePart.substring(0, strFilePart.indexOf(".part"));
+                File filePart = new File(strFilePart);
+                File fileBase = new File(strFileBase);
+                filePart.renameTo(fileBase);
             } catch (IOException e) {
                 // TODO Auto-generated catch block
                 e.printStackTrace();
@@ -366,6 +372,11 @@ public class AlleleFrequencyOutput extends SimulationLinker implements IOutput {
         if(this.expectedHtzOutputEnabled) {
             try {
                 expectedHtzOutputnc.close();
+                String strFilePart = this.getFilenameExpectedHtz();
+                String strFileBase = strFilePart.substring(0, strFilePart.indexOf(".part"));
+                File filePart = new File(strFilePart);
+                File fileBase = new File(strFileBase);
+                filePart.renameTo(fileBase);
             } catch (IOException e) {
                 // TODO Auto-generated catch block
                 e.printStackTrace();

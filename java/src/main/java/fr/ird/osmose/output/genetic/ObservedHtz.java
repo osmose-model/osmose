@@ -69,6 +69,7 @@ public class ObservedHtz extends SimulationLinker implements IOutput {
     @Override
     public void reset() {
         number_of_occurrences = new double[ntrait][nlocus_max];
+        normalization = new double[ntrait][nlocus_max];
     }
 
     @Override
@@ -139,6 +140,8 @@ public class ObservedHtz extends SimulationLinker implements IOutput {
 
     @Override
     public void init() {
+
+        recordFrequency = getConfiguration().getInt("output.recordfrequency.ndt");
 
         nvalue_max = Integer.MIN_VALUE;
         nlocus_max = Integer.MIN_VALUE;
@@ -229,6 +232,11 @@ public class ObservedHtz extends SimulationLinker implements IOutput {
     public void close() {
         try {
             this.observedHtzOutputnc.close();
+            String strFilePart = this.getFilenameObservedHtz();
+            String strFileBase = strFilePart.substring(0, strFilePart.indexOf(".part"));
+            File filePart = new File(strFilePart);
+            File fileBase = new File(strFileBase);
+            filePart.renameTo(fileBase);
         } catch (IOException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
@@ -245,7 +253,7 @@ public class ObservedHtz extends SimulationLinker implements IOutput {
         IOTools.makeDirectories(filename.toString());
 
         filename.append(getConfiguration().getString("output.file.prefix"));
-        filename.append("_expectedHtz");
+        filename.append("_observedHtz");
         filename.append("-");
         filename.append(species.getName());
         filename.append("Simu");
