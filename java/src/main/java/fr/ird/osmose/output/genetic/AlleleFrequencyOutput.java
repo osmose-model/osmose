@@ -45,18 +45,27 @@ public class AlleleFrequencyOutput extends AbstractOutput {
     int nvalue_max;
     int nlocus_max;
 
-    private NetcdfFormatWriter nc;
-    private NetcdfFormatWriter.Builder bNc;
+    private boolean expectedHtzOutputEnabled;
+    private boolean alleleFrequencyOutputEnabled;
+
+    private NetcdfFormatWriter alleleFrequencyOutputnc;
+    private NetcdfFormatWriter.Builder alleleFrequencyOutputbNc;
+
+    private NetcdfFormatWriter expectedHtzOutputnc;
+    private NetcdfFormatWriter.Builder expectedHtzOutputbNc;
+
     private Dimension timeDim;
 
     private int record_index;
 
-    private double[][][] probability_occurrence;
+    private double[][][] number_of_occurrences;
     private double[][] normalization;
 
-    public AlleleFrequencyOutput(int rank, String subfolder, String name, boolean includeOnlyAlive, Species species) {
+    public AlleleFrequencyOutput(int rank, String subfolder, String name, boolean includeOnlyAlive, Species species, boolean expectedHtzOutput, boolean alleleFrequecyOutput) {
         super(rank, subfolder, name, includeOnlyAlive);
         this.species = species;
+        this.expectedHtzOutputEnabled = expectedHtzOutput;
+        this.alleleFrequencyOutputEnabled = alleleFrequecyOutput;
     }
 
 
@@ -67,7 +76,7 @@ public class AlleleFrequencyOutput extends AbstractOutput {
 
     @Override
     public void reset() {
-        probability_occurrence = new double[ntrait][nlocus_max][nvalue_max];
+        number_of_occurrences = new double[ntrait][nlocus_max][nvalue_max];
     }
 
     @Override
@@ -93,14 +102,14 @@ public class AlleleFrequencyOutput extends AbstractOutput {
                     // Loop over all the possible values of the alleles
                     for (int ival = 0; ival < nvalues[itrait]; ival++) {
                         if (value0 == trait.getDiv(species_index, ilocus, ival)) {
-                            this.probability_occurrence[itrait][ilocus][ival] += 1; // TODO: multiply by abundance?
+                            this.number_of_occurrences[itrait][ilocus][ival] += school.getAbundance();
                         }
                         if (value1 == trait.getDiv(species_index, ilocus, ival)) {
-                            this.probability_occurrence[itrait][ilocus][ival] += 1; // TODO: multiply by abundance?
+                            this.number_of_occurrences[itrait][ilocus][ival] +=  school.getAbundance();
                         }
                     }
 
-                    normalization[itrait][ilocus] += 2; // TODO: multiply by abundance?
+                    normalization[itrait][ilocus] += 2 * school.getAbundance();
 
                 }
             }
@@ -110,13 +119,66 @@ public class AlleleFrequencyOutput extends AbstractOutput {
     @Override
     public void write(float time) {
 
+        if(this.alleleFrequencyOutputEnabled) {
+            this.writeAlleleFrequency(time);
+        }
+
+        if(this.expectedHtzOutputEnabled) {
+            this.writeExpectedHtz(time);
+        }
+
+        this.record_index += 1;
+    }
+
+
+    private void writeExpectedHtz(float time) {
+
+        ArrayDouble.D1 arrTime = new ArrayDouble.D1(1);
+        ArrayFloat.D3 arrOut = new ArrayFloat.D3(1, this.ntrait, this.nlocus_max);
+
+        arrTime.set(0, time);
+        try {
+            Variable tvar = alleleFrequencyOutputnc.findVariable("time");
+            alleleFrequencyOutputnc.write(tvar, new int[] { this.record_index }, arrTime);
+        } catch (IOException | InvalidRangeException ex) {
+            Logger.getLogger(DietOutput_Netcdf.class.getName()).log(Level.SEVERE, null, ex);
+        }
+
+        double[][] expectedHtz = new double[this.ntrait][this.nlocus_max];
+        for (int itrait = 0; itrait < ntrait; itrait++) {
+            for(int ilocus = 0; ilocus < nlocus[itrait]; ilocus++) {
+                double sum = 0;
+                for(int ival = 0; ival < nvalues[itrait]; ival++) {
+                    sum += Math.pow(number_of_occurrences[itrait][ilocus][ival] / normalization[itrait][ilocus], 2);
+                }
+                expectedHtz[itrait][ilocus] = 1 - sum;
+            }
+        }
+
+        for (int itrait = 0; itrait < ntrait; itrait++) {
+            for (int ilocus = 0; ilocus < nlocus[itrait]; ilocus++) {
+                arrOut.set(0, itrait, ilocus, (float) expectedHtz[itrait][ilocus]);
+            } // end of loop of resources as preys
+        } // end of predator stage loop
+
+        try {
+            Variable outvar = expectedHtzOutputnc.findVariable(this.getExpectedHtzVarName());
+            expectedHtzOutputnc.write(outvar, new int[] { this.record_index, 0, 0}, arrOut);
+        } catch (IOException | InvalidRangeException ex) {
+            Logger.getLogger(DietOutput_Netcdf.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+
+
+    private void writeAlleleFrequency(float time) {
+
         ArrayDouble.D1 arrTime = new ArrayDouble.D1(1);
         ArrayFloat.D4 arrOut = new ArrayFloat.D4(1, this.ntrait, this.nlocus_max, this.nvalue_max);
 
         arrTime.set(0, time);
         try {
-            Variable tvar = nc.findVariable("time");
-            nc.write(tvar, new int[] { this.record_index }, arrTime);
+            Variable tvar = alleleFrequencyOutputnc.findVariable("time");
+            alleleFrequencyOutputnc.write(tvar, new int[] { this.record_index }, arrTime);
         } catch (IOException | InvalidRangeException ex) {
             Logger.getLogger(DietOutput_Netcdf.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -124,19 +186,17 @@ public class AlleleFrequencyOutput extends AbstractOutput {
         for (int itrait = 0; itrait < ntrait; itrait++) {
             for(int ilocus = 0; ilocus < nlocus[itrait]; ilocus++) {
                 for(int ival = 0; ival < nvalues[itrait]; ival++) {
-                    arrOut.set(0, itrait, ilocus, ival, (float) (100.d * probability_occurrence[itrait][ilocus][ival] / normalization[itrait][ilocus]));
+                    arrOut.set(0, itrait, ilocus, ival, (float) (100.d * number_of_occurrences[itrait][ilocus][ival] / normalization[itrait][ilocus]));
                 } // end of loop of resources as preys
             } // end of predator stage loop
         } // end of predator species loop
 
         try {
-            Variable outvar = nc.findVariable(this.getVarName());
-            nc.write(outvar, new int[] { this.record_index, 0, 0, 0 }, arrOut);
+            Variable outvar = alleleFrequencyOutputnc.findVariable(this.getAlleleFreqVarName());
+            alleleFrequencyOutputnc.write(outvar, new int[] { this.record_index, 0, 0, 0 }, arrOut);
         } catch (IOException | InvalidRangeException ex) {
             Logger.getLogger(DietOutput_Netcdf.class.getName()).log(Level.SEVERE, null, ex);
         }
-
-        this.record_index += 1;
     }
 
     @Override
@@ -166,26 +226,38 @@ public class AlleleFrequencyOutput extends AbstractOutput {
             nlocus_max = Math.max(nlocus_max, nlocus[indexTrait]);
         }
 
+
+        if(this.alleleFrequencyOutputEnabled) {
+            this.createAlleleFrequencyOutputFile();
+        }
+
+
+
+    }
+
+
+    private void createAlleleFrequencyOutputFile() {
+
         Nc4Chunking chunker = getConfiguration().getChunker();
 
         /*
          * Create NetCDF file
          */
-        String filename = getFilename();
+        String filename = getFilenameAlleleFrequency();
 
-        bNc = NetcdfFormatWriter.createNewNetcdf4(getConfiguration().getNcOutVersion(), filename, chunker);
+        alleleFrequencyOutputbNc = NetcdfFormatWriter.createNewNetcdf4(getConfiguration().getNcOutVersion(), filename, chunker);
 
         // Add time dim and variable (common to all files)
-        timeDim = bNc.addUnlimitedDimension("time");
+        timeDim = alleleFrequencyOutputbNc.addUnlimitedDimension("time");
 
-        Variable.Builder<?> tvar = bNc.addVariable("time", DataType.DOUBLE, "time");
+        Variable.Builder<?> tvar = alleleFrequencyOutputbNc.addVariable("time", DataType.DOUBLE, "time");
         tvar.addAttribute(new Attribute("units", "days since 0-1-1 0:0:0"));
         tvar.addAttribute(new Attribute("calendar", "360_day"));
         tvar.addAttribute(new Attribute("description", "time ellapsed, in days, since the beginning of the simulation"));
 
-        Dimension traitDim = bNc.addDimension("trait", ntrait);
-        Dimension locusDim = bNc.addDimension("locus", nlocus_max);
-        Dimension alleleDim = bNc.addDimension("allele", nvalue_max);
+        Dimension traitDim = alleleFrequencyOutputbNc.addDimension("trait", ntrait);
+        Dimension locusDim = alleleFrequencyOutputbNc.addDimension("locus", nlocus_max);
+        Dimension alleleDim = alleleFrequencyOutputbNc.addDimension("allele", nvalue_max);
 
         List<Dimension> outDims = new ArrayList<>();
         outDims.add(timeDim);
@@ -194,14 +266,59 @@ public class AlleleFrequencyOutput extends AbstractOutput {
         outDims.add(alleleDim);
 
         // Create output variable
-        Variable.Builder<?> outvar = bNc.addVariable(getVarName(), DataType.FLOAT, outDims);
+        Variable.Builder<?> outvar = alleleFrequencyOutputbNc.addVariable(getAlleleFreqVarName(), DataType.FLOAT, outDims);
         outvar.addAttribute(new Attribute("units", ""));
         outvar.addAttribute(new Attribute("description", getDescription()));
         outvar.addAttribute(new Attribute("_FillValue", -999));
 
         try {
             // Validates the structure of the NetCDF file.
-            nc = bNc.build();
+            alleleFrequencyOutputnc = alleleFrequencyOutputbNc.build();
+        } catch (IOException ex) {
+            Logger.getLogger(AbstractOutput_Netcdf.class.getName()).log(Level.SEVERE, null, ex);
+        }
+
+        // Write NetCDF coords (for instance species, stage, etc.)
+        this.write_nc_coords();
+
+    }
+
+    private void createExpectedHtzOutputFile() {
+
+        Nc4Chunking chunker = getConfiguration().getChunker();
+
+        /*
+         * Create NetCDF file
+         */
+        String filename = getExpectedHtzVarName();
+
+        expectedHtzOutputbNc = NetcdfFormatWriter.createNewNetcdf4(getConfiguration().getNcOutVersion(), filename, chunker);
+
+        // Add time dim and variable (common to all files)
+        timeDim = expectedHtzOutputbNc.addUnlimitedDimension("time");
+
+        Variable.Builder<?> tvar = expectedHtzOutputbNc.addVariable("time", DataType.DOUBLE, "time");
+        tvar.addAttribute(new Attribute("units", "days since 0-1-1 0:0:0"));
+        tvar.addAttribute(new Attribute("calendar", "360_day"));
+        tvar.addAttribute(new Attribute("description", "time ellapsed, in days, since the beginning of the simulation"));
+
+        Dimension traitDim = expectedHtzOutputbNc.addDimension("trait", ntrait);
+        Dimension locusDim = expectedHtzOutputbNc.addDimension("locus", nlocus_max);
+
+        List<Dimension> outDims = new ArrayList<>();
+        outDims.add(timeDim);
+        outDims.add(traitDim);
+        outDims.add(locusDim);
+
+        // Create output variable
+        Variable.Builder<?> outvar = expectedHtzOutputbNc.addVariable(getAlleleFreqVarName(), DataType.FLOAT, outDims);
+        outvar.addAttribute(new Attribute("units", ""));
+        outvar.addAttribute(new Attribute("description", getDescription()));
+        outvar.addAttribute(new Attribute("_FillValue", -999));
+
+        try {
+            // Validates the structure of the NetCDF file.
+            expectedHtzOutputnc = expectedHtzOutputbNc.build();
         } catch (IOException ex) {
             Logger.getLogger(AbstractOutput_Netcdf.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -233,10 +350,10 @@ public class AlleleFrequencyOutput extends AbstractOutput {
     @Override
     public void close() {
         // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'close'");
+        // throw new UnsupportedOperationException("Unimplemented method 'close'");
     }
 
-    String getFilename() {
+    String getFilenameAlleleFrequency() {
         // Create parent directory
         StringBuilder filename = this.initFileName();
         filename.append("Genetic");
@@ -250,6 +367,22 @@ public class AlleleFrequencyOutput extends AbstractOutput {
         filename.append(".nc.part");
         return filename.toString();
     }
+
+    String getFilenameExpectedHtz() {
+        // Create parent directory
+        StringBuilder filename = this.initFileName();
+        filename.append("Genetic");
+        filename.append(File.separatorChar);
+        filename.append(getConfiguration().getString("output.file.prefix"));
+        filename.append("_expectedHtz");
+        filename.append("-");
+        filename.append(species.getName());
+        filename.append("Simu");
+        filename.append(getRank());
+        filename.append(".nc.part");
+        return filename.toString();
+    }
+
 
     public StringBuilder initFileName() {
         File path = new File(getConfiguration().getOutputPathname());
@@ -266,7 +399,12 @@ public class AlleleFrequencyOutput extends AbstractOutput {
         return new String[] {""};
     }
 
-    private String getVarName() {
+    private String getAlleleFreqVarName() {
+        return "allele_occurrence_frequency";
+    }
+
+
+    private String getExpectedHtzVarName() {
         return "allele_occurrence_frequency";
     }
 
