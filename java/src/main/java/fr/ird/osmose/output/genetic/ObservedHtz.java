@@ -170,7 +170,7 @@ public class ObservedHtz extends AbstractOutput {
         /*
          * Create NetCDF file
          */
-        String filename = getObservedHtzVarName();
+        String filename = getFilenameObservedHtz();
 
         observedHtzOutputbNc = NetcdfFormatWriter.createNewNetcdf4(getConfiguration().getNcOutVersion(), filename, chunker);
 
@@ -235,22 +235,8 @@ public class ObservedHtz extends AbstractOutput {
         // throw new UnsupportedOperationException("Unimplemented method 'close'");
     }
 
-    String getFilenameAlleleFrequency() {
-        // Create parent directory
-        StringBuilder filename = this.initFileName();
-        filename.append("Genetic");
-        filename.append(File.separatorChar);
-        filename.append(getConfiguration().getString("output.file.prefix"));
-        filename.append("_alleleFrequency");
-        filename.append("-");
-        filename.append(species.getName());
-        filename.append("Simu");
-        filename.append(getRank());
-        filename.append(".nc.part");
-        return filename.toString();
-    }
 
-    String getFilenameExpectedHtz() {
+    String getFilenameObservedHtz() {
         // Create parent directory
         StringBuilder filename = this.initFileName();
         filename.append("Genetic");
@@ -280,7 +266,7 @@ public class ObservedHtz extends AbstractOutput {
     }
 
     private String getObservedHtzVarName() {
-        return "allele_occurrence_frequency";
+        return "observed_heterozygosity";
     }
 
 }

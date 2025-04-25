@@ -201,11 +201,18 @@ public class AlleleFrequencyOutput extends AbstractOutput {
 
     @Override
     public String getDescription() {
+        return "";
+    }
+
+    public String getAlleleFrequencyDescription() {
         // TODO Auto-generated method stub
         // throw new UnsupportedOperationException("Unimplemented method 'getDescription'");
         return String.format("Probility of occurrence of a given allele for species %s. Depends on trait and locus", species.getName());
     }
 
+    public String getExpectedHtzDescription() {
+        return String.format("Expected heterozygosity for species %s.", species.getName());
+    }
 
     @Override
     public void init() {
@@ -269,7 +276,7 @@ public class AlleleFrequencyOutput extends AbstractOutput {
         // Create output variable
         Variable.Builder<?> outvar = alleleFrequencyOutputbNc.addVariable(getAlleleFreqVarName(), DataType.FLOAT, outDims);
         outvar.addAttribute(new Attribute("units", ""));
-        outvar.addAttribute(new Attribute("description", getDescription()));
+        outvar.addAttribute(new Attribute("description", getAlleleFrequencyDescription()));
         outvar.addAttribute(new Attribute("_FillValue", -999));
 
         try {
@@ -312,9 +319,9 @@ public class AlleleFrequencyOutput extends AbstractOutput {
         outDims.add(locusDim);
 
         // Create output variable
-        Variable.Builder<?> outvar = expectedHtzOutputbNc.addVariable(getAlleleFreqVarName(), DataType.FLOAT, outDims);
+        Variable.Builder<?> outvar = expectedHtzOutputbNc.addVariable(getExpectedHtzVarName(), DataType.FLOAT, outDims);
         outvar.addAttribute(new Attribute("units", ""));
-        outvar.addAttribute(new Attribute("description", getDescription()));
+        outvar.addAttribute(new Attribute("description", getExpectedHtzDescription()));
         outvar.addAttribute(new Attribute("_FillValue", -999));
 
         try {
@@ -406,7 +413,7 @@ public class AlleleFrequencyOutput extends AbstractOutput {
 
 
     private String getExpectedHtzVarName() {
-        return "allele_occurrence_frequency";
+        return "expected_heterozygosity";
     }
 
 }
