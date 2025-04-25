@@ -238,7 +238,6 @@ public class ObservedHtz extends SimulationLinker implements IOutput {
             File fileBase = new File(strFileBase);
             filePart.renameTo(fileBase);
         } catch (IOException e) {
-            // TODO Auto-generated catch block
             e.printStackTrace();
         }
     }
