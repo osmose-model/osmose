@@ -9,17 +9,15 @@ import java.util.logging.Logger;
 
 import fr.ird.osmose.School;
 import fr.ird.osmose.Species;
-import fr.ird.osmose.output.AbstractOutput;
 import fr.ird.osmose.output.IOutput;
 import fr.ird.osmose.output.netcdf.AbstractOutput_Netcdf;
 import fr.ird.osmose.output.netcdf.DietOutput_Netcdf;
-import fr.ird.osmose.process.genet.Trait;
 import fr.ird.osmose.process.genet.Genotype;
+import fr.ird.osmose.process.genet.Trait;
+import fr.ird.osmose.util.SimulationLinker;
 import ucar.ma2.ArrayDouble;
 import ucar.ma2.ArrayFloat;
-import ucar.ma2.ArrayInt;
 import ucar.ma2.DataType;
-import ucar.ma2.Index;
 import ucar.ma2.InvalidRangeException;
 import ucar.nc2.Attribute;
 import ucar.nc2.Dimension;
@@ -27,7 +25,7 @@ import ucar.nc2.Variable;
 import ucar.nc2.write.Nc4Chunking;
 import ucar.nc2.write.NetcdfFormatWriter;
 
-public class ObservedHtz extends AbstractOutput {
+public class ObservedHtz extends SimulationLinker implements IOutput {
 
     private Species species;
 
@@ -52,12 +50,13 @@ public class ObservedHtz extends AbstractOutput {
     private Dimension timeDim;
 
     private int record_index;
+    private int recordFrequency;
 
     private double[][] number_of_occurrences;
     private double[][] normalization;
 
-    public ObservedHtz(int rank, String subfolder, String name, boolean includeOnlyAlive, Species species) {
-        super(rank, subfolder, name, includeOnlyAlive);
+    public ObservedHtz(int rank, Species species) {
+        super(rank);
         this.species = species;
     }
 
@@ -132,11 +131,7 @@ public class ObservedHtz extends AbstractOutput {
 
     }
 
-    @Override
     public String getDescription() {
-        // TODO Auto-generated method stub
-        // throw new UnsupportedOperationException("Unimplemented method
-        // 'getDescription'");
         return String.format("Probility of occurrence of a given allele for species %s. Depends on trait and locus",
                 species.getName());
     }
@@ -231,8 +226,12 @@ public class ObservedHtz extends AbstractOutput {
 
     @Override
     public void close() {
-        // TODO Auto-generated method stub
-        // throw new UnsupportedOperationException("Unimplemented method 'close'");
+        try {
+            this.observedHtzOutputnc.close();
+        } catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
     }
 
 
@@ -258,15 +257,13 @@ public class ObservedHtz extends AbstractOutput {
         return filename;
     }
 
-    @Override
-    public String[] getHeaders() {
-        // TODO Auto-generated method stub
-        // throw new UnsupportedOperationException("Unimplemented method 'getHeaders'");
-        return new String[] { "" };
-    }
-
     private String getObservedHtzVarName() {
         return "observed_heterozygosity";
+    }
+
+    @Override
+    public boolean isTimeToWrite(int iStepSimu) {
+        return (((iStepSimu + 1) % recordFrequency) == 0);
     }
 
 }

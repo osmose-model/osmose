@@ -9,17 +9,15 @@ import java.util.logging.Logger;
 
 import fr.ird.osmose.School;
 import fr.ird.osmose.Species;
-import fr.ird.osmose.output.AbstractOutput;
 import fr.ird.osmose.output.IOutput;
 import fr.ird.osmose.output.netcdf.AbstractOutput_Netcdf;
 import fr.ird.osmose.output.netcdf.DietOutput_Netcdf;
-import fr.ird.osmose.process.genet.Trait;
 import fr.ird.osmose.process.genet.Genotype;
+import fr.ird.osmose.process.genet.Trait;
+import fr.ird.osmose.util.SimulationLinker;
 import ucar.ma2.ArrayDouble;
 import ucar.ma2.ArrayFloat;
-import ucar.ma2.ArrayInt;
 import ucar.ma2.DataType;
-import ucar.ma2.Index;
 import ucar.ma2.InvalidRangeException;
 import ucar.nc2.Attribute;
 import ucar.nc2.Dimension;
@@ -27,7 +25,7 @@ import ucar.nc2.Variable;
 import ucar.nc2.write.Nc4Chunking;
 import ucar.nc2.write.NetcdfFormatWriter;
 
-public class AlleleFrequencyOutput extends AbstractOutput {
+public class AlleleFrequencyOutput extends SimulationLinker implements IOutput {
 
     private Species species;
 
@@ -57,12 +55,13 @@ public class AlleleFrequencyOutput extends AbstractOutput {
     private Dimension timeDim;
 
     private int record_index;
+    int recordFrequency;
 
     private double[][][] number_of_occurrences;
     private double[][] normalization;
 
-    public AlleleFrequencyOutput(int rank, String subfolder, String name, boolean includeOnlyAlive, Species species, boolean expectedHtzOutput, boolean alleleFrequecyOutput) {
-        super(rank, subfolder, name, includeOnlyAlive);
+    public AlleleFrequencyOutput(int rank, Species species, boolean expectedHtzOutput, boolean alleleFrequecyOutput) {
+        super(rank);
         this.species = species;
         this.expectedHtzOutputEnabled = expectedHtzOutput;
         this.alleleFrequencyOutputEnabled = alleleFrequecyOutput;
@@ -199,11 +198,6 @@ public class AlleleFrequencyOutput extends AbstractOutput {
         }
     }
 
-    @Override
-    public String getDescription() {
-        return "";
-    }
-
     public String getAlleleFrequencyDescription() {
         // TODO Auto-generated method stub
         // throw new UnsupportedOperationException("Unimplemented method 'getDescription'");
@@ -216,6 +210,8 @@ public class AlleleFrequencyOutput extends AbstractOutput {
 
     @Override
     public void init() {
+
+        recordFrequency = getConfiguration().getInt("output.recordfrequency.ndt");
 
         nvalue_max = Integer.MIN_VALUE;
         nlocus_max = Integer.MIN_VALUE;
@@ -357,8 +353,23 @@ public class AlleleFrequencyOutput extends AbstractOutput {
 
     @Override
     public void close() {
-        // TODO Auto-generated method stub
-        // throw new UnsupportedOperationException("Unimplemented method 'close'");
+        if(this.alleleFrequencyOutputEnabled) {
+            try {
+                alleleFrequencyOutputnc.close();
+            } catch (IOException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
+        }
+
+        if(this.expectedHtzOutputEnabled) {
+            try {
+                expectedHtzOutputnc.close();
+            } catch (IOException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
+        }
     }
 
     String getFilenameAlleleFrequency() {
@@ -399,14 +410,6 @@ public class AlleleFrequencyOutput extends AbstractOutput {
         return filename;
     }
 
-
-    @Override
-    public String[] getHeaders() {
-        // TODO Auto-generated method stub
-        // throw new UnsupportedOperationException("Unimplemented method 'getHeaders'");
-        return new String[] {""};
-    }
-
     private String getAlleleFreqVarName() {
         return "allele_occurrence_frequency";
     }
@@ -414,6 +417,11 @@ public class AlleleFrequencyOutput extends AbstractOutput {
 
     private String getExpectedHtzVarName() {
         return "expected_heterozygosity";
+    }
+
+    @Override
+    public boolean isTimeToWrite(int iStepSimu) {
+        return (((iStepSimu + 1) % recordFrequency) == 0);
     }
 
 }

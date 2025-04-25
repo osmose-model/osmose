@@ -283,4 +283,8 @@ abstract public class AbstractOutput extends SimulationLinker implements IOutput
         }
         return arr;
     }
+
+    public String getSubfolder() {
+        return this.subfolder;
+    }
 }
