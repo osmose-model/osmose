@@ -163,8 +163,6 @@ public class ObservedHtz extends AbstractOutput {
         this.createObservedHtzOutputFile();
     }
 
-    }
-
     private void createObservedHtzOutputFile() {
 
         Nc4Chunking chunker = getConfiguration().getChunker();
@@ -284,3 +282,5 @@ public class ObservedHtz extends AbstractOutput {
     private String getObservedHtzVarName() {
         return "allele_occurrence_frequency";
     }
+
+}
