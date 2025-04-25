@@ -602,8 +602,13 @@ public class Releases {
                         "module.population.initialisation.enabled"); // to be updated.
                 }   
                 
+                //info("hello");             
+                //info(this.getFocalIndex()[1]);             
                 // Update parameters for EnergyBudget.java
-                for (int index : this.getFocalIndex()) {
+                int focalIndex[] = cfg.findKeys("species.type.sp*").stream().filter(k -> cfg.getString(k).equals("focal")).mapToInt(rgKey -> Integer.valueOf(rgKey.substring(rgKey.lastIndexOf(".sp") + 3))).sorted().toArray();
+                
+                //for (int index : this.getFocalIndex()) {
+                for (int index : focalIndex) {
                   if(cfg.canFind("species.bioen.maturity.r.sp" + index)) {
                       updateKey("species.bioen.maturity.r.sp" + index, "species.maturity.r.sp" + index);
                   }   
