@@ -402,7 +402,7 @@ osmose_calibration_outputs = function(output) {
 #' @export
 #'
 #' @inheritParams osmose_calibration_setup
-osmose_calibration_runmodel = function(input, osmose, name, version="4.3.3", par=NULL, debug=FALSE) {
+osmose_calibration_runmodel = function(input, name, version="4.3.3", par=NULL, debug=FALSE) {
   
   wd = getwd()
   on.exit(setwd(wd))
@@ -435,6 +435,8 @@ osmose_calibration_runmodel = function(input, osmose, name, version="4.3.3", par
   if(isTRUE(debug)) debug(run_model)
   
   setwd(dir_master)
+  osmose = "../.osmose.jar"
+  if(!file.exists(osmose)) stop("OSMOSE executable '.osmose.jar' was not found in the calibration directory.")
   simulated = try(run_model(par=par_guess, conf=conf, osmose=osmose, is_a_test=FALSE, version=version))
   if(inherits(simulated, "try-error")) stop("Error while running run_model.")
   setwd(wd)
