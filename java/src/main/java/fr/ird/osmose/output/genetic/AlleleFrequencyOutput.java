@@ -15,6 +15,7 @@ import fr.ird.osmose.output.netcdf.DietOutput_Netcdf;
 import fr.ird.osmose.process.genet.Genotype;
 import fr.ird.osmose.process.genet.Trait;
 import fr.ird.osmose.util.SimulationLinker;
+import fr.ird.osmose.util.io.IOTools;
 import ucar.ma2.ArrayDouble;
 import ucar.ma2.ArrayFloat;
 import ucar.ma2.DataType;
@@ -81,7 +82,7 @@ public class AlleleFrequencyOutput extends SimulationLinker implements IOutput {
     @Override
     public void update() {
         // Loop over all the schools
-        for (School school : getSchoolSet().getAliveSchools()) {
+        for (School school : getSchoolSet().getSchools(species)) {
 
             // genotype of the school
             Genotype genotype = school.getGenotype();
@@ -294,7 +295,7 @@ public class AlleleFrequencyOutput extends SimulationLinker implements IOutput {
         /*
          * Create NetCDF file
          */
-        String filename = getExpectedHtzVarName();
+        String filename = getFilenameExpectedHtz();
 
         expectedHtzOutputbNc = NetcdfFormatWriter.createNewNetcdf4(getConfiguration().getNcOutVersion(), filename, chunker);
 
@@ -377,6 +378,9 @@ public class AlleleFrequencyOutput extends SimulationLinker implements IOutput {
         StringBuilder filename = this.initFileName();
         filename.append("Genetic");
         filename.append(File.separatorChar);
+
+        IOTools.makeDirectories(filename.toString());
+
         filename.append(getConfiguration().getString("output.file.prefix"));
         filename.append("_alleleFrequency");
         filename.append("-");
@@ -392,6 +396,9 @@ public class AlleleFrequencyOutput extends SimulationLinker implements IOutput {
         StringBuilder filename = this.initFileName();
         filename.append("Genetic");
         filename.append(File.separatorChar);
+
+        IOTools.makeDirectories(filename.toString());
+
         filename.append(getConfiguration().getString("output.file.prefix"));
         filename.append("_expectedHtz");
         filename.append("-");
