@@ -78,7 +78,7 @@ public class Trait extends SimulationLinker {
      * Diversity matrix, used to initialize genotypes. One matrix for each
      * species
      */
-    private double[][][] diversity;
+    private double diversity[][][];
 
     private Random generator;
 

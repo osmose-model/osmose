@@ -58,8 +58,8 @@ public class AlleleFrequencyOutput extends SimulationLinker implements IOutput {
     private int record_index;
     int recordFrequency;
 
-    private double[][][] number_of_occurrences;
-    private double[][] normalization;
+    private double number_of_occurrences[][][];
+    private double normalization[][];
 
     public AlleleFrequencyOutput(int rank, Species species, boolean expectedHtzOutput, boolean alleleFrequecyOutput) {
         super(rank);
@@ -150,7 +150,7 @@ public class AlleleFrequencyOutput extends SimulationLinker implements IOutput {
             for(int ilocus = 0; ilocus < nlocus[itrait]; ilocus++) {
                 double sum = 0;
                 for(int ival = 0; ival < nvalues[itrait]; ival++) {
-                    sum += Math.pow(number_of_occurrences[itrait][ilocus][ival] / normalization[itrait][ilocus], 2);
+                    sum += Math.pow((double) (number_of_occurrences[itrait][ilocus][ival]) / normalization[itrait][ilocus], 2);
                 }
                 expectedHtz[itrait][ilocus] = 1 - sum;
             }

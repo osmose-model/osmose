@@ -53,8 +53,8 @@ public class ObservedHtz extends SimulationLinker implements IOutput {
     private int record_index;
     private int recordFrequency;
 
-    private double[][] number_of_occurrences;
-    private double[][] normalization;
+    private double number_of_occurrences[][];
+    private double normalization[][];
 
     public ObservedHtz(int rank, Species species) {
         super(rank);
@@ -118,7 +118,7 @@ public class ObservedHtz extends SimulationLinker implements IOutput {
         for (int itrait = 0; itrait < ntrait; itrait++) {
             for (int ilocus = 0; ilocus < nlocus[itrait]; ilocus++) {
                 arrOut.set(0, itrait, ilocus,
-                        (float) (number_of_occurrences[itrait][ilocus] / normalization[itrait][ilocus]));
+                        (float) ((double) (number_of_occurrences[itrait][ilocus]) / normalization[itrait][ilocus]));
             } // end of loop of resources as preys
         } // end of predator stage loop
 
