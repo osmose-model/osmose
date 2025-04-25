@@ -138,8 +138,8 @@ public class AlleleFrequencyOutput extends AbstractOutput {
 
         arrTime.set(0, time);
         try {
-            Variable tvar = alleleFrequencyOutputnc.findVariable("time");
-            alleleFrequencyOutputnc.write(tvar, new int[] { this.record_index }, arrTime);
+            Variable tvar = expectedHtzOutputnc.findVariable("time");
+            expectedHtzOutputnc.write(tvar, new int[] { this.record_index }, arrTime);
         } catch (IOException | InvalidRangeException ex) {
             Logger.getLogger(DietOutput_Netcdf.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -226,12 +226,13 @@ public class AlleleFrequencyOutput extends AbstractOutput {
             nlocus_max = Math.max(nlocus_max, nlocus[indexTrait]);
         }
 
-
         if(this.alleleFrequencyOutputEnabled) {
             this.createAlleleFrequencyOutputFile();
         }
 
-
+        if(this.expectedHtzOutputEnabled) {
+            this.createExpectedHtzOutputFile();
+        }
 
     }
 
