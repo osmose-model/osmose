@@ -376,10 +376,10 @@ osmose_calibration_outputs = function(output) {
     names(surveys) = paste("biomass", names(surveys), sep=".")
   }
   
-  growth = sapply(get_var(output, "residualSizeByAge", no.error = TRUE), calibrar:::penalty, obs=NULL)
-  mortality = sapply(get_var(output, "residualMortalityByAge", no.error = TRUE), calibrar:::penalty, obs=NULL, n=10)
-  collapse = get_var(output, "penalty.collapse")
-  outburst = get_var(output, "penalty.outburst")
+  growth = sapply(get_var(output, "residualSizeByAge", no.error=TRUE), calibrar:::penalty, obs=NULL)
+  mortality = sapply(get_var(output, "residualMortalityByAge", no.error=TRUE), calibrar:::penalty, obs=NULL, n=10)
+  collapse = get_var(output, "penalty.collapse", no.error=TRUE)
+  outburst = get_var(output, "penalty.outburst", no.error=TRUE)
   
   cal_output = c(surveys, 
                  landings   = get_var(output, "observed.landings", how="list", no.error = TRUE),

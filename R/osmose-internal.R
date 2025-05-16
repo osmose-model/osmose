@@ -729,11 +729,15 @@ osmose2R.v4r0 = function (path=NULL, species.names=NULL, conf=NULL, ...) {
       }
     }
     
+    # if(is.null(outputData$penalty.collapse)) outputData$penalty.collapse = 0
+    
     if(!is.null(get_par(conf, "calibration.biomass.penalty.outburst"))) {
       if(isTRUE(get_par(conf, "calibration.biomass.penalty.outburst"))) {
         outputData$penalty.outburst = sqrt(get_minmaxt(outputData, conf, lower=FALSE))
       }
     }
+    
+    # if(is.null(outputData$penalty.outburst)) outputData$penalty.outburst = 0
     
     start = get_par(conf, "simulation.time.start")
     if(is.null(start)) start = 0
