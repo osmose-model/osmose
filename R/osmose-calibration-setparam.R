@@ -199,6 +199,10 @@
     write_osmose(set_par(pars, delta=+3), file=max_file, append = TRUE)
     write_osmose(set_par(pars, value=phase), file=phase_file, append = TRUE)
     
+    stype = get_par(this, "fisheries.selectivity.type")
+    
+    if(stype==9) return(invisible(NULL))
+    
     # make difference for each one: l50, l75
     pars = get_par(this, "fisheries.selectivity.l50", as.is=TRUE)
     msg = sprintf("Parameter 'fisheries.selectivity.l50' not found for fishery '%s'. Age selectivity is NOT supported with multispecies fisheries.", nmf[i])
@@ -230,6 +234,7 @@
     }
     
   } # end of fisheries parameters
+  
 }
 
 

@@ -74,6 +74,10 @@
     mproxy = mp$M[cut(iage, breaks=mp$age, labels=FALSE)]
     # mproxy = array(mp$M[cut(as.numeric(y), breaks=mp$size, labels=FALSE)],
     #                dim=dim(y))/ndt
+    
+    # ALL THE OPERATIONS TO COMPUTE MORTALITY BY COHORT f(mnat)
+    # ALL THE OPERATION TO COMPUTE SURVIVAL
+    
     mnati = as.numeric(apply(mnat, 2, mean, na.rm=TRUE))*ndt
     mdeviate = log((mnati + tiny)/(mproxy + tiny))
     out[[i]] = mdeviate[-1] # remove larval mortality
