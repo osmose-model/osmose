@@ -201,7 +201,7 @@
     
     stype = get_par(this, "fisheries.selectivity.type")
     
-    if(stype==9) return(invisible(NULL))
+    if(stype==9) next
     
     # make difference for each one: l50, l75
     pars = get_par(this, "fisheries.selectivity.l50", as.is=TRUE)

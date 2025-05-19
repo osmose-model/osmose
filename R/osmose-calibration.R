@@ -28,9 +28,6 @@ osmose_calibration_setup = function(input, osmose, name=NULL, data_path=NULL, ty
   skip_tests = control$skip_tests
   if(is.null(skip_tests)) skip_tests = FALSE 
   
-  cleanup = control$cleanup
-  if(is.null(cleanup)) cleanup = TRUE 
-  
   type = match.arg(type, choices=c("simple", "survey"))
   
   control$method = type
@@ -45,6 +42,10 @@ osmose_calibration_setup = function(input, osmose, name=NULL, data_path=NULL, ty
   
   run = if(is.null(name)) ".run" else sprintf(".run_%s", name)
   dir = if(is.null(name)) "calibration" else sprintf("calibration_%s", name)
+  
+  cleanup = control$cleanup
+  if(is.null(cleanup)) cleanup = TRUE
+  cleanup = cleanup & !dir.exists(dir)
   
   success = !cleanup
   if(!dir.exists(dir)) {
