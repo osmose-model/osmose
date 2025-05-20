@@ -210,7 +210,7 @@
   if(is.null(start)) start = 0
   
   y = get_var.osmose(x, type, no.error=TRUE)
-  if(is.null(y)) return(x)
+  if(is.null(y)) return(NULL)
   spp = colnames(y)
   xx = list()
   for(i in seq_len(ncol(y))) {
@@ -609,7 +609,7 @@ get_codes = function(sp, conf) {
 .getTimeIndex = function(x) {
   y = as.numeric(rownames(x)) 
   y = y %% 1
-  y1 = min(y[y!=0])
+  y1 = suppressWarnings(min(y[y!=0]))
   if(y[1]==0) y[1] = 1e-6
   y[y==0] = 1
   y = y/y1

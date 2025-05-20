@@ -952,7 +952,10 @@ osmose2R.v3r0 = function(path=NULL, species.names=NULL, ...) {
   
   # fg = .get_functional_groups(conf, type=type)
   fgd = get_fg_data(conf, x=x, type=type)
-  if(is.null(fgd)) return(x)
+  if(is.null(fgd)) {
+    if(isTRUE(merge)) return(x) else return(NULL)
+  }
+    
   rownames(fgd) = rownames(x)
   dimnames(fgd)[[3]] = dimnames(x)[[3]]
   
