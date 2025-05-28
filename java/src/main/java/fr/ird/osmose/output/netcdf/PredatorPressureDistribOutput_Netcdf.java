@@ -77,7 +77,7 @@ public class PredatorPressureDistribOutput_Netcdf extends AbstractDistribOutput_
     }
 
     @Override
-    String getDescription() {
+    protected String getDescription() {
         StringBuilder description = new StringBuilder();
         description.append("Distribution of the preyed biomass (tonne) of ");
         description.append(species.getName());

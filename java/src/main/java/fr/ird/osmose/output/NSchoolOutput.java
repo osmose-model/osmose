@@ -77,7 +77,7 @@ public class NSchoolOutput extends AbstractOutput {
     }
 
     @Override
-    String getDescription() {
+    protected String getDescription() {
         return "Number of schools";
     }
 

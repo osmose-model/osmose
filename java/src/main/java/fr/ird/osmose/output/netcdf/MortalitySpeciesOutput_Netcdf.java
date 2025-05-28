@@ -98,7 +98,7 @@ public class MortalitySpeciesOutput_Netcdf extends AbstractDistribOutput_Netcdf 
     }
 
     @Override
-    String getDescription() {
+    protected String getDescription() {
         return "Predation (Mpred), Starvation (Mstarv), Additional mortality (Madd), Fishing (F) & Out-of-domain (Z) mortality rates per time step of saving and per size class. Z is the total mortality for migratory fish outside the simulation grid. To get annual mortality rates, sum the mortality rates within one year.";
     }
 

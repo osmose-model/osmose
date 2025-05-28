@@ -172,7 +172,7 @@ public class DistribOutput extends AbstractOutput {
     }
 
     @Override
-    String getDescription() {
+    protected String getDescription() {
         StringBuilder sb = new StringBuilder();
         sb.append(description);
         sb.append(" by ").append(getType().getDescription());

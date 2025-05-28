@@ -82,7 +82,7 @@ public class AbundanceDistribOutput_Netcdf extends AbstractDistribOutput_Netcdf 
     }
 
     @Override
-    String getDescription() {
+    protected String getDescription() {
         StringBuilder description = new StringBuilder();
         description.append("Distribution of fish abundance (number of fish) by ");
         description.append(getType().getDescription());

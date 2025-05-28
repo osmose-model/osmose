@@ -83,7 +83,7 @@ public class AbundanceOutput_age1 extends AbstractOutput {
     }
 
     @Override
-    String getDescription() {
+    protected String getDescription() {
         return "Abundance at age 1 (number of individuals)";
     }
 

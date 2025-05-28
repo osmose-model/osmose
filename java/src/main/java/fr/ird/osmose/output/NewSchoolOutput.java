@@ -86,7 +86,7 @@ public class NewSchoolOutput extends AbstractOutput {
     }
 
     @Override
-    String getDescription() {
+    protected String getDescription() {
         return "Percentage of egg biomass for each species";
     }
 

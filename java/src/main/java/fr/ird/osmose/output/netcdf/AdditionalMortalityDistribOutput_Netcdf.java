@@ -83,7 +83,7 @@ public class AdditionalMortalityDistribOutput_Netcdf extends AbstractDistribOutp
     }
 
     @Override
-    String getDescription() {
+    protected String getDescription() {
         StringBuilder description = new StringBuilder();
         description.append("Distribution of additional mortality biomass (tonne of fish dead from unexplicited cause per time step of saving) by ");
         description.append(getType().getDescription());

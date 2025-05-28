@@ -59,6 +59,8 @@ import fr.ird.osmose.output.netcdf.YieldNOutput_Netcdf;
 import fr.ird.osmose.output.netcdf.YieldOutput_Netcdf;
 import fr.ird.osmose.output.distribution.DistributionType;
 import fr.ird.osmose.output.distribution.OutputDistribution;
+import fr.ird.osmose.output.genetic.AlleleFrequencyOutput;
+import fr.ird.osmose.output.genetic.ObservedHtz;
 import fr.ird.osmose.util.io.IOTools;
 import fr.ird.osmose.util.SimulationLinker;
 import java.util.ArrayList;
@@ -287,11 +289,11 @@ public class OutputManager extends SimulationLinker {
             if (getConfiguration().getBoolean("output.fisheries.yield.biomass.enabled")) {
                 outputs.add(new FisheryOutputYield(rank));
             }
-            
+
             if (getConfiguration().getBoolean("output.fisheries.yield.abundance.enabled")) {
                 outputs.add(new FisheryOutputYieldN(rank));
             }
-            
+
             if (getConfiguration().getBoolean("output.fisheries.accessiblebiomass.enabled")) {
                 outputs.add(new FisheryOutputAccessibleBiomass(rank));
             }
@@ -793,6 +795,22 @@ public class OutputManager extends SimulationLinker {
                 outputs.add(new MeanGenotypeOutput(rank, "meanTraitsParents", (school -> school.getNEggs()),
                         (school -> school.isMature()), (schoolset -> schoolset.getAliveSchools()), "Mean traits of parent schools, ponderated by number of eggs"));
             }
+
+            boolean alleleFrequencyOutput = getConfiguration().getBoolean("output.allele.frequency.enabled");
+            boolean expectedHeterozygosity = getConfiguration().getBoolean("output.expected.heterozygosity.enabled");
+            if(alleleFrequencyOutput || expectedHeterozygosity) {
+                for(int ispecies = 0; ispecies < getConfiguration().getNSpecies(); ispecies++) {
+                    outputs.add(new AlleleFrequencyOutput(rank, getConfiguration().getSpecies(ispecies), expectedHeterozygosity, alleleFrequencyOutput));
+                }
+            }
+
+            boolean observedHeterozygosity = getConfiguration().getBoolean("output.observed.heterozygosity.enabled");
+            if(observedHeterozygosity) {
+                for(int ispecies = 0; ispecies < getConfiguration().getNSpecies(); ispecies++) {
+                    outputs.add(new ObservedHtz(rank, getConfiguration().getSpecies(ispecies)));
+                }
+            }
+
         }
 
         /*
