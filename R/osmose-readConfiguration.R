@@ -280,6 +280,7 @@ read.cal = function(conf, sp) {
   
   start = get_par(conf, par="simulation.time.start")
   if(is.null(start)) start = attr(landings, "start")
+  if(length(start)>1) stop("Duplicated 'simulation.time.start', please check.")
   
   time = start + seq(from=0.5/ndt, by=1/ndt, length=T)
   
