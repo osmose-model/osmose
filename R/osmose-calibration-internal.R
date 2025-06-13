@@ -756,7 +756,9 @@ get_codes = function(sp, conf) {
     bestpar = as.list(bestpar)
     class(bestpar) = c("osmose.configuration")
     output$best = bestpar
-  }
+  } else {
+    warning("Restart file not found, returning only basic calibration configuration.")
+  } 
   
   class(output) = "osmose.calibration"
   return(output)

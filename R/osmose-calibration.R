@@ -403,7 +403,7 @@ osmose_calibration_outputs = function(output) {
 #' @export
 #'
 #' @inheritParams osmose_calibration_setup
-osmose_calibration_runmodel = function(input, name, version="4.3.3", par=NULL, debug=FALSE) {
+osmose_calibration_runmodel = function(input, name, version="4.3.3", par=NULL, additional=NULL, debug=FALSE) {
   
   wd = getwd()
   on.exit(setwd(wd))
@@ -429,6 +429,18 @@ osmose_calibration_runmodel = function(input, name, version="4.3.3", par=NULL, d
       par[which(check)] = NULL
     }
     par_guess[names(par)] = par
+  }
+  
+  if(!is.null(additional)) {
+    check = inherits(additional, "osmose.configuration") | inherits(additional, "list")
+    if(!check) stop("'additional' must be of class 'list' or 'osmose.configuration'.")
+    check = names(additional)==""
+    if(any(check)) {
+      warning("Removing unnamed elements of 'additional'.")
+      additional[which(check)] = NULL
+    }
+    additional[names(par_guess)] = NULL
+    par_guess = c(par_guess, additional)
   }
   
   source(file.path(dir, "run_model.R"), local=TRUE)
