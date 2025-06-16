@@ -463,7 +463,7 @@ osmose_calibration_runmodel = function(input, name, version="4.3.3", par=NULL, a
   setwd(dir_master)
   osmose = "../.osmose.jar"
   if(!file.exists(osmose)) stop("OSMOSE executable '.osmose.jar' was not found in the calibration directory.")
-  simulated = try(run_model(par=par_guess, conf=conf, osmose=osmose, is_a_test=is_a_test, version=version))
+  simulated = try(run_model(par=par_guess, conf=conf, osmose=osmose, is_a_test=FALSE, version=version))
   if(inherits(simulated, "try-error")) stop("Error while running run_model.")
   setwd(wd)
   
