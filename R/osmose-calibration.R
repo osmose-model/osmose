@@ -428,6 +428,12 @@ osmose_calibration_runmodel = function(input, name, version="4.3.3", par=NULL, a
       warning("Removing unnamed elements of 'par'.")
       par[which(check)] = NULL
     }
+    dup = setdiff(names(par), names(par_guess))
+    if(length(dup)>0) {
+      message("Ignoring non-calibrated parameters in 'par', set them with the 'additional' argument.")
+      message(sprintf("\tIgnored parameters: %s", paste(dup, collapse=", ")))
+      par[dup] = NULL
+    }
     par_guess[names(par)] = par
   }
   
@@ -439,7 +445,14 @@ osmose_calibration_runmodel = function(input, name, version="4.3.3", par=NULL, a
       warning("Removing unnamed elements of 'additional'.")
       additional[which(check)] = NULL
     }
-    additional[names(par_guess)] = NULL
+    dup = intersect(names(par_guess), names(additional))
+    p0 = get_par(par_guess, linear=TRUE, as.is=TRUE)
+    dup = c(dup, intersect(names(p0), names(additional)))
+    if(length(dup)>0) {
+      message("Ignoring calibrated parameters in 'additional', set them with the 'par' argument.")
+      message(sprintf("\tIgnored parameters: %s", paste(dup, collapse=", ")))
+      additional[dup] = NULL
+    }
     par_guess = c(par_guess, additional)
   }
   
@@ -450,7 +463,7 @@ osmose_calibration_runmodel = function(input, name, version="4.3.3", par=NULL, a
   setwd(dir_master)
   osmose = "../.osmose.jar"
   if(!file.exists(osmose)) stop("OSMOSE executable '.osmose.jar' was not found in the calibration directory.")
-  simulated = try(run_model(par=par_guess, conf=conf, osmose=osmose, is_a_test=FALSE, version=version))
+  simulated = try(run_model(par=par_guess, conf=conf, osmose=osmose, is_a_test=is_a_test, version=version))
   if(inherits(simulated, "try-error")) stop("Error while running run_model.")
   setwd(wd)
   
