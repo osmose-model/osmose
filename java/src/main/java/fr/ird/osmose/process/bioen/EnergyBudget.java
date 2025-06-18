@@ -68,10 +68,14 @@ public class EnergyBudget extends AbstractProcess {
     private double[] larvaePredationRateBioen;
 
     private double[] assimilation;
-    private double[] netenergy_scaling;
+    private double[] xi_crit;
     private double[] temperature_tmin;
     private double[] temperature_tmax;
     private double[] temperature_topt;
+    private double[] temperature_T1;
+    private double[] temperature_T2;
+    private double[] Imax;
+    private double[] larvaeRatio;
 
     @FunctionalInterface
     private interface GetENet {
@@ -93,7 +97,7 @@ public class EnergyBudget extends AbstractProcess {
 
     // Add for migrating school
     private double[] c_rateBioen;
-    private double[] W0; // weigth of indicidual at age = species.larvae.growth.threshold.age.sp ; only
+    private double[] W0; // weigth of individual at age = species.larvae.growth.threshold.age.sp ; only
                          // for migration species. We can compute automaticaly if parameters was no
                          // provide with von berta parameters and length weight coefficients. But can be
                          // specified if more reliable data
@@ -103,15 +107,19 @@ public class EnergyBudget extends AbstractProcess {
 
         String key;
         int cpt;
+        double R, hmin, hmax, H, k1, k2;
         // Redundant with the beta of the BioenPredationMortality class.
         int nSpecies = this.getNSpecies();
 
         c_m = new double[nSpecies];
         assimilation = new double[nSpecies];
-        netenergy_scaling = new double[nSpecies];
+        xi_crit = new double[nSpecies];
         temperature_tmin = new double[nSpecies];
         temperature_tmax = new double[nSpecies];
         temperature_topt = new double[nSpecies];
+        temperature_T1 = new double[nSpecies];
+        temperature_T2 = new double[nSpecies];
+        Imax = new double[nSpecies];
         EnetComputer = new GetENet[nSpecies];
 
         cpt = 0;
@@ -130,8 +138,8 @@ public class EnergyBudget extends AbstractProcess {
 
                 EnetComputer[cpt] = (School school) -> computeEnetLite(school);
 
-                key = String.format("species.netenergy.scaling.sp%d", i);
-                netenergy_scaling[cpt] = this.getConfiguration().getDouble(key);
+                key = String.format("predation.efficiency.critical.sp%d", i);
+                xi_crit[cpt] = this.getConfiguration().getDouble(key);
 
                 key = String.format("species.temperature.tmin.sp%d", i);
                 temperature_tmin[cpt] = this.getConfiguration().getDouble(key);
@@ -141,7 +149,22 @@ public class EnergyBudget extends AbstractProcess {
 
                 key = String.format("species.temperature.topt.sp%d", i);
                 temperature_topt[cpt] = this.getConfiguration().getDouble(key);
-
+                
+                key = String.format("predation.ingestion.rate.max.sp%d", i);
+                // Imax in in by time step units.
+                Imax[cpt] = this.getConfiguration().getDouble(key) / this.getConfiguration().getNStepYear();
+                
+                
+                R = temperature_tmax[cpt] - temperature_tmin[cpt];
+                hmin = (xi_crit[cpt]/(1 - xi_crit[cpt]))*Math.pow(temperature_tmin[cpt]-temperature_topt[cpt], 2.0);
+                hmax = (xi_crit[cpt]/(1 - xi_crit[cpt]))*Math.pow(temperature_tmax[cpt]-temperature_topt[cpt], 2.0);
+                H = (hmax - hmin)/R;
+                
+                k1 = (-(R+H) + Math.sqrt(Math.pow(R+H, 2.0) + 4*hmin))/2;
+                k2 = k1 + H;
+  
+                temperature_T1[cpt] = temperature_tmin[cpt] - k1;
+                temperature_T2[cpt] = temperature_tmax[cpt] + k2;
             }
 
             cpt++;
@@ -151,7 +174,7 @@ public class EnergyBudget extends AbstractProcess {
         cpt = 0;
         eta = new double[nSpecies];
         for (int i : getConfiguration().getFocalIndex()) {
-            key = String.format("species.bioen.maturity.eta.sp%d", i);
+            key = String.format("species.maturity.eta.sp%d", i);
             eta[cpt] = this.getConfiguration().getDouble(key);
             cpt++;
         }
@@ -232,22 +255,22 @@ public class EnergyBudget extends AbstractProcess {
 
     public void computeEnetLite(School school) {
         int ispec = school.getSpeciesIndex();
-        double Enet = netenergy_scaling[ispec] * this.assimilation[ispec] * school.getIngestion()
-                * computeLiteTempFunction(school) * oxygen_function.getFO2(school);
+        int thresAge = this.getSpecies(ispec).getLarvaeThresDt();
+        double thetap = (school.getAgeDt() < thresAge) ? this.larvaePredationRateBioen[ispec] : 1;
+        double Enet = this.assimilation[ispec] * ( school.getIngestion()
+                * computeLiteTempFunction(school) * oxygen_function.getFO2(school)
+                - this.Imax[ispec] * thetap * this.xi_crit[ispec]
+                * Math.pow(school.getWeight() * 1e6f, school.getBetaBioen())
+                * school.getInstantaneousAbundance() * 1e-6f);
         school.setENet(Enet);
     }
 
     public double computeLiteTempFunction(School school) {
         int ispec = school.getSpeciesIndex();
         double temperature = temp_function.getTemp(school);
-        if ((temperature < temperature_tmin[ispec]) || (temperature > temperature_tmax[ispec])) {
-            return 0;
-        } else {
-            double numerator = (temperature - temperature_tmin[ispec]) * (temperature - temperature_tmax[ispec]);
-            double denominator = numerator - Math.pow(temperature - temperature_topt[ispec], 2);
-            return numerator / denominator;
-        }
-
+        double numerator = (temperature - temperature_T1[ispec]) * (temperature - temperature_T2[ispec]);
+        double denominator = numerator - Math.pow(temperature - temperature_topt[ispec], 2);
+        return numerator / denominator;
     }
 
     /**
@@ -478,12 +501,13 @@ public class EnergyBudget extends AbstractProcess {
             dgrowth_mig = (growth_mig_a2 - growth_mig_a1) / getConfiguration().getNStepYear();
 
         }
-
+        
         if (school.isAlive()) {
             // increments the weight
             school.incrementWeight((float) ((dgrowth_mig * (1 - rho)) / 1e6f));
-            school.incrementGonadWeight((float) ((dgrowth_mig * rho) / 1e6f));
+            school.incrementGonadWeight((float) ((dgrowth_mig * eta[ispec] * rho) / 1e6f));
         }
+        
     }
 
     /**
@@ -523,11 +547,8 @@ public class EnergyBudget extends AbstractProcess {
 
         // If the organism is imature, all the net energy goes to the somatic growth.
         // else, only a 1-rho fraction goes to somatic growth
-        //double rho = (!school.isMature()) ? 0
-        //        : r_temp / (etaSpecies * school.get_enet_faced())
-        //                * Math.pow(school.getWeight() * 1e6f, 1 - school.getBetaBioen());
         double rho = (!school.isMature()) ? 0
-                : r_temp / (school.get_enet_faced())
+                : r_temp / (etaSpecies * school.get_enet_faced())
                         * Math.pow(school.getWeight() * 1e6f, 1 - school.getBetaBioen());
         rho = ((rho < 0) ? 0 : rho); // 0 if rho<0
         rho = ((rho > 1) ? 1 : rho); // 1 if rho>1
