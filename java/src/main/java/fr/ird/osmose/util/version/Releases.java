@@ -618,6 +618,9 @@ public class Releases {
                   if(cfg.canFind("species.bioen.maturity.m1.sp" + index)) {
                       updateKey("species.bioen.maturity.m1.sp" + index, "species.maturity.m1.sp" + index);
                   }   
+                  if(cfg.canFind("species.bioen.maturity.eta.sp" + index)) {
+                      updateKey("species.bioen.maturity.eta.sp" + index, "species.maturity.eta.sp" + index);
+                  }   
                 }
             }
         }
