@@ -397,7 +397,8 @@ osmose_calibration_outputs = function(output) {
 
 #' Run a model as set up for a calibration trial
 #'
-#' @param par A list or osmose.configuration object containing OSMOSE parameters
+#' @param par A list or osmose.configuration object containing OSMOSE parameters. Only calibrated parameters are accepted.
+#' @param additional A list or osmose.configuration object containing OSMOSE parameters. Only NON calibrated parameters are accepted, particularly output parameters.
 #' @param debug Do you want to debug the run_model function?
 #' @returns A list with the simulated data used for calibration.
 #' @export
