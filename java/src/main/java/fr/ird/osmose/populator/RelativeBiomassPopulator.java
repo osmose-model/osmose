@@ -307,6 +307,7 @@ public class RelativeBiomassPopulator extends AbstractPopulator {
         // Need to be before the check of maturity
         if (getConfiguration().isGeneticEnabled()) {
             school0.instance_genotype(getSimulation().getRank());
+            school0.getGenotype().init_genotype();
         }
 
         if (this.isBioenEnabled) {
