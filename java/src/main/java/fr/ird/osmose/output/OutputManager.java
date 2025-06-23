@@ -507,6 +507,18 @@ public class OutputManager extends SimulationLinker {
                     school -> school.abd2biom(school.getNdead(MortalityCause.FISHING)), weightDistrib, false, false));
         }
 
+        if (getConfiguration().getBoolean("output.yield.abundance.byTl.enabled")) {
+            outputs.add(new DistribOutput(rank, "Indicators", "yieldN",
+                    "Distribution of cumulative catch (number of fish per time step of saving)",
+                    school -> school.getNdead(MortalityCause.FISHING), tl_distrib, false, false));
+        }
+
+        if (getConfiguration().getBoolean("output.yield.biomass.byTl.enabled")) {
+            outputs.add(new DistribOutput(rank, "Indicators", "yield",
+                    "Distribution of cumulative catch (tonne per time step of saving)",
+                    school -> school.abd2biom(school.getNdead(MortalityCause.FISHING)), tl_distrib, false, false));
+        }
+
         if (getConfiguration().getBoolean("output.meanSize.byAge.enabled")) {
             outputs.add(new WeightedDistribOutput(rank, "AgeIndicators", "meanSize", "Mean size of fish (centimeter)",
                     school -> school.getLength(), school -> school.getInstantaneousAbundance(), ageDistrib));
