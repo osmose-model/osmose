@@ -73,8 +73,8 @@ public class MortalityOutput_Netcdf extends AbstractOutput_Netcdf {
      */
     final private int STAGES = 3;
     final private int EGG = 0;
-    final private int PRE_RECRUIT = 1;
-    final private int RECRUIT = 2;
+    final private int JUVENILE = 1;
+    final private int ADULT = 2;
     /*
      * Mortality rates array [SPECIES][CAUSES][STAGES]
      */
@@ -83,14 +83,6 @@ public class MortalityOutput_Netcdf extends AbstractOutput_Netcdf {
      * Abundance per stages [SPECIES][STAGES]
      */
     private double[] abundanceStage;
-    /**
-     * Age of recruitment (expressed in number of time steps) [SPECIES]
-     */
-    private int recruitmentAge;
-    /**
-     * Size of recruitment (expressed in centimetre) [SPECIES]
-     */
-    private float recruitmentSize;
     /**
      * Stage of the schools at the beginning of the time step.
      */
@@ -103,20 +95,6 @@ public class MortalityOutput_Netcdf extends AbstractOutput_Netcdf {
     }
 
     public void init() {
-        // Get the age of recruitment
-        int iSpecies = this.species.getFileSpeciesIndex();
-        if (!getConfiguration().isNull("mortality.fishing.recruitment.age.sp" + iSpecies)) {
-            float age = getConfiguration().getFloat("mortality.fishing.recruitment.age.sp" + iSpecies);
-            recruitmentAge = Math.round(age * getConfiguration().getNStepYear());
-            recruitmentSize = -1.f;
-        } else if (!getConfiguration().isNull("mortality.fishing.recruitment.size.sp" + iSpecies)) {
-            recruitmentSize = getConfiguration().getFloat("mortality.fishing.recruitment.size.sp" + iSpecies);
-            recruitmentAge = -1;
-        } else {
-            warning("Could not find parameters mortality.fishing.recruitment.age/size.sp{0}. Osmose assumes it is one year.", new Object[]{iSpecies});
-            recruitmentAge = getConfiguration().getNStepYear();
-            recruitmentSize = -1.f;
-        }
         super.init();
     }
 
@@ -169,11 +147,15 @@ public class MortalityOutput_Netcdf extends AbstractOutput_Netcdf {
                 for (int iDeath = 0; iDeath < nCause; iDeath++) {
                     nDeadTot += nDead[iDeath][iStage];
                 }
-                double Ftot = Math.log(abundanceStage[iStage] / (abundanceStage[iStage] - nDeadTot));
+                // Adding 1e-6 for numerical stability. It will only impact when
+                // nDeatTot == abundanceStage[iSpecies][iStage]. Then Z=23.025 instead Inf,
+                // extremely minor effect otherwise (when nDeatTot -> abundanceStage[iClass])
+                double Ftot = Math.log((abundanceStage[iStage] + 1e-6) / ((abundanceStage[iStage] - nDeadTot) + 1e-6));
+                // When Ftot=0, nDead/NDeadTot gives NaN. But Z=0 should imply all partial mortalities are 0.
 
-                if (Ftot != 0) {
+                if (Ftot > 0) {
                     for (int iDeath = 0; iDeath < nCause; iDeath++) {
-                        mortalityRates[iDeath][iStage] += Ftot * nDead[iDeath][iStage] / ((1 - Math.exp(-Ftot)) * abundanceStage[iStage]);
+                        mortalityRates[iDeath][iStage] += Ftot * nDead[iDeath][iStage] / nDeadTot;
                     }
                 }
             }
@@ -200,37 +182,19 @@ public class MortalityOutput_Netcdf extends AbstractOutput_Netcdf {
 
         int iStage;
 
-        if (this.getConfiguration().isBioenEnabled()) {
+        if (school.isEgg()) {
+            // Eggss
+            iStage = EGG;
 
-            if (school.isEgg()) {
-                // Eggss
-                iStage = EGG;
-
-            } else if (!school.isMature()) {
-                // Pre-recruits
-                iStage = PRE_RECRUIT;
-
-            } else {
-                // Recruits
-                iStage = RECRUIT;
-            }
+        } else if (!school.isMature()) {
+            // Pre-recruits
+            iStage = JUVENILE;
 
         } else {
-
-            if (school.isEgg()) {
-                // Eggss
-                iStage = EGG;
-
-            } else if (school.getAgeDt() < recruitmentAge
-                    || school.getLength() < recruitmentSize) {
-                // Pre-recruits
-                iStage = PRE_RECRUIT;
-
-            } else {
-                // Recruits
-                iStage = RECRUIT;
-            }
+            // Recruits
+            iStage = ADULT;
         }
+
         return iStage;
     }
 
@@ -272,7 +236,7 @@ public class MortalityOutput_Netcdf extends AbstractOutput_Netcdf {
 
         Dimension stageDim = getBNc().addDimension("stage", STAGES);
         Variable.Builder<?> stagevarBuilder = getBNc().addVariable("stage", DataType.INT, stageDim.getName());
-        String[] stages_str = new String[]{"Egg", "Pre-recruit", "Recruit"};
+        String[] stages_str = new String[]{"Egg", "Juvenile", "Adult"};
         for (int i = 0; i < STAGES; i++) {
             String attrname = String.format("stage%d", i);
             String attval = stages_str[i];
