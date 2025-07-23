@@ -636,8 +636,19 @@ get_codes = function(sp, conf) {
   if(is.na(ind)) stop("Could not find the 'data_path'.")
   path = read.table(file=script, sep="=", skip=ind-1, nrows=1, row.names=1)
   path = str_trim(as.character(path))
+  return(path)
 }
 
+.check_osmose_parameters = function(par, nm="par") {
+  check = inherits(par, "osmose.configuration") | inherits(par, "list")
+  if(!check) stop(sprintf("'%s' must be of class 'list' or 'osmose.configuration'.", nm))
+  check = names(par)==""
+  if(any(check)) {
+    warning(sprintf("Removing unnamed elements of '%s'.", nm))
+    par[which(check)] = NULL
+  }
+  return(par)
+}
 
 
 # TESTS -------------------------------------------------------------------
@@ -646,23 +657,24 @@ get_codes = function(sp, conf) {
 .calibration_test_1 = function(simulated, observed, setup) {
 
   test1 = identical(sort(names(observed)), sort(names(simulated)))
+
+  if(!test1) {
+    message("Pre-calibration test: FAILED. Simulated and observed have not the same variable names. Check your calibration settings.\n")
+  }
+  
+  nm = names(observed)
+  simulated = simulated[nm] # reordering simulated as observed
+  # obs_check = obs_check[nm]
+  # sim_check = sim_check[nm]
   
   useData = as.logical(setup$use_data)
   isActive = as.logical(setup$calibrate)
   readData = useData & isActive
   
-  if(!test1) {
-    message("Pre-calibration test: FAILED. Simulated and observed have not the same variable names. Check your calibration settings.\n")
-  }
-  
   obs_check = lapply(observed, FUN=.dim_or_length)
   sim_check = lapply(simulated, FUN=.dim_or_length)
   sim_check[!readData] = 1L
 
-  nm = sort(names(observed))
-  obs_check = obs_check[nm]
-  sim_check = sim_check[nm]
-  
   test2 = identical(obs_check, sim_check)
   
   msg = "Error in variable '%s': observed [%s] and simulated [%s] dimensions do not match."

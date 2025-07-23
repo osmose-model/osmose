@@ -411,6 +411,7 @@ osmose_calibration_runmodel = function(input, name, version="4.3.3", par=NULL, a
   
   conf = read_osmose(input=input)
   
+  if(missing(name)) name = NULL
   dir = if(is.null(name)) "calibration" else sprintf("calibration_%s", name)
   dir_master = file.path(dir, "master") 
   if(!dir.exists(dir)) stop(sprintf("Calibration folder %d does not exists.", dir))
@@ -422,13 +423,7 @@ osmose_calibration_runmodel = function(input, name, version="4.3.3", par=NULL, a
   par_guess = read_osmose(input=guess_file)
   
   if(!is.null(par)) {
-    check = inherits(par, "osmose.configuration") | inherits(par, "list")
-    if(!check) stop("'par' must be of class 'list' or 'osmose.configuration'.")
-    check = names(par)==""
-    if(any(check)) {
-      warning("Removing unnamed elements of 'par'.")
-      par[which(check)] = NULL
-    }
+    par = .check_osmose_parameters(par=par, nm="par")
     dup = setdiff(names(par), names(par_guess))
     if(length(dup)>0) {
       message("Ignoring non-calibrated parameters in 'par', set them with the 'additional' argument.")
@@ -439,13 +434,7 @@ osmose_calibration_runmodel = function(input, name, version="4.3.3", par=NULL, a
   }
   
   if(!is.null(additional)) {
-    check = inherits(additional, "osmose.configuration") | inherits(additional, "list")
-    if(!check) stop("'additional' must be of class 'list' or 'osmose.configuration'.")
-    check = names(additional)==""
-    if(any(check)) {
-      warning("Removing unnamed elements of 'additional'.")
-      additional[which(check)] = NULL
-    }
+    additional = .check_osmose_parameters(par=additional, nm="additional")
     dup = intersect(names(par_guess), names(additional))
     p0 = get_par(par_guess, linear=TRUE, as.is=TRUE)
     dup = c(dup, intersect(names(p0), names(additional)))
@@ -468,10 +457,51 @@ osmose_calibration_runmodel = function(input, name, version="4.3.3", par=NULL, a
   if(inherits(simulated, "try-error")) stop("Error while running run_model.")
   setwd(wd)
   
-  message(sprintf("OSMOSE outputs written in '%s'.", dir_master))
+  message(sprintf("OSMOSE outputs written in '%s'.", file.path(dir_master, "output")))
   
   class(simulated) = "osmose.runmodel"
   
   return(simulated)
+  
+}
+
+#' Check the results of a calibration trial
+#'
+#' @returns A list of outputs from the model.
+#' @export
+#'
+#' @inheritParams osmose_calibration_runmodel
+osmose_calibration_check = function(input, name=NULL, par=NULL, additional=NULL, version="4.4.1") {
+  
+  dir = if(is.null(name)) "calibration" else sprintf("calibration_%s", name)
+  outputDir = file.path(dir, "master", "output") 
+  
+  restart = read_osmose(path=dir)
+  
+  bestpar = get_var(restart, "best")
+  if(!is.null(par)) {
+    par = .check_osmose_parameters(par=par, nm="par")
+    bestpar[names(par)] = par
+  } 
+  
+  output_par = list("output.diet.composition.enabled"=TRUE, "output.mortality.enabled"=TRUE)
+  if(!is.null(additional)) {
+    additional = .check_osmose_parameters(par=additional, nm="par")
+    additional[names(output_par)] = output_par
+  } else {
+    additional = output_par
+  }
+  
+  update = osmose_calibration_runmodel(input=input, name=name, par=bestpar, additional=additional)
+  
+  output = read_osmose(path=outputDir, version=version)
+  output$simulated = update
+  output$observed = restart$observed
+  output$settings = restart$settings
+  output$cv = setNames(restart$settings$cv, nm=restart$settings$variable)
+  
+  class(output) = "osmose.calibration"
+  
+  return(output)
   
 }

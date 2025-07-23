@@ -199,18 +199,19 @@ calculateMortality = function(conf, sp) {
     return(all(diff(Mi) < 0))
   }
   
-  this = get_par(conf, sp=sp)
-  d1 = get_par(this, "species.egg.stage.duration") # days
-  if(is.null(d1)) d1 = 2
-  d1 = d1/365 # transformed to years
-  
   tsMLF = calculateMLF(conf, sp=sp)
   MLF = mean(tsMLF) 
   
   this = get_par(conf, sp=sp)
   
-  tn = get_par(this, "species.lifespan")
+  rmode = get_par(this, "species.reproduction.mode") # is viviparous?
+  d1 = get_par(this, "species.egg.stage.duration") # days
+  if(is.null(d1)) d1 = 2
+  d1 = d1/365 # transformed to years
+  
+  tn    = get_par(this, "species.lifespan")
   ratio = get_par(this, "species.sexratio")
+  ndt   = get_par(conf, "time.ndtPerYear")
   
   ind = sapply(2:20, .getM, ratio=ratio, MLF=MLF, tn=tn, d1=d1, value=FALSE)
   n = which.min(ind)
@@ -219,11 +220,19 @@ calculateMortality = function(conf, sp) {
   Mi = tmp$Mi
   di = tmp$di
   
-  ti = cumsum(di)
+  ti = c(0, cumsum(di))
   
-  size = VB(c(0, ti), this, method=3)
+  size = VB(ti, this, method=3)
   size[length(size)] = Inf
-  out = list(age = c(0, ti), size=size, M=Mi)
+  
+  xndt = 15*ndt
+  xage = seq(from=0+0.5/xndt, to=tn, by=1/xndt)
+
+  # average mortality by age in time steps of the model
+  m = colMeans(matrix(Mi[cut(xage, breaks=ti, labels = FALSE)], nrow=15))
+  
+  out = list(age=ti, size=size, M=Mi, Mage=m)
+  
   return(out)
   
 }
