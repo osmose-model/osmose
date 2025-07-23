@@ -63,12 +63,12 @@ public class MortalityOutput extends SimulationLinker implements IOutput {
     private PrintWriter[] prw;
     private int recordFrequency;
     /*
-     * Mortality rates Stages: 1. eggs & larvae 2. Pre-recruits 3. Recruits
+     * Mortality rates Stages: 1. eggs & larvae 2. Juveniles 3. Adults
      */
     final private int STAGES = 3;
     final private int EGG = 0;
-    final private int PRE_RECRUIT = 1;
-    final private int RECRUIT = 2;
+    final private int JUVENILE = 1;
+    final private int ADULT = 2;
     /*
      * Mortality rates array [SPECIES][CAUSES][STAGES]
      */
@@ -77,14 +77,6 @@ public class MortalityOutput extends SimulationLinker implements IOutput {
      * Abundance per stages [SPECIES][STAGES]
      */
     private double[][] abundanceStage;
-    /**
-     * Age of recruitment (expressed in number of time steps) [SPECIES]
-     */
-    private int[] recruitmentAge;
-    /**
-     * Size of recruitment (expressed in centimetre) [SPECIES]
-     */
-    private float[] recruitmentSize;
     /**
      * CSV separator
      */
@@ -148,13 +140,14 @@ public class MortalityOutput extends SimulationLinker implements IOutput {
                     for (int iDeath = 0; iDeath < nCause; iDeath++) {
                         nDeadTot += nDead[iSpecies][iDeath][iStage];
                     }
-                    // total mortality rate for the species/class based on  D = A (1 - e^{-F})
-                    double Ftot = Math.log(abundanceStage[iSpecies][iStage] / (abundanceStage[iSpecies][iStage] - nDeadTot));
-
-                    // Mortality rates is just the proportion Fi = Ftot * Di / D, with D the number of dead.
-                    if (Ftot != 0) {
+                    // Adding 1e-6 for numerical stability. It will only impact when
+                    // nDeatTot == abundanceStage[iSpecies][iStage]. Then Z=23.025 instead Inf,
+                    // extremely minor effect otherwise (when nDeatTot -> abundanceStage[iClass])
+                    double Ftot = Math.log((abundanceStage[iSpecies][iStage] + 1e-6) / ((abundanceStage[iSpecies][iStage] - nDeadTot) + 1e-6));
+                    // When Ftot=0, nDead/NDeadTot gives NaN. But Z=0 should imply all partial mortalities are 0.
+                    if (Ftot > 0) {
                         for (int iDeath = 0; iDeath < nCause; iDeath++) {
-                            mortalityRates[iSpecies][iDeath][iStage] += Ftot * nDead[iSpecies][iDeath][iStage] / ((1 - Math.exp(-Ftot)) * abundanceStage[iSpecies][iStage]);
+                            mortalityRates[iSpecies][iDeath][iStage] += Ftot * nDead[iSpecies][iDeath][iStage] / nDeadTot;
                         }
                     }
                 }
@@ -191,8 +184,6 @@ public class MortalityOutput extends SimulationLinker implements IOutput {
 
         fos = new FileOutputStream[getNSpecies()];
         prw = new PrintWriter[getNSpecies()];
-        recruitmentAge = new int[getNSpecies()];
-        recruitmentSize = new float[getNSpecies()];
         for (int iSpecies = 0; iSpecies < getNSpecies(); iSpecies++) {
             // Create parent directory
             File path = new File(getConfiguration().getOutputPathname());
@@ -255,26 +246,11 @@ public class MortalityOutput extends SimulationLinker implements IOutput {
                     prw[iSpecies].print(separator);
                     prw[iSpecies].print("Eggs");
                     prw[iSpecies].print(separator);
-                    prw[iSpecies].print("Pre-recruits");
+                    prw[iSpecies].print("Juvenil");
                     prw[iSpecies].print(separator);
-                    prw[iSpecies].print("Recruits");
+                    prw[iSpecies].print("Adult");
                 }
                 prw[iSpecies].println();
-            }
-
-            // Get the age of recruitment
-            if (!getConfiguration().isNull("mortality.fishing.recruitment.age.sp" + iSpecies)) {
-                float age = getConfiguration().getFloat("mortality.fishing.recruitment.age.sp" + iSpecies);
-                recruitmentAge[iSpecies] = Math.round(age * getConfiguration().getNStepYear());
-                recruitmentSize[iSpecies] = -1.f;
-            } else if (!getConfiguration().isNull("mortality.fishing.recruitment.size.sp" + iSpecies)) {
-                recruitmentSize[iSpecies] = getConfiguration().getFloat("mortality.fishing.recruitment.size.sp" + iSpecies);
-                recruitmentAge[iSpecies] = -1;
-            } else {
-                warning("Could not find parameters mortality.fishing.recruitment.age/size.sp{0}. Osmose assumes it is one year.", new Object[]{iSpecies});
-                recruitmentAge[iSpecies] = getConfiguration().getNStepYear();
-                recruitmentSize[iSpecies] = -1.f;
-
             }
         }
     }
@@ -282,38 +258,20 @@ public class MortalityOutput extends SimulationLinker implements IOutput {
     private int getStage(School school) {
 
         int iStage;
+        
+        if (school.isEgg()) {
+            // Eggss
+            iStage = EGG;
 
-        if(this.getConfiguration().isBioenEnabled()) {
-
-            if (school.isEgg()) {
-                // Eggss
-                iStage = EGG;
-
-            } else if (!school.isMature()) {
-                // Pre-recruits
-                iStage = PRE_RECRUIT;
-
-            } else {
-                // Recruits
-                iStage = RECRUIT;
-            }
+        } else if (!school.isMature()) {
+            // Pre-recruits
+            iStage = JUVENILE;
 
         } else {
-
-            if (school.isEgg()) {
-                // Eggss
-                iStage = EGG;
-
-            } else if (school.getAgeDt() < recruitmentAge[school.getSpeciesIndex()]
-                    || school.getLength() < recruitmentSize[school.getSpeciesIndex()]) {
-                // Pre-recruits
-                iStage = PRE_RECRUIT;
-
-            } else {
-                // Recruits
-                iStage = RECRUIT;
-            }
+            // Recruits
+            iStage = ADULT;
         }
+
         return iStage;
     }
 
