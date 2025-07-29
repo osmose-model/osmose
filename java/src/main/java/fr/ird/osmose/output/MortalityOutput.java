@@ -59,8 +59,8 @@ import java.util.logging.Logger;
 public class MortalityOutput extends SimulationLinker implements IOutput {
 
     // IO
-    private FileOutputStream[] fos;
-    private PrintWriter[] prw;
+    private FileOutputStream fos[][];
+    private PrintWriter prw[][];
     private int recordFrequency;
     /*
      * Mortality rates Stages: 1. eggs & larvae 2. Juveniles 3. Adults
@@ -70,24 +70,27 @@ public class MortalityOutput extends SimulationLinker implements IOutput {
     final private int JUVENILE = 1;
     final private int ADULT = 2;
     /*
-     * Mortality rates array [SPECIES][CAUSES][STAGES]
+     * Mortality rates array [REGION][SPECIES][CAUSES][STAGES]
      */
-    private double[][][] mortalityRates;
+    private double mortalityRates[][][][];
     /*
-     * Abundance per stages [SPECIES][STAGES]
+     * Abundance per stages [REGION][SPECIES][STAGES]
      */
-    private double[][] abundanceStage;
+    private double abundanceStage[][][];
     /**
      * CSV separator
      */
     private final String separator;
 
     /** Stage of the schools at the beginning of the time step. */
-    private int[] stage_init;
+    private int stage_init[][];
+
+    private int nRegions;
 
     public MortalityOutput(int rank) {
         super(rank);
         separator = getConfiguration().getOutputSeparator();
+        nRegions = getConfiguration().getOutputRegions().size();
     }
 
     @Override
@@ -95,59 +98,80 @@ public class MortalityOutput extends SimulationLinker implements IOutput {
 
         // Reset the nDead array used to compute the mortality rates of current
         // time step
-        abundanceStage = new double[getNSpecies()][STAGES];
+        abundanceStage = new double[nRegions][getNSpecies()][STAGES];
+        stage_init = new int[nRegions][getSchoolSet().getSchools().size()];
 
-        stage_init = new int[getSchoolSet().getSchools().size()];
-
+        // Index of the school that is being processed
         int cpt = 0;
+        int timeStep = getSimulation().getIndexTimeSimu();
 
         // save abundance at the beginning of the time step
         for (School school : getSchoolSet().getSchools()) {
+            // Loop over the schools
             int stage = getStage(school);
-            stage_init[cpt] = stage;
-            abundanceStage[school.getSpeciesIndex()][stage] += school.getAbundance();
+            for (int iRegion = 0; iRegion < nRegions; iRegion++) {
+
+                // Loop over all the output regions
+                AbstractOutputRegion region = getConfiguration().getOutputRegions().get(iRegion);
+
+                // If the school is within the domain, then we integrate
+                if (region.contains(timeStep, school)) {
+                    stage_init[iRegion][cpt] = stage;
+                    abundanceStage[iRegion][school.getSpeciesIndex()][stage] += school.getAbundance();
+                }
+
+            }
             cpt += 1;
         }
     }
 
     @Override
     public void reset() {
-
         // Reset mortality rates
-        mortalityRates = new double[getNSpecies()][MortalityCause.values().length][STAGES];
+        mortalityRates = new double[nRegions][getNSpecies()][MortalityCause.values().length][STAGES];
     }
 
     @Override
     public void update() {
         int iStage, cpt = 0;
         int nCause = MortalityCause.values().length;
-        double[][][] nDead = new double[getNSpecies()][nCause][STAGES];
+        double nDead[][][][] = new double[nRegions][getNSpecies()][nCause][STAGES];
         for (School school : getSchoolSet().getSchools()) {
-            //iStage = getStage(school);
-            iStage = stage_init[cpt];
-            int iSpecies = school.getSpeciesIndex();
-            // Update number of deads
-            for (MortalityCause cause : MortalityCause.values()) {
-                nDead[iSpecies][cause.index][iStage] += school.getNdead(cause);
+            for (int iRegion = 0; iRegion < nRegions; iRegion++) {
+                iStage = stage_init[iRegion][cpt];
+                int iSpecies = school.getSpeciesIndex();
+                // Update number of deads
+                for (MortalityCause cause : MortalityCause.values()) {
+                    nDead[iRegion][iSpecies][cause.index][iStage] += school.getNdead(iRegion, cause);
+                }
+
             }
             cpt += 1;
         }
+
+
+
         // Cumulate the mortality rates
-        for (int iSpecies = 0; iSpecies < getNSpecies(); iSpecies++) {
-            for (iStage = 0; iStage < STAGES; iStage++) {
-                if (abundanceStage[iSpecies][iStage] > 0) {
-                    double nDeadTot = 0;
-                    for (int iDeath = 0; iDeath < nCause; iDeath++) {
-                        nDeadTot += nDead[iSpecies][iDeath][iStage];
-                    }
-                    // Adding 1e-6 for numerical stability. It will only impact when
-                    // nDeatTot == abundanceStage[iSpecies][iStage]. Then Z=23.025 instead Inf,
-                    // extremely minor effect otherwise (when nDeatTot -> abundanceStage[iClass])
-                    double Ftot = Math.log((abundanceStage[iSpecies][iStage] + 1e-6) / ((abundanceStage[iSpecies][iStage] - nDeadTot) + 1e-6));
-                    // When Ftot=0, nDead/NDeadTot gives NaN. But Z=0 should imply all partial mortalities are 0.
-                    if (Ftot > 0) {
+        for (int iRegion = 0; iRegion < nRegions; iRegion++) {
+            for (int iSpecies = 0; iSpecies < getNSpecies(); iSpecies++) {
+                for (iStage = 0; iStage < STAGES; iStage++) {
+                    if (abundanceStage[iRegion][iSpecies][iStage] > 0) {
+                        double nDeadTot = 0;
                         for (int iDeath = 0; iDeath < nCause; iDeath++) {
-                            mortalityRates[iSpecies][iDeath][iStage] += Ftot * nDead[iSpecies][iDeath][iStage] / nDeadTot;
+                            nDeadTot += nDead[iRegion][iSpecies][iDeath][iStage];
+                        }
+                        // Adding 1e-6 for numerical stability. It will only impact when
+                        // nDeatTot == abundanceStage[iSpecies][iStage]. Then Z=23.025 instead Inf,
+                        // extremely minor effect otherwise (when nDeatTot -> abundanceStage[iClass])
+                        double Ftot = Math.log((abundanceStage[iRegion][iSpecies][iStage] + 1e-6)
+                                / ((abundanceStage[iRegion][iSpecies][iStage] - nDeadTot) + 1e-6));
+                        // When Ftot=0, nDead/NDeadTot gives NaN. But Z=0 should imply all partial
+                        // mortalities are 0.
+                        if (Ftot > 0) {
+                            for (int iDeath = 0; iDeath < nCause; iDeath++) {
+                                mortalityRates[iRegion][iSpecies][iDeath][iStage] += Ftot * nDead[iRegion][iSpecies][iDeath][iStage]
+                                        / nDeadTot;
+                            }
                         }
                     }
                 }
@@ -157,100 +181,126 @@ public class MortalityOutput extends SimulationLinker implements IOutput {
 
     @Override
     public void write(float time) {
-
-        for (int iSpecies = 0; iSpecies < getNSpecies(); iSpecies++) {
-            prw[iSpecies].print(time);
-            prw[iSpecies].print(separator);
-            for (int iDeath = 0; iDeath < MortalityCause.values().length; iDeath++) {
-                for (int iStage = 0; iStage < STAGES; iStage++) {
-                    if (iDeath == MortalityCause.ADDITIONAL.index && iStage == EGG) {
-                        // instantenous mortality rate for eggs additional mortality
-                        prw[iSpecies].print(mortalityRates[iSpecies][iDeath][iStage] / recordFrequency);
-                    } else {
-                        prw[iSpecies].print(mortalityRates[iSpecies][iDeath][iStage]);
+        for (int iRegion = 0; iRegion < nRegions; iRegion++) {
+            for (int iSpecies = 0; iSpecies < getNSpecies(); iSpecies++) {
+                prw[iRegion][iSpecies].print(time);
+                prw[iRegion][iSpecies].print(separator);
+                for (int iDeath = 0; iDeath < MortalityCause.values().length; iDeath++) {
+                    for (int iStage = 0; iStage < STAGES; iStage++) {
+                        if (iDeath == MortalityCause.ADDITIONAL.index && iStage == EGG) {
+                            // instantenous mortality rate for eggs additional mortality
+                            prw[iRegion][iSpecies].print(mortalityRates[iRegion][iSpecies][iDeath][iStage] / recordFrequency);
+                        } else {
+                            prw[iRegion][iSpecies].print(mortalityRates[iRegion][iSpecies][iDeath][iStage]);
+                        }
+                        prw[iRegion][iSpecies].print(separator);
                     }
-                    prw[iSpecies].print(separator);
                 }
+                prw[iRegion][iSpecies].println();
             }
-            prw[iSpecies].println();
         }
     }
 
     @Override
     public void init() {
 
+    //         final String getFilename(int region, String regionName) {
+    //     StringBuilder filename = new StringBuilder();
+    //     if (null != subfolder && !subfolder.isEmpty()) {
+    //         filename.append(subfolder).append(File.separatorChar);
+    //     }
+    //     filename.append(getConfiguration().getString("output.file.prefix"));
+    //     filename.append("_").append(name);
+    //     if (region > 0) {
+    //         filename.append("-").append(regionName);
+    //     }
+    //     filename.append("_Simu");
+    //     filename.append(getRank());
+    //     filename.append(".csv");
+    //     return filename.toString();
+    // }
+
         // Record frequency
         recordFrequency = getConfiguration().getInt("output.recordfrequency.ndt");
 
-        fos = new FileOutputStream[getNSpecies()];
-        prw = new PrintWriter[getNSpecies()];
-        for (int iSpecies = 0; iSpecies < getNSpecies(); iSpecies++) {
-            // Create parent directory
-            File path = new File(getConfiguration().getOutputPathname());
-            StringBuilder filename = new StringBuilder("Mortality");
-            filename.append(File.separatorChar);
-            filename.append(getConfiguration().getString("output.file.prefix"));
-            filename.append("_mortalityRate-");
-            filename.append(getSpecies(iSpecies).getName());
-            filename.append("_Simu");
-            filename.append(getRank());
-            filename.append(".csv");
-            File file = new File(path, filename.toString());
-            boolean fileExists = file.exists();
-            file.getParentFile().mkdirs();
-            try {
-                // Init stream
-                fos[iSpecies] = new FileOutputStream(file, false);
-            } catch (FileNotFoundException ex) {
-                Logger.getLogger(MortalityOutput.class.getName()).log(Level.SEVERE, null, ex);
-            }
-            prw[iSpecies] = new PrintWriter(fos[iSpecies], true);
-            if (!fileExists) {
-                // Write headers
-                prw[iSpecies].println(quote("Predation (Mpred), Starvation (Mstarv), Additional mortality (Madd), Fishing (F) & Out-of-domain (Zout) mortality rates per time step of saving, except for Madd Eggs that is expressed in osmose time step. Z is the total mortality for migratory fish outside the simulation grid. To get annual mortality rates, sum the mortality rates within one year."));
-                prw[iSpecies].print(quote("Time"));
-                for (int i = 0; i < STAGES; i++) {
-                    prw[iSpecies].print(separator);
-                    prw[iSpecies].print(quote("Mpred"));
+        fos = new FileOutputStream[nRegions][getNSpecies()];
+        prw = new PrintWriter[nRegions][getNSpecies()];
+
+        for (int iRegion = 0; iRegion < nRegions; iRegion++) {
+            AbstractOutputRegion region = getConfiguration().getOutputRegions().get(iRegion);
+            for (int iSpecies = 0; iSpecies < getNSpecies(); iSpecies++) {
+                // Create parent directory
+                File path = new File(getConfiguration().getOutputPathname());
+                StringBuilder filename = new StringBuilder("Mortality");
+                filename.append(File.separatorChar);
+                filename.append(getConfiguration().getString("output.file.prefix"));
+                filename.append("_mortalityRate");
+                if (iRegion > 0) {
+                    filename.append("-").append(region.getName());
                 }
-                for (int i = 0; i < STAGES; i++) {
-                    prw[iSpecies].print(separator);
-                    prw[iSpecies].print(quote("Mstarv"));
+                filename.append("-");
+                filename.append(getSpecies(iSpecies).getName());
+                filename.append("_Simu");
+                filename.append(getRank());
+                filename.append(".csv");
+                File file = new File(path, filename.toString());
+                boolean fileExists = file.exists();
+                file.getParentFile().mkdirs();
+                try {
+                    // Init stream
+                    fos[iRegion][iSpecies] = new FileOutputStream(file, false);
+                } catch (FileNotFoundException ex) {
+                    Logger.getLogger(MortalityOutput.class.getName()).log(Level.SEVERE, null, ex);
                 }
-                for (int i = 0; i < STAGES; i++) {
-                    prw[iSpecies].print(separator);
-                    prw[iSpecies].print(quote("Madd"));
+                prw[iRegion][iSpecies] = new PrintWriter(fos[iRegion][iSpecies], true);
+                if (!fileExists) {
+                    // Write headers
+                    prw[iRegion][iSpecies].println(quote(
+                            "Predation (Mpred), Starvation (Mstarv), Additional mortality (Madd), Fishing (F) & Out-of-domain (Zout) mortality rates per time step of saving, except for Madd Eggs that is expressed in osmose time step. Z is the total mortality for migratory fish outside the simulation grid. To get annual mortality rates, sum the mortality rates within one year."));
+                    prw[iRegion][iSpecies].print(quote("Time"));
+                    for (int i = 0; i < STAGES; i++) {
+                        prw[iRegion][iSpecies].print(separator);
+                        prw[iRegion][iSpecies].print(quote("Mpred"));
+                    }
+                    for (int i = 0; i < STAGES; i++) {
+                        prw[iRegion][iSpecies].print(separator);
+                        prw[iRegion][iSpecies].print(quote("Mstarv"));
+                    }
+                    for (int i = 0; i < STAGES; i++) {
+                        prw[iRegion][iSpecies].print(separator);
+                        prw[iRegion][iSpecies].print(quote("Madd"));
+                    }
+                    for (int i = 0; i < STAGES; i++) {
+                        prw[iRegion][iSpecies].print(separator);
+                        prw[iRegion][iSpecies].print(quote("F"));
+                    }
+                    for (int i = 0; i < STAGES; i++) {
+                        prw[iRegion][iSpecies].print(separator);
+                        prw[iRegion][iSpecies].print(quote("Zout"));
+                    }
+                    for (int i = 0; i < STAGES; i++) {
+                        prw[iRegion][iSpecies].print(separator);
+                        prw[iRegion][iSpecies].print(quote("Mfor"));
+                    }
+                    for (int i = 0; i < STAGES; i++) {
+                        prw[iRegion][iSpecies].print(separator);
+                        prw[iRegion][iSpecies].print(quote("Mdis"));
+                    }
+                    for (int i = 0; i < STAGES; i++) {
+                        prw[iRegion][iSpecies].print(separator);
+                        prw[iRegion][iSpecies].print(quote("Mage"));
+                    }
+                    prw[iRegion][iSpecies].println();
+                    for (int cpt = 0; cpt < MortalityCause.values().length; cpt++) {
+                        prw[iRegion][iSpecies].print(separator);
+                        prw[iRegion][iSpecies].print("Eggs");
+                        prw[iRegion][iSpecies].print(separator);
+                        prw[iRegion][iSpecies].print("Juvenil");
+                        prw[iRegion][iSpecies].print(separator);
+                        prw[iRegion][iSpecies].print("Adult");
+                    }
+                    prw[iRegion][iSpecies].println();
                 }
-                for (int i = 0; i < STAGES; i++) {
-                    prw[iSpecies].print(separator);
-                    prw[iSpecies].print(quote("F"));
-                }
-                for (int i = 0; i < STAGES; i++) {
-                    prw[iSpecies].print(separator);
-                    prw[iSpecies].print(quote("Zout"));
-                }
-                for (int i = 0; i < STAGES; i++) {
-                    prw[iSpecies].print(separator);
-                    prw[iSpecies].print(quote("Mfor"));
-                }
-                for (int i = 0; i < STAGES; i++) {
-                    prw[iSpecies].print(separator);
-                    prw[iSpecies].print(quote("Mdis"));
-                }
-                for (int i = 0; i < STAGES; i++) {
-                    prw[iSpecies].print(separator);
-                    prw[iSpecies].print(quote("Mage"));
-                }
-                prw[iSpecies].println();
-                for (int cpt = 0; cpt < MortalityCause.values().length; cpt++) {
-                    prw[iSpecies].print(separator);
-                    prw[iSpecies].print("Eggs");
-                    prw[iSpecies].print(separator);
-                    prw[iSpecies].print("Juvenil");
-                    prw[iSpecies].print(separator);
-                    prw[iSpecies].print("Adult");
-                }
-                prw[iSpecies].println();
             }
         }
     }
@@ -258,7 +308,7 @@ public class MortalityOutput extends SimulationLinker implements IOutput {
     private int getStage(School school) {
 
         int iStage;
-        
+
         if (school.isEgg()) {
             // Eggss
             iStage = EGG;
@@ -281,15 +331,17 @@ public class MortalityOutput extends SimulationLinker implements IOutput {
 
     @Override
     public void close() {
-        for (int iSpecies = 0; iSpecies < getNSpecies(); iSpecies++) {
-            if (null != prw) {
-                prw[iSpecies].close();
-            }
-            if (null != fos) {
-                try {
-                    fos[iSpecies].close();
-                } catch (IOException ex) {
-                    // do nothing
+        for (int iRegion = 0; iRegion < nRegions; iRegion++) {
+            for (int iSpecies = 0; iSpecies < getNSpecies(); iSpecies++) {
+                if (null != prw) {
+                    prw[iRegion][iSpecies].close();
+                }
+                if (null != fos) {
+                    try {
+                        fos[iRegion][iSpecies].close();
+                    } catch (IOException ex) {
+                        // do nothing
+                    }
                 }
             }
         }
