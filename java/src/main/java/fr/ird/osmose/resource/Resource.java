@@ -156,12 +156,7 @@ public class Resource extends OsmoseLinker implements IAggregation {
         if (cause != MortalityCause.PREDATION) {
             throw new UnsupportedOperationException("MortalityCause for Swarm must be PREDATION only.");
         }
-        for (int iRegion = 0; iRegion < getConfiguration().getOutputRegions().size(); iRegion++) {
-            AbstractOutputRegion region = getConfiguration().getOutputRegions().get(iRegion);
-            if (region.contains(timeStep, this.cell)) {
-                this.nDead += nDead;
-            }
-        }
+        this.nDead += nDead;
     }
 
     @Override
