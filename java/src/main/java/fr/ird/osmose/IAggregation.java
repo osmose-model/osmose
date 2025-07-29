@@ -105,7 +105,7 @@ public interface IAggregation extends IMarineOrganism {
      * @param cause, the mortality cause (predation, fishing, starvation, etc.)
      * @param nDead, the number of dead individuals
      */
-    public void incrementNdead(MortalityCause cause, double nDead);
+    public void incrementNdead(MortalityCause cause, double nDead, int timeStep);
 
     /**
      * Converts biomass, in tonne, into abundance.
