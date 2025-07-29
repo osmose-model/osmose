@@ -42,7 +42,7 @@
 package fr.ird.osmose.output;
 
 import fr.ird.osmose.AbstractSchool;
-
+import fr.ird.osmose.Cell;
 import fr.ird.osmose.process.mortality.fishery.FisheryMapSet;
 
 /**
@@ -142,7 +142,12 @@ public class OutputRegion extends AbstractOutputRegion {
      */
     @Override
     public boolean contains(int timeStep, AbstractSchool school) {
-        return (this.mapSet.getValue(timeStep, school.getCell()) > 0);
+        return this.contains(timeStep, school.getCell());
+    }
+
+    @Override
+    public boolean contains(int timeStep, Cell cell) {
+        return (this.mapSet.getValue(timeStep, cell) > 0);
     }
 
     @Override

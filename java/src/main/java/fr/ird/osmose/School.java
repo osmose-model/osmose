@@ -304,7 +304,7 @@ public class School extends AbstractSchool {
      * @param subdt, the sub time step of the mortality algorithm
      */
     public void releaseEgg(int subdt) {
-        eggRetained = Math.max(0.d, eggRetained - (abundance - nDead[MortalityCause.ADDITIONAL.index]) / (double) subdt);
+        eggRetained = Math.max(0.d, eggRetained - (abundance - nDead[0][MortalityCause.ADDITIONAL.index]) / (double) subdt);
         abundanceHasChanged = true;
     }
 
@@ -315,7 +315,7 @@ public class School extends AbstractSchool {
      * call the {@link #releaseEgg} function to release some eggs.
      */
     public void retainEgg() {
-        eggRetained = abundance - nDead[MortalityCause.ADDITIONAL.index];
+        eggRetained = abundance - nDead[0][MortalityCause.ADDITIONAL.index];
         abundanceHasChanged = true;
     }
 
@@ -370,8 +370,8 @@ public class School extends AbstractSchool {
      * @param nDead, the number of dead fish for this mortality cause
      */
     public void setNdead(MortalityCause cause, double nDead) {
-        this.nDead[cause.index] = nDead;
-        this.ageDeath[cause.index] += nDead * this.getAge();
+        this.nDead[0][cause.index] = nDead;
+        this.ageDeath[0][cause.index] += nDead * this.getAge();
 
         double factor = 1;
         if (this.getInstantaneousAbundance() != 0) {
@@ -385,10 +385,15 @@ public class School extends AbstractSchool {
     }
 
     @Override
-    public void incrementNdead(MortalityCause cause, double nDead) {
+    public void incrementNdead(MortalityCause cause, double nDead, int timeStep) {
 
-        this.nDead[cause.index] += nDead;
-        this.ageDeath[cause.index] += nDead * this.getAge();
+        for (int indexRegion = 0; indexRegion < getConfiguration().getOutputRegions().size(); indexRegion++) {
+            if (getConfiguration().getOutputRegions().get(indexRegion).contains(timeStep, this)) {
+                this.nDead[indexRegion][cause.index] += nDead;
+                this.ageDeath[indexRegion][cause.index] += nDead * this.getAge();
+            }
+        }
+
         double factor = 1;
 
         if (this.getInstantaneousAbundance() != 0) {
@@ -408,7 +413,9 @@ public class School extends AbstractSchool {
      * @param cause, the mortality cause
      */
     public void resetNdead(MortalityCause cause) {
-        nDead[cause.index] = 0;
+        for (int iRegion = 0; iRegion < nDead.length; iRegion++) {
+            nDead[iRegion][cause.index] = 0;
+        }
         abundanceHasChanged = true;
     }
 
@@ -580,7 +587,7 @@ public class School extends AbstractSchool {
 
     @Override
     public void updateBiomAndAbd() {
-        instantaneousAbundance = (abundance - eggRetained) - sum(nDead) + nDead[MortalityCause.AGING.index];
+        instantaneousAbundance = (abundance - eggRetained) - sum(nDead[0]) + nDead[0][MortalityCause.AGING.index];
         if (instantaneousAbundance < 1.d) {
             instantaneousAbundance = 0.d;
         }
@@ -774,7 +781,7 @@ public class School extends AbstractSchool {
     public void setRho(double value) {
         this.rho = value;
     }
-    
+
 
     public void incrementEnet(double d) {
         this.e_net += d;
