@@ -750,8 +750,12 @@ get_codes = function(sp, conf) {
   output$settings = calibrar::calibration_setup(grep(pattern="calibration_settings", x=files, value=TRUE))
   output$observed = readRDS(grep(pattern="observed.rds", x=files, value=TRUE))
   
+  results.file = grep(pattern=".results$", x=files, value=TRUE)
   restart.file = grep(pattern=".restart$", x=files, value=TRUE)
-  if(length(restart.file)>1) stop("More than one restart file found.")
+  if(length(restart.file)>1) {
+    restart.file = grep(pattern="test.restart$", x=restart.file, invert=TRUE, value=TRUE)
+    if(length(restart.file)>1) stop("More than one restart file found.")
+  }
   if(length(restart.file)==1) {
     res = readRDS(restart.file)
     output$phase = NA
@@ -760,7 +764,7 @@ get_codes = function(sp, conf) {
     output$fitness = res$trace$fitness[ind, ]
     if(is.null(colnames(output$fitness))) colnames(output$fitness) = names(res$opt$weights)
     output$par = res$trace$par[ind, ]
-    colnames(output$par) = names(res$opt$upper)
+    colnames(output$par) = names(res$opt$upper) 
     output$value = res$trace$value[ind]
     
     bestpar = res$opt$MU
@@ -769,7 +773,24 @@ get_codes = function(sp, conf) {
     class(bestpar) = c("osmose.configuration")
     output$best = bestpar
   } else {
-    warning("Restart file not found, returning only basic calibration configuration.")
+    if(length(results.file)>1) {
+      results.file = grep(pattern="test.results$", x=results.file, invert=TRUE, value=TRUE)
+      if(length(results.file)>1) stop("More than one results file found.")
+    }
+    if(length(results.file)==1) {
+      res = readRDS(results.file)
+      output$phase = res$trace$phase
+      output$generation = res$trace$generations
+      ind = seq_len(output$generation)
+      output$fitness = res$trace$fitness[ind, ]
+      if(is.null(colnames(output$fitness))) colnames(output$fitness) = names(res$opt$weights)
+      output$par = res$trace$par[ind, ]
+      output$value = res$trace$value[ind]
+      output$best = res$par
+      colnames(output$par) = names(unlist(output$best)[res$active])
+    } else {
+      warning("Restart file not found, returning only basic calibration configuration.")
+    }
   } 
   
   class(output) = "osmose.calibration"
