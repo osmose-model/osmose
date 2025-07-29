@@ -194,6 +194,9 @@ public class PredatorPressureOutput extends SimulationLinker implements IOutput 
         dietOutputStage = new SchoolStage("output.diet.stage");
         dietOutputStage.init();
 
+        fos = new FileOutputStream[nRegions];
+        prw = new PrintWriter[nRegions];
+
         for (int iRegion = 0; iRegion < nRegions; iRegion++) {
 
             AbstractOutputRegion region = getConfiguration().getOutputRegions().get(iRegion);
