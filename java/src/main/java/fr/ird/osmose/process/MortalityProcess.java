@@ -135,7 +135,7 @@ public class MortalityProcess extends AbstractProcess {
     /*
      * Random generator
      */
-    private static Random random;
+    private Random random;
     /*
      * Subdivise the main time step in smaller time steps for applying mortality.
      * Should only be 1 so far, still problems to fix.
@@ -544,7 +544,7 @@ public class MortalityProcess extends AbstractProcess {
             seqFishery = new Integer[ns + nBkg][];
             for (int i = 0; i < ns + nBkg; i++) {
                 seqFishery[i] = Arrays.copyOf(singleSeqFishery, nfishery);
-                shuffleArray(seqFishery[i]);
+                this.shuffleArray(seqFishery[i]);
             }
         }
 
@@ -557,15 +557,15 @@ public class MortalityProcess extends AbstractProcess {
         listPred.addAll(schools);
         listPred.addAll(bkgSchool);
 
-        shuffleArray(seqPred);
-        shuffleArray(seqFish);
-        shuffleArray(seqNat);
-        shuffleArray(seqStarv);
-        shuffleArray(seqFor);
+        this.shuffleArray(seqPred);
+        this.shuffleArray(seqFish);
+        this.shuffleArray(seqNat);
+        this.shuffleArray(seqStarv);
+        this.shuffleArray(seqFor);
 
         boolean keepRecord = getSimulation().isPreyRecord();
         for (int i = 0; i < ns + nBkg; i++) { // loop over all the school (focal and bkg) as predators.
-            shuffleArray(mortalityCauses);
+            this.shuffleArray(mortalityCauses);
             for (MortalityCause cause : mortalityCauses) { // random loop over all the mortality causes. OUT and DISCARDS are not used here.
                 School school;
                 double nDead = 0;
@@ -742,7 +742,7 @@ public class MortalityProcess extends AbstractProcess {
      * @param <T> type of array
      * @param a   input array
      */
-    public static <T> void shuffleArray(T[] a) {
+    public <T> void shuffleArray(T[] a) {
         // Shuffle array
         for (int i = a.length; i > 1; i--) {
             T tmp = a[i - 1];
