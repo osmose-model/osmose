@@ -224,8 +224,8 @@ public class TestWritting {
         cmd.put("output.ndeadschool.byage.enabled", bool);
         cmd.put("output.ndeadschool.bysize.enabled", bool);
         cmd.put("output.individual.enabled", bool);
-        cmd.put("output.fecondity.bysize.enabled", bool);
-        cmd.put("output.fecondity.byage.enabled", bool);
+        cmd.put("output.fecundity.bysize.enabled", bool);
+        cmd.put("output.fecundity.byage.enabled", bool);
         cmd.put("output.bioen.mature.age.enabled", bool);
         cmd.put("output.bioen.ingest.enabled", bool);
         cmd.put("output.bioen.ingest.tot.enabled", bool);

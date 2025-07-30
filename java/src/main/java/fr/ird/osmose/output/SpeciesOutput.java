@@ -156,7 +156,7 @@ public class SpeciesOutput extends AbstractOutput {
     }
 
     @Override
-    String getDescription() {
+    protected String getDescription() {
         return description;
     }
 }

@@ -122,7 +122,7 @@ public class RelativeBiomassPopulator extends AbstractPopulator {
             cpt = 0;
             gonadicIndex = new double[nSpecies];
             for (int i : getConfiguration().getFocalIndex()) {
-                String key = String.format("species.bioen.maturity.r.sp%d", i);
+                String key = String.format("species.maturity.r.sp%d", i);
                 gonadicIndex[cpt] = this.getConfiguration().getDouble(key);
                 cpt++;
             }
@@ -291,9 +291,9 @@ public class RelativeBiomassPopulator extends AbstractPopulator {
 
         double weight;
         if (length == species.getEggSize()) {
-            weight = species.getEggWeight();
+            weight = species.getEggWeight();   // returns weight in grams
         } else {
-            weight = (double) species.computeWeight((float) length);
+            weight = (double) species.computeWeight((float) length);  // return weight in grams
         }
 
         // Computes the abundance based on weight ratio. Weight is in g, so
@@ -302,15 +302,28 @@ public class RelativeBiomassPopulator extends AbstractPopulator {
 
         // In school constructor, weight is provided in g.
         School school0 = new School(species, nEgg, (float) length, (float) weight, (int) ageDt);
-        if(this.isBioenEnabled) {
-            float gonadWeight = (float) (weight * gonadicIndex[iSpecies]);
-            school0.incrementGonadWeight(gonadWeight);
-        }
 
         // Fix by Nicolas: instance genotype for newly created schools
-        if(getConfiguration().isGeneticEnabled()) {
+        // Need to be before the check of maturity
+        if (getConfiguration().isGeneticEnabled()) {
             school0.instance_genotype(getSimulation().getRank());
+            school0.getGenotype().init_genotype();
         }
+
+        if (this.isBioenEnabled) {
+            try {
+                // Update maturation based on age and length
+                school0.updateBioenMaturation();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            if (school0.isMature()) {
+                float gonadWeight = (float) (weight * gonadicIndex[iSpecies] * 1e-6f); // convert gonadic weight in tons
+                school0.incrementGonadWeight(gonadWeight);
+            }
+        }
+
+
 
         return school0;
 

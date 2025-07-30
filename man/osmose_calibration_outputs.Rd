@@ -16,7 +16,7 @@ A list with the variables needed for a basic calibration of OSMOSE.
 Process outputs for calibration from an OSMOSE object
 }
 \examples{
-#' \dontrun{
+\dontrun{
 output = read_osmose(".")
 calib_output = osmose_calibration_outputs(output)
 }

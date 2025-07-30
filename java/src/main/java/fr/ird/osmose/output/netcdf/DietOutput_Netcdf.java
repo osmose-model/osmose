@@ -265,7 +265,7 @@ public class DietOutput_Netcdf extends AbstractOutput_Netcdf {
     }
 
     @Override
-    String getDescription() {
+    protected String getDescription() {
         return "% of prey species (in rows) in the diet of predator species (in col)";
     }
 

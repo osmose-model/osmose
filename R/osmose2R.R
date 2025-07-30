@@ -221,7 +221,7 @@ getMortalityDeviation = function(x, stage, type, pars=NULL) {
 #' }
 getOsmoseParameter = function(par, ..., keep.att=FALSE) {
   chain = unlist(list(...))
-  x = .getPar(par, ..., keep.att=TRUE)
+  x = get_par(par, ..., keep.att=TRUE)
   if(!isTRUE(keep.att)) attributes(x) = NULL
   if(is.null(x)) stop(sprintf("Parameter '%s' not found.", paste(chain, collapse=".")))
   return(x)
@@ -1167,7 +1167,7 @@ F_msy = function(sp, input.file, restart=FALSE,
 #' @param keep.att Whether parameter attributes should be kept
 existOsmoseParameter = function(par, ..., keep.att=FALSE) {
   chain = unlist(list(...))
-  x = .getPar(par, ..., keep.att=TRUE)
+  x = get_par(par, ..., keep.att=TRUE)
   if(is.null(x)) return(0) else return(1)
 }
 

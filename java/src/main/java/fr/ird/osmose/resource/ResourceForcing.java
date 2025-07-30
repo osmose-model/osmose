@@ -22,7 +22,7 @@
  * Ricardo OLIVEROS RAMOS (ricardo.oliveros@gmail.com)
  * Philippe VERLEY (philippe.verley@ird.fr)
  * Laure VELEZ (laure.velez@ird.fr)
- * Nicolas Barrier (nicolas.barrier@ird.fr)
+ * Nicolas BARRIER (nicolas.barrier@ird.fr)
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -47,6 +47,7 @@ import fr.ird.osmose.Cell;
 import fr.ird.osmose.util.OsmoseLinker;
 import fr.ird.osmose.util.io.ForcingFile;
 import fr.ird.osmose.util.io.ForcingFileCaching;
+import fr.ird.osmose.util.timeseries.ForcingTimeSeries;
 
 /**
  *
@@ -77,6 +78,14 @@ public class ResourceForcing extends OsmoseLinker {
      * configuration.
      */
     private double uBiomass;
+    
+        /**
+     * The biomass, in tonne, in a cell of the model, considering time variability. Parameter
+     * 'species.biomass.sp#' provides the total biomass of a given resource
+     * group in the system in combination with species.biomass.nsteps.year.sp#. 
+     */
+    private double[] fBiomass;
+    private double tBiomass;
 
     /**
      * Multiplier of the resource biomass. Parameter 'species.multiplier.sp#' for
@@ -124,7 +133,7 @@ public class ResourceForcing extends OsmoseLinker {
             multiplier = 1.d;
         }
 
-        // biomass multiplier
+        // biomass offset
         if (!getConfiguration().isNull("species.offset.sp" + fileindex)) {
             offset = getConfiguration().getFloat("species.offset.sp" + fileindex);
             warning("Biomass for resource group " + fileindex + " will be offseted by " + offset
@@ -162,6 +171,24 @@ public class ResourceForcing extends OsmoseLinker {
 
             this.forcingFile = new ForcingFile(name, ncFile, ncPerYear, 0.0, this.multiplier, caching);
             this.forcingFile.init();
+            
+        } else if (!getConfiguration().isNull("species.biomass.sp" + fileindex)) {
+          
+              uBiomass = -9999.d;
+              
+              String keyVal = "species.biomass.sp" + fileindex;
+              String keyShift = "species.biomass.nsteps.year.sp" + fileindex;
+              ForcingTimeSeries biomassSeries = new ForcingTimeSeries(keyShift, keyVal);
+              biomassSeries.init();
+
+              fBiomass = biomassSeries.getValues();
+              
+              for (int i = 0; i < fBiomass.length; i++) {
+                fBiomass[i] = multiplier * (fBiomass[i] + offset) / getGrid().getNOceanCell();
+              }
+              
+              tBiomass = fBiomass[0];
+          
         }
 
     }
@@ -178,13 +205,21 @@ public class ResourceForcing extends OsmoseLinker {
         if (uBiomass >= 0.d) {
             return;
         }
+        
+        if (uBiomass < -9000.0) {
+          tBiomass = fBiomass[iStepSimu];
+          //String msg = String.format("tBiomass=%f", tBiomass);
+          //info(msg);
+          return;
+        }
 
         this.forcingFile.update(iStepSimu);
 
     }
 
     public double getBiomass(Cell cell) {
-        return (uBiomass >= 0) ? uBiomass : this.forcingFile.getVariable(cell);
+        return (uBiomass >= 0) ? uBiomass : 
+                (uBiomass < -9000.0) ? tBiomass : this.forcingFile.getVariable(cell);
     }
 
     public int getIndex() {

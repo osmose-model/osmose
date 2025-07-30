@@ -17,6 +17,7 @@
 \alias{plot.osmose.yieldNByAge}
 \alias{plot.osmose.yieldBySize}
 \alias{plot.osmose.yieldByAge}
+\alias{plot.osmose.calibration}
 \title{Plot method for osmose objects}
 \usage{
 \method{plot}{osmose}(x, what = "biomass", ...)
@@ -376,6 +377,8 @@
   units = list(x = "years", y = "tonnes"),
   ...
 )
+
+\method{plot}{osmose.calibration}(x, ...)
 }
 \arguments{
 \item{x}{\code{osmose} object.}

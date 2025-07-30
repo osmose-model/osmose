@@ -58,7 +58,7 @@ public class PredatorPressureDistribOutput extends AbstractDistribOutput {
     }
 
     @Override
-    String getDescription() {
+    protected String getDescription() {
         StringBuilder description = new StringBuilder();
         description.append("Distribution of the preyed biomass (tonne) of ");
         description.append(species.getName());

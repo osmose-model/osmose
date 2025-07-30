@@ -79,7 +79,7 @@ public class NDeadSchoolOutput extends AbstractOutput {
     }
 
     @Override
-    String getDescription() {
+    protected String getDescription() {
         return "Ratio of the number of dead schools over the total number of schools per species per time step of saving.";
     }
 

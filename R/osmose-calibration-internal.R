@@ -74,6 +74,10 @@
     mproxy = mp$M[cut(iage, breaks=mp$age, labels=FALSE)]
     # mproxy = array(mp$M[cut(as.numeric(y), breaks=mp$size, labels=FALSE)],
     #                dim=dim(y))/ndt
+    
+    # ALL THE OPERATIONS TO COMPUTE MORTALITY BY COHORT f(mnat)
+    # ALL THE OPERATION TO COMPUTE SURVIVAL
+    
     mnati = as.numeric(apply(mnat, 2, mean, na.rm=TRUE))*ndt
     mdeviate = log((mnati + tiny)/(mproxy + tiny))
     out[[i]] = mdeviate[-1] # remove larval mortality
@@ -206,7 +210,7 @@
   if(is.null(start)) start = 0
   
   y = get_var.osmose(x, type, no.error=TRUE)
-  if(is.null(y)) return(x)
+  if(is.null(y)) return(NULL)
   spp = colnames(y)
   xx = list()
   for(i in seq_len(ncol(y))) {
@@ -503,7 +507,7 @@ get_codes = function(sp, conf) {
                mortality="normp", growth="normp", penalty="normp", random="re")
   
   cal_cv = c(biomass=0.25, yield=0.05, landings=0.05, discards=0.1, catchatlength=1, 
-             mortality=1, growth=0.1, penalty=1/sqrt(2), random=1/sqrt(2))
+             mortality=1, growth=0.1, penalty=1, random=1/sqrt(2))
   
   cal_useData = c(biomass=TRUE, yield=TRUE, landings=TRUE, discards=TRUE, catchatlength=TRUE, 
                   mortality=FALSE, growth=FALSE, penalty=FALSE, random=FALSE)
@@ -605,7 +609,7 @@ get_codes = function(sp, conf) {
 .getTimeIndex = function(x) {
   y = as.numeric(rownames(x)) 
   y = y %% 1
-  y1 = min(y[y!=0])
+  y1 = suppressWarnings(min(y[y!=0]))
   if(y[1]==0) y[1] = 1e-6
   y[y==0] = 1
   y = y/y1
@@ -632,8 +636,19 @@ get_codes = function(sp, conf) {
   if(is.na(ind)) stop("Could not find the 'data_path'.")
   path = read.table(file=script, sep="=", skip=ind-1, nrows=1, row.names=1)
   path = str_trim(as.character(path))
+  return(path)
 }
 
+.check_osmose_parameters = function(par, nm="par") {
+  check = inherits(par, "osmose.configuration") | inherits(par, "list")
+  if(!check) stop(sprintf("'%s' must be of class 'list' or 'osmose.configuration'.", nm))
+  check = names(par)==""
+  if(any(check)) {
+    warning(sprintf("Removing unnamed elements of '%s'.", nm))
+    par[which(check)] = NULL
+  }
+  return(par)
+}
 
 
 # TESTS -------------------------------------------------------------------
@@ -642,23 +657,24 @@ get_codes = function(sp, conf) {
 .calibration_test_1 = function(simulated, observed, setup) {
 
   test1 = identical(sort(names(observed)), sort(names(simulated)))
+
+  if(!test1) {
+    message("Pre-calibration test: FAILED. Simulated and observed have not the same variable names. Check your calibration settings.\n")
+  }
+  
+  nm = names(observed)
+  simulated = simulated[nm] # reordering simulated as observed
+  # obs_check = obs_check[nm]
+  # sim_check = sim_check[nm]
   
   useData = as.logical(setup$use_data)
   isActive = as.logical(setup$calibrate)
   readData = useData & isActive
   
-  if(!test1) {
-    message("Pre-calibration test: FAILED. Simulated and observed have not the same variable names. Check your calibration settings.\n")
-  }
-  
   obs_check = lapply(observed, FUN=.dim_or_length)
   sim_check = lapply(simulated, FUN=.dim_or_length)
   sim_check[!readData] = 1L
 
-  nm = sort(names(observed))
-  obs_check = obs_check[nm]
-  sim_check = sim_check[nm]
-  
   test2 = identical(obs_check, sim_check)
   
   msg = "Error in variable '%s': observed [%s] and simulated [%s] dimensions do not match."
@@ -693,8 +709,9 @@ get_codes = function(sp, conf) {
   out = cumsum(out[ind])
   if(length(out)!=nphase) stop("Incompatible phases configuration.")
   npar = max(out)
-  mult = sapply(out, FUN=function(x) max(pretty(npar/x)))
-  return(pmin(reltol*mult, 1e-1))
+  mult = 5*sapply(out, FUN=function(x) max(pretty(npar/x)))
+  mult[length(mult)] = 1 
+  return(pmin(reltol*mult, 2.5e-2))
 }
 
 .timing = function(.t0, t0, t1, tr, file) {
@@ -705,3 +722,117 @@ get_codes = function(sp, conf) {
       file=file, append=TRUE)
   return(invisible())
 }
+
+
+# Read calibration outputs ------------------------------------------------
+
+.is_calibration_dir = function(path) {
+  if(is.null(path)) return(FALSE)
+  check = all(c("observed.rds", "run_model.R", "master") %in% dir(path))
+  if(!check) return(FALSE)
+  c0 = sum(grepl(pattern="parguess", x=dir(path)))
+  c1 = sum(grepl(pattern="calibration_settings", x=dir(path)))
+  c2 = sum(grepl(pattern="parmax|parmin|parphase", x=dir(path)))
+  if(c0 < 1) return(FALSE)
+  if(c1 < 1) return(FALSE)
+  if(c2 < 1) return(FALSE)
+  return(TRUE)
+}
+
+.read_osmose_calibration = function(path) {
+  
+  files = dir(path, full.names = TRUE)
+  output = list()
+  output$parguess = read_osmose(grep(pattern="parguess", x=files, value=TRUE))
+  output$parphase = read_osmose(grep(pattern="parphase", x=files, value=TRUE))
+  output$parmin = read_osmose(grep(pattern="parmin", x=files, value=TRUE))
+  output$parmax = read_osmose(grep(pattern="parmax", x=files, value=TRUE))
+  output$settings = calibrar::calibration_setup(grep(pattern="calibration_settings", x=files, value=TRUE))
+  output$observed = readRDS(grep(pattern="observed.rds", x=files, value=TRUE))
+  
+  results.file = grep(pattern=".results$", x=files, value=TRUE)
+  restart.file = grep(pattern=".restart$", x=files, value=TRUE)
+  if(length(restart.file)>1) {
+    restart.file = grep(pattern="test.restart$", x=restart.file, invert=TRUE, value=TRUE)
+    if(length(restart.file)>1) stop("More than one restart file found.")
+  }
+  if(length(restart.file)==1) {
+    res = readRDS(restart.file)
+    output$phase = NA
+    output$generation = res$opt$gen
+    ind = seq_len(output$generation)
+    output$fitness = res$trace$fitness[ind, ]
+    if(is.null(colnames(output$fitness))) colnames(output$fitness) = names(res$opt$weights)
+    output$par = res$trace$par[ind, ]
+    colnames(output$par) = names(res$opt$upper) 
+    output$value = res$trace$value[ind]
+    
+    bestpar = res$opt$MU
+    names(bestpar) = names(res$opt$upper)
+    bestpar = as.list(bestpar)
+    class(bestpar) = c("osmose.configuration")
+    output$best = bestpar
+  } else {
+    if(length(results.file)>1) {
+      results.file = grep(pattern="test.results$", x=results.file, invert=TRUE, value=TRUE)
+      if(length(results.file)>1) stop("More than one results file found.")
+    }
+    if(length(results.file)==1) {
+      res = readRDS(results.file)
+      output$phase = res$trace$phase
+      output$generation = res$trace$generations
+      ind = seq_len(output$generation)
+      output$fitness = res$trace$fitness[ind, ]
+      if(is.null(colnames(output$fitness))) colnames(output$fitness) = names(res$opt$weights)
+      output$par = res$trace$par[ind, ]
+      output$value = res$trace$value[ind]
+      output$best = res$par
+      colnames(output$par) = names(unlist(output$best)[res$active])
+    } else {
+      warning("Restart file not found, returning only basic calibration configuration.")
+    }
+  } 
+  
+  class(output) = "osmose.calibration"
+  return(output)
+  
+}
+
+
+# Penalties ---------------------------------------------------------------
+
+lnorm2 = function(obs, sim, tiny=1e-2, ...) {
+  if(all(!is.finite(sim))) return(Inf)
+  obs = log(obs + tiny)
+  sim = log(sim + tiny)
+  nlogLike = sum((obs-sim)^2, na.rm=TRUE)
+  return(nlogLike)
+}
+
+lnorm2p = function(obs, sim, tiny=1e-2, lower=TRUE, ...) {
+  if(all(is.na(obs))) stop("All observed values are NA.")
+  obs = log(obs + tiny)
+  sim = log(sim + tiny)
+  nlogLike = (obs-sim)^2
+  if(isTRUE(lower)) return(sum(ifelse(sim < obs, nlogLike, 0), na.rm=TRUE))
+  return(sum(ifelse(sim > obs, nlogLike, 0), na.rm=TRUE))
+}
+
+get_minmaxt = function(outputData, conf, lower=TRUE) {
+  
+  type = if(isTRUE(lower)) "min" else "max"
+  default = if(isTRUE(lower)) 0 else Inf
+  
+  bio = get_var(outputData, "biomass", how = "list", expected = TRUE)
+  code = get_species(conf, type="focal", code=TRUE)
+  pars = sprintf("calibration.biomass.%s.sp%s", type, code)
+  pmin = setNames(conf[pars], nm=pars)
+  pmin = lapply(pmin, FUN=function(x) if(is.null(x)) default else x)
+  names(pmin) = get_species(conf, nm=names(pmin))
+  pmin = pmin[names(bio)]
+  minp = mapply(lnorm2p, obs=pmin, sim=bio, MoreArgs=list(lower=lower))
+  
+  return(minp)
+  
+}
+

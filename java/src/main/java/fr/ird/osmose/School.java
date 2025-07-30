@@ -227,8 +227,8 @@ public class School extends AbstractSchool {
     public School(Species species, float x, float y, double abundance, float length, float weight, int ageDt, float trophicLevel, float gonadWeight) {
         this.abundance = abundance;
         instantaneousAbundance = abundance;
-        this.weight = weight * 1.e-6f;
-        this.gonadWeight = gonadWeight * 1.e-6f;
+        this.weight = weight * 1.e-6f;  // weight is converted from g to tons
+        this.gonadWeight = gonadWeight * 1.e-6f;  // gonadic weight is converted from g to tons
         biomass = instantaneousBiomass = abundance * (this.weight + this.gonadWeight);
         abundanceHasChanged = false;
         this.trophicLevel = trophicLevel;
@@ -916,5 +916,36 @@ public class School extends AbstractSchool {
         error("Not implemented yet", new Exception());
         return 0;
     }
+
+    public void updateBioenMaturation() throws Exception {
+
+        // If the school is mature, nothing is done and returns 1
+        if (this.isMature()) {
+            return;
+        }
+
+        String key = "m0";
+        double m0_temp = this.existsTrait(key) ? this.getTrait(key) : this.species.getMaturityM0();
+
+        key = "m1";
+        double m1_temp = this.existsTrait(key) ? this.getTrait(key) : this.species.getMaturityM1();
+
+        // If the this is not mature yet, maturation is computed following equation 8
+        double age = this.getAge();  // returns the age in years
+        double length = this.getLength();   // warning: length in cm.
+        double llim = m0_temp + m1_temp * age ;   // computation of a maturity
+
+        int output = (length >= llim) ? 1 : 0;
+        if (output == 1) {
+            this.setAgeMat(age);
+            this.setSizeMat(length);
+            this.setIsMature(true);
+        }
+
+        return;
+
+    }
+
+
 
 }

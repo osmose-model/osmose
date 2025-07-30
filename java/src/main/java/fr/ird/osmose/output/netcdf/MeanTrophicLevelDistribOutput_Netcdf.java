@@ -69,7 +69,7 @@ public class MeanTrophicLevelDistribOutput_Netcdf extends AbstractMeanDistribOut
     }
 
     @Override
-    String getDescription() {
+    protected String getDescription() {
         StringBuilder description = new StringBuilder();
         description.append("Mean trophic level of fish species by ");
         description.append(getType().getDescription());

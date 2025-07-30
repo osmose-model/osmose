@@ -6,25 +6,29 @@
 \usage{
 osmose_calibration_runmodel(
   input,
-  osmose,
   name,
   version = "4.3.3",
+  par = NULL,
+  additional = NULL,
   debug = FALSE
 )
 }
 \arguments{
 \item{input}{Filename of the main configuration file}
 
-\item{osmose}{Path to a OSMOSE .jar executable. By default (NULL), uses the stable
-jar for the current version.}
-
 \item{name}{Name for the calibration trial.}
 
 \item{version}{OSMOSE version. Integer (2, 3, etc.) or releases ('v3r2') are
 accepted.}
+
+\item{par}{A list or osmose.configuration object containing OSMOSE parameters. Only calibrated parameters are accepted.}
+
+\item{additional}{A list or osmose.configuration object containing OSMOSE parameters. Only NON calibrated parameters are accepted, particularly output parameters.}
+
+\item{debug}{Do you want to debug the run_model function?}
 }
 \value{
-A list with the simulated data used for calibration
+A list with the simulated data used for calibration.
 }
 \description{
 Run a model as set up for a calibration trial

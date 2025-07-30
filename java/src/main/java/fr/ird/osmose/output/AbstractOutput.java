@@ -84,7 +84,7 @@ abstract public class AbstractOutput extends SimulationLinker implements IOutput
 ///////////////////
 // Abstract methods
 ///////////////////
-    abstract String getDescription();
+    protected abstract String getDescription();
 
     public abstract String[] getHeaders();
 
@@ -106,12 +106,12 @@ abstract public class AbstractOutput extends SimulationLinker implements IOutput
 ///////////////
 
     /** Constructor in which alive schools are forced to be included */
-    AbstractOutput(int rank, String subfolder, String name) {
+    protected AbstractOutput(int rank, String subfolder, String name) {
         this(rank, subfolder, name, true);
     }
 
     /** Constructor with additional argument which specifies if only alive schools are to be included */
-    AbstractOutput(int rank, String subfolder, String name, boolean includeOnlyAlive) {
+    protected AbstractOutput(int rank, String subfolder, String name, boolean includeOnlyAlive) {
         super(rank);
         this.subfolder = subfolder;
         this.name = name;
@@ -282,5 +282,9 @@ abstract public class AbstractOutput extends SimulationLinker implements IOutput
             arr[i] = quote(str[i]);
         }
         return arr;
+    }
+
+    public String getSubfolder() {
+        return this.subfolder;
     }
 }

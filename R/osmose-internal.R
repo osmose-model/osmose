@@ -721,6 +721,24 @@ osmose2R.v4r0 = function (path=NULL, species.names=NULL, conf=NULL, ...) {
     # yieldByYear (include species groups)
     outputData = .aggregate_catch_byyear(outputData, conf, type="yield")
     
+    # calibration penalties
+    
+    if(!is.null(get_par(conf, "calibration.biomass.penalty.collapse"))) {
+      if(isTRUE(get_par(conf, "calibration.biomass.penalty.collapse"))) {
+        outputData$penalty.collapse = sqrt(get_minmaxt(outputData, conf, lower=TRUE))
+      }
+    }
+    
+    # if(is.null(outputData$penalty.collapse)) outputData$penalty.collapse = 0
+    
+    if(!is.null(get_par(conf, "calibration.biomass.penalty.outburst"))) {
+      if(isTRUE(get_par(conf, "calibration.biomass.penalty.outburst"))) {
+        outputData$penalty.outburst = sqrt(get_minmaxt(outputData, conf, lower=FALSE))
+      }
+    }
+    
+    # if(is.null(outputData$penalty.outburst)) outputData$penalty.outburst = 0
+    
     start = get_par(conf, "simulation.time.start")
     if(is.null(start)) start = 0
     ndt   = get_par(conf, "simulation.time.ndtPerYear")/get_par(conf, "output.recordfrequency.ndt")
@@ -934,7 +952,10 @@ osmose2R.v3r0 = function(path=NULL, species.names=NULL, ...) {
   
   # fg = .get_functional_groups(conf, type=type)
   fgd = get_fg_data(conf, x=x, type=type)
-  if(is.null(fgd)) return(x)
+  if(is.null(fgd)) {
+    if(isTRUE(merge)) return(x) else return(NULL)
+  }
+    
   rownames(fgd) = rownames(x)
   dimnames(fgd)[[3]] = dimnames(x)[[3]]
   
@@ -1011,6 +1032,15 @@ get_fg_data = function(conf, x, type="species") {
   gp = get_par(conf, code, unlist=TRUE)
   if(is.null(gp)) return(NULL)
   
+  allv = NULL
+  if(type=="species") allv = get_species(conf, type="focal", code=TRUE)
+  if(type=="fisheries") allv = get_fisheries(conf, code=TRUE)
+
+  if(!is.null(allv)) {
+    ind = names(gp) %in% sprintf("%s%s", code, allv)
+    gp = gp[which(ind)]
+  }
+
   .find_species_in_group = function(y, gp, conf, type) {
     nmg = gsub(names(gp[which(gp==y)]), pattern=code, replacement="")
     xout = NULL

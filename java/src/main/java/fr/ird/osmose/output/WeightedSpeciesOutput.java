@@ -149,7 +149,7 @@ public class WeightedSpeciesOutput extends AbstractOutput {
     }
 
     @Override
-    String getDescription() {
+    protected String getDescription() {
         return description;
     }
 }

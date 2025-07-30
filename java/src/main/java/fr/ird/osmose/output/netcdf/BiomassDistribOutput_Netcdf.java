@@ -84,7 +84,7 @@ public class BiomassDistribOutput_Netcdf extends AbstractDistribOutput_Netcdf {
     }
 
     @Override
-    String getDescription() {
+    protected String getDescription() {
         StringBuilder description = new StringBuilder();
         description.append("Distribution of fish species biomass (tonne) by ");
         description.append(getType().getDescription());

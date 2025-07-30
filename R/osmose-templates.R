@@ -64,13 +64,16 @@ osmose_template = function(input, file, what="initialisation", control=list(), .
 #' osmose_tidy(input=configFile)}
 osmose_tidy = function(input, key="reference") {
   
-  on.exit(if(file.exists(".testx.R")) rm(".testx.R"))
+  on.exit(if(file.exists(".testx.R")) file.remove(".testx.R"))
   
   osmose:::.tidy_conf(input=input, file = ".testx.R", checks=FALSE)
   test = read_osmose(input=".testx.R")
   test = get_par(test, par="^osmose.configuration", invert=TRUE, as.is=TRUE)
-  model = get_par(test, "prefix")
-  version = get_par(test, "version")
+  model = tolower(get_par(test, "prefix"))
+  version = tolower(get_par(test, "version"))
+  version = gsub(gsub(version, pattern='[[:space:]]', replacement=""), 
+                 pattern="update|release", replacement=".")
+  version = gsub(version, pattern="osmose", replacement="")
   
   the_files = test[sapply(test, FUN=.is_path)]
   
@@ -380,12 +383,12 @@ gpar = function(conf, par=NULL, sp=NULL, fsh=NULL, sr=NULL, invert=FALSE, as.is=
   write_osmose(c(par0, par1), file=file, append = TRUE)
   
   tcat("bioenergetics module", file=file, section=FALSE)
-  par0 = gpar(conf, "simulation.bioen.enabled", default=FALSE)
-  par1 = gpar(conf, "simulation.genetic.enabled", default=FALSE)
+  par0 = gpar(conf, "module.bioenergetics.enabled", default=FALSE)
+  par1 = gpar(conf, "module.genetics.enabled", default=FALSE)
   write_osmose(c(par0, par1), file=file, append = TRUE)
   
-  tcat("economic module", file=file, section=FALSE)
-  par0 = gpar(conf, "economy.enabled", default=FALSE)
+  tcat("bioeconomics module", file=file, section=FALSE)
+  par0 = gpar(conf, "module.bioeconomics.enabled", default=FALSE)
   write_osmose(par0, file=file, append = TRUE)
   
   tcat("Species", file=file, section=FALSE)

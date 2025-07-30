@@ -106,11 +106,13 @@ public class MortalitySpeciesOutput extends AbstractDistribOutput {
                 // Adding 1e-6 for numerical stability. It will only impact when
                 // nDeatTot == abundanceStage[iClass]. Then Z=23.025 instead Inf,
                 // extremely minor effect otherwise (when nDeatTot -> abundanceStage[iClass])
-                double Z = Math.log((abundanceStage[iClass] + 1e-6) / (abundanceStage[iClass] + 1e-6 - nDeadTot));
+                double Z = Math.log((abundanceStage[iClass] + 1e-6) / ((abundanceStage[iClass] - nDeadTot) + 1e-6));
                 // When Z=0, nDead/NDeadTot gives NaN. But Z=0 should imply all partial mortalities are 0.
                 if (Z > 0) {
                     for (int iDeath = 0; iDeath < nCause; iDeath++) {
                         mortalityRates[iDeath][iClass] += Z * nDead[iDeath][iClass] / nDeadTot;
+                        //msg = String.format("Z = %.3f, nDeadTot = %.3f, nDead=%.3f, abundance=%.3f",Z,nDeadTot,nDead[iDeath][iClass],abundanceStage[iClass]);
+                        //if(Double.isInfinite(mortalityRates[iDeath][iClass])) info(msg);
                     }
                 }
             }

@@ -67,7 +67,7 @@ public class AgeAtDeathOutput extends AbstractOutput {
     }
 
     @Override
-    String getDescription() {
+    protected String getDescription() {
         return "Total (Mtot), Predation (Mpred), Starvation (Mstarv), Additional mortality (Madd), Fishing (F) & Out-of-domain (Z) ages at death (years)";
     }
 

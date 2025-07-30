@@ -51,7 +51,7 @@ public class TestAdditionalMortality {
         mort1 = new AnnualAdditionalMortality(0, spec);
         mort1.init();
 
-        mort1larva = new AnnualLarvaMortality(0, spec);
+        mort1larva = new AnnualLarvaMortality(0, spec, "larva");
         mort1larva.init();
 
         // Setting values for species 1
@@ -59,7 +59,7 @@ public class TestAdditionalMortality {
         mort2 = new AnnualAdditionalMortality(0, spec);
         mort2.init();
 
-        mort2larva = new AnnualLarvaMortality(0, spec);
+        mort2larva = new AnnualLarvaMortality(0, spec, "larva");
         mort2larva.init();
 
     }

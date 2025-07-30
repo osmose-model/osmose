@@ -96,8 +96,8 @@ public class Genotype extends SimulationLinker {
 
             // Init the list of locus for the given trait
             List<Locus> list_locus = new ArrayList<>();
-            for (int j = 0; j < nlocus[i]; j++) {
-                Locus l = new Locus(j, trait, spec_index, getRank());
+            for (int locus_index = 0; locus_index < nlocus[i]; locus_index++) {
+                Locus l = new Locus(locus_index, trait, spec_index, getRank());
                 list_locus.add(l);
             }  // end of locus loop
 

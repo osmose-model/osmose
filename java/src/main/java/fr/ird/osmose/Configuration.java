@@ -540,15 +540,16 @@ public class Configuration extends OLogger {
 
         nSchool = new int[nSpecies];
 
-        int n, mul, nSchoolDef, ntmp;
+        int n, nSchoolDef, ntmp;
+        double mul;
         nSchoolDef = 10; // roliveros: hardcoded, to review
-        mul = canFind("simulation.nschool.multiplier") ? getInt("simulation.nschool.multiplier") : 1;
+        mul = canFind("simulation.nschool.multiplier") ? getDouble("simulation.nschool.multiplier") : 1.0;
         n   = canFind("simulation.nschool") ? getInt("simulation.nschool") : nSchoolDef;
 
         int cpt = 0;
         for (int i : this.focalIndex) {
               ntmp = canFind("simulation.nschool.sp" + i) ? getInt("simulation.nschool.sp" + i) : n;
-              nSchool[cpt] = mul*ntmp;
+              nSchool[cpt] = (int) (mul * (float) ntmp);
               cpt++;
         }
 

@@ -83,7 +83,7 @@ public class YieldNDistribOutput_Netcdf extends AbstractDistribOutput_Netcdf {
     }
 
     @Override
-    String getDescription() {
+    protected String getDescription() {
         StringBuilder description = new StringBuilder();
         description.append("Distribution of cumulative catch (number of fish caught per time step of saving) by ");
         description.append(getType().getDescription());

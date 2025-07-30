@@ -491,3 +491,38 @@ plot.osmose.yieldByAge = function(x, type = 1, species = NULL,
   
   return(invisible())
 }
+
+
+# Calibration -------------------------------------------------------------
+
+#' @rdname plot.osmose
+#' @method plot osmose.calibration
+#' @export
+plot.osmose.calibration = function(x, ...) {
+  
+  opar = par(no.readonly=TRUE)
+  on.exit(par(opar))
+  
+  par = get_var(x, "par") 
+  likelihood = get_var(x, "value")
+  
+  .basepar = function(x) paste(head(unlist(strsplit(x, spli="\\.")), -1), collapse=".")
+  basepar = sapply(colnames(par), FUN=.basepar)
+  basepar = gsub(basepar, pattern=".base", replacement="")
+  ind = split(seq_along(basepar), f = basepar)
+  n = length(ind) + 1
+  ix = floor(sqrt(n))
+  iy = ceiling(n/ix)
+  fac = min(floor(log10(range(likelihood[is.finite(likelihood)]))))
+  par(mfrow=sort(c(ix, iy), decreasing = TRUE), mar=c(3,3,3,1), oma=c(1,1,1,1))
+  for(i in seq_along(ind)) {
+    matplot(par[,ind[[i]]], pch=19, type="b", cex=0.5, main=names(ind)[i], las=1, ylab="")
+  }
+  expr = sprintf("log-likelihood (x10^%d)", fac)
+  plot((10^-fac)*likelihood, type="l", las=1, ylab="", main=expr)
+  
+  return(invisible(NULL))
+  
+}
+
+

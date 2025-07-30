@@ -121,9 +121,7 @@ public class PredationMortality extends AbstractMortality {
                     .getArrayDouble("predation.predPrey.sizeRatio.max.sp" + fileSpeciesIndex);
             predPreySizesMin[cpt] = getConfiguration()
                     .getArrayDouble("predation.predPrey.sizeRatio.min.sp" + fileSpeciesIndex);
-            if (!getConfiguration().isBioenEnabled()) {
-                predationRate[cpt] = getConfiguration().getDouble("predation.ingestion.rate.max.sp" + fileSpeciesIndex);
-            }
+            predationRate[cpt] = getConfiguration().getDouble("predation.ingestion.rate.max.sp" + fileSpeciesIndex);
 
             // Check that the predator/prey ratios are properly set
             for (int k = 0; k < predPreySizesMin[cpt].length; k++) {

@@ -177,7 +177,7 @@ public class BackgroundSpecies extends OsmoseLinker implements ISpecies {
             length = cfg.getArrayFloat("species.length.sp" + fileindex);
 
             if (classProportion.length != nClass) {
-                message = String.format("Length of species.size.proportion.sp%d is "
+                message = message + String.format("Length of species.size.proportion.sp%d is "
                         + "not consistent with species.nclass.cp%d", fileindex, fileindex);
                 isOk = false;
             }
@@ -189,7 +189,7 @@ public class BackgroundSpecies extends OsmoseLinker implements ISpecies {
             }
 
             if (sum != 1.f) {
-                message = String.format("species.size.proportion.sp%d must sum to 1.0", fileindex);
+                message = message + String.format("species.size.proportion.sp%d must sum to 1.0", fileindex);
                 isOk = false;
             }
 
@@ -198,25 +198,25 @@ public class BackgroundSpecies extends OsmoseLinker implements ISpecies {
         }
 
         if (trophicLevel.length != nClass) {
-            message = String.format("Length of species.trophic.level.sp%d is "
+            message = message + String.format("Length of species.trophic.level.sp%d is "
                     + "not consistent with species.nclass.cp%d", fileindex, fileindex);
             isOk = false;
         }
 
         if (age.length != nClass) {
-            message = String.format("Length of species.age.sp%d is "
+            message = message + String.format("Length of species.age.sp%d is "
                     + "not consistent with species.nclass.cp%d", fileindex, fileindex);
             isOk = false;
         }
 
         if (length.length != nClass) {
-            message = String.format("Length of species.length.sp%d is "
+            message = message + String.format("Length of species.length.sp%d is "
                     + "not consistent with species.nclass.cp%d", fileindex, fileindex);
             isOk = false;
         }
 
         if (!isOk) {
-          // This is only throwing the last message!
+          // This is only throwing the last message! FIXED: But needs formatting.
           error(message, new IOException());
         }
 

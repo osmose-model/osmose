@@ -59,6 +59,8 @@ import fr.ird.osmose.output.netcdf.YieldNOutput_Netcdf;
 import fr.ird.osmose.output.netcdf.YieldOutput_Netcdf;
 import fr.ird.osmose.output.distribution.DistributionType;
 import fr.ird.osmose.output.distribution.OutputDistribution;
+import fr.ird.osmose.output.genetic.AlleleFrequencyOutput;
+import fr.ird.osmose.output.genetic.ObservedHtz;
 import fr.ird.osmose.util.io.IOTools;
 import fr.ird.osmose.util.SimulationLinker;
 import java.util.ArrayList;
@@ -667,14 +669,14 @@ public class OutputManager extends SimulationLinker {
 
         if (getConfiguration().isBioenEnabled()) {
 
-            if (getConfiguration().getBoolean("output.fecondity.bysize.enabled", NO_WARNING)) {
-                outputs.add(new DistribOutput(rank, "SizeIndicators", "fecondity",
+            if (getConfiguration().getBoolean("output.fecundity.bysize.enabled", NO_WARNING)) {
+                outputs.add(new DistribOutput(rank, "SizeIndicators", "fecundity",
                         "Number of eggs by species and by size class",
                         school -> school.getNEggs(), sizeDistrib, false));
             }
 
-            if (getConfiguration().getBoolean("output.fecondity.byage.enabled", NO_WARNING)) {
-                outputs.add(new DistribOutput(rank, "AgeIndicators", "fecondity",
+            if (getConfiguration().getBoolean("output.fecundity.byage.enabled", NO_WARNING)) {
+                outputs.add(new DistribOutput(rank, "AgeIndicators", "fecundity",
                         "Number of eggs by species and by size class",
                         school -> school.getNEggs(), ageDistrib, false));
             }
@@ -828,6 +830,22 @@ public class OutputManager extends SimulationLinker {
                 outputs.add(new MeanGenotypeOutput(rank, "meanTraitsParents", (school -> school.getNEggs()),
                         (school -> school.isMature()), (schoolset -> schoolset.getAliveSchools()), "Mean traits of parent schools, ponderated by number of eggs"));
             }
+
+            boolean alleleFrequencyOutput = getConfiguration().getBoolean("output.allele.frequency.enabled");
+            boolean expectedHeterozygosity = getConfiguration().getBoolean("output.expected.heterozygosity.enabled");
+            if(alleleFrequencyOutput || expectedHeterozygosity) {
+                for(int ispecies = 0; ispecies < getConfiguration().getNSpecies(); ispecies++) {
+                    outputs.add(new AlleleFrequencyOutput(rank, getConfiguration().getSpecies(ispecies), expectedHeterozygosity, alleleFrequencyOutput));
+                }
+            }
+
+            boolean observedHeterozygosity = getConfiguration().getBoolean("output.observed.heterozygosity.enabled");
+            if(observedHeterozygosity) {
+                for(int ispecies = 0; ispecies < getConfiguration().getNSpecies(); ispecies++) {
+                    outputs.add(new ObservedHtz(rank, getConfiguration().getSpecies(ispecies)));
+                }
+            }
+
         }
 
         if (getConfiguration().getBoolean("output.spatial.biomass.bysize.enabled")) {

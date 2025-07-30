@@ -149,8 +149,6 @@ public class MortalityOutput extends SimulationLinker implements IOutput {
             cpt += 1;
         }
 
-
-
         // Cumulate the mortality rates
         for (int iRegion = 0; iRegion < nRegions; iRegion++) {
             for (int iSpecies = 0; iSpecies < getNSpecies(); iSpecies++) {
@@ -312,11 +310,9 @@ public class MortalityOutput extends SimulationLinker implements IOutput {
         if (school.isEgg()) {
             // Eggss
             iStage = EGG;
-
         } else if (!school.isMature()) {
             // Pre-recruits
             iStage = JUVENILE;
-
         } else {
             // Recruits
             iStage = ADULT;

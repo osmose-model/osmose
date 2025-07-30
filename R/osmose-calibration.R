@@ -28,9 +28,6 @@ osmose_calibration_setup = function(input, osmose, name=NULL, data_path=NULL, ty
   skip_tests = control$skip_tests
   if(is.null(skip_tests)) skip_tests = FALSE 
   
-  cleanup = control$cleanup
-  if(is.null(cleanup)) cleanup = TRUE 
-  
   type = match.arg(type, choices=c("simple", "survey"))
   
   control$method = type
@@ -46,6 +43,10 @@ osmose_calibration_setup = function(input, osmose, name=NULL, data_path=NULL, ty
   run = if(is.null(name)) ".run" else sprintf(".run_%s", name)
   dir = if(is.null(name)) "calibration" else sprintf("calibration_%s", name)
   
+  cleanup = control$cleanup
+  if(is.null(cleanup)) cleanup = TRUE
+  cleanup = cleanup & !dir.exists(dir)
+  
   success = !cleanup
   if(!dir.exists(dir)) {
     # if the directory does not exist, clean up everything on exit
@@ -58,7 +59,7 @@ osmose_calibration_setup = function(input, osmose, name=NULL, data_path=NULL, ty
   file.copy(from=osmose, to=file.path(dir, nosmose))
   osmose = file.path("..", nosmose)
   
-  reltol = if(is.null(control$reltol)) 5e-5 else control$reltol
+  reltol = if(is.null(control$reltol)) 5e-4 else control$reltol
   
   # Create dir and file names -----------------------------------------------
   
@@ -360,7 +361,7 @@ osmose_calibration_test = function(path, setup=NULL, script=NULL, parallel.only=
 #' @export
 #'
 #' @examples
-#' #' \dontrun{
+#' \dontrun{
 #' output = read_osmose(".")
 #' calib_output = osmose_calibration_outputs(output)
 #' }
@@ -376,14 +377,18 @@ osmose_calibration_outputs = function(output) {
     names(surveys) = paste("biomass", names(surveys), sep=".")
   }
   
-  growth = sapply(get_var(output, "residualSizeByAge", no.error = TRUE), calibrar:::penalty, obs=NULL)
-  mortality = sapply(get_var(output, "residualMortalityByAge", no.error = TRUE), calibrar:::penalty, obs=NULL, n=10)
+  growth = sapply(get_var(output, "residualSizeByAge", no.error=TRUE), calibrar:::penalty, obs=NULL)
+  mortality = sapply(get_var(output, "residualMortalityByAge", no.error=TRUE), calibrar:::penalty, obs=NULL, n=10)
+  collapse = get_var(output, "penalty.collapse", no.error=TRUE)
+  outburst = get_var(output, "penalty.outburst", no.error=TRUE)
   
   cal_output = c(surveys, 
                  landings   = get_var(output, "observed.landings", how="list", no.error = TRUE),
                  catchatlength = get_var(output, "yieldNBySize", how="list", no.error = TRUE),
-                 growth.penalty.vonbertalanffy = list(growth),
-                 mortality.penalty.caddy = list(mortality)
+                 penalty.growth.vonbertalanffy = list(growth),
+                 penalty.mortality.caddy = list(mortality),
+                 penalty.biomass.collapse = list(collapse),
+                 penalty.biomass.outburst = list(outburst)
   )
   
   return(cal_output)  
@@ -392,32 +397,111 @@ osmose_calibration_outputs = function(output) {
 
 #' Run a model as set up for a calibration trial
 #'
-#' @returns A list with the simulated data used for calibration
+#' @param par A list or osmose.configuration object containing OSMOSE parameters. Only calibrated parameters are accepted.
+#' @param additional A list or osmose.configuration object containing OSMOSE parameters. Only NON calibrated parameters are accepted, particularly output parameters.
+#' @param debug Do you want to debug the run_model function?
+#' @returns A list with the simulated data used for calibration.
 #' @export
 #'
 #' @inheritParams osmose_calibration_setup
-osmose_calibration_runmodel = function(input, osmose, name, version="4.3.3", debug=FALSE) {
+osmose_calibration_runmodel = function(input, name, version="4.3.3", par=NULL, additional=NULL, debug=FALSE) {
   
   wd = getwd()
   on.exit(setwd(wd))
   
   conf = read_osmose(input=input)
   
+  if(missing(name)) name = NULL
   dir = if(is.null(name)) "calibration" else sprintf("calibration_%s", name)
-  dir_master = file.path(dir, "master")  
+  dir_master = file.path(dir, "master") 
+  if(!dir.exists(dir)) stop(sprintf("Calibration folder %d does not exists.", dir))
+  if(!dir.exists(dir_master)) stop(sprintf("Calibration master folder %d does not exists.", dir_master))
   
   bsn = sprintf("osmose-%s", get_par(conf, "output.file.prefix"))
   guess_file = file.path(dir, paste(bsn, "-parguess.osm", sep=""))
+  if(!file.exists(guess_file)) stop(sprintf("Guess file was not found in %s", dir))
   par_guess = read_osmose(input=guess_file)
+  
+  if(!is.null(par)) {
+    par = .check_osmose_parameters(par=par, nm="par")
+    dup = setdiff(names(par), names(par_guess))
+    if(length(dup)>0) {
+      message("Ignoring non-calibrated parameters in 'par', set them with the 'additional' argument.")
+      message(sprintf("\tIgnored parameters: %s", paste(dup, collapse=", ")))
+      par[dup] = NULL
+    }
+    par_guess[names(par)] = par
+  }
+  
+  if(!is.null(additional)) {
+    additional = .check_osmose_parameters(par=additional, nm="additional")
+    dup = intersect(names(par_guess), names(additional))
+    p0 = get_par(par_guess, linear=TRUE, as.is=TRUE)
+    dup = c(dup, intersect(names(p0), names(additional)))
+    if(length(dup)>0) {
+      message("Ignoring calibrated parameters in 'additional', set them with the 'par' argument.")
+      message(sprintf("\tIgnored parameters: %s", paste(dup, collapse=", ")))
+      additional[dup] = NULL
+    }
+    par_guess = c(par_guess, additional)
+  }
   
   source(file.path(dir, "run_model.R"), local=TRUE)
   
   if(isTRUE(debug)) debug(run_model)
   
   setwd(dir_master)
+  osmose = "../.osmose.jar"
+  if(!file.exists(osmose)) stop("OSMOSE executable '.osmose.jar' was not found in the calibration directory.")
   simulated = try(run_model(par=par_guess, conf=conf, osmose=osmose, is_a_test=FALSE, version=version))
+  if(inherits(simulated, "try-error")) stop("Error while running run_model.")
   setwd(wd)
   
+  message(sprintf("OSMOSE outputs written in '%s'.", file.path(dir_master, "output")))
+  
+  class(simulated) = "osmose.runmodel"
+  
   return(simulated)
+  
+}
+
+#' Check the results of a calibration trial
+#'
+#' @returns A list of outputs from the model.
+#' @export
+#'
+#' @inheritParams osmose_calibration_runmodel
+osmose_calibration_check = function(input, name=NULL, par=NULL, additional=NULL, version="4.4.1") {
+  
+  dir = if(is.null(name)) "calibration" else sprintf("calibration_%s", name)
+  outputDir = file.path(dir, "master", "output") 
+  
+  restart = read_osmose(path=dir)
+  
+  bestpar = get_var(restart, "best")
+  if(!is.null(par)) {
+    par = .check_osmose_parameters(par=par, nm="par")
+    bestpar[names(par)] = par
+  } 
+  
+  output_par = list("output.diet.composition.enabled"=TRUE, "output.mortality.enabled"=TRUE)
+  if(!is.null(additional)) {
+    additional = .check_osmose_parameters(par=additional, nm="par")
+    additional[names(output_par)] = output_par
+  } else {
+    additional = output_par
+  }
+  
+  update = osmose_calibration_runmodel(input=input, name=name, par=bestpar, additional=additional)
+  
+  output = read_osmose(path=outputDir, version=version)
+  output$simulated = update
+  output$observed = restart$observed
+  output$settings = restart$settings
+  output$cv = setNames(restart$settings$cv, nm=restart$settings$variable)
+  
+  class(output) = "osmose.calibration"
+  
+  return(output)
   
 }

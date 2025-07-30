@@ -1,16 +1,16 @@
 
 .getSelectivity = function(size, this) {
   
-  par = list(type    = .getPar(this, "fisheries.selectivity.type"),
-             L50     = .getPar(this, "fisheries.selectivity.l50"),
-             L75     = .getPar(this, "fisheries.selectivity.l75"),
-             L25     = .getPar(this, "fisheries.selectivity.l25"),
-             L0      = .getPar(this, "fisheries.selectivity.l0"),
-             L1      = .getPar(this, "fisheries.selectivity.l1"),
-             plateau = .getPar(this, "fisheries.selectivity.plateau"),
-             breaks  = .getPar(this, "fisheries.selectivity.breaks"),
-             values  = .getPar(this, "fisheries.selectivity.values"),
-             tiny    = .getPar(this, "fisheries.selectivity.tiny"))
+  par = list(type    = get_par(this, "fisheries.selectivity.type"),
+             L50     = get_par(this, "fisheries.selectivity.l50"),
+             L75     = get_par(this, "fisheries.selectivity.l75"),
+             L25     = get_par(this, "fisheries.selectivity.l25"),
+             L0      = get_par(this, "fisheries.selectivity.l0"),
+             L1      = get_par(this, "fisheries.selectivity.l1"),
+             plateau = get_par(this, "fisheries.selectivity.plateau"),
+             breaks  = get_par(this, "fisheries.selectivity.breaks"),
+             values  = get_par(this, "fisheries.selectivity.values"),
+             tiny    = get_par(this, "fisheries.selectivity.tiny"))
   
   if(is.null(par$tiny)) par$tiny = 1e-3
   

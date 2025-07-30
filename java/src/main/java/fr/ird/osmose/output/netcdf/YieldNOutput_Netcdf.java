@@ -93,7 +93,7 @@ public class YieldNOutput_Netcdf extends AbstractOutput_Netcdf {
     }
 
     @Override
-    String getDescription() {
+    protected String getDescription() {
         return "cumulative catch. ex: if time step of saving is the year, then annual catches in fish numbers are saved";
     }
 

@@ -18,7 +18,7 @@ init_ncdf = function(input, file, parameters = NULL, output = NULL,
   rfiles = dir(path=rpath, pattern = "\\.nc.*")
   nf = length(rfiles)
   
-  spnames = unlist(.getPar(conf, par="species.name")[.getPar(conf, par="species.type")=="focal"])
+  spnames = unlist(get_par(conf, par="species.name")[get_par(conf, par="species.type")=="focal"])
   spindex = as.numeric(gsub(names(spnames), pattern="species.name.sp", replacement = ""))
   
   spp       = NULL 
@@ -45,7 +45,7 @@ init_ncdf = function(input, file, parameters = NULL, output = NULL,
   
   biomass = 1e-6*abundance*weight
   
-  nsp = .getPar(conf, "simulation.nspecies")
+  nsp = get_par(conf, "simulation.nspecies")
 
   SPP       = NULL 
   ABUNDANCE = NULL
@@ -63,7 +63,7 @@ init_ncdf = function(input, file, parameters = NULL, output = NULL,
     iweight = weight[ind]
     itl = tl[ind]
     iage = age[ind]
-    this = .getPar(conf, sp=isp)
+    this = get_par(conf, sp=isp)
     
     xabundance = rowsum(iabundance, group = iage)
     xbiomass   = rowsum(ibiomass, group = iage)
@@ -113,7 +113,7 @@ init_ncdf = function(input, file, parameters = NULL, output = NULL,
   
   globalAtt = list(step=-1, species=paste(spindex, spnames, sep="=", collapse=", "))
   
-  bname = sprintf("%s-initial_conditions.nc", .getPar(conf, "output.file.prefix"))
+  bname = sprintf("%s-initial_conditions.nc", get_par(conf, "output.file.prefix"))
   ncfile = file.path(dirname(file), bname)
   units = c("", "scalar", "scalar", "scalar", "year", "cm", "g", "scalar")
   prec  = c("integer", "float", "float", "double", "float", "float", "float", "float")
@@ -148,7 +148,7 @@ init_alaia = function(input, file, parameters = NULL, output = NULL,
   rfiles = dir(path=rpath, pattern = "\\.nc.*")
   nf = length(rfiles)
   
-  spnames = unlist(.getPar(conf, par="species.name")[.getPar(conf, par="species.type")=="focal"])
+  spnames = unlist(get_par(conf, par="species.name")[get_par(conf, par="species.type")=="focal"])
   spindex = as.numeric(gsub(names(spnames), pattern="species.name.sp", replacement = ""))
  
   if(!dir.exists(file.path(dirname(file), "initial_conditions")))
@@ -157,7 +157,7 @@ init_alaia = function(input, file, parameters = NULL, output = NULL,
   for(i in seq_along(rfiles)) {
     ifile = file.path(rpath, rfiles[i])
     icode = tail(unlist(strsplit(ifile, split="\\.")), 1)
-    bname = sprintf("%s-initial_conditions.nc.%s", .getPar(conf, "output.file.prefix"), icode)
+    bname = sprintf("%s-initial_conditions.nc.%s", get_par(conf, "output.file.prefix"), icode)
     ncfile = file.path(dirname(file), "initial_conditions", bname)
     file.copy(ifile, ncfile)
     nc = nc_open(ncfile, write=TRUE)
@@ -166,7 +166,7 @@ init_alaia = function(input, file, parameters = NULL, output = NULL,
   }
   
   mainfile = file.path("initial_conditions", 
-                       sprintf("%s-initial_conditions.nc", .getPar(conf, "output.file.prefix")))
+                       sprintf("%s-initial_conditions.nc", get_par(conf, "output.file.prefix")))
   
   # the file is only bname because we are saving in the same folder as file (relative)
   pars = list(mainfile)
@@ -197,7 +197,7 @@ init_firstyear = function(input, file, parameters = NULL, output = NULL,
   rfiles = dir(path=rpath, pattern = "\\.nc.*")
   nf = length(rfiles)
 
-  spnames = unlist(.getPar(conf, par="species.name")[.getPar(conf, par="species.type")=="focal"])
+  spnames = unlist(get_par(conf, par="species.name")[get_par(conf, par="species.type")=="focal"])
   spindex = as.numeric(gsub(names(spnames), pattern="species.name.sp", replacement = ""))
   
   spp       = NULL 
@@ -224,7 +224,7 @@ init_firstyear = function(input, file, parameters = NULL, output = NULL,
   
   biomass = 1e-6*abundance*weight
   
-  nsp = .getPar(conf, "simulation.nspecies")
+  nsp = get_par(conf, "simulation.nspecies")
   
   pars = list()
   for(isp in spindex) {
@@ -235,8 +235,8 @@ init_firstyear = function(input, file, parameters = NULL, output = NULL,
     ilength = length[ind]
     itl = tl[ind]
     iage = age[ind]
-    this = .getPar(conf, sp=isp)
-    egg.size = .getPar(this, "egg.size")
+    this = get_par(conf, sp=isp)
+    egg.size = get_par(this, "egg.size")
     
     xabundance = rowsum(iabundance, group = iage)
     xbiomass   = rowsum(ibiomass, group = iage)
@@ -296,12 +296,12 @@ init_sofia = function(input, file=NULL, test=FALSE, sp=NULL, ...) {
   
   conf = .readConfiguration(input)
   
-  nsp = .getPar(conf, "simulation.nspecies")
-  ndt = .getPar(conf, "simulation.time.ndtPerYear")
+  nsp = get_par(conf, "simulation.nspecies")
+  ndt = get_par(conf, "simulation.time.ndtPerYear")
   
-  spind = .getPar(conf, "species.type") == "focal"
+  spind = get_par(conf, "species.type") == "focal"
   spind = gsub(names(spind)[which(spind)], pattern="species.type.sp", replacement = "") 
-  spnames = .getPar(conf, "species.name")[sprintf("species.name.sp%s", spind)]
+  spnames = get_par(conf, "species.name")[sprintf("species.name.sp%s", spind)]
   spind = sort(as.numeric(spind))
   
   if(!is.null(sp)) {
@@ -315,8 +315,8 @@ init_sofia = function(input, file=NULL, test=FALSE, sp=NULL, ...) {
   
   for(sp in spind) {
     
-    this = .getPar(conf, sp=sp)
-    iSpName = .getPar(this, "species.name")
+    this = get_par(conf, sp=sp)
+    iSpName = get_par(this, "species.name")
     
     cat(sprintf("\nInitialising species %d (%s)\n", sp, iSpName))
     
@@ -325,14 +325,14 @@ init_sofia = function(input, file=NULL, test=FALSE, sp=NULL, ...) {
     sim$biomass   = read.biomass(conf, sp)
     sim$yield     = read.yield(conf, sp)
     sim$fecundity = read.fecundity(conf, sp)
-    sim$bioguess  = .getPar(.getPar(conf, sp=sp), "observed.biomass.guess")
+    sim$bioguess  = get_par(get_par(conf, sp=sp), "observed.biomass.guess")
     isp = sprintf("osmose.initialization.data.sp%d", sp)
     conf[[isp]]   = sim
     
-    this = .getPar(conf, sp=sp)
+    this = get_par(conf, sp=sp)
     
     sim = .simF_ini(conf, sp, test=test)
-    sim$nschool = .getPar(this, "simulation.nschool")
+    sim$nschool = get_par(this, "simulation.nschool")
     if(is.null(sim$nschool))
       stop(sprintf("Parameter 'simulation.nschool.sp%d' not found.", sp))
     sim$larvalM = ndt*sim$larvalM # transform to annual rate, asummed 'by time-step'
@@ -362,12 +362,12 @@ init_sofia = function(input, file=NULL, test=FALSE, sp=NULL, ...) {
 
 .simCatch_ini = function(conf, sp) {
   
-  this = .getPar(conf, sp=sp)
-  dat  = .getPar(this, par="osmose.initialization.data")
+  this = get_par(conf, sp=sp)
+  dat  = get_par(this, par="osmose.initialization.data")
   ndt = conf$simulation.time.ndtperyear
-  A = .getPar(this, "species.lifespan")
-  a = .getPar(this, "species.length2weight.condition.factor")
-  b = .getPar(this, "species.length2weight.allometric.power")
+  A = get_par(this, "species.lifespan")
+  a = get_par(this, "species.length2weight.condition.factor")
+  b = get_par(this, "species.length2weight.allometric.power")
   
   age_bins = seq(from=0, to=A, by=1/ndt)
   age = 0.5*head(age_bins, -1) + 0.5*tail(age_bins, -1)
@@ -408,7 +408,7 @@ init_sofia = function(input, file=NULL, test=FALSE, sp=NULL, ...) {
   M = calculateMortality(conf, sp)
   Ma = M$M[cut(age, breaks = M$age, labels = FALSE)]
   
-  cutoff = .getPar(this, "observed.biomass.cutoff.size")
+  cutoff = get_par(this, "observed.biomass.cutoff.size")
   if(is.null(cutoff)) 
     stop(sprintf("Parameter 'observed.biomass.cutoff.size.sp%d' has not been provided.", sp), call. = FALSE)
   xn = which.max(size >= cutoff) - 1
@@ -476,7 +476,7 @@ init_sofia = function(input, file=NULL, test=FALSE, sp=NULL, ...) {
   matsize = .get_matsize(this)
   isMature = size >= matsize
   
-  mode = .getPar(this, "species.reproduction.mode")
+  mode = get_par(this, "species.reproduction.mode")
   if(is.null(mode)) mode = "oviparity"
   if(mode=="viviparity") weight = 1e-6
   
@@ -497,12 +497,12 @@ init_sofia = function(input, file=NULL, test=FALSE, sp=NULL, ...) {
   if(!isTRUE(sim$harvested) & !is.null(sim)) return(sim)
   if(isTRUE(test)) return(sim)
   
-  this = .getPar(conf, sp=sp)
-  dat  = .getPar(this, par="osmose.initialization.data")
+  this = get_par(conf, sp=sp)
+  dat  = get_par(this, par="osmose.initialization.data")
   ndt = conf$simulation.time.ndtperyear
-  A = .getPar(this, "species.lifespan")
-  a = .getPar(this, "species.length2weight.condition.factor")
-  b = .getPar(this, "species.length2weight.allometric.power")
+  A = get_par(this, "species.lifespan")
+  a = get_par(this, "species.length2weight.condition.factor")
+  b = get_par(this, "species.length2weight.allometric.power")
   
   age_bins = seq(from=0, to=A, by=1/ndt)
   age = 0.5*head(age_bins, -1) + 0.5*tail(age_bins, -1)
@@ -533,7 +533,7 @@ init_sofia = function(input, file=NULL, test=FALSE, sp=NULL, ...) {
   M = calculateMortality(conf, sp)
   Ma = M$M[cut(age, breaks = M$age, labels = FALSE)]
   
-  cutoff = .getPar(this, "observed.biomass.cutoff.size")
+  cutoff = get_par(this, "observed.biomass.cutoff.size")
   if(is.null(cutoff)) stop(sprintf("Parameter 'observed.biomass.cutoff.size.sp%d' has not been provided.", sp), call. = FALSE)
   xn = which.max(size >= cutoff) - 1
   ixn = seq_len(C)
@@ -644,7 +644,7 @@ init_sofia = function(input, file=NULL, test=FALSE, sp=NULL, ...) {
   matsize = .get_matsize(this)
   isMature = size >= matsize
   
-  mode = .getPar(this, "species.reproduction.mode")
+  mode = get_par(this, "species.reproduction.mode")
   if(is.null(mode)) mode = "oviparity"
   if(mode=="viviparity") weight = 1e-6
   
@@ -675,15 +675,6 @@ init_sofia = function(input, file=NULL, test=FALSE, sp=NULL, ...) {
 
 
 # Internal ----------------------------------------------------------------
-
-
-lnorm2 = function(obs, sim, tiny=1e-2, ...) {
-  if(all(!is.finite(sim))) return(Inf)
-  obs = log(obs + tiny)
-  sim = log(sim + tiny)
-  nlogLike = sum((obs-sim)^2, na.rm=TRUE)
-  return(nlogLike)
-}
 
 llw = function(cv) 1/(2*cv^2)
 

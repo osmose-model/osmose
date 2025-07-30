@@ -116,6 +116,11 @@ control$restart.file = restart_file # name of the restart file
 eff_cores = floor((ncores - 1)/nht/osm_ncpu)
 control$ncores = eff_cores # the actual number of cores you have
 
+.ncore = function(n) if(n>1) "cores" else "core"
+msg = sprintf("Running calibration with %d %s, OSMOSE is using %d %s per simulation.",
+              eff_cores, .ncore(eff_cores), osm_ncpu, .ncore(osm_ncpu))
+message(msg)
+
 if(isTRUE(parallel)) {
   
   if(!isTRUE(MPI)) {

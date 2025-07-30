@@ -83,7 +83,7 @@
                           files=allfiles, scale=c(0.8, 1.2), lower=-1, upper=+3, delta=1, default=1)
    
   knots = get_par(conf, "mortality.additional.larva.knots", as.is=TRUE)
-  viv   = get_par(conf, "species.reproducion.mode", as.is=TRUE)
+  viv   = get_par(conf, "species.reproduction.mode", as.is=TRUE)
   
   pars = list()
   for(isp in get_species(conf, type="focal", code=TRUE)) {
@@ -181,8 +181,10 @@
     phase = get_par_phase(conf, "fisheries.rate.base", default=2)
     
     write_osmose(pars, file=guess_file, append = TRUE)
-    write_osmose(set_par(pars, delta=-3), file=min_file, append = TRUE)
-    write_osmose(set_par(pars, delta=+3), file=max_file, append = TRUE)
+    write_osmose(set_par(pars, delta=-3, upper=-10), file=min_file, append = TRUE)
+    write_osmose(set_par(pars, delta=+3, lower=0.5), file=max_file, append = TRUE)
+    # write_osmose(set_par(pars, scale=0.8, lower=-10), file=min_file, append = TRUE)
+    # write_osmose(set_par(pars, scale=1.2, upper=0.5), file=max_file, append = TRUE)
     write_osmose(set_par(pars, value=phase), file=phase_file, append = TRUE)
     
     pars = get_par(this, "fisheries.rate.byperiod.fsh", as.is=TRUE)
@@ -196,6 +198,10 @@
     write_osmose(set_par(pars, delta=-3), file=min_file, append = TRUE)
     write_osmose(set_par(pars, delta=+3), file=max_file, append = TRUE)
     write_osmose(set_par(pars, value=phase), file=phase_file, append = TRUE)
+    
+    stype = get_par(this, "fisheries.selectivity.type")
+    
+    if(stype==9) next
     
     # make difference for each one: l50, l75
     pars = get_par(this, "fisheries.selectivity.l50", as.is=TRUE)
@@ -228,6 +234,7 @@
     }
     
   } # end of fisheries parameters
+  
 }
 
 

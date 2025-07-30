@@ -64,7 +64,7 @@ public class NDeadSchoolDistribOutput extends AbstractDistribOutput {
     }
 
     @Override
-    String getDescription() {
+    protected String getDescription() {
         StringBuilder description = new StringBuilder();
         description.append("Distribution of the number of dead school by ");
         description.append(getType().getDescription());
