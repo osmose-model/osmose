@@ -42,6 +42,7 @@
 package fr.ird.osmose.output;
 
 import fr.ird.osmose.AbstractSchool;
+import fr.ird.osmose.Cell;
 import fr.ird.osmose.util.OsmoseLinker;
 
 /**
@@ -54,6 +55,7 @@ public abstract class AbstractOutputRegion extends OsmoseLinker {
     private final int index;
 
     public abstract boolean contains(int timeStep, AbstractSchool school);
+    public abstract boolean contains(int timeStep, Cell cell);
     public abstract double getSelectivity(int timeStep, AbstractSchool school);
     public abstract void init();
 

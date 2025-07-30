@@ -143,7 +143,7 @@ public class BackgroundSchool extends AbstractSchool {
 
     @Override
     public void updateBiomAndAbd() {
-        this.instantaneousAbundance = this.abundance - sum(nDead);
+        this.instantaneousAbundance = this.abundance - sum(nDead[0]);
         if (instantaneousAbundance < 1.d) {
             instantaneousAbundance = 0.d;
         }

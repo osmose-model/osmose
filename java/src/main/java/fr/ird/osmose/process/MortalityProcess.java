@@ -135,7 +135,7 @@ public class MortalityProcess extends AbstractProcess {
     /*
      * Random generator
      */
-    private static Random random;
+    private Random random;
     /*
      * Subdivise the main time step in smaller time steps for applying mortality.
      */
@@ -277,6 +277,8 @@ public class MortalityProcess extends AbstractProcess {
             fishingMortality.setMPA();
         }
 
+        int timeStep = getSimulation().getIndexTimeSimu();
+
         // Init the accessibility matrix
         // done at the beginning of time-step
         int year = getSimulation().getYear();
@@ -338,7 +340,7 @@ public class MortalityProcess extends AbstractProcess {
                     // Egg loss, not accessible to predation process
                     double D = additionalMortality.getRate(school);
                     double nDead = school.getInstantaneousAbundance() * (1.d - Math.exp(-D));
-                    school.incrementNdead(MortalityCause.ADDITIONAL, nDead);
+                    school.incrementNdead(MortalityCause.ADDITIONAL, nDead, timeStep);
                     school.retainEgg();
                 }
             }
@@ -395,7 +397,7 @@ public class MortalityProcess extends AbstractProcess {
                     trophicLevel += 1;
                     school.setTrophicLevel((float) trophicLevel);
                 }
-            } // end of trophicLevel 
+            } // end of trophicLevel
         } // end of starvation and trophicLevel update
 
         // Apply Zout mortality on schools out of the simulated domain
@@ -454,6 +456,8 @@ public class MortalityProcess extends AbstractProcess {
      * fly).
      */
     private void computeMortality(int subdt, Cell cell) throws Exception {
+
+        int timeStep = getSimulation().getIndexTimeSimu();
 
         // Declare variable which may not be used.
         Integer[][] seqFishery = null;
@@ -536,7 +540,7 @@ public class MortalityProcess extends AbstractProcess {
             seqFishery = new Integer[ns + nBkg][];
             for (int i = 0; i < ns + nBkg; i++) {
                 seqFishery[i] = Arrays.copyOf(singleSeqFishery, this.nfishery);
-                shuffleArray(seqFishery[i]);
+                this.shuffleArray(seqFishery[i]);
             }
         }
 
@@ -552,15 +556,15 @@ public class MortalityProcess extends AbstractProcess {
             listPred.addAll(bkgSchool);
         }
 
-        shuffleArray(seqPred);
-        shuffleArray(seqFish);
-        shuffleArray(seqNat);
-        shuffleArray(seqStarv);
-        shuffleArray(seqFor);
+        this.shuffleArray(seqPred);
+        this.shuffleArray(seqFish);
+        this.shuffleArray(seqNat);
+        this.shuffleArray(seqStarv);
+        this.shuffleArray(seqFor);
 
         boolean keepRecord = getSimulation().isPreyRecord();
         for (int i = 0; i < ns + nBkg; i++) { // loop over all the school (focal and bkg) as predators.
-            shuffleArray(mortalityCauses);
+            this.shuffleArray(mortalityCauses);
             for (MortalityCause cause : mortalityCauses) { // random loop over all the mortality causes. OUT and DISCARDS are not used here.
                 School school;
                 double nDead = 0;
@@ -577,7 +581,7 @@ public class MortalityProcess extends AbstractProcess {
                     double Mo = foragingMortality.getRate(school) / subdt;
                     if (school.getAgeDt() >= school.getFirstFeedingAgeDt()) {
                         nDead = school.getInstantaneousAbundance() * (1.d - Math.exp(-Mo));
-                        school.incrementNdead(MortalityCause.FORAGING, nDead);
+                        school.incrementNdead(MortalityCause.FORAGING, nDead, timeStep);
                     }
                     break;
                 case PREDATION:
@@ -599,7 +603,7 @@ public class MortalityProcess extends AbstractProcess {
                             // the biomass of the prey is updted
                             IAggregation prey = subpreys.get(ipr);
                             nDead = prey.biom2abd(preyUpon[ipr]); // total biomass that has been eaten
-                            prey.incrementNdead(MortalityCause.PREDATION, nDead);
+                            prey.incrementNdead(MortalityCause.PREDATION, nDead, timeStep);
                             predator.preyedUpon(prey.getSpeciesIndex(), prey.getFileSpeciesIndex(),
                                     prey.getTrophicLevel(), prey.getAge(), prey.getLength(), preyUpon[ipr], keepRecord);
                         }
@@ -624,7 +628,7 @@ public class MortalityProcess extends AbstractProcess {
                         nDead = bioenStarvationMortality.computeStarvation(school, subdt);
                     }
                     if (nDead > 0.d) {
-                        school.incrementNdead(MortalityCause.STARVATION, nDead);
+                        school.incrementNdead(MortalityCause.STARVATION, nDead, timeStep);
                     }
 
                     break;
@@ -640,7 +644,7 @@ public class MortalityProcess extends AbstractProcess {
                     if (school.getAgeDt() > 0) {
                         double D = additionalMortality.getRate(school) / subdt;
                         nDead = school.getInstantaneousAbundance() * (1.d - Math.exp(-D));
-                        school.incrementNdead(MortalityCause.ADDITIONAL, nDead);
+                        school.incrementNdead(MortalityCause.ADDITIONAL, nDead, timeStep);
                     }
                     break;
                 case FISHING:
@@ -676,8 +680,8 @@ public class MortalityProcess extends AbstractProcess {
                             //fishedSchool.discardedBy(iFishery, fishedSchool.abd2biom(nDiscarded));
                             fishedSchool.discardedNBy(iFishery, nDiscarded);
 
-                            fishedSchool.incrementNdead(MortalityCause.FISHING, nFished);
-                            fishedSchool.incrementNdead(MortalityCause.DISCARDS, nDiscarded);
+                            fishedSchool.incrementNdead(MortalityCause.FISHING, nFished, timeStep);
+                            fishedSchool.incrementNdead(MortalityCause.DISCARDS, nDiscarded, timeStep);
 
                             // make sure a different fishery is called every time
                             // it is just a trick since we do not have case FISHERY1,
@@ -711,7 +715,7 @@ public class MortalityProcess extends AbstractProcess {
                             getSimulation().getEconomicModule().incrementHarvestedBiomass(iFishery, school, nDead);
                         }
 
-                        school.incrementNdead(MortalityCause.FISHING, nDead);
+                        school.incrementNdead(MortalityCause.FISHING, nDead, timeStep);
 
                     }
                     break;
@@ -739,7 +743,7 @@ public class MortalityProcess extends AbstractProcess {
      * @param <T> type of array
      * @param a   input array
      */
-    public static <T> void shuffleArray(T[] a) {
+    public <T> void shuffleArray(T[] a) {
         // Shuffle array
         for (int i = a.length; i > 1; i--) {
             T tmp = a[i - 1];

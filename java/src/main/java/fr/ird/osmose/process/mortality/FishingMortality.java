@@ -170,18 +170,21 @@ public class FishingMortality extends AbstractMortality {
 
                     float average = sum / nCells;
 
-                    if (Math.abs(average - 1.f) > 1e-2) {
-                        StringBuilder msg = new StringBuilder();
-                        msg.append("The means of the factors in spatial fishing distribution file ");
-                        msg.append(getConfiguration()
-                                .getFile("mortality.fishing.spatial.distrib.file.sp" + fileSpeciesIndex));
-                        msg.append(" must be equal to one over fished areas.");
-                        msg.append("Spatial factor will be normalized");
-                        warning(msg.toString());
-                        for (Cell cell : getGrid().getCells()) {
-                            spatialFactor[cpt].setValue(cell, spatialFactor[cpt].getValue(cell) / average);
-                        }
-                    }
+                   String key = "fisheries.movement.normalisation.disabled";
+                   if (!getConfiguration().getBoolean(key)) {
+                      if (Math.abs(average - 1.f) > 1e-2) {
+                          StringBuilder msg = new StringBuilder();
+                          msg.append("The means of the factors in spatial fishing distribution file ");
+                          msg.append(getConfiguration()
+                                  .getFile("mortality.fishing.spatial.distrib.file.sp" + fileSpeciesIndex));
+                          msg.append(" must be equal to one over fished areas.");
+                          msg.append("Spatial factor will be normalized");
+                          warning(msg.toString());
+                          for (Cell cell : getGrid().getCells()) {
+                              spatialFactor[cpt].setValue(cell, spatialFactor[cpt].getValue(cell) / average);
+                          }
+                      }
+                   }
 
                 } // end of existence test
 

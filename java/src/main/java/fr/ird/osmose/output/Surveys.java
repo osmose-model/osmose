@@ -42,6 +42,7 @@
 package fr.ird.osmose.output;
 
 import fr.ird.osmose.AbstractSchool;
+import fr.ird.osmose.Cell;
 import fr.ird.osmose.process.mortality.fishery.FisheryMapSet;
 import fr.ird.osmose.process.mortality.fishery.FisherySelectivity;
 
@@ -124,10 +125,16 @@ public class Surveys extends AbstractOutputRegion {
      */
     @Override
     public boolean contains(int timeStep, AbstractSchool school) {
-        if(school.isOut()) {
+
+        if (school.isOut()) {
             return false;
         }
-        return (this.mapSet.getValue(timeStep, school.getCell()) > 0);
+        return this.contains(timeStep, school.getCell());
+    }
+
+    @Override
+    public boolean contains(int timeStep, Cell cell) {
+        return (this.mapSet.getValue(timeStep, cell) > 0);
     }
 
     @Override

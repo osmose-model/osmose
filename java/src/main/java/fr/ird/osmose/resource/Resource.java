@@ -45,6 +45,7 @@ import java.util.List;
 
 import fr.ird.osmose.Cell;
 import fr.ird.osmose.IAggregation;
+import fr.ird.osmose.output.AbstractOutputRegion;
 import fr.ird.osmose.process.mortality.MortalityCause;
 import fr.ird.osmose.util.OsmoseLinker;
 
@@ -151,7 +152,7 @@ public class Resource extends OsmoseLinker implements IAggregation {
      * mortality cause
      */
     @Override
-    public void incrementNdead(MortalityCause cause, double nDead) {
+    public void incrementNdead(MortalityCause cause, double nDead, int timeStep) {
         if (cause != MortalityCause.PREDATION) {
             throw new UnsupportedOperationException("MortalityCause for Swarm must be PREDATION only.");
         }

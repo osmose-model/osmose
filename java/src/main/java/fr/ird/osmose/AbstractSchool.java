@@ -41,6 +41,7 @@
 
 package fr.ird.osmose;
 
+import fr.ird.osmose.output.AbstractOutputRegion;
 import fr.ird.osmose.process.mortality.MortalityCause;
 import fr.ird.osmose.util.GridPoint;
 
@@ -98,12 +99,12 @@ public abstract class AbstractSchool extends GridPoint implements IAggregation {
     /**
      * Number of dead fish in the current time step, for each mortality cause.
      */
-    protected final double[] nDead = new double[MortalityCause.values().length];
+    protected final double nDead[][] = new double[getConfiguration().getOutputRegions().size()][MortalityCause.values().length];
 
     /**
      * Number of dead fish in the current time step, for each mortality cause.
      */
-    protected final double[] ageDeath = new double[MortalityCause.values().length];
+    protected final double ageDeath[][]  = new double[getConfiguration().getOutputRegions().size()][MortalityCause.values().length];
 
     /**
      * Biomass of prey, in tonne, ingested by the school at current time step.
@@ -153,10 +154,16 @@ public abstract class AbstractSchool extends GridPoint implements IAggregation {
     public abstract boolean isOut();
 
     @Override
-    public void incrementNdead(MortalityCause cause, double nDead) {
-        this.nDead[cause.index] += nDead;
-        this.ageDeath[cause.index] += nDead * this.getAge();
-        abundanceHasChanged = true;
+    public void incrementNdead(MortalityCause cause, double nDead, int timestep) {
+        int indexRegion = 0;
+        for (AbstractOutputRegion region : getConfiguration().getOutputRegions()) {
+            if (region.contains(timestep, this)) {
+                this.nDead[indexRegion][cause.index] += nDead;
+                this.ageDeath[indexRegion][cause.index] += nDead * this.getAge();
+                abundanceHasChanged = true;
+            }
+            indexRegion++;
+        }
     }
 
     /**
@@ -181,6 +188,14 @@ public abstract class AbstractSchool extends GridPoint implements IAggregation {
     protected void reset(double[] array) {
         for (int i = 0; i < array.length; i++) {
             array[i] = 0.d;
+        }
+    }
+
+    protected void reset(double[][] array) {
+        for (int i = 0; i < array.length; i++) {
+            for (int j = 0; j < array[0].length; j++) {
+                array[i][j] = 0.d;
+            }
         }
     }
 
@@ -445,7 +460,11 @@ public abstract class AbstractSchool extends GridPoint implements IAggregation {
      * @return the number of dead fish for this mortality cause
      */
     public double getNdead(MortalityCause cause) {
-        return nDead[cause.index];
+        return nDead[0][cause.index];
+    }
+
+    public double getNdead(int iRegion, MortalityCause cause) {
+        return nDead[iRegion][cause.index];
     }
 
     /**
@@ -455,7 +474,11 @@ public abstract class AbstractSchool extends GridPoint implements IAggregation {
      *
      */
     public double getAgeDeath(MortalityCause cause) {
-        return ageDeath[cause.index];
+        return ageDeath[0][cause.index];
+    }
+
+    public double getAgeDeath(MortalityCause cause, int iRegion) {
+        return ageDeath[iRegion][cause.index];
     }
 
     public void resetAccessiblePreyIndex() {

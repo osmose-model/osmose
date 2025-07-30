@@ -161,12 +161,12 @@ public class SchoolSet extends OsmoseLinker {
     }
 
     /** Increments the biomass of dead individuals that are going to die of aging */
-    public void updateAgingMortality() {
+    public void updateAgingMortality(int timeStep) {
         Iterator<School> it = schoolset.iterator();
         while (it.hasNext()) {
             School tmpSchool = it.next();
             if (tmpSchool.diesAging()) {
-                tmpSchool.incrementNdead(MortalityCause.AGING, tmpSchool.getInstantaneousAbundance());
+                tmpSchool.incrementNdead(MortalityCause.AGING, tmpSchool.getInstantaneousAbundance(), timeStep);
             }
         }
     }
