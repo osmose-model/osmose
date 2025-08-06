@@ -4,7 +4,15 @@
 \alias{readOsmoseFiles}
 \title{Read Osmose output file}
 \usage{
-readOsmoseFiles(path, type, bySpecies = FALSE, ext = "csv", varid = NA, ...)
+readOsmoseFiles(
+  path,
+  type,
+  bySpecies = FALSE,
+  bySurvey = FALSE,
+  ext = "csv",
+  varid = NA,
+  ...
+)
 }
 \arguments{
 \item{path}{Osmose output path}

@@ -185,7 +185,7 @@ get_var.default = function(object, what=NULL, no.error=FALSE, ...) {
   }
   if(length(what)>1) stop("Only one name is allowed in 'what'.")
   x = object[[what]]
-  if(is.null(out)) {
+  if(is.null(x)) {
     msg = "The variable '%s' was not found in OSMOSE outputs."
     if(isTRUE(no.error)) return(NULL)
     stop(sprintf(msg, what)) 
