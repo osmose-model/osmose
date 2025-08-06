@@ -84,7 +84,8 @@ plot.osmose = function(x, what = "biomass", ...) {
 #' @rdname get_var
 #' @method get_var osmose
 #' @export
-get_var.osmose = function(object, what, how = c("matrix", "list"), 
+get_var.osmose = function(object, what, sp=NULL, srv=NULL, fsh=NULL, 
+                          how = c("matrix", "list"), 
                           expected = FALSE, no.error=FALSE, drop=TRUE, 
                           size=NULL, random=FALSE, replace=FALSE, ...){
   
@@ -95,15 +96,11 @@ get_var.osmose = function(object, what, how = c("matrix", "list"),
   if(how == "list") expected = TRUE
   
   # Extract variable from object
-  out = object[[what]]
-  
-  # If it's NULL, then show an error message
-  if(is.null(out)) {
-    msg = "The variable '%s' was not found in OSMOSE outputs."
-    if(isTRUE(no.error)) return(NULL)
-    stop(sprintf(msg, what)) 
-  }
-  
+  out = get_var.default(object=object, what=what, no.error=no.error)
+  if(!is.null(srv)) out = get_var.default(object=out, what=srv, no.error=no.error)
+  if(!is.null(fsh)) out = get_var.default(object=out, what=fsh, no.error=no.error)
+  if(!is.null(sp)) out = get_var.default(object=out, what=sp, no.error=no.error)
+
   if(!is.null(size)) {
     
     if(length(size)>1) stop("Size for sampling replicates must be an integer.")
@@ -176,6 +173,26 @@ get_var.osmose.calibration = function(object, what, how, ...) {
   return(x)
   
 }
+
+#' @rdname get_var
+#' @export
+get_var.default = function(object, what=NULL, no.error=FALSE, ...) {
+  if(is.null(object)) return(NULL)
+  if(is.null(what)) return(object)
+  if(!is.list(object)) {
+    warning(sprintf("Object is not a list, ignoring '%s' subsetting.", what))
+    return(object)
+  }
+  if(length(what)>1) stop("Only one name is allowed in 'what'.")
+  x = object[[what]]
+  if(is.null(out)) {
+    msg = "The variable '%s' was not found in OSMOSE outputs."
+    if(isTRUE(no.error)) return(NULL)
+    stop(sprintf(msg, what)) 
+  }
+  return(x)
+}
+
 
 #' Print information for an \code{osmose} object
 #'
