@@ -146,7 +146,7 @@
 
 # Groups input files for each species.
 # **The name of the configuration must not contain any _ or - characters**
-.bySpecies = function(files, sep=c("_", "-")) {
+.byOne = function(files, sep=c("_", "-")) {
   out = NULL
   if(length(files)>0) {
     sp  = lapply(sapply(files, FUN=.strsplit2v, sep[1],
@@ -155,6 +155,21 @@
     sp[ind] = NULL
     sp = do.call(cbind, sp)[2,]
     out = as.list(tapply(files[!ind], INDEX=sp, FUN=identity))
+  }
+  # change names for all species
+  return(out)
+}
+
+.byTwo = function(files, sep=c("_", "-")) {
+  out = NULL
+  if(length(files)>0) {
+    sp  = lapply(sapply(files, FUN=.strsplit2v, sep[1],
+                        USE.NAMES=FALSE)[2,], FUN=.strsplit2v, sep[2])
+    ind = sapply(sp, length)!=3
+    sp[ind] = NULL
+    sr = do.call(cbind, sp)[2,]
+    sp = do.call(cbind, sp)[3,]
+    out = lapply(split(files[!ind], f=sr), FUN=split, f=sp)
   }
   # change names for all species
   return(out)
@@ -615,9 +630,10 @@ osmose2R.v4r0 = function (path=NULL, species.names=NULL, conf=NULL, ...) {
                     accessibleBiomassArray = readOsmoseFiles(path = path, type = "accessibleBiomassByFishery", varid="accessible_biomass", ext="nc"),
 
                     # survey outputs
-                    surveyBiomass = readOsmoseFiles(path = path, type = "biomass", bySpecies = TRUE),
-                    surveyAbundance = readOsmoseFiles(path = path, type = "abundance", bySpecies = TRUE),
-                    surveyYield = readOsmoseFiles(path = path, type = "yield", bySpecies = TRUE),
+                    surveyBiomass = readOsmoseFiles(path = path, type = "biomass", bySurvey=TRUE),
+                    surveyAbundance = readOsmoseFiles(path = path, type = "abundance", bySurvey=TRUE),
+                    surveyYield = readOsmoseFiles(path = path, type = "yield", bySurvey=TRUE),
+                    surveyMortality = readOsmoseFiles(path = path, type = "mortalityRate", bySurvey=TRUE, bySpecies=TRUE),
 
                     # bioen variables
                     sizeMature = readOsmoseFiles(path = path, type = "sizeMature"),
