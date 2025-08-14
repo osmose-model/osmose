@@ -634,6 +634,7 @@ osmose2R.v4r0 = function (path=NULL, species.names=NULL, conf=NULL, ...) {
                     surveyAbundance = readOsmoseFiles(path = path, type = "abundance", bySurvey=TRUE),
                     surveyYield = readOsmoseFiles(path = path, type = "yield", bySurvey=TRUE),
                     surveyMortality = readOsmoseFiles(path = path, type = "mortalityRate", bySurvey=TRUE, bySpecies=TRUE),
+                    surveyPredatorPressure = readOsmoseFiles(path = path, type = "predatorPressure", bySurvey=TRUE),
 
                     # bioen variables
                     sizeMature = readOsmoseFiles(path = path, type = "sizeMature"),
