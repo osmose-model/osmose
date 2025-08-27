@@ -564,7 +564,7 @@ public class Configuration extends OLogger {
             // [0, nSpecies])
             species[cpt] = new Species(fileIndex, cpt);
             // Name must contain only alphanumerical characters
-            if (!species[cpt].getName().matches("^[a-zA-Z0-9]*$")) {
+            if (!species[cpt].getName().matches("^[a-zA-Z0-9-]+$")) {
                 error("Species name must contain alphanumeric characters only. Please rename " + species[cpt].getName(),
                         null);
             }
@@ -579,7 +579,7 @@ public class Configuration extends OLogger {
             // species index (cpt in [0, nResources])
             rscSpecies[cpt] = new ResourceSpecies(fileIndex, cpt);
             // Name must contain only alphanumerical characters
-            if (!rscSpecies[cpt].getName().matches("^[a-zA-Z0-9]*$")) {
+            if (!rscSpecies[cpt].getName().matches("^[a-zA-Z0-9-]+$")) {
                 error("Resource name must contain alphanumeric characters only. Please rename "
                         + rscSpecies[cpt].getName(), null);
             }
@@ -609,7 +609,7 @@ public class Configuration extends OLogger {
             // BackgroundSpecies are now instanciated from the fileIndex (fileIndex) and the
             // species index (cpt in [0, nResources])
             bkgSpecies[cpt] = new BackgroundSpecies(fileIndex, cpt);
-            if (!bkgSpecies[cpt].getName().matches("^[a-zA-Z0-9]*$")) {
+            if (!bkgSpecies[cpt].getName().matches("^[a-zA-Z0-9-]+$")) {
                 error("Background species name must contain alphanumeric characters only. Please rename "
                         + bkgSpecies[cpt].getName(), null);
             }
