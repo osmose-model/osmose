@@ -5,12 +5,16 @@
 \alias{get_var.list}
 \alias{get_var.NULL}
 \alias{get_var.osmose.calibration}
+\alias{get_var.default}
 \alias{get_var}
 \title{Get variable from an \code{osmose}-like object.}
 \usage{
 \method{get_var}{osmose}(
   object,
   what,
+  sp = NULL,
+  srv = NULL,
+  fsh = NULL,
   how = c("matrix", "list"),
   expected = FALSE,
   no.error = FALSE,
@@ -24,6 +28,9 @@
 \method{get_var}{list}(
   object,
   what,
+  sp = NULL,
+  srv = NULL,
+  fsh = NULL,
   how = c("matrix", "list"),
   expected = FALSE,
   no.error = FALSE,
@@ -37,6 +44,8 @@
 \method{get_var}{`NULL`}(object, ...)
 
 \method{get_var}{osmose.calibration}(object, what, how, ...)
+
+\method{get_var}{default}(object, what = NULL, no.error = FALSE, ...)
 
 get_var(object, what, how, ...)
 }

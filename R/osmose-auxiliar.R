@@ -45,8 +45,9 @@
 #' @param ... Additional arguments
 #'
 #' @return Output data frame
-readOsmoseFiles = function(path, type, bySpecies=FALSE, ext="csv", varid=NA, ...) {
+readOsmoseFiles = function(path, type, bySpecies=FALSE, bySurvey=FALSE, ext="csv", varid=NA, ...) {
   
+  by = bySpecies + bySurvey
   # Build the class name pasting osmose + type
   xclass = paste("osmose", type, sep = ".")
   
@@ -60,14 +61,18 @@ readOsmoseFiles = function(path, type, bySpecies=FALSE, ext="csv", varid=NA, ...
   extFiles = allFiles[grepl(pattern = paste0("\\.", ext), x = allFiles)]
   
   # Read files 
-  if(isTRUE(bySpecies)) {
-    
+  if(by > 0) {
     # Subset list of files
     files  = extFiles[grepl(pattern = paste0(type, "-"), x = extFiles)]
-    # Split path names by species 
-    files  = .bySpecies(files = files)
+    # Split path names by species
+    if(by==1) files  = .byOne(files = files)
+    if(by==2) files  = .byTwo(files = files)
     # Read files
-    output = lapply(files, .readFilesList, path = path, type = type, varid=varid, ...)
+    if(length(files)==0) {
+      return(NULL)
+    } else {
+      output = rapply(files, f=.readFilesList, path = path, type = type, varid=varid, how="replace", ...)
+    }
     
   } else {
     
