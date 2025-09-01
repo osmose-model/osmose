@@ -322,6 +322,16 @@ public class OutputManager extends SimulationLinker {
                     school -> school.getInstantaneousBiomass(), ageDistrib));
         }
 
+        if (getConfiguration().getBoolean("output.mature.biomass.byage.enabled")) {
+            outputs.add(new DistribOutput(rank, "Indicators", "matureBiomass", "Distribution of mature fish species biomass (tonne)",
+                    school -> school.isSexuallyMature() ? school.getInstantaneousBiomass() : 0.d, ageDistrib));
+        }
+
+        if (getConfiguration().getBoolean("output.mature.abundance.byage.enabled")) {
+            outputs.add(new DistribOutput(rank, "Indicators", "matureAbundance", "Distribution of mature fish species abuncance (number)",
+                    school -> school.isSexuallyMature() ? school.getInstantaneousAbundance() : 0.d, ageDistrib));
+        }
+
         // Abundance
         if (getConfiguration().getBoolean("output.abundance.enabled")) {
             outputs.add(
