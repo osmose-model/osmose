@@ -74,6 +74,11 @@ public abstract class AbstractSchool extends GridPoint implements IAggregation {
      */
     protected double instantaneousAbundance;
 
+    /** Returns true if the school is sexually mature
+     *
+     */
+    public abstract boolean isMature();
+
     /**
      * Biomass, in tonne, of the school, estimated on the fly.
      */
