@@ -305,9 +305,11 @@ public class AlleleFrequencyOutput extends SimulationLinker implements IOutput {
         Dimension traitDim = alleleFrequencyOutputbNc.addDimension("trait", ntrait);
         Dimension locusDim = alleleFrequencyOutputbNc.addDimension("locus", nlocus_max);
         Dimension alleleDim = alleleFrequencyOutputbNc.addDimension("allele", nvalue_max);
+        Dimension classDim = alleleFrequencyOutputbNc.addDimension("class", numberOfClasses);
 
         List<Dimension> outDims = new ArrayList<>();
         outDims.add(timeDim);
+        outDims.add(classDim);
         outDims.add(traitDim);
         outDims.add(locusDim);
         outDims.add(alleleDim);
@@ -327,7 +329,7 @@ public class AlleleFrequencyOutput extends SimulationLinker implements IOutput {
         }
 
         // Write NetCDF coords (for instance species, stage, etc.)
-        this.write_nc_coords();
+        this.write_nc_coords(alleleFrequencyOutputnc);
 
     }
 
@@ -354,9 +356,11 @@ public class AlleleFrequencyOutput extends SimulationLinker implements IOutput {
 
         Dimension traitDim = expectedHtzOutputbNc.addDimension("trait", ntrait);
         Dimension locusDim = expectedHtzOutputbNc.addDimension("locus", nlocus_max);
+        Dimension classDim = expectedHtzOutputbNc.addDimension("class", numberOfClasses);
 
         List<Dimension> outDims = new ArrayList<>();
         outDims.add(timeDim);
+        outDims.add(classDim);
         outDims.add(traitDim);
         outDims.add(locusDim);
 
@@ -374,28 +378,29 @@ public class AlleleFrequencyOutput extends SimulationLinker implements IOutput {
         }
 
         // Write NetCDF coords (for instance species, stage, etc.)
-        this.write_nc_coords();
+        this.write_nc_coords(expectedHtzOutputnc);
 
     }
 
-    private void write_nc_coords() {
-        // // Writes variable trait (trait names) and species (species names)
-        // ArrayInt arrSpecies = new ArrayInt(new int[] { this.getNSpecies() }, false);
-        // Index index = arrSpecies.getIndex();
+    private void write_nc_coords(NetcdfFormatWriter fileWriter) {
 
-        // for (int i = 0; i < this.getNSpecies(); i++) {
-        // index.set(i);
-        // arrSpecies.set(index, i);
-        // }
+        if (this.numberOfClasses == 1) {
+            return;
+        }
 
-        // Variable varspec = this.nc.findVariable("species");
+        ArrayDouble.D1 arrClass = new ArrayDouble.D1(numberOfClasses - 1);
+        for (int i = 0; i < this.numberOfClasses; i++) {
+            arrClass.set(i, distrib.getThreshold(i));
+        }
 
-        // try {
-        // nc.write(varspec, arrSpecies);
-        // } catch (IOException | InvalidRangeException ex) {
-        // Logger.getLogger(AbstractOutput_Netcdf.class.getName()).log(Level.SEVERE,
-        // null, ex);
-        // }
+        Variable classVar = fileWriter.findVariable("class_thresholds");
+        try {
+            fileWriter.write(classVar, new int[] { 0 }, arrClass);
+        } catch (IOException | InvalidRangeException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+
     }
 
     @Override
