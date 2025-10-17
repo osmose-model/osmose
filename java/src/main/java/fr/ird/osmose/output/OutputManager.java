@@ -821,7 +821,7 @@ public class OutputManager extends SimulationLinker {
                 }
             }
 
-            boolean observedHeterozygosityByAge = getConfiguration().getBoolean("output.observed.heterozygosity.enabled");
+            boolean observedHeterozygosityByAge = getConfiguration().getBoolean("output.observed.heterozygosity.byage.enabled");
             if(observedHeterozygosityByAge) {
                 for(int ispecies = 0; ispecies < getConfiguration().getNSpecies(); ispecies++) {
                     outputs.add(new ObservedHtz(rank, getConfiguration().getSpecies(ispecies), ageDistrib));
