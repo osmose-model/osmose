@@ -389,7 +389,7 @@ public class AlleleFrequencyOutput extends SimulationLinker implements IOutput {
         }
 
         ArrayDouble.D1 arrClass = new ArrayDouble.D1(numberOfClasses - 1);
-        for (int i = 0; i < this.numberOfClasses; i++) {
+        for (int i = 0; i < this.numberOfClasses - 1; i++) {
             arrClass.set(i, distrib.getThreshold(i));
         }
 
