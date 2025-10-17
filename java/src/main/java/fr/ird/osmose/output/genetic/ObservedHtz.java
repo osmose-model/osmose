@@ -299,6 +299,11 @@ public class ObservedHtz extends SimulationLinker implements IOutput {
 
         filename.append(getConfiguration().getString("output.file.prefix"));
         filename.append("_observedHtz");
+
+        if (this.numberOfClasses > 1) {
+            filename.append("DistribBy" + distrib.getType());
+        }
+
         filename.append("-");
         filename.append(species.getName());
         filename.append("Simu");

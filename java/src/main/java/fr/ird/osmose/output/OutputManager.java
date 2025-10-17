@@ -821,6 +821,23 @@ public class OutputManager extends SimulationLinker {
                 }
             }
 
+            boolean observedHeterozygosityByAge = getConfiguration().getBoolean("output.observed.heterozygosity.enabled");
+            if(observedHeterozygosityByAge) {
+                for(int ispecies = 0; ispecies < getConfiguration().getNSpecies(); ispecies++) {
+                    outputs.add(new ObservedHtz(rank, getConfiguration().getSpecies(ispecies), ageDistrib));
+                }
+            }
+
+            boolean alleleFrequencyOutputByAge = getConfiguration().getBoolean("output.allele.frequency.byage.enabled");
+            boolean expectedHeterozygosityByAge = getConfiguration()
+                    .getBoolean("output.expected.heterozygosity.byage.enabled");
+            if (alleleFrequencyOutputByAge || expectedHeterozygosityByAge) {
+                for (int ispecies = 0; ispecies < getConfiguration().getNSpecies(); ispecies++) {
+                    outputs.add(new AlleleFrequencyOutput(rank, getConfiguration().getSpecies(ispecies),
+                            expectedHeterozygosity, alleleFrequencyOutput, ageDistrib));
+                }
+            }
+
         }
 
         /*

@@ -444,6 +444,11 @@ public class AlleleFrequencyOutput extends SimulationLinker implements IOutput {
 
         filename.append(getConfiguration().getString("output.file.prefix"));
         filename.append("_alleleFrequency");
+
+        if (this.numberOfClasses > 1) {
+            filename.append("DistribBy" + distrib.getType());
+        }
+
         filename.append("-");
         filename.append(species.getName());
         filename.append("Simu");
@@ -462,6 +467,11 @@ public class AlleleFrequencyOutput extends SimulationLinker implements IOutput {
 
         filename.append(getConfiguration().getString("output.file.prefix"));
         filename.append("_expectedHtz");
+
+        if (this.numberOfClasses > 1) {
+            filename.append("DistribBy" + distrib.getType());
+        }
+
         filename.append("-");
         filename.append(species.getName());
         filename.append("Simu");
