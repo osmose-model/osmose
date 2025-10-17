@@ -7,9 +7,11 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import fr.ird.osmose.IMarineOrganism;
 import fr.ird.osmose.School;
 import fr.ird.osmose.Species;
 import fr.ird.osmose.output.IOutput;
+import fr.ird.osmose.output.distribution.OutputDistribution;
 import fr.ird.osmose.output.netcdf.AbstractOutput_Netcdf;
 import fr.ird.osmose.output.netcdf.DietOutput_Netcdf;
 import fr.ird.osmose.process.genet.Genotype;
@@ -49,16 +51,30 @@ public class ObservedHtz extends SimulationLinker implements IOutput {
     private NetcdfFormatWriter.Builder observedHtzOutputbNc;
 
     private Dimension timeDim;
+    private int numberOfClasses;
 
     private int record_index;
     private int recordFrequency;
 
-    private double number_of_occurrences[][];
-    private double normalization[][];
+    private double number_of_occurrences[][][];
+    private double normalization[][][];
+
+    private OutputDistribution distrib;
+
+    private interface ClassMethod {
+        int getClassIndex(IMarineOrganism school);
+    }
+
+    private ClassMethod classMethod;
 
     public ObservedHtz(int rank, Species species) {
+        this(rank, species, null);
+    }
+
+    public ObservedHtz(int rank, Species species, OutputDistribution distrib) {
         super(rank);
         this.species = species;
+        this.distrib = distrib;
     }
 
     @Override
@@ -68,17 +84,23 @@ public class ObservedHtz extends SimulationLinker implements IOutput {
 
     @Override
     public void reset() {
-        number_of_occurrences = new double[ntrait][nlocus_max];
-        normalization = new double[ntrait][nlocus_max];
+        number_of_occurrences = new double[numberOfClasses][ntrait][nlocus_max];
+        normalization = new double[numberOfClasses][ntrait][nlocus_max];
+    }
+
+    int getClassIndex(IMarineOrganism school) {
+        return distrib.getClass(school);
     }
 
     @Override
     public void update() {
-        // Loop over all the schools
+
         for(School school : getSchoolSet().getSchools(species)) {
 
             // genotype of the school
             Genotype genotype = school.getGenotype();
+
+            int classIndex = classMethod.getClassIndex(school);
 
             // Loop over all the traits
             for (int itrait = 0; itrait < ntrait; itrait++) {
@@ -91,10 +113,10 @@ public class ObservedHtz extends SimulationLinker implements IOutput {
                     double value1 = genotype.getLocus(itrait, ilocus).getValue(1);
 
                     if (value0 != value1) {
-                        this.number_of_occurrences[itrait][ilocus] += school.getAbundance();
+                        this.number_of_occurrences[classIndex][itrait][ilocus] += school.getAbundance();
                     }
 
-                    normalization[itrait][ilocus] += school.getAbundance();
+                    normalization[classIndex][itrait][ilocus] += school.getAbundance();
 
                 }
             }
@@ -105,7 +127,7 @@ public class ObservedHtz extends SimulationLinker implements IOutput {
     public void write(float time) {
 
         ArrayDouble.D1 arrTime = new ArrayDouble.D1(1);
-        ArrayFloat.D3 arrOut = new ArrayFloat.D3(1, this.ntrait, this.nlocus_max);
+        ArrayFloat.D4 arrOut = new ArrayFloat.D4(1, this.numberOfClasses, this.ntrait, this.nlocus_max);
 
         arrTime.set(0, time);
         try {
@@ -115,16 +137,19 @@ public class ObservedHtz extends SimulationLinker implements IOutput {
             Logger.getLogger(DietOutput_Netcdf.class.getName()).log(Level.SEVERE, null, ex);
         }
 
-        for (int itrait = 0; itrait < ntrait; itrait++) {
-            for (int ilocus = 0; ilocus < nlocus[itrait]; ilocus++) {
-                arrOut.set(0, itrait, ilocus,
-                        (float) ((double) (number_of_occurrences[itrait][ilocus]) / normalization[itrait][ilocus]));
-            } // end of loop of resources as preys
-        } // end of predator stage loop
+        for (int iclass = 0; iclass < this.numberOfClasses; iclass++) {
+            for (int itrait = 0; itrait < ntrait; itrait++) {
+                for (int ilocus = 0; ilocus < nlocus[itrait]; ilocus++) {
+                    arrOut.set(0, iclass, itrait, ilocus,
+                            (float) ((double) (number_of_occurrences[iclass][itrait][ilocus])
+                                    / normalization[iclass][itrait][ilocus]));
+                } // end of loop of resources as preys
+            } // end of predator stage loop
+        }
 
         try {
             Variable outvar = observedHtzOutputnc.findVariable(this.getObservedHtzVarName());
-            observedHtzOutputnc.write(outvar, new int[] { this.record_index, 0, 0 }, arrOut);
+            observedHtzOutputnc.write(outvar, new int[] { this.record_index, 0, 0, 0}, arrOut);
         } catch (IOException | InvalidRangeException ex) {
             Logger.getLogger(DietOutput_Netcdf.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -142,6 +167,15 @@ public class ObservedHtz extends SimulationLinker implements IOutput {
     public void init() {
 
         recordFrequency = getConfiguration().getInt("output.recordfrequency.ndt");
+
+        // If distribution is null, then we use the update method without classes.
+        if(distrib == null) {
+            classMethod = (school) -> {return 0;};
+            this.numberOfClasses = 1;
+        } else {
+            classMethod = (school) -> this.getClassIndex(school);
+            this.numberOfClasses = distrib.getNClass();
+        }
 
         nvalue_max = Integer.MIN_VALUE;
         nlocus_max = Integer.MIN_VALUE;
@@ -184,9 +218,20 @@ public class ObservedHtz extends SimulationLinker implements IOutput {
 
         Dimension traitDim = observedHtzOutputbNc.addDimension("trait", ntrait);
         Dimension locusDim = observedHtzOutputbNc.addDimension("locus", nlocus_max);
+        Dimension classDim = observedHtzOutputbNc.addDimension("class", this.numberOfClasses);
+
+
+        if(this.numberOfClasses > 1) {
+            Dimension minimumClassDim = observedHtzOutputbNc.addDimension("class_thresholds", this.numberOfClasses - 1);
+            List<Dimension> minimumClassDimList = new ArrayList<>();
+            minimumClassDimList.add(minimumClassDim);
+            Variable.Builder<?> minimumClassDimVariable = observedHtzOutputbNc.addVariable("class_thresholds", DataType.FLOAT, minimumClassDimList);
+        }
+
 
         List<Dimension> outDims = new ArrayList<>();
         outDims.add(timeDim);
+        outDims.add(classDim);
         outDims.add(traitDim);
         outDims.add(locusDim);
 
@@ -209,23 +254,24 @@ public class ObservedHtz extends SimulationLinker implements IOutput {
     }
 
     private void write_nc_coords() {
-        // // Writes variable trait (trait names) and species (species names)
-        // ArrayInt arrSpecies = new ArrayInt(new int[] { this.getNSpecies() }, false);
-        // Index index = arrSpecies.getIndex();
 
-        // for (int i = 0; i < this.getNSpecies(); i++) {
-        // index.set(i);
-        // arrSpecies.set(index, i);
-        // }
+        if (this.numberOfClasses == 1) {
+            return;
+        }
 
-        // Variable varspec = this.nc.findVariable("species");
+        ArrayDouble.D1 arrClass = new ArrayDouble.D1(numberOfClasses - 1);
+        for (int i = 0; i < this.numberOfClasses; i++) {
+            arrClass.set(i, distrib.getThreshold(i));
+        }
 
-        // try {
-        // nc.write(varspec, arrSpecies);
-        // } catch (IOException | InvalidRangeException ex) {
-        // Logger.getLogger(AbstractOutput_Netcdf.class.getName()).log(Level.SEVERE,
-        // null, ex);
-        // }
+        Variable classVar = observedHtzOutputnc.findVariable("class_thresholds");
+        try {
+            observedHtzOutputnc.write(classVar, new int[] { 0 }, arrClass);
+        } catch (IOException | InvalidRangeException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+
     }
 
     @Override
