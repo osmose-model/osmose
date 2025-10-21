@@ -41,6 +41,7 @@
 package fr.ird.osmose.process;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import fr.ird.osmose.School;
@@ -167,8 +168,8 @@ public class ReproductionProcess extends AbstractProcess {
         if (getConfiguration().isBioenEnabled()) {
           //bioenSeason();
         }
-        
-        
+
+
         cpt = 0;
         for (int i : getConfiguration().getFocalIndex()) {
             float sum = 0;
@@ -181,13 +182,13 @@ public class ReproductionProcess extends AbstractProcess {
                 } else {
                     mode = "oviparity"; // default
                 }
-                
+
                 if (!getConfiguration().isNull("species.sexratio.sp" + i)) {
                     sexRatio[cpt] = getConfiguration().getDouble("species.sexratio.sp" + i);
                 } else {
                     sexRatio[cpt] = 0.5; // default
                 }
-                
+
                 modes[cpt] = mode;
                 String key = (mode.equals("oviparity")) ? "relativefecundity" : "absolutefecundity";
 
@@ -254,19 +255,40 @@ public class ReproductionProcess extends AbstractProcess {
                 }
                 warning("Did not find parameter population.seeding.year.max. Osmose set it to "
                         + ((float) yearMaxSeeding / getConfiguration().getNStepYear())
-                        + " years, the lifespan of the longest-lived species.");        
+                        + " years, the lifespan of the longest-lived species.");
             }
         }
 
         if (this.getConfiguration().isGeneticEnabled()) {
             dateGenoTransmission = (int) getConfiguration().getDouble("population.genotype.transmission.year.start")
                     * getConfiguration().getNStepYear();
-            if (dateGenoTransmission < this.getYearSeading()) {
+
+
+            // by default, no constrain on the date of transmission
+            boolean contrainDateTransmission = false;
+
+            // list of coding traits in Osmose (to be updated eventually)
+            List<String> codingTraitsList = new ArrayList<>(Arrays.asList("m0", "m1", "imax", "r"));
+
+            // Loop over all the traits defined in Osmose
+            for(int i = 0; i < this.getSimulation().getNEvolvingTraits(); i++) {
+                String traitName = this.getSimulation().getEvolvingTrait(i).getName().toLowerCase();
+                boolean isCodingTrait = false;
+                for(String codingTrait : codingTraitsList) {
+                    // if the trait name matches one of the coding name
+                    if(codingTrait.compareTo(traitName) == 0) {
+                        isCodingTrait = true;
+                        break;
+                    }
+                }
+                contrainDateTransmission = contrainDateTransmission || isCodingTrait;
+            }
+
+            if (contrainDateTransmission && (dateGenoTransmission < this.getYearSeading())) {
                 error("The 'population.genotype.transmission.year.start' parameter must be greater/equal than the 'population.seeding.year.max' one",
                         new Exception());
             }
         }
-
     }
 
     @Override
@@ -492,11 +514,11 @@ public class ReproductionProcess extends AbstractProcess {
         } else {
             iStep = getSimulation().getIndexTimeYear();
         }
-        
+
         if (getConfiguration().isBioenEnabled()) {
           //return seasonSpawningBioen[iSpec][iStep];
         }
-        
+
         return seasonSpawning[iSpec][iStep];
     }
 
