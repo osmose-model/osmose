@@ -307,6 +307,15 @@ public class AlleleFrequencyOutput extends SimulationLinker implements IOutput {
         Dimension alleleDim = alleleFrequencyOutputbNc.addDimension("allele", nvalue_max);
         Dimension classDim = alleleFrequencyOutputbNc.addDimension("class", numberOfClasses);
 
+        if (this.numberOfClasses > 1) {
+            Dimension minimumClassDim = alleleFrequencyOutputbNc.addDimension("class_thresholds", this.numberOfClasses - 1);
+            List<Dimension> minimumClassDimList = new ArrayList<>();
+            minimumClassDimList.add(minimumClassDim);
+            Variable.Builder<?> minimumClassDimVariable = alleleFrequencyOutputbNc.addVariable("class_thresholds",
+                    DataType.FLOAT, minimumClassDimList);
+        }
+
+
         List<Dimension> outDims = new ArrayList<>();
         outDims.add(timeDim);
         outDims.add(classDim);
@@ -357,6 +366,15 @@ public class AlleleFrequencyOutput extends SimulationLinker implements IOutput {
         Dimension traitDim = expectedHtzOutputbNc.addDimension("trait", ntrait);
         Dimension locusDim = expectedHtzOutputbNc.addDimension("locus", nlocus_max);
         Dimension classDim = expectedHtzOutputbNc.addDimension("class", numberOfClasses);
+
+        if (this.numberOfClasses > 1) {
+            Dimension minimumClassDim = expectedHtzOutputbNc.addDimension("class_thresholds",
+                    this.numberOfClasses - 1);
+            List<Dimension> minimumClassDimList = new ArrayList<>();
+            minimumClassDimList.add(minimumClassDim);
+            Variable.Builder<?> minimumClassDimVariable = expectedHtzOutputbNc.addVariable("class_thresholds",
+                    DataType.FLOAT, minimumClassDimList);
+        }
 
         List<Dimension> outDims = new ArrayList<>();
         outDims.add(timeDim);
