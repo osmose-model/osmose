@@ -194,7 +194,7 @@ public class Simulation extends OsmoseLinker {
                 NetcdfFile nc = NetcdfDatasets.openDataset(ncfile);
                 Attribute ncAttribute = nc.findGlobalAttribute("step");
                 if (ncAttribute != null) {
-                    i_step_simu = Integer.valueOf(ncAttribute.getStringValue()) + 1;
+                    init_step_simu = Integer.valueOf(ncAttribute.getStringValue()) + 1;
                     info("Restarting simulation from year {0} step {1}",
                             new Object[] { this.getYear(), this.getIndexTimeYear() });
                 } else {
