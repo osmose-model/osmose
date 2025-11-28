@@ -276,8 +276,9 @@ public class Trait extends SimulationLinker {
         }
 
         NetcdfFile nc;
+        String key = "simulation.restart.file";
 
-        String plainFilename = getConfiguration().getFile("simulation.restart.file");
+        String plainFilename = getConfiguration().getFile(key);
         String rankedFilename = plainFilename + "." + getRank();
         boolean plainFile = false, rankedFile = false;
         if (new File(plainFilename).exists()) {
