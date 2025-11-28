@@ -169,6 +169,7 @@ public class Trait extends SimulationLinker {
             cpt++;
         }
 
+        // If restart is enabled, recover the diversity from restart file
         if(getConfiguration().isRestart()) {
             this.restartDiversity();
             return;
@@ -271,11 +272,7 @@ public class Trait extends SimulationLinker {
 
     public void restartDiversity() {
 
-        if(getConfiguration().isRestart()) {
-            return;
-        }
-
-        NetcdfFile nc;
+        NetcdfFile nc = null;
         String key = "simulation.restart.file";
 
         String plainFilename = getConfiguration().getFile(key);
@@ -303,12 +300,23 @@ public class Trait extends SimulationLinker {
         }
 
         // Recover the list of species indexes from the restart
-        ArrayInt.D1 species = (ArrayInt.D1) nc.findVariable("species").read();
+        ArrayInt.D1 species = null;
+        try {
+            species = (ArrayInt.D1) nc.findVariable("species").read();
+        } catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
 
         Variable genetVar = null;
         ArrayFloat.D4 genotype = null;   // data array containing the Netcdf genotype array
         genetVar = nc.findVariable("genotype");
-        genotype = (ArrayFloat.D4) genetVar.read();
+        try {
+            genotype = (ArrayFloat.D4) genetVar.read();
+        } catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
 
         // Recover the dimensions of the genotype variable
         int restart_nSchool = genetVar.getDimension(0).getLength();
@@ -320,51 +328,59 @@ public class Trait extends SimulationLinker {
 
         //  genotype.set(s, iTrait, iLoci, 0, (float) gen.getLocus(iTrait, iLoci).getValue(0));
 
-        // School index
-        int s = 0;
-
-        diversity = new double[nSpecies][][];
-
         // Initialize the list of biodiversity values for each species and locus
-        List<List<List<Double>>> values = new ArrayList<>(nSpecies);
+        // Create the list by species
+        List<List<List<Double>>> values = new ArrayList<>();
         for(int ispec = 0; ispec < nSpecies; ispec++) {
+
+            // Get the number of locus for the species
             int nLocus = this.nLocus[ispec];
-            values.add(new ArrayList<>(nLocus));
+            // Initialize the list of locus for the species
+            List<List<Double>> list_locus = new ArrayList<>();
+            for(int i  = 0; i < nLocus; i++) {
+                // For each locus, initialize the list of values
+                List<Double> list_values = new ArrayList<>();
+                list_locus.add(list_values); // Initializes the list of values for the locus
+            }
+            values.add(list_locus);  // Initializes the list of locus for the species
         }
 
         // Loop over all the saved variables in restart (one value per school)
         for (int ischool = 0; ischool < restart_nSchool; ischool++) {
             int speciesIndex = species.get(ischool);
-
             // Loop over all the locus for the trait and the species index
             for (int locus = 0; locus < this.nLocus[speciesIndex]; locus++) {
                 for (int k = 0; k < 2; k++) {
                     double value = genotype.get(ischool, traitIndex, locus, k);
-                    if (values.get(speciesIndex).get(locus).contains(value)) {
-                        continue;
-                    } else {
+                    if (!values.get(speciesIndex).get(locus).contains(value)) {
                         values.get(speciesIndex).get(locus).add(value);
                     }
                 }
             }
         }
 
+        diversity = new double[nSpecies][][];
 
         // Initialize the diversity array for the trait
-        for(int indexSpecies = 0; indexSpecies < getNSpecies(); s++) {
-            int speciesIndex = species.get(s);
-            diversity[s] = new double[nLocus[speciesIndex]][];
-            int nLocus = this.nLocus[speciesIndex];
-            for(int iloc = 0; iloc < nLocus; iloc++) {
-                List<Double> temp_values = values.get(indexSpecies).get(iloc);
-                temp_values.sort(Double::compareTo);
-                int nVal = temp_values.size();
-                diversity[s][iloc] = new double[nVal];
-                for(int k = 0; k < nVal; k++) {
-                    diversity[s][iloc][k] = temp_values.get(k);
+        for(int indexSpecies = 0; indexSpecies < getNSpecies(); indexSpecies++) {
+            int nLocus = this.nLocus[indexSpecies];
+            diversity[indexSpecies] = new double[nLocus][];
+            for(int locus = 0; locus < nLocus; locus++) {
+                int nValues = values.get(indexSpecies).get(locus).size();
+                diversity[indexSpecies][locus] = new double[nValues];
+                for(int k = 0; k < nValues; k++) {
+                    diversity[indexSpecies][locus][k] = values.get(indexSpecies).get(locus).get(k);
                 }
             }
         }
+
+        try {
+            nc.close();
+        } catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+
     }
 
 }
