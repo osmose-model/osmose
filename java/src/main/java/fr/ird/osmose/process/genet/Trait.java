@@ -169,6 +169,12 @@ public class Trait extends SimulationLinker {
             cpt++;
         }
 
+        if(getConfiguration().isRestart()) {
+            this.restartDiversity();
+            return;
+        }
+
+
         diversity = new double[nspecies][][];
 
         for (int ispec = 0; ispec < nspecies; ispec++) {
@@ -343,18 +349,21 @@ public class Trait extends SimulationLinker {
         }
 
 
-        // // Initialize the diversity array for the trait
-        // for(int indexSpecies = 0; indexSpecies < getNSpecies(); s++) {
-        //     int speciesIndex = species.get(s);
-        //     diversity[s] = new double[nLocus[speciesIndex]][];
-        //     int nLocus = this.nLocus[speciesIndex];
-        //     // for(int iloc = 0; iloc < nLocus; iloc++) {
-        //     //     diversity[s][iloc] = new double[nVal[speciesIndex]];
-        //     // }
-        // }
-
-
-
+        // Initialize the diversity array for the trait
+        for(int indexSpecies = 0; indexSpecies < getNSpecies(); s++) {
+            int speciesIndex = species.get(s);
+            diversity[s] = new double[nLocus[speciesIndex]][];
+            int nLocus = this.nLocus[speciesIndex];
+            for(int iloc = 0; iloc < nLocus; iloc++) {
+                List<Double> temp_values = values.get(indexSpecies).get(iloc);
+                temp_values.sort(Double::compareTo);
+                int nVal = temp_values.size();
+                diversity[s][iloc] = new double[nVal];
+                for(int k = 0; k < nVal; k++) {
+                    diversity[s][iloc][k] = temp_values.get(k);
+                }
+            }
+        }
     }
 
 }
