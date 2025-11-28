@@ -42,6 +42,17 @@
 package fr.ird.osmose.process.genet;
 
 import fr.ird.osmose.util.SimulationLinker;
+import ucar.ma2.ArrayFloat;
+import ucar.ma2.ArrayInt;
+import ucar.nc2.NetcdfFile;
+import ucar.nc2.Variable;
+import ucar.nc2.dataset.NetcdfDatasets;
+
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 
 /**
@@ -82,6 +93,8 @@ public class Trait extends SimulationLinker {
 
     private Random generator;
 
+    private int traitIndex;
+
     /**
      * Locus constructor.
      *
@@ -93,6 +106,7 @@ public class Trait extends SimulationLinker {
         super(rank);
         // Trait eyecolor = new Trait(rank, "eyecol")
         this.prefix = prefix;
+        this.traitIndex = traitIndex;
 
         if(getConfiguration().getBoolean("simulation.fixedseed.enabled", false)) {
             // Assumes a seed of dimension [trait][nSimu]
@@ -246,6 +260,101 @@ public class Trait extends SimulationLinker {
         double std = Math.sqrt(this.envVar[index]);
         double val = generator.nextGaussian() * std;
         return val;
+    }
+
+
+    public void restartDiversity() {
+
+        if(getConfiguration().isRestart()) {
+            return;
+        }
+
+        NetcdfFile nc;
+
+        String plainFilename = getConfiguration().getFile("simulation.restart.file");
+        String rankedFilename = plainFilename + "." + getRank();
+        boolean plainFile = false, rankedFile = false;
+        if (new File(plainFilename).exists()) {
+            plainFile = true;
+        }
+        if (new File(rankedFilename).exists()) {
+            rankedFile = true;
+        };
+
+        if (!plainFile && !rankedFile) {
+            error("Could not find any NetCDF initialization file (check parameter " + key + ").", new FileNotFoundException("Neither file " + plainFilename + " nor " + rankedFilename + " exist."));
+        } else if (plainFile && rankedFile) {
+            warning("Found two suitable NetCDF initialization files: " + plainFilename + " and " + rankedFilename + ". Osmose will use the latest " + rankedFilename);
+        }
+
+        String ncfile = rankedFile ? rankedFilename : plainFilename;
+        try {
+
+            nc = NetcdfDatasets.openDataset(ncfile);
+        } catch (IOException ex) {
+            error("Failed to open restart file " + ncfile, ex);
+        }
+
+        // Recover the list of species indexes from the restart
+        ArrayInt.D1 species = (ArrayInt.D1) nc.findVariable("species").read();
+
+        Variable genetVar = null;
+        ArrayFloat.D4 genotype = null;   // data array containing the Netcdf genotype array
+        genetVar = nc.findVariable("genotype");
+        genotype = (ArrayFloat.D4) genetVar.read();
+
+        // Recover the dimensions of the genotype variable
+        int restart_nSchool = genetVar.getDimension(0).getLength();
+        int restart_nTrait = genetVar.getDimension(1).getLength();
+        int restart_nMaxLoci = genetVar.getDimension(2).getLength();
+        int restart_nValue = genetVar.getDimension(3).getLength();
+
+        int nSpecies = getNSpecies();
+
+        //  genotype.set(s, iTrait, iLoci, 0, (float) gen.getLocus(iTrait, iLoci).getValue(0));
+
+        // School index
+        int s = 0;
+
+        diversity = new double[nSpecies][][];
+
+        // Initialize the list of biodiversity values for each species and locus
+        List<List<List<Double>>> values = new ArrayList<>(nSpecies);
+        for(int ispec = 0; ispec < nSpecies; ispec++) {
+            int nLocus = this.nLocus[ispec];
+            values.add(new ArrayList<>(nLocus));
+        }
+
+        // Loop over all the saved variables in restart (one value per school)
+        for (int ischool = 0; ischool < restart_nSchool; ischool++) {
+            int speciesIndex = species.get(ischool);
+
+            // Loop over all the locus for the trait and the species index
+            for (int locus = 0; locus < this.nLocus[speciesIndex]; locus++) {
+                for (int k = 0; k < 2; k++) {
+                    double value = genotype.get(ischool, traitIndex, locus, k);
+                    if (values.get(speciesIndex).get(locus).contains(value)) {
+                        continue;
+                    } else {
+                        values.get(speciesIndex).get(locus).add(value);
+                    }
+                }
+            }
+        }
+
+
+        // // Initialize the diversity array for the trait
+        // for(int indexSpecies = 0; indexSpecies < getNSpecies(); s++) {
+        //     int speciesIndex = species.get(s);
+        //     diversity[s] = new double[nLocus[speciesIndex]][];
+        //     int nLocus = this.nLocus[speciesIndex];
+        //     // for(int iloc = 0; iloc < nLocus; iloc++) {
+        //     //     diversity[s][iloc] = new double[nVal[speciesIndex]];
+        //     // }
+        // }
+
+
+
     }
 
 }
