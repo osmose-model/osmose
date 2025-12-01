@@ -63,10 +63,7 @@ public class GradientDistribution extends AbstractSpatialDistribution {
 
     private final int iSpecies;
     private final int iSpeciesFile;
-    private Random rd1;
     private MapSet maps;
-    private float[] maxProbaPresence;
-    private float randomWalkProba;
     private int rank;
     private int baseSearchRadius;
     private float randomWalkCoef; // alpha
