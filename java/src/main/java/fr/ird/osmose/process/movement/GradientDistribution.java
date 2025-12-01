@@ -68,7 +68,7 @@ public class GradientDistribution extends AbstractSpatialDistribution {
     private float randomWalkProba;
     private int rank;
     private int baseSearchRadius;
-    private double randomWalkCoef;
+    private float randomWalkCoef;  // alpha
     private static int radiusExpansions[] = new int[] { 0, 1, 2, 3, 5, 10 };
 
     /*
@@ -105,7 +105,9 @@ public class GradientDistribution extends AbstractSpatialDistribution {
         }
 
         baseSearchRadius = getConfiguration().getInt("movement.base.search.radius.sp" + iSpeciesFile);
-        randomWalkCoef = getConfiguration().getInt("movement.random.walk.coef.sp" + iSpeciesFile);
+
+        // To do: add a check for [0, 1] values
+        randomWalkCoef = getConfiguration().getFloat("movement.random.walk.coef.sp" + iSpeciesFile);
 
     }
 
@@ -126,19 +128,6 @@ public class GradientDistribution extends AbstractSpatialDistribution {
         int indexMap = maps.getIndexMap(school.getAgeDt(), iStepSimu);
         GridMap map = maps.getMap(indexMap);
 
-        /*
-         * Check whether the map has changed from previous cohort and time-step. For
-         * cohort zero and first time-step of the simulation we can assert sameMap =
-         * false;
-         */
-        boolean sameMap = false;
-        if (age > 0 && iStepSimu > 0) {
-            int previousIndexMap = maps.getIndexMap(age - 1, iStepSimu - 1);
-            if (indexMap == previousIndexMap) {
-                sameMap = true;
-            }
-        }
-
         // Normalize probabilities
         List<Cell> listOfCells = this.getAccessibleCells(school, map);
         List<Float> listOfProba = new ArrayList<>();
@@ -153,44 +142,11 @@ public class GradientDistribution extends AbstractSpatialDistribution {
             listOfProba.set(k, listOfProba.get(k) / probaTot);
         }
 
+        float N =  (float) listOfProba.size();
 
-        // Move the school
-        if (!sameMap || school.isUnlocated()) {
-            /*
-             * Random distribution in a map, either because the map has changed from
-             * previous cohort and time-step, or because the school was unlocated due to
-             * migration.
-             */
-            int maxIter = 10000;
-            int nIter = -1;
-            int indexCell;
-            int nCells = getGrid().get_nx() * getGrid().get_ny();
-            double proba;
-            do {
-                nIter++;
-                if (nIter >= maxIter) {
-                    StringBuilder bld = new StringBuilder();
-                    bld.append("The maximum number of iterations for map distribution has been reached\n");
-                    String outFmt = String.format("Check movements for species %s", school.getSpecies().getName());
-                    bld.append(outFmt);
-                    outFmt = String.format(" and for age %f\n", (float) age / getConfiguration().getNStepYear());
-                    bld.append(outFmt);
-                    error(bld.toString(), new Exception());
-                }
-                indexCell = (int) Math.round((nCells - 1) * rd1.nextDouble());
-                proba = map.getValue(getGrid().getCell(indexCell));
-            } while (proba <= 0.d || proba < rd2.nextDouble() * maxProbaPresence[indexMap] || Double.isNaN(proba)
-                    || getGrid().getCell(indexCell).isLand());
-            school.moveToCell(getGrid().getCell(indexCell));
-        } else {
-
-            double testMove = rd1.nextDouble(); // valeur entre 0 et 1
-            if (testMove >= randomWalkProba) {
-                // Random move in adjacent cells contained in the map.
-                List<Cell> accessibleCells = getAccessibleCells(school, map);
-                Cell destinationCell = randomDeal(accessibleCells, rd3);
-                school.moveToCell(destinationCell);
-            }
+        List<Float> listOfCombinedProba = new ArrayList<>();
+        for(int k = 0; k < listOfProba.size(); k++) {
+            listOfCombinedProba.add(randomWalkCoef * 1/N + (1 - randomWalkCoef) * listOfProba.get(k));
         }
     }
 
