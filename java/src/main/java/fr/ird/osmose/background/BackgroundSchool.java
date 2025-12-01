@@ -305,4 +305,10 @@ public class BackgroundSchool extends AbstractSchool {
         return false;
     }
 
+    @Override
+    public boolean isMature() {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'isMature'");
+    }
+
 }

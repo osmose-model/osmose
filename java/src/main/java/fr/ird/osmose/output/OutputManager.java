@@ -345,6 +345,16 @@ public class OutputManager extends SimulationLinker {
                     school -> school.getInstantaneousBiomass(), ageDistrib));
         }
 
+        if (getConfiguration().getBoolean("output.mature.biomass.byage.enabled")) {
+            outputs.add(new DistribOutput(rank, "Indicators", "matureBiomass", "Distribution of mature fish species biomass (tonne)",
+                    school -> school.isMature() ? school.getInstantaneousBiomass() : 0.d, ageDistrib));
+        }
+
+        if (getConfiguration().getBoolean("output.mature.abundance.byage.enabled")) {
+            outputs.add(new DistribOutput(rank, "Indicators", "matureAbundance", "Distribution of mature fish species abuncance (number)",
+                    school -> school.isMature() ? school.getInstantaneousAbundance() : 0.d, ageDistrib));
+        }
+
         // Abundance
         if (getConfiguration().getBoolean("output.abundance.enabled")) {
             outputs.add(
@@ -631,7 +641,7 @@ public class OutputManager extends SimulationLinker {
         // Debugging outputs
         if (getConfiguration().getBoolean("output.ssb.enabled", NO_WARNING)) {
             outputs.add(new SpeciesOutput(rank, null, "SSB", "Spawning Stock Biomass (tonne)",
-                    school -> school.isSexuallyMature() ? school.getInstantaneousBiomass() : 0.d));
+                    school -> school.isMature() ? school.getInstantaneousBiomass() : 0.d));
         }
 
         if (getConfiguration().getBoolean("output.nschool.enabled", NO_WARNING)) {
@@ -843,6 +853,23 @@ public class OutputManager extends SimulationLinker {
             if(observedHeterozygosity) {
                 for(int ispecies = 0; ispecies < getConfiguration().getNSpecies(); ispecies++) {
                     outputs.add(new ObservedHtz(rank, getConfiguration().getSpecies(ispecies)));
+                }
+            }
+
+            boolean observedHeterozygosityByAge = getConfiguration().getBoolean("output.observed.heterozygosity.byage.enabled");
+            if(observedHeterozygosityByAge) {
+                for(int ispecies = 0; ispecies < getConfiguration().getNSpecies(); ispecies++) {
+                    outputs.add(new ObservedHtz(rank, getConfiguration().getSpecies(ispecies), ageDistrib));
+                }
+            }
+
+            boolean alleleFrequencyOutputByAge = getConfiguration().getBoolean("output.allele.frequency.byage.enabled");
+            boolean expectedHeterozygosityByAge = getConfiguration()
+                    .getBoolean("output.expected.heterozygosity.byage.enabled");
+            if (alleleFrequencyOutputByAge || expectedHeterozygosityByAge) {
+                for (int ispecies = 0; ispecies < getConfiguration().getNSpecies(); ispecies++) {
+                    outputs.add(new AlleleFrequencyOutput(rank, getConfiguration().getSpecies(ispecies),
+                            expectedHeterozygosity, alleleFrequencyOutput, ageDistrib));
                 }
             }
 

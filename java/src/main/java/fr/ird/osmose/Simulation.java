@@ -48,6 +48,9 @@ import fr.ird.osmose.populator.PopulatingProcess;
 import fr.ird.osmose.process.genet.Trait;
 import fr.ird.osmose.resource.ResourceForcing;
 import fr.ird.osmose.util.OsmoseLinker;
+
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -165,13 +168,33 @@ public class Simulation extends OsmoseLinker {
 
         // Look for restart file if restart is enabled
         if(getConfiguration().isRestart()) {
-            String ncfile = getConfiguration().getFile("simulation.restart.file") + "." + rank;
+
+            String key = "simulation.restart.file";
+            String plainFilename = getConfiguration().getFile(key);
+            String rankedFilename = plainFilename + "." + getRank();
+            boolean plainFile = false, rankedFile = false;
+            if (new File(plainFilename).exists()) {
+                plainFile = true;
+            }
+            if (new File(rankedFilename).exists()) {
+                rankedFile = true;
+            }
+            if (!plainFile && !rankedFile) {
+                error("Could not find any NetCDF initialization file (check parameter " + key + ").",
+                        new FileNotFoundException(
+                                "Neither file " + plainFilename + " nor " + rankedFilename + " exist."));
+            } else if (plainFile && rankedFile) {
+                warning("Found two suitable NetCDF initialization files: " + plainFilename + " and " + rankedFilename
+                        + ". Osmose will use the latest " + rankedFilename);
+            }
+            String ncfile = rankedFile ? rankedFilename : plainFilename;
+
             init_step_simu = 0;
             try {
                 NetcdfFile nc = NetcdfDatasets.openDataset(ncfile);
                 Attribute ncAttribute = nc.findGlobalAttribute("step");
                 if (ncAttribute != null) {
-                    i_step_simu = Integer.valueOf(ncAttribute.getStringValue()) + 1;
+                    init_step_simu = Integer.valueOf(ncAttribute.getStringValue()) + 1;
                     info("Restarting simulation from year {0} step {1}",
                             new Object[] { this.getYear(), this.getIndexTimeYear() });
                 } else {
