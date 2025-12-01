@@ -74,24 +74,13 @@ public class GradientDistribution extends AbstractSpatialDistribution {
         this.iSpeciesFile = iSpeciesFile;
         this.iSpecies = iSpecies;
         this.rank = rank;
-        randomDraft = new WeightedRandomDraft<>(rank);
+        randomDraft = new WeightedRandomDraft<>(this.rank);
     }
 
     @Override
     public void init() {
 
         randomDraft.init();
-
-        boolean fixedSeed = false;
-        if (!getConfiguration().isNull("simulation.fixedseed.enabled")) {
-            fixedSeed = getConfiguration().getBoolean("simulation.fixedseed.enabled");
-        }
-        if (fixedSeed) {
-            rd1 = new Random((13L ^ iSpecies) * (rank + 1));
-            warning("Parameter 'simulation.fixedseed.enabled' is set to true. It means that two simulations with strictly identical initial school distribution will lead to same movement.");
-        } else {
-            rd1 = new Random();
-        }
 
         // List of probability maps
         maps = new MapSet(iSpeciesFile, iSpecies, "movement");
