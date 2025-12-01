@@ -71,6 +71,8 @@ public class MovementProcess extends AbstractProcess {
                 spatialDistribution[cpt] = new RandomDistribution(iSpecies, cpt, getRank());
             } else if (distributionMethod.equalsIgnoreCase("maps")) {
                 spatialDistribution[cpt] = new MapDistribution(iSpecies, cpt, getRank());
+            } else if (distributionMethod.equalsIgnoreCase("gradient")) {
+                spatialDistribution[cpt] = new GradientDistribution(iSpecies, cpt, getRank());
             } else {
                 throw new UnsupportedOperationException("Distribution method is either 'random' or 'maps'");
             }
