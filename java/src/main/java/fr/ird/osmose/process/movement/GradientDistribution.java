@@ -69,7 +69,7 @@ public class GradientDistribution extends AbstractSpatialDistribution {
     private float randomWalkProba;
     private int rank;
     private int baseSearchRadius;
-    private float randomWalkCoef;  // alpha
+    private float randomWalkCoef; // alpha
     private static int radiusExpansions[] = new int[] { 0, 1, 2, 3, 5, 10 };
 
     public GradientDistribution(int iSpeciesFile, int iSpecies, int rank) {
@@ -93,7 +93,7 @@ public class GradientDistribution extends AbstractSpatialDistribution {
         }
 
         // List of probability maps
-        maps = new MapSet(iSpeciesFile, iSpecies, "gradient.movement");
+        maps = new MapSet(iSpeciesFile, iSpecies, "movement");
         try {
             maps.init();
         } catch (IOException | InvalidRangeException ex) {
@@ -103,7 +103,7 @@ public class GradientDistribution extends AbstractSpatialDistribution {
         baseSearchRadius = getConfiguration().getInt("movement.base.search.radius.sp" + iSpeciesFile);
 
         randomWalkCoef = getConfiguration().getFloat("movement.random.walk.coef.sp" + iSpeciesFile);
-        if((this.randomWalkCoef > 1) || (this.randomWalkCoef < 0)) {
+        if ((this.randomWalkCoef > 1) || (this.randomWalkCoef < 0)) {
             error("The movement.random.walk.coef.sp" + iSpeciesFile + " parameter must be in [0, 1]", new Exception());
         }
 
@@ -111,7 +111,11 @@ public class GradientDistribution extends AbstractSpatialDistribution {
 
     @Override
     public void move(School school, int iStepSimu) {
-        gradientDistribution(school, iStepSimu);
+        if (!isOut(school, iStepSimu)) {
+            gradientDistribution(school, iStepSimu);
+        } else {
+            school.out();
+        }
     }
 
     private boolean isOut(School school, int iStepSimu) {
@@ -129,7 +133,7 @@ public class GradientDistribution extends AbstractSpatialDistribution {
         List<Float> listOfProba = new ArrayList<>();
 
         float probaTot = 0;
-        for (Cell cell: listOfCells) {
+        for (Cell cell : listOfCells) {
             listOfProba.add(map.getValue(cell));
             probaTot += map.getValue(cell);
         }
@@ -138,11 +142,11 @@ public class GradientDistribution extends AbstractSpatialDistribution {
             listOfProba.set(k, listOfProba.get(k) / probaTot);
         }
 
-        float N =  (float) listOfProba.size();
+        float N = (float) listOfProba.size();
 
         List<Float> listOfCombinedProba = new ArrayList<>();
-        for(int k = 0; k < listOfProba.size(); k++) {
-            listOfCombinedProba.add(randomWalkCoef * 1/N + (1 - randomWalkCoef) * listOfProba.get(k));
+        for (int k = 0; k < listOfProba.size(); k++) {
+            listOfCombinedProba.add(randomWalkCoef * 1 / N + (1 - randomWalkCoef) * listOfProba.get(k));
         }
 
         WeightedRandomDraft<Cell> randomDraft = new WeightedRandomDraft<>(rank);
@@ -165,7 +169,7 @@ public class GradientDistribution extends AbstractSpatialDistribution {
     private List<Cell> getAccessibleCells(School school, GridMap map) {
 
         // If the school is not located yet, move it anywhere on the grid
-        if(school.isUnlocated()) {
+        if (school.isUnlocated()) {
             return this.getGrid().getOceanCells();
         }
 
@@ -209,32 +213,6 @@ public class GradientDistribution extends AbstractSpatialDistribution {
         }
 
         return accessibleCells;
-    }
 
-    /**
-     * Randomly choose a cell among the given list of cells.
-     *
-     * @param cells,
-     *            a list of cells
-     * @param rd,
-     *            a random generator
-     * @return a cell from the list of cells.
-     */
-    private Cell randomDeal(List<Cell> cells, Random rd) {
-        int index = (int) Math.round((cells.size() - 1) * rd.nextDouble());
-        return cells.get(index);
-    }
-
-    private float computeMaxProbaPresence(int numMap) {
-        float tempMaxProbaPresence = 0;
-        GridMap map = maps.getMap(numMap);
-        if (null != map) {
-            for (int j = 0; j < getGrid().get_ny(); j++) {
-                for (int i = 0; i < getGrid().get_nx(); i++) {
-                    tempMaxProbaPresence = Math.max(tempMaxProbaPresence, map.getValue(i, j));
-                }
-            }
-        }
-        return tempMaxProbaPresence;
     }
 }
