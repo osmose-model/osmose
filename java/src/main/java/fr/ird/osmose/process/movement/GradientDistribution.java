@@ -71,15 +71,19 @@ public class GradientDistribution extends AbstractSpatialDistribution {
     private int baseSearchRadius;
     private float randomWalkCoef; // alpha
     private static int radiusExpansions[] = new int[] { 0, 1, 2, 3, 5, 10 };
+    private final WeightedRandomDraft<Cell> randomDraft;
 
     public GradientDistribution(int iSpeciesFile, int iSpecies, int rank) {
         this.iSpeciesFile = iSpeciesFile;
         this.iSpecies = iSpecies;
         this.rank = rank;
+        randomDraft = new WeightedRandomDraft<>(rank);
     }
 
     @Override
     public void init() {
+
+        randomDraft.init();
 
         boolean fixedSeed = false;
         if (!getConfiguration().isNull("simulation.fixedseed.enabled")) {
@@ -149,7 +153,7 @@ public class GradientDistribution extends AbstractSpatialDistribution {
             listOfCombinedProba.add(randomWalkCoef * 1 / N + (1 - randomWalkCoef) * listOfProba.get(k));
         }
 
-        WeightedRandomDraft<Cell> randomDraft = new WeightedRandomDraft<>(rank);
+        randomDraft.reset();
         for (int k = 0; k < listOfProba.size(); k++) {
             randomDraft.add(listOfCombinedProba.get(k), listOfCells.get(k));
         }
@@ -168,9 +172,9 @@ public class GradientDistribution extends AbstractSpatialDistribution {
      */
     private List<Cell> getAccessibleCells(School school, GridMap map) {
 
-        // If the school is not located yet, move it anywhere on the grid
+        // If the school is not located yet, move it anywhere on the grid where P > 0
         if (school.isUnlocated()) {
-            return this.getGrid().getOceanCells();
+            return this.listGlobalCells(map);
         }
 
         Cell cell = school.getCell();
@@ -201,18 +205,32 @@ public class GradientDistribution extends AbstractSpatialDistribution {
 
             // If the number of accessible cells > 0
             // then we leave the loop
-            if (accessibleCells.size() > 0) {
+            if (accessibleCells.isEmpty()) {
                 break;
             }
 
         } // end of loop on radius iterator
 
-        // If no cells is available, then all cells are accessible
+        // If no cells is available, then all where P>0 are accessible
         if (accessibleCells.isEmpty()) {
-            accessibleCells = this.getGrid().getOceanCells();
+            return this.listGlobalCells(map);
         }
 
         return accessibleCells;
 
     }
+
+    List<Cell> listGlobalCells(GridMap map) {
+
+        List<Cell> accessibleCells = new ArrayList<>();
+        for (Cell oceanCell : getGrid().getOceanCells()) {
+            if ((map.getValue(oceanCell) > 0) && (!Double.isNaN(map.getValue(oceanCell)))) {
+                accessibleCells.add(oceanCell);
+            }
+        }
+
+        return accessibleCells;
+
+    }
+
 }
