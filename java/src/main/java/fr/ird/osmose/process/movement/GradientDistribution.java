@@ -44,6 +44,7 @@ package fr.ird.osmose.process.movement;
 import fr.ird.osmose.Cell;
 import fr.ird.osmose.util.GridMap;
 import fr.ird.osmose.School;
+import fr.ird.osmose.process.bioen.WeightedRandomDraft;
 import fr.ird.osmose.util.MapSet;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -70,11 +71,6 @@ public class GradientDistribution extends AbstractSpatialDistribution {
     private int baseSearchRadius;
     private float randomWalkCoef;  // alpha
     private static int radiusExpansions[] = new int[] { 0, 1, 2, 3, 5, 10 };
-
-    /*
-     * Ranges of movement in cell during one Osmose time step
-     */
-    private int range;
 
     public GradientDistribution(int iSpeciesFile, int iSpecies, int rank) {
         this.iSpeciesFile = iSpeciesFile;
@@ -106,8 +102,10 @@ public class GradientDistribution extends AbstractSpatialDistribution {
 
         baseSearchRadius = getConfiguration().getInt("movement.base.search.radius.sp" + iSpeciesFile);
 
-        // To do: add a check for [0, 1] values
         randomWalkCoef = getConfiguration().getFloat("movement.random.walk.coef.sp" + iSpeciesFile);
+        if((this.randomWalkCoef > 1) || (this.randomWalkCoef < 0)) {
+            error("The movement.random.walk.coef.sp" + iSpeciesFile + " parameter must be in [0, 1]", new Exception());
+        }
 
     }
 
@@ -116,13 +114,11 @@ public class GradientDistribution extends AbstractSpatialDistribution {
         gradientDistribution(school, iStepSimu);
     }
 
-    // private boolean isOut(School school, int iStepSimu) {
-    // return (null == maps.getMap(school, iStepSimu));
-    // }
+    private boolean isOut(School school, int iStepSimu) {
+        return (null == maps.getMap(school, iStepSimu));
+    }
 
     private void gradientDistribution(School school, int iStepSimu) {
-
-        int age = school.getAgeDt();
 
         // Get current map and max probability of presence
         int indexMap = maps.getIndexMap(school.getAgeDt(), iStepSimu);
@@ -148,6 +144,15 @@ public class GradientDistribution extends AbstractSpatialDistribution {
         for(int k = 0; k < listOfProba.size(); k++) {
             listOfCombinedProba.add(randomWalkCoef * 1/N + (1 - randomWalkCoef) * listOfProba.get(k));
         }
+
+        WeightedRandomDraft<Cell> randomDraft = new WeightedRandomDraft<>(rank);
+        for (int k = 0; k < listOfProba.size(); k++) {
+            randomDraft.add(listOfCombinedProba.get(k), listOfCells.get(k));
+        }
+
+        Cell destinationCell = randomDraft.next();
+        school.moveToCell(destinationCell);
+
     }
 
     /**
@@ -158,6 +163,11 @@ public class GradientDistribution extends AbstractSpatialDistribution {
      * @return
      */
     private List<Cell> getAccessibleCells(School school, GridMap map) {
+
+        // If the school is not located yet, move it anywhere on the grid
+        if(school.isUnlocated()) {
+            return this.getGrid().getOceanCells();
+        }
 
         Cell cell = school.getCell();
 
@@ -193,8 +203,9 @@ public class GradientDistribution extends AbstractSpatialDistribution {
 
         } // end of loop on radius iterator
 
+        // If no cells is available, then all cells are accessible
         if (accessibleCells.isEmpty()) {
-            accessibleCells.add(cell);
+            accessibleCells = this.getGrid().getOceanCells();
         }
 
         return accessibleCells;

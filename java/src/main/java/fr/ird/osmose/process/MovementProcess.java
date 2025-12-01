@@ -43,6 +43,7 @@ package fr.ird.osmose.process;
 
 import fr.ird.osmose.School;
 import fr.ird.osmose.process.movement.AbstractSpatialDistribution;
+import fr.ird.osmose.process.movement.GradientDistribution;
 import fr.ird.osmose.process.movement.MapDistribution;
 import fr.ird.osmose.process.movement.RandomDistribution;
 
