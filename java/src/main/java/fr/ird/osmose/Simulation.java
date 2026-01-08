@@ -126,6 +126,8 @@ public class Simulation extends OsmoseLinker {
     private List<Trait> evolvingTrait;
     private int nEvolvingTrait;
 
+    private double simulationSSB[];
+
     //////////////
     // Constructor
     //////////////
@@ -159,6 +161,8 @@ public class Simulation extends OsmoseLinker {
 
         // Create a new school set, empty at the moment
         schoolSet = new SchoolSet();
+
+        simulationSSB = new double[getConfiguration().getNSpecies()];
 
         // barrier.n: init a set of background schools (used to save fisheries and
         // discards)
@@ -444,6 +448,26 @@ public class Simulation extends OsmoseLinker {
 
     public int getRank() {
         return this.rank;
+    }
+
+    /** Increment the total spawning biomass */
+    public void incrementSSB(School school) {
+        if(school.isMature()) {
+            simulationSSB[school.getSpeciesIndex()] += school.getInstantaneousBiomass();
+        }
+    }
+
+    /** Resets the total SSB biomass */
+    public void resetSSB() {
+        for(int s = 0; s < getConfiguration().getNSpecies(); s++) {
+            simulationSSB[s] = 0;
+        }
+    }
+
+    /** Removes SSB biomass */
+    public void removeSSB(IAggregation school, double nDead) {
+        simulationSSB[school.getSpeciesIndex()] -= nDead * school.getWeight();
+        simulationSSB[school.getSpeciesIndex()] = Math.max(simulationSSB[school.getSpeciesIndex()], 0);
     }
 
 }
