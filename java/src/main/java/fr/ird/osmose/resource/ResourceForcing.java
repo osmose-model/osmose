@@ -175,8 +175,8 @@ public class ResourceForcing extends OsmoseLinker {
         } else if (resourceForcingMode == ResourceForcingMode.NETCDF_BIOMASS) {
             updateInterface = (fileindex -> updateNetcdf(fileindex));
             biomassInterface = (cell -> getBiomassNetcdf(cell));
-        } else if (resourceForcingMode == ResourceForcingMode.NETCDF_BIOMASS) {
-            updateInterface = (fileindex -> updateNetcdf(fileindex));
+        } else if (resourceForcingMode == ResourceForcingMode.COMBINED_TS_NETCDF_BIOMASS) {
+            updateInterface = (fileindex -> updateCombined(fileindex));
             biomassInterface = (cell -> getBiomassCombined(cell));
         }
 
