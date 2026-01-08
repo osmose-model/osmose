@@ -84,7 +84,7 @@ public class ResourceForcing extends OsmoseLinker {
      * 'species.biomass.sp#' provides the total biomass of a given resource
      * group in the system in combination with species.biomass.nsteps.year.sp#.
      */
-    private double tBiomass;
+    private double currentBiomass;
 
     /**
      * Multiplier of the resource biomass. Parameter 'species.multiplier.sp#' for
@@ -189,9 +189,8 @@ public class ResourceForcing extends OsmoseLinker {
             // If we have uniform biomass, two cases: constant biomass
             if (!getConfiguration().isNull("species.constant.biomass.sp" + fileindex)) {
 
-                double constantuBiomass = getConfiguration().getDouble("species.constant.biomass.sp" + fileindex)
-                        / getGrid().getNOceanCell();
-                constantuBiomass = multiplier * (constantuBiomass + offset);
+                double constantuBiomass = getConfiguration().getDouble("species.constant.biomass.sp" + fileindex);
+                constantuBiomass = multiplier * (constantuBiomass + offset) / getGrid().getNOceanCell();
                 for (int t = 0; t < getConfiguration().getNStep(); t++) {
                     uBiomass[t] = constantuBiomass;
                 }
@@ -233,7 +232,13 @@ public class ResourceForcing extends OsmoseLinker {
                             .valueOf(getConfiguration().getString(prefix + ".file.caching.sp" + fileindex).toUpperCase());
                 }
 
-                this.forcingFile = new ForcingFile(name, ncFile, ncPerYear, offset, this.multiplier, caching);
+                if (resourceForcingMode == ResourceForcingMode.COMBINED_TS_NETCDF_BIOMASS) {
+                    // if combined mode, then force offset to 0 and factor to 1
+                    // since it is applied to the uniform biomass
+                    this.forcingFile = new ForcingFile(name, ncFile, ncPerYear, 0, 1, caching);
+                } else {
+                    this.forcingFile = new ForcingFile(name, ncFile, ncPerYear, offset, this.multiplier, caching);
+                }
                 this.forcingFile.init();
 
             } else {
@@ -254,7 +259,7 @@ public class ResourceForcing extends OsmoseLinker {
 
     /** Updates the uniform biomass time series */
     public void updateUniform(int iStepSimu) {
-        tBiomass = uBiomass[iStepSimu];
+        currentBiomass = uBiomass[iStepSimu];
     }
 
     /**
@@ -272,7 +277,7 @@ public class ResourceForcing extends OsmoseLinker {
     */
     public void updateCombined(int iStepSimu) {
         this.forcingFile.update(iStepSimu);
-        tBiomass = uBiomass[iStepSimu];
+        currentBiomass = uBiomass[iStepSimu];
     }
 
     /** Get the biomass using a functional interface */
@@ -284,7 +289,7 @@ public class ResourceForcing extends OsmoseLinker {
      * Get the uniform biomass value
      */
     public double getBiomassUniform(Cell cell) {
-        return tBiomass;
+        return currentBiomass;
     }
 
     /**
@@ -298,7 +303,7 @@ public class ResourceForcing extends OsmoseLinker {
      * Get the combined biomass value
     */
     public double getBiomassCombined(Cell cell) {
-        return tBiomass * this.forcingFile.getVariable(cell);
+        return currentBiomass * this.forcingFile.getVariable(cell);
     }
 
     public int getIndex() {
