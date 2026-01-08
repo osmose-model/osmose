@@ -139,6 +139,18 @@ public class Species implements ISpecies {
         public boolean isStarvationEnabled(School school);
     }
 
+    private enum ReproductionStrategy {
+        ITEROPAROUS,
+        SEMELPAROUS
+    }
+
+    private ReproductionStrategy reproductionStrategy;
+
+    /** Number of time-steps a species survive after spawning
+     * In number of time-steps
+     */
+    private int postReproductionSurvivalTime;
+
     private StarvationInterface starvationInterface;
 
     // private ByClassTimeSeries prices;
@@ -155,10 +167,33 @@ public class Species implements ISpecies {
      */
     public Species(int fileIndex, int index) {
 
+        String key;
+
         this.index = index;
+
 
         Configuration cfg = Osmose.getInstance().getConfiguration();
         this.fileIndex = fileIndex;
+
+        // Defines the reproduction strategy.
+        key = String.format("species.reproduction.strategy.sp%d", fileIndex);
+        if(cfg.isNull(key)) {
+            reproductionStrategy = ReproductionStrategy.ITEROPAROUS;
+        } else {
+            reproductionStrategy = ReproductionStrategy.valueOf(cfg.getString(key).toUpperCase());
+        }
+
+        if(reproductionStrategy == ReproductionStrategy.SEMELPAROUS) {
+            key = String.format("species.reproduction.postspawning.survivaltime.sp", fileIndex);
+            if(cfg.isNull(key)) {
+                postReproductionSurvivalTime = 0;
+            } else {
+                postReproductionSurvivalTime = (int) Math.round(cfg.getDouble(key) * cfg.getNStepYear());
+            }
+        } else {
+            // for default behaviour, we set the survival time as equal to infinity
+            postReproductionSurvivalTime = Integer.MAX_VALUE;
+        }
 
         // Initialization of parameters
         name = cfg.getString("species.name.sp" + fileIndex).replaceAll("_", "").replaceAll("-", "");
@@ -172,7 +207,7 @@ public class Species implements ISpecies {
         }
 
         boolean fixedSeed = false;
-        String key = "simulation.fixedseed.enabled";
+        key = "simulation.fixedseed.enabled";
         if (!cfg.isNull(key)) {
             fixedSeed = cfg.getBoolean(key);
         }
@@ -456,6 +491,15 @@ public class Species implements ISpecies {
 
     public double getMaturityM1() {
         return this.m1;
+    }
+
+    /**
+     * Returns the number of years the species survives after spawning
+     *
+     * return value is in years.
+     */
+    public int getSpawningSurvivalTime() {
+        return this.postReproductionSurvivalTime;
     }
 
 }
