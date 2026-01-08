@@ -110,6 +110,8 @@ public class AnnualLarvaMortality extends AbstractMortalitySpecies {
             mortRate[i] = multiplier * mortRateBase[i] * seasonValues[i] / nStepYear;
         }
 
+        a = new double[getConfiguration().getNStep()];
+
         if (referenceDensity < 0) {
             // if reference density does not exist, set the value of a to 1
             for (int i = 0; i < getConfiguration().getNStep(); i++) {
