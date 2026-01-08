@@ -470,4 +470,9 @@ public class Simulation extends OsmoseLinker {
         simulationSSB[school.getSpeciesIndex()] = Math.max(simulationSSB[school.getSpeciesIndex()], 0);
     }
 
+    /** Gets SSB biomass */
+    public double getSSB(IAggregation school) {
+        return simulationSSB[school.getSpeciesIndex()];
+    }
+
 }
