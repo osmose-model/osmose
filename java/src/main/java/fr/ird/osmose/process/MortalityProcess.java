@@ -45,6 +45,7 @@ import fr.ird.osmose.AbstractSchool;
 import fr.ird.osmose.Cell;
 import fr.ird.osmose.IAggregation;
 import fr.ird.osmose.School;
+import fr.ird.osmose.Simulation;
 import fr.ird.osmose.Prey;
 import fr.ird.osmose.background.BackgroundSchool;
 import fr.ird.osmose.process.bioen.BioenPredationMortality;
@@ -395,7 +396,7 @@ public class MortalityProcess extends AbstractProcess {
                     trophicLevel += 1;
                     school.setTrophicLevel((float) trophicLevel);
                 }
-            } // end of trophicLevel 
+            } // end of trophicLevel
         } // end of starvation and trophicLevel update
 
         // Apply Zout mortality on schools out of the simulated domain
@@ -578,6 +579,9 @@ public class MortalityProcess extends AbstractProcess {
                     if (school.getAgeDt() >= school.getFirstFeedingAgeDt()) {
                         nDead = school.getInstantaneousAbundance() * (1.d - Math.exp(-Mo));
                         school.incrementNdead(MortalityCause.FORAGING, nDead);
+                        if(school.isMature()) {
+                            getSimulation().removeSSB(school, nDead);
+                        }
                     }
                     break;
                 case PREDATION:
@@ -600,6 +604,9 @@ public class MortalityProcess extends AbstractProcess {
                             IAggregation prey = subpreys.get(ipr);
                             nDead = prey.biom2abd(preyUpon[ipr]); // total biomass that has been eaten
                             prey.incrementNdead(MortalityCause.PREDATION, nDead);
+                            if (prey.isMature()) {
+                                getSimulation().removeSSB(prey, nDead);
+                            }
                             predator.preyedUpon(prey.getSpeciesIndex(), prey.getFileSpeciesIndex(),
                                     prey.getTrophicLevel(), prey.getAge(), prey.getLength(), preyUpon[ipr], keepRecord);
                         }
@@ -625,6 +632,9 @@ public class MortalityProcess extends AbstractProcess {
                     }
                     if (nDead > 0.d) {
                         school.incrementNdead(MortalityCause.STARVATION, nDead);
+                        if (school.isMature()) {
+                            getSimulation().removeSSB(school, nDead);
+                        }
                     }
 
                     break;
@@ -641,6 +651,9 @@ public class MortalityProcess extends AbstractProcess {
                         double D = additionalMortality.getRate(school) / subdt;
                         nDead = school.getInstantaneousAbundance() * (1.d - Math.exp(-D));
                         school.incrementNdead(MortalityCause.ADDITIONAL, nDead);
+                        if (school.isMature()) {
+                            getSimulation().removeSSB(school, nDead);
+                        }
                     }
                     break;
                 case FISHING:
@@ -679,6 +692,10 @@ public class MortalityProcess extends AbstractProcess {
                             fishedSchool.incrementNdead(MortalityCause.FISHING, nFished);
                             fishedSchool.incrementNdead(MortalityCause.DISCARDS, nDiscarded);
 
+                            if (fishedSchool.isMature()) {
+                                getSimulation().removeSSB(fishedSchool, nFished + nDiscarded);
+                            }
+
                             // make sure a different fishery is called every time
                             // it is just a trick since we do not have case FISHERY1,
                             // case FISHERY2, etc. like the other mortality sources.
@@ -712,6 +729,9 @@ public class MortalityProcess extends AbstractProcess {
                         }
 
                         school.incrementNdead(MortalityCause.FISHING, nDead);
+                        if (school.isMature()) {
+                            getSimulation().removeSSB(school, nDead);
+                        }
 
                     }
                     break;
