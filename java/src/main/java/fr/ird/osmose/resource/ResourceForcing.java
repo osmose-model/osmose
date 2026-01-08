@@ -235,7 +235,7 @@ public class ResourceForcing extends OsmoseLinker {
                 if (resourceForcingMode == ResourceForcingMode.COMBINED_TS_NETCDF_BIOMASS) {
                     // if combined mode, then force offset to 0 and factor to 1
                     // since it is applied to the uniform biomass
-                    this.forcingFile = new ForcingFile(name, ncFile, ncPerYear, 0, 1, caching);
+                    this.forcingFile = new ForcingFile(name, ncFile, ncPerYear, 0, 1, caching, true);
                 } else {
                     this.forcingFile = new ForcingFile(name, ncFile, ncPerYear, offset, this.multiplier, caching);
                 }
