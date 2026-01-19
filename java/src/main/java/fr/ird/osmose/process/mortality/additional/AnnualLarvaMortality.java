@@ -68,13 +68,17 @@ public class AnnualLarvaMortality extends AbstractMortalitySpecies {
     @Override
     public void init() {
 
-        // check if the parameter reference density exists
-        // if not, set a value to -999
-        String keyDens = String.format("mortality.additional.larva.referencedensity.sp%s", getFileSpeciesIndex());
-        if(getConfiguration().isNull(keyDens)) {
-            referenceDensity = -999;
+        if (stage0.equals("larva")) {
+            // check if the parameter reference density exists
+            // if not, set a value to -999
+            String keyDens = String.format("mortality.additional.%s.referencedensity.sp%s", stage0, getFileSpeciesIndex());
+            if (getConfiguration().isNull(keyDens)) {
+                referenceDensity = -999;
+            } else {
+                referenceDensity = getConfiguration().getDouble(keyDens);
+            }
         } else {
-            referenceDensity = getConfiguration().getDouble(keyDens);
+            referenceDensity = -999;
         }
 
         int nStepYear = getConfiguration().getNStepYear();
