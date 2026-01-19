@@ -6,24 +6,31 @@
 
 -   Renaming of output fisheries parameters (`output.fishery.*` to `output.fisheries.*`).
 -   Multispecies fisheries are activated using `process.multispecies.fisheries.enabled` (replaces fisheries.enabled).
--   **Annual larval mortality is now provided in rates/year instead of rates/time-step. So make sure to update your configuration file accordingly (multiply your original rates by** `simulation.time.ndtperyear`)\*\*
--   Possiblity to provide additional mortality rates in log format using `"mortality.additional.rate.log.spX` and
+-   **Annual larval mortality is now provided in rates/year instead of rates/time-step. So make sure to update your configuration file accordingly (multiply your original rates by** `simulation.time.ndtperyear`)
+- Possiblity to provide additional mortality rates in log format using `"mortality.additional.rate.log.spX` and
+- Parameter `predation.ingestion.rate.max.bioen.spX` has been renamed `predation.ingestion.rate.max.bioen.spX` to be consistent with the classical Osmose parameter names
+- Parameter `predation.coef.ingestion.rate.max.larvae.bioen.sp` has been renamed `predation.larval.ingestion.rate.increase.ratio.spX`
+- Parameter `species.bioen.maturity.eta.spX` has been renamed `species.maturity.eta.spX`
+- Parameter `species.bioen.maturity.r.spX` has been replaced by `species.maturity.r.spX`
+- Parameter `species.bioen.maturity.m0.spX` has been replaced by `species.bioen.maturity.m0.spX`
+- Parameter `species.bioen.maturity.m1.spXX` has been replaced by `species.maturity.m1.spX`
+
 
 ### New features
 
 -   Outputs:
-    -   Add the bioen output of size at maturity.
+    -   Add the bioenergetic output of size at maturity.
     -   Adding computation performance outputs (`output.cpu.performance.enabled`)
     -   Adding additional genetic outputs (allele frequency outputs, observed and expected heterotrophy)
     -   Output of fishery accessible biomass, yields in abundance
     -   Averaged genotype outputs instead of instantaneous outputs.
     -   Mortality outputs can now be recorded on different regions
+-   New
 -   Adding some patches to run Osmose on a single cell. This mode is activated by setting `grid.single.cell.enabled` to `True`. **This mode may be much slower than 2d simulations**
 -   Adding gradient based spatial distribution
 -   New management of background species and schools. Their biomass is now initialized with the `species.biomass.spX` and `species.biomass.nsteps.year.spX` parameters. And their schools are managed in the same way as focal species schools, contrary to having one school per grid cell as in the original implementation.
 -   Fishing by fisheries is now computed in abundance rather than biomass (Ricardo Oliveros-Ramos change).
 -   **New**: fully functional economic module (Emy Cottrant's post-doct)
--
 
 ### Bug fix
 
@@ -35,6 +42,8 @@
 -   Correct a bug in `Surveys` and `OutputRegion`. When school was out of the domain, the code crashed. Fixed by assuming that outside schools are out of the survey region.
 -   Added the background schools in the computation of diets.
 -   Correct a bug in resource output: background species are no longer managed with `ResourceForcing`.
+-   Correct a bug in the `NetcdfPopulator.java` when genetic is enabled. The genotype was not instanciated.
+-   Correct a bug in the `RelativeBiomassPopulator.java` when genetic and/or bioenegetic was on. Genotype was not instanciated and maturity and gonadic weight were not initialized
 
 ## Osmose 4.3.3
 
