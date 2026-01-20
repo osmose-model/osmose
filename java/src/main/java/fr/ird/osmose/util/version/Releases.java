@@ -556,6 +556,24 @@ public class Releases {
 
                     Configuration cfg = this.getConfiguration();
 
+                    String key;
+
+                    key = "output.restart.enabled";
+
+                    if(!cfg.canFind(key)) {
+                        updateKey(key, key.replace("output", "simulation")); // to be updated.
+                    }
+
+                    key = "output.restart.recordfrequency.ndt";
+                    if (!cfg.canFind(key)) {
+                        updateKey(key, key.replace("output", "simulation")); // to be updated.
+                    }
+
+                    key = "output.restart.spinup";
+                    if (!cfg.canFind(key)) {
+                        updateKey(key, "simulation.restart.spinup.nyear"); // to be updated.
+                    }
+
                     // update parameter names
                     if (cfg.canFind("predation.coef.ingestion.rate.max.larvae.bioen.sp")) {
                         updateKey("predation.coef.ingestion.rate.max.larvae.bioen.sp",

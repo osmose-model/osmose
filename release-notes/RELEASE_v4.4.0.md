@@ -103,12 +103,13 @@ Release notes capturing changes from OSMOSE 4.3.3 to 4.4.0
 ### Renamed Parameters
 
 -   `output.fishery.*` → `output.fisheries.*` (output parameters)
+-   `output.restart.*` → `simulation.restart.*` (output restart parameters)
 -   `simulation.bioen.enabled` → `module.bioenergetics.enabled`
 -   `simulation.genetic.enabled` → `module.genetics.enabled`
--   `simulation.fishing.mortality.enabled` → `simulation.fishing.mortality.enabled` (clarified)
+-   `fishing.mortality.enabled` → `simulation.fishing.mortality.enabled` (clarified)
 -   `economy.enabled` → `module.bioeconomics.enabled`
 -   `fisheries.enabled` → `process.multispecies.fisheries.enabled`
--   `predation.ingestion.rate.max.bioen.spX` → `predation.ingestion.rate.max.bioen.spX` (consistency)
+-   `predation.ingestion.rate.max.bioen.spX` → `predation.ingestion.rate.max.spX` (consistency)
 -   `predation.coef.ingestion.rate.max.larvae.bioen.sp` → `predation.larval.ingestion.rate.increase.ratio.spX`
 -   `species.bioen.maturity.eta.spX` → `species.maturity.eta.spX`
 -   `species.bioen.maturity.r.spX` → `species.maturity.r.spX`
@@ -141,9 +142,7 @@ Release notes capturing changes from OSMOSE 4.3.3 to 4.4.0
 -   `population.initialisation.biomass.sp#`: Population initialization biomass
 -   `population.seeding.biomass.sp#`: Seeding biomass guarantee
 -   `population.seeding.year.max`: Maximum seeding duration (years)
--   `simulation.restart`: Improved restart parameter handling
 -   `reproduction.mode`: Specify reproduction mode (oviparous/viviparous/etc.)
--   `output.restart`: Moved to `simulation.restart` with time-step resolution
 -   `species.weight.at.larvae.growth.threshold.age` (W0): Optional (default 0)
 -   `predation.success.disabled.sp`: Disable predation success for specific species
 -   `module.population.initialisation.enabled`: Control population initialization
