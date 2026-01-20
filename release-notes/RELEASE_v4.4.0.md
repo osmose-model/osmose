@@ -1,4 +1,3 @@
-
 # OSMOSE Release Notes - Version 4.4.0
 
 Release notes capturing changes from OSMOSE 4.3.3 to 4.4.0
@@ -266,8 +265,6 @@ Release notes capturing changes from OSMOSE 4.3.3 to 4.4.0
 -   **R Package**: Enhanced with new calibration functions and analysis capabilities
 -   **Configuration**: Automatic incremental updates from Osmose 3 and 4.x versions
 
-
-
 ## Manually written release notes for OSMOSE 4.4.0
 
 ### Parameter changes
@@ -275,17 +272,17 @@ Release notes capturing changes from OSMOSE 4.3.3 to 4.4.0
 -   Renaming of output fisheries parameters (`output.fishery.*` to `output.fisheries.*`).
 -   Multispecies fisheries are activated using `process.multispecies.fisheries.enabled` (replaces fisheries.enabled).
 -   **Annual larval mortality is now provided in rates/year instead of rates/time-step. So make sure to update your configuration file accordingly (multiply your original rates by** `simulation.time.ndtperyear`)
-- Possiblity to provide additional mortality rates in log format using `"mortality.additional.rate.log.spX` and
-- Parameter `predation.ingestion.rate.max.bioen.spX` has been renamed `predation.ingestion.rate.max.bioen.spX` to be consistent with the classical Osmose parameter names
-- Parameter `predation.coef.ingestion.rate.max.larvae.bioen.sp` has been renamed `predation.larval.ingestion.rate.increase.ratio.spX`
-- Parameter `species.bioen.maturity.eta.spX` has been renamed `species.maturity.eta.spX`
-- Parameter `species.bioen.maturity.r.spX` has been replaced by `species.maturity.r.spX`
-- Parameter `species.bioen.maturity.m0.spX` has been replaced by `species.bioen.maturity.m0.spX`
-- Parameter `species.bioen.maturity.m1.spXX` has been replaced by `species.maturity.m1.spX`
-- Parameter `fisheries.enabled` has been replaced by `module.multispecies.fisheries.enabled`
-- Parameter `simulation.bioen.enabled` has been replaced by `module.bioenergetics.enabled`
-- Parameter `simulation.genetic.enabled` has been replaced by `module.genetics.enabled`
-- Parameter `economy.enabled` has been replaced by `module.bioeconomics.enabled`
+-   Possiblity to provide additional mortality rates in log format using `"mortality.additional.rate.log.spX` and
+-   Parameter `predation.ingestion.rate.max.bioen.spX` has been renamed `predation.ingestion.rate.max.bioen.spX` to be consistent with the classical Osmose parameter names
+-   Parameter `predation.coef.ingestion.rate.max.larvae.bioen.sp` has been renamed `predation.larval.ingestion.rate.increase.ratio.spX`
+-   Parameter `species.bioen.maturity.eta.spX` has been renamed `species.maturity.eta.spX`
+-   Parameter `species.bioen.maturity.r.spX` has been replaced by `species.maturity.r.spX`
+-   Parameter `species.bioen.maturity.m0.spX` has been replaced by `species.bioen.maturity.m0.spX`
+-   Parameter `species.bioen.maturity.m1.spXX` has been replaced by `species.maturity.m1.spX`
+-   Parameter `fisheries.enabled` has been replaced by `module.multispecies.fisheries.enabled`
+-   Parameter `simulation.bioen.enabled` has been replaced by `module.bioenergetics.enabled`
+-   Parameter `simulation.genetic.enabled` has been replaced by `module.genetics.enabled`
+-   Parameter `economy.enabled` has been replaced by `module.bioeconomics.enabled`
 
 ### New features
 

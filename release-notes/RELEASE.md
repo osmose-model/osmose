@@ -1,8 +1,8 @@
 # OSMOSE Release Notes
 
-## Osmose >= 4.4
+## Osmose \>= 4.4
 
-**Release notes for versions >= 4.4 are on individual files**
+**Release notes for versions \>= 4.4 are now written on individual files**
 
 ## Osmose 4.3.3
 
