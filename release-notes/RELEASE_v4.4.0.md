@@ -102,31 +102,23 @@ Release notes capturing changes from OSMOSE 4.3.3 to 4.4.0
 
 ### Renamed Parameters
 
+- Homogenization of module names:
+    -   `simulation.bioen.enabled` → `module.bioenergetics.enabled`
+    -   `simulation.genetic.enabled` → `module.genetics.enabled`
+    -   `economy.enabled` → `module.bioeconomics.enabled`
+    -   `fisheries.enabled` → `module.multispecies.fisheries.enabled`
+- Bioen-Osmose parameters for consistency with classical Osmose:
+    -   `predation.ingestion.rate.max.bioen.spX` → `predation.ingestion.rate.max.spX` (consistency)
+    -   `predation.coef.ingestion.rate.max.larvae.bioen.sp` → `predation.larval.ingestion.rate.increase.ratio.spX`
+    -   `species.bioen.maturity.eta.spX` → `species.maturity.eta.spX`
+    -   `species.bioen.maturity.r.spX` → `species.maturity.r.spX`
 -   `output.fishery.*` → `output.fisheries.*` (output parameters)
 -   `output.restart.*` → `simulation.restart.*` (output restart parameters)
--   `simulation.bioen.enabled` → `module.bioenergetics.enabled`
--   `simulation.genetic.enabled` → `module.genetics.enabled`
 -   `fishing.mortality.enabled` → `simulation.fishing.mortality.enabled` (clarified)
--   `economy.enabled` → `module.bioeconomics.enabled`
--   `fisheries.enabled` → `process.multispecies.fisheries.enabled`
--   `predation.ingestion.rate.max.bioen.spX` → `predation.ingestion.rate.max.spX` (consistency)
--   `predation.coef.ingestion.rate.max.larvae.bioen.sp` → `predation.larval.ingestion.rate.increase.ratio.spX`
--   `species.bioen.maturity.eta.spX` → `species.maturity.eta.spX`
--   `species.bioen.maturity.r.spX` → `species.maturity.r.spX`
--   `species.bioen.maturity.m0.spX` and `m1` parameter swap (m0 is now intercept, m1 is slope)
--   `fisheries.rate.bySeason.fsh%d` → `fisheries.rate.byperiod.fsh%d`
--   `species.larva2adults.agethres.sp` → `species.first.feeding.age.sp`
--   `stochastic.mortality.seed` → `stochastic.mortality.randomseed.fixed` (boolean)
--   `population.initialization.seed` → `population.initialization.randomseed.fixed` (boolean)
--   Fisheries class outputs renamed for consistency
--   Grid NetCDF file reading now uses `NcGrid.java` class (removal of `grid.java.classname`)
 
 ### New Parameters
 
 -   `grid.single.cell.enabled`: Enable single-cell mode simulation
--   `module.bioenergetics.enabled`: Control bioenergetics module
--   `module.genetics.enabled`: Control genetics module
--   `module.bioeconomics.enabled`: Control economic module
 -   `simulation.cpu.performance.enabled`: Enable CPU performance tracking
 -   `output.cpu.performance.enabled`: Output CPU performance metrics
 -   `species.biomass.spX`: Initialize background/school species biomass
@@ -148,11 +140,18 @@ Release notes capturing changes from OSMOSE 4.3.3 to 4.4.0
 -   `module.population.initialisation.enabled`: Control population initialization
 -   `simulation.resource.computePercent.legacy`: Legacy resource computation mode
 -   `simulation.nschool.sp%d`: Species-specific school counts
+-   `simulation.fixed.seed.enabled`: fix the seed for all the stochastic process (easy control for replicability)
 -   Fisheries grouping parameters for disaggregated analysis
 -   Survey selectivity and other survey-specific parameters
 
 ### Deprecated Parameters
 
+- Paramters to fix seeds are now deprecated and replaced by `simulation.fixed.seed.enabled`:
+    - `population.initialization.randomseed.fixed`
+    - `genetics.randomseed.fixed`
+    - `movement.randomseed.fixed`
+    - `reproduction.randomseed.fixed`
+    - `stochastic.mortality.randomseed.fixed`
 -   `population.initialisation.method`: Replaced by unified seeding mechanism
 -   `population.initialisation.biomass.sp#`: Deprecated (use seeding mechanism)
 -   `flux.incoming.season.file`, `flux.incoming.season.file.sp#`: Replaced by time-series approach
@@ -289,7 +288,7 @@ Release notes capturing changes from OSMOSE 4.3.3 to 4.4.0
     -   Add the bioenergetic output of size at maturity.
     -   Adding computation performance outputs (`output.cpu.performance.enabled`)
     -   Adding additional genetic outputs (allele frequency outputs, observed and expected heterotrophy)
-    -   Output of fishery accessible biomass, yields in abundance
+    -   Output of fishery accessible biomass, yields in abundance and biomass
     -   Averaged genotype outputs instead of instantaneous outputs.
     -   Mortality outputs can now be recorded on different regions
 -   Possibility to have simplified bioenergetics for species with lack of data (invertebrates).
