@@ -558,33 +558,6 @@ public class Releases {
 
                     String key;
 
-                    key = "output.restart.enabled";
-
-                    if(!cfg.canFind(key)) {
-                        updateKey(key, key.replace("output", "simulation")); // to be updated.
-                    }
-
-                    key = "output.restart.recordfrequency.ndt";
-                    if (!cfg.canFind(key)) {
-                        updateKey(key, key.replace("output", "simulation")); // to be updated.
-                    }
-
-                    key = "output.restart.spinup";
-                    if (!cfg.canFind(key)) {
-                        updateKey(key, "simulation.restart.spinup.nyear"); // to be updated.
-                    }
-
-                    // update parameter names
-                    if (cfg.canFind("predation.coef.ingestion.rate.max.larvae.bioen.sp")) {
-                        updateKey("predation.coef.ingestion.rate.max.larvae.bioen.sp",
-                                "predation.larval.ingestion.rate.increase.ratio.sp"); // to be updated.
-                    }
-
-                    if (cfg.canFind("population.initialization.relativebiomass.enabled")) {
-                        updateKey("population.initialization.relativebiomass.enabled",
-                                "module.population.initialisation.enabled"); // to be updated.
-                    }
-
                     // info("hello");
                     // info(this.getFocalIndex()[1]);
                     // Update parameters for EnergyBudget.java
@@ -607,6 +580,18 @@ public class Releases {
                         if (cfg.canFind("species.bioen.maturity.eta.sp" + index)) {
                             updateKey("species.bioen.maturity.eta.sp" + index, "species.maturity.eta.sp" + index);
                         }
+
+                        // update parameter names
+                        if (cfg.canFind("predation.coef.ingestion.rate.max.larvae.bioen.sp" + index)) {
+                            updateKey("predation.coef.ingestion.rate.max.larvae.bioen.sp" + index,
+                                    "predation.larval.ingestion.rate.increase.ratio.sp" + index); // to be updated.
+                        }
+
+                        if (cfg.canFind("predation.ingestion.rate.max.bioen.sp" + index)) {
+                            updateKey("predation.ingestion.rate.max.bioen.sp" + index,
+                                    "predation.ingestion.rate.max.sp" + index); // to be updated.
+                        }
+
                     }
 
                     if (cfg.canFind("output.fishery.enabled")) {

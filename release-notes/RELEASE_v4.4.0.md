@@ -37,13 +37,13 @@ These changes modernize the modeling framework and extend its biological, ecolog
 |---------------------------------|---------------------------------------|
 | `output.restart.enabled` | `simulation.restart.enabled` |
 | `output.restart.recordfrequency.ndt` | `simulation.restart.recordfrequency.ndt` |
-| `output.restart.spinup` | `simulation.restart.spinup.nstep` / `.nyear` |
+| `output.restart.spinup` | `simulation.restart.spinup.nyear` |
 
 #### Bioenergetic module
 
 | Old Key | New Key |
 |------------------------------------|------------------------------------|
-| `predation.ingestion.rate.max.bioen.spX` | `predation.ingestion.rate.max.bioen.spX` |
+| `predation.ingestion.rate.max.bioen.spX` | `predation.ingestion.rate.max.spX` |
 | `predation.coef.ingestion.rate.max.larvae.bioen.sp` | `predation.larval.ingestion.rate.increase.ratio.spX` |
 | `species.bioen.maturity.eta.spX` | `species.maturity.eta.spX` |
 | `species.bioen.maturity.r.spX` | `species.maturity.r.spX` |
@@ -74,20 +74,21 @@ See [here](https://github.com/osmose-model/osmose/wiki/Reproduction#stochastic-m
 
 #### Egg size (bioenergetics)
 
--   `species.egg.density.sp#`
+-   `species.egg.density.sp#`: density of eggs (in $g.cm^{-3}$) used to compute length from weight.
 
 #### Background species & biomass scaling
 
--   `species.multiplier.sp#`
--   `species.multiplier.log.sp#`
+-   `species.multiplier.sp#`: multiplier to control background species biomass
+-   `species.multiplier.log.sp#`: multiplier to control background species biomass (in log value)
 
 #### Background movement & map handling
 
--   `movement.checks.enabled`
--   `movement.randomwalk.range.sp#`
--   `movement.netcdf.enabled`
+-   `movement.randomwalk.range.sp#`: allow to specify the range of random walk for background species.
+-   `movement.netcdf.enabled`: allow map distributions from NetCDF for Background species
 
 #### Bioeconomics module
+
+The bioeconomic module is now functional. Parameters are fully described [here](https://github.com/osmose-model/osmose/wiki/Economic-Module)
 
 -   `species.stock.elasticity.sp#`
 -   `baseline.costs.t0.sp#`
@@ -101,14 +102,18 @@ See [here](https://github.com/osmose-model/osmose/wiki/Reproduction#stochastic-m
 
 #### Gradient based movements
 
--   `movement.random.walk.coef.sp#`
--   `movement.base.search.radius.sp#`
+See details [here](https://github.com/osmose-model/osmose/wiki/Movement:-gradient-based-movements)
+
+-   `movement.random.walk.coef.sp#`: Random walk coefficient (between 0 and 1)
+-   `movement.base.search.radius.sp#`: perception (integer, ranging from 1 to 0)
 
 #### Predation on LTL
 
--   `simulation.resources.computePercent.legacy`
+-   `simulation.resources.computePercent.legacy`: if set to True, the LTL percentage that is eaten by a school is computed based on the original linear relationship. Else, it will use a $\log$ relationship.
 
 #### Bioenergetics
+
+Parameters to control whether a simplified bioenergetic implementation should be used (see [here](https://github.com/osmose-model/osmose/wiki/Bioenergetic-module:-Simplified-equations) for details)
 
 -   `species.bioenergetics.model.sp`: `full` or `simple`
 -   `predation.efficiency.critical.spX`
