@@ -1,6 +1,6 @@
 # 🌊 OSMOSE 4.4.0 — Java Release Notes
 
-# 1. 🎯 Overview
+## 1. 🎯 Overview
 
 This release introduces **major architectural improvements**, **new biological capabilities**, **expanded economic modeling**, and **significant refactoring** of internal processes, especially:
 
@@ -18,11 +18,11 @@ These changes modernize the modeling framework and extend its biological, ecolog
 
 ------------------------------------------------------------------------
 
-# 1. ⚙️ Configuration Changes (User Level)
+## 1. ⚙️ Configuration Changes (User Level)
 
-## 1.1. Renamed (breaking) configuration keys
+### 1.1. Renamed (breaking) configuration keys
 
-### Module toggles
+#### Module toggles
 
 | Old Key                      | New Key                                 |
 |------------------------------|-----------------------------------------|
@@ -31,7 +31,7 @@ These changes modernize the modeling framework and extend its biological, ecolog
 | `fisheries.enabled`          | `module.multispecies.fisheries.enabled` |
 | `economy.enabled`            | `module.bioeconomics.enabled`           |
 
-### Restart system
+#### Restart system
 
 | Old Key | New Key |
 |---------------------------------|---------------------------------------|
@@ -39,7 +39,7 @@ These changes modernize the modeling framework and extend its biological, ecolog
 | `output.restart.recordfrequency.ndt` | `simulation.restart.recordfrequency.ndt` |
 | `output.restart.spinup` | `simulation.restart.spinup.nstep` / `.nyear` |
 
-### Bioenergetic module
+#### Bioenergetic module
 
 | Old Key | New Key |
 |------------------------------------|------------------------------------|
@@ -54,41 +54,40 @@ These renames are **mandatory for existing configurations**.
 
 ------------------------------------------------------------------------
 
-## 1.2. New configuration keys
+### 1.2. New configuration keys
 
-### Post-reproduction mortality
+#### Post-reproduction mortality
 
 -   `species.reproduction.strategy.sp#` = `iteroparous` or `semelparous`
 -   `species.reproduction.postspawning.survivaltime.sp#` = post-reproduction survival time (in years). Used only for `semelparous`
 
-### Simulation & reproducibility
+#### Simulation & reproducibility
 
 -   `simulation.fixed.seed.enabled`: used to control the stochasticity of a simulation and allow replicable runs
 -   `simulation.nschool.multiplier`: Parameter to multiply the number of schools for all species (default one):
 
-### Maturity ogive
+#### Maturity ogive
 
-See []()
--   `species.maturity.mode`: controls whether stochastic (`stochastic`) or deterministic (`legacy`) production is used.
--   `species.maturity.l50.sp#`: mean of the gaussian
--   `species.maturity.l75.sp#`
+See [here](https://github.com/osmose-model/osmose/wiki/Reproduction#stochastic-maturity) for details
+- `species.maturity.mode`: controls whether stochastic (`stochastic`) or deterministic (`legacy`) production is used.
+- `species.maturity.l50.sp#`: mean of the gaussian - `species.maturity.l75.sp#`
 
-### Egg size (bioenergetics)
+#### Egg size (bioenergetics)
 
 -   `species.egg.density.sp#`
 
-### Background species & biomass scaling
+#### Background species & biomass scaling
 
 -   `species.multiplier.sp#`
 -   `species.multiplier.log.sp#`
 
-### Background movement & map handling
+#### Background movement & map handling
 
 -   `movement.checks.enabled`
 -   `movement.randomwalk.range.sp#`
 -   `movement.netcdf.enabled`
 
-### Bioeconomics module
+#### Bioeconomics module
 
 -   `species.stock.elasticity.sp#`
 -   `baseline.costs.t0.sp#`
@@ -100,16 +99,16 @@ See []()
 -   `substitution.elasticity`
 -   `elasticity.demand.fish`
 
-### Gradient based movements
+#### Gradient based movements
 
 -   `movement.random.walk.coef.sp#`
 -   `movement.base.search.radius.sp#`
 
-### Predation on LTL
+#### Predation on LTL
 
 -   `simulation.resources.computePercent.legacy`
 
-### Bioenergetics
+#### Bioenergetics
 
 -   `species.bioenergetics.model.sp`: `full` or `simple`
 -   `predation.efficiency.critical.spX`
@@ -120,23 +119,23 @@ See []()
 
 ------------------------------------------------------------------------
 
-# 3. ⭐ User‑Facing Changes
+## 3. ⭐ User‑Facing Changes
 
-## 3.1. Major New Features
+### 3.1. Major New Features
 
-### Gradient-based movement distribution
+#### Gradient-based movement distribution
 
 -   Gradient based spatial distribution has been included ([Gradient based movements](https://github.com/osmose-model/osmose/wiki/Movement:-gradient-based-movements))
 
-### LTL predation
+#### LTL predation
 
 -   Possibility to use a log version of the `computePercent` method
 
-### ✔ Region‑specific mortality
+#### ✔ Region‑specific mortality
 
 Mortality is now tracked **per output region**. Arrays such as `nDead` and `ageDeath` are now 2‑dimensional: `[region][mortality_cause]`.
 
-### ✔ Fishing & discards tracked in numbers
+#### ✔ Fishing & discards tracked in numbers
 
 Fishing/discard tracking moved from **biomass** to **abundance**:
 
@@ -144,7 +143,7 @@ Fishing/discard tracking moved from **biomass** to **abundance**:
 -   `discardedBiomass` → `discardedAbundance`
 -   Biomass now computed on demand using abundance × mass functions.
 
-### ✔ Background species & maps overhaul
+#### ✔ Background species & maps overhaul
 
 A new full subsystem handles background species:
 
@@ -157,9 +156,9 @@ A new full subsystem handles background species:
 
 ------------------------------------------------------------------------
 
-## 3.2. Biological Process Enhancements
+### 3.2. Biological Process Enhancements
 
-### ✔ Stochastic maturity ogive
+#### ✔ Stochastic maturity ogive
 
 Optional probabilistic (not deterministic) maturity (see [here](https://github.com/osmose-model/osmose/wiki/Reproduction#stochastic-maturity) for details):
 
@@ -167,7 +166,7 @@ Optional probabilistic (not deterministic) maturity (see [here](https://github.c
 -   A normal CDF calculates probability of maturing between timesteps
 -   Once mature, always mature
 
-### ✔ Improved egg size under bioenergetics
+#### ✔ Improved egg size under bioenergetics
 
 Under the bioenergetics module:
 
@@ -178,7 +177,7 @@ This replaces the adult-coefficient-based egg mass–length conversion.
 
 ------------------------------------------------------------------------
 
-## 3.3. Expanded Bioeconomics Module
+### 3.3. Expanded Bioeconomics Module
 
 Economic modelling expanded significantly:
 
@@ -193,16 +192,16 @@ New parameters include elasticities, cost time trends, size preferences and more
 
 ------------------------------------------------------------------------
 
-## 3.4. Simulation & Restart Enhancements
+### 3.4. Simulation & Restart Enhancements
 
-### ✔ More robust restart system
+#### ✔ More robust restart system
 
 -   Restart keys migrated to `simulation.restart.*`
 -   Intelligent fallback between plain and per-rank files
 -   Required global attribute in restart NetCDF: `step`
 -   Improved error messages
 
-### ✔ Deterministic simulation mode
+#### ✔ Deterministic simulation mode
 
 `simulation.fixed.seed.enabled` enforces reproducible random number generation for:
 
@@ -214,26 +213,26 @@ New parameters include elasticities, cost time trends, size preferences and more
 
 ------------------------------------------------------------------------
 
-## 3.5. Output Behavior Improvements
+### 3.5. Output Behavior Improvements
 
-### ✔ NetCDF chunking default changed
+#### ✔ NetCDF chunking default changed
 
 Default chunking now uses the **standard NetCDF-4 chunking strategy** for improved performance.
 
-### ✔ Background species always included in outputs
+#### ✔ Background species always included in outputs
 
 Refactor ensures consistent treatment of background schools in spatial, fisheries, mortality, and predator-prey outputs.
 
 ------------------------------------------------------------------------
 
-# 4. 💥 Breaking Changes
+## 4. 💥 Breaking Changes
 
-### ⚠ Fishing/discards API changed
+#### ⚠ Fishing/discards API changed
 
 -   `fishedBy()` / `discardedBy()` replaced by `fishedNBy()` / `discardedNBy()`
 -   Fishing inputs/outputs now primarily use **numbers**, not **biomass**
 
-### ⚠ Mortality API changed
+#### ⚠ Mortality API changed
 
 `incrementNdead()` now requires the timestep:
 
@@ -241,27 +240,27 @@ Refactor ensures consistent treatment of background schools in spatial, fisherie
 incrementNdead(MortalityCause cause, double nDead, int timeStep)
 ```
 
-### ⚠ Region indexing mandatory
+#### ⚠ Region indexing mandatory
 
 `nDead`, `ageDeath`, caught fish, discards, mortality outputs and other arrays now include a **region dimension**.
 
-### ⚠ Restart NetCDF must include global attribute `step`
+#### ⚠ Restart NetCDF must include global attribute `step`
 
 Restart files missing this field will cause the simulation to abort.
 
-### ⚠ Many configuration keys renamed or restructured
+#### ⚠ Many configuration keys renamed or restructured
 
 Old keys **will not work** without migration.
 
-### ⚠ Species background biomass reading and scaling logic changed
+#### ⚠ Species background biomass reading and scaling logic changed
 
 Existing background configurations relying on older semantics may need adjustment.
 
 ------------------------------------------------------------------------
 
-# 5. 👨‍💻 Developer‑Facing Notes
+## 5. 👨‍💻 Developer‑Facing Notes
 
-## 5.1. Background Species Refactor
+### 5.1. Background Species Refactor
 
 A very large subsystem rewrite:
 
@@ -276,7 +275,7 @@ This will impact any tool, plugin, or analysis code accessing background species
 
 ------------------------------------------------------------------------
 
-## 5.2. Aggregation Interface Changes
+### 5.2. Aggregation Interface Changes
 
 New abstract methods required in `AbstractSchool` / `IAggregation`:
 
@@ -297,7 +296,7 @@ Internal arrays:
 
 ------------------------------------------------------------------------
 
-## 5.3. Configuration Parsing Changes
+### 5.3. Configuration Parsing Changes
 
 -   Many key comparisons now use `equalsIgnoreCase()`
 -   Path resolution uses `getAbsolutePath()` instead of `getCanonicalPath()` (fix for Windows)
@@ -306,7 +305,7 @@ Internal arrays:
 
 ------------------------------------------------------------------------
 
-## 5.4. Bioeconomics Engine Rewrite
+### 5.4. Bioeconomics Engine Rewrite
 
 Developers integrating with the economy module must update:
 
@@ -318,7 +317,7 @@ Developers integrating with the economy module must update:
 
 ------------------------------------------------------------------------
 
-## 5.5. Initialization & Restart Logic
+### 5.5. Initialization & Restart Logic
 
 -   Genetic diversity and trait values may now be restored from restart files
 -   Population initialization more modular
@@ -326,7 +325,7 @@ Developers integrating with the economy module must update:
 
 ------------------------------------------------------------------------
 
-# 6. 🐞 Bug Fixes
+## 6. 🐞 Bug Fixes
 
 -   Correction of the `BiomassDietStageOutput.write` method. There was a bug in the indexing during the conversion from 2D to 1D.
 -   In `SimulationStep`, `movementProcess.run()` is now called before `indicators.initStep()`. This in order to make sure that the initial biomass is always less than the total predated biomass.
@@ -340,10 +339,10 @@ Developers integrating with the economy module must update:
 
 ------------------------------------------------------------------------
 
-# 7. 📦 Summary Table
+## 7. 📦 Summary Table
 
 | Category | Summary |
-|-------------------|-----------------------------------------------------|
+|--------------------|----------------------------------------------------|
 | **New Features** | Region‑specific mortality, stochastic maturity ogive, density-based egg size, background movement maps, expanded bioeconomics |
 | **Breaking Changes** | New fishing/discard APIs, mortality API requires timestep, config key renames, restart requirements, region dimension added |
 | **Behavioral Changes** | NetCDF chunking change, background school process rewrite, new maturity logic, numbers-based fishing |
@@ -352,7 +351,7 @@ Developers integrating with the economy module must update:
 
 ------------------------------------------------------------------------
 
-# 8. ✔ Short Summary
+## 8. ✔ Short Summary
 
 -   Region‑specific mortality
 -   Fishing/discards tracked in numbers
@@ -365,6 +364,207 @@ Developers integrating with the economy module must update:
 -   NetCDF chunking uses 'standard' by default
 
 ------------------------------------------------------------------------
+
+# 🌊 OSMOSE 4.4.0 — R Release Notes
+
+## 🚀 Highlights
+
+*   **New end-to-end calibration workflow**: add setup, test, run-model, and check utilities for OSMOSE calibrations, including automatic generation of parameter bounds/templates and observed-data scaffolding. [\[2\]](?web=1)
+*   **Much richer output handling**: improved reading/structuring of fishery & survey outputs, including by-fishery-by-species arrays, time/class aggregation, and functional group rollups. [\[2\]](?web=1), [\[?web=1\]](?web=1)
+*   **Major `get_var()` upgrade**: new subsetting, safer behavior, and replicate sampling features make extraction of outputs more flexible and robust. [\[2\]](?web=1), [\[?web=1\]](?web=1)
+
+***
+
+## ✨ New Features
+
+### 1) Calibration framework (new public API)
+
+A complete set of calibration utilities was added, centered around:
+
+*   **`osmose_calibration_setup()`**
+    Creates a calibration directory structure, writes guess/min/max/phase parameter files, installs scripts/templates, runs pre-flight model checks, and creates (or consumes) observed-data templates plus calibration settings. [\[2\]](?web=1), [\[?web=1\]](?web=1)
+
+*   **`osmose_calibration_test()`**
+    Runs automated tests (data compatibility + sequential and parallel “smoke tests”) to validate that the calibration environment is correctly configured. [\[2\]](?web=1), [\[?web=1\]](?web=1)
+
+*   **`osmose_calibration_runmodel()`**
+    Runs the calibration-ready model using the calibration directory and parameter sets, with safeguards against mixing calibrated vs non-calibrated parameters. [\[2\]](?web=1), [\[?web=1\]](?web=1)
+
+*   **`osmose_calibration_check()`**
+    Re-runs the model with best parameters from results/restart and returns a calibration object combining simulated/observed/settings/cv. [\[2\]](?web=1), [\[?web=1\]](?web=1)
+
+*   **`osmose_calibration_outputs()`**
+    Produces a curated list of calibration-ready outputs (surveys, landings, catch-at-length, penalties for growth/mortality/collapse/outburst, etc.). [\[2\]](?web=1), [\[?web=1\]](?web=1)
+
+***
+
+### 2) Calibration parameter helpers (new internal + exported utilities)
+
+New helpers make it easier to transform, replicate, and write parameter sets:
+
+*   Parameter manipulation & transformations:
+    *   `set_par()`, `transform_par()`, `replicate_par()` [\[2\]](?web=1), [\[?web=1\]](?web=1)
+    *   `logit()`, `ilogit()` helpers [\[2\]](?web=1), [\[?web=1\]](?web=1)
+*   Parameter extraction logic for calibration/grouped parameters:
+    *   `get_par2()`, `get_par_phase()`, `get_calibration_parameters()`, `get_osmose_parameter()` [\[2\]](?web=1), [\[?web=1\]](?web=1)
+*   Writers:
+    *   `write_osmose_parameter()` (writes guess/min/max/phase entries for a parameter block) [\[2\]](?web=1), [\[?web=1\]](?web=1)
+*   Calibration settings creators:
+    *   `.create_calibration_settings()` plus type-specific helpers (simple/survey) [\[2\]](?web=1), [\[?web=1\]](?web=1)
+
+***
+
+### 3) New S3 methods for usability (`head()`/`tail()` on OSMOSE outputs)
+
+New `head.*` and `tail.*` methods preserve OSMOSE output class when slicing:
+
+*   `tail.osmose.biomass`, `tail.osmose.abundance`, `tail.osmose.yield`, `tail.osmose.yieldN` [\[?web=1\]](?web=1), [\[2\]](?web=1)
+*   `head.osmose.biomass`, `head.osmose.abundance`, `head.osmose.yield`, `head.osmose.yieldN` [\[?web=1\]](?web=1), [\[2\]](?web=1)
+
+***
+
+### 4) Configuration checks: egg density validation
+
+A new internal check warns when egg density appears unrealistic:
+
+*   `.check_density()` computes density from egg weight and egg size and emits warnings for “lower than seawater”, “abnormal”, or “wrong” density ranges. [\[2\]](?web=1), [\[?web=1\]](?web=1)
+
+***
+
+## 📈 Output & Data Handling Improvements
+
+### 1) `readOsmoseFiles()` gains survey-aware grouping and safer behavior
+
+*   New argument **`bySurvey`** (in addition to `bySpecies`) supports more structured output folder parsing. [\[2\]](?web=1), [\[?web=1\]](?web=1)
+*   Combined grouping (`bySpecies + bySurvey`) is supported, with logic based on how many “grouping dimensions” are requested. [\[?web=1\]](?web=1), [\[2\]](?web=1)
+*   Returns **`NULL` when no matching files exist**, avoiding downstream failures. [\[2\]](?web=1), [\[?web=1\]](?web=1)
+
+***
+
+### 2) Fishery outputs expanded and reshaped
+
+New NetCDF-based fishery outputs are supported and integrated:
+
+*   Added reading/representation of:
+    *   `yieldByFisheryBySpecies`, `yieldNByFisheryBySpecies`, `accessibleBiomassByFishery` [\[2\]](?web=1), [\[?web=1\]](?web=1)
+*   New reshaping and aggregation helpers:
+    *   `.reshapeFishery()` (with `by="fishery"|"species"` and `aggregate=TRUE/FALSE`) [\[2\]](?web=1), [\[?web=1\]](?web=1)
+    *   Aggregations across time/class/year:
+        *   `.aggregate_catch_bytime()`, `.aggregate_catch_byclass()`, `.aggregate_catch_byyear()` [\[2\]](?web=1), [\[?web=1\]](?web=1)
+*   New “observed.\*” fields are produced from reshaped fishery catches (e.g., `observed.landings`, `observed.discards`) to feed calibration workflows. [\[2\]](?web=1), [\[?web=1\]](?web=1)
+
+***
+
+### 3) Surveys are treated as first-class outputs
+
+*   Survey outputs now support `bySurvey` and include additional survey datasets (e.g., mortality/predator pressure) where available. [\[2\]](?web=1), [\[?web=1\]](?web=1)
+*   Survey outputs can be filtered to their target species based on config. [\[?web=1\]](?web=1), [\[2\]](?web=1)
+
+***
+
+### 4) More robust CSV/NetCDF reading
+
+*   CSV readers now fail gracefully and return `NULL` on read errors instead of erroring. [\[2\]](?web=1), [\[?web=1\]](?web=1)
+*   NetCDF reader `.read_osmose_ncdf()` was hardened:
+    *   uses `try(nc_open(...))` and returns `NULL` if opening fails [\[?web=1\]](?web=1), [\[2\]](?web=1)
+    *   adds dimension names (`time`, `species`, `fishery`, `replicates`) and handles `species_names` / `fisheries_names` attributes [\[?web=1\]](?web=1), [\[2\]](?web=1)
+
+***
+
+## 🧰 API Enhancements & Behavior Changes
+
+### 1) `get_var()` is significantly enhanced
+
+`get_var.osmose()` now supports:
+
+*   hierarchical subsetting:
+    *   `sp`, `srv`, `fsh` arguments for species / survey / fishery selection [\[2\]](?web=1), [\[?web=1\]](?web=1)
+*   safer behavior:
+    *   `no.error=TRUE` returns `NULL` instead of throwing when variables are missing [\[?web=1\]](?web=1), [\[2\]](?web=1)
+*   output shaping and replicate sampling:
+    *   `drop`, `size`, `random`, `replace` for slicing/sampling replicates [\[?web=1\]](?web=1), [\[2\]](?web=1)
+*   new generic helpers/methods:
+    *   `get_var.default()`, `get_var.osmose.calibration()`, `get_var.list`, `get_var.NULL` [\[2\]](?web=1), [\[?web=1\]](?web=1)
+
+> **Potential breaking change**: code that relied on `get_var()` erroring on missing variables may need updates if `no.error=TRUE` is used or propagated. [\[2\]](?web=1), [\[?web=1\]](?web=1)
+
+***
+
+### 2) Plotting behavior improved for `plot.osmose()`
+
+*   `plot.osmose()` now passes derived metadata (`initialYear`, `freq`) when plotting extracted variables, improving plot correctness for time axes. [\[?web=1\]](?web=1), [\[2\]](?web=1)
+
+***
+
+### 3) Printing `osmose` objects is more informative
+
+*   `print.osmose()` now prints model name/version from configuration, replicate count, species list, and a compact list of available outputs (excluding empty/system fields). [\[?web=1\]](?web=1), [\[2\]](?web=1)
+
+***
+
+## 🛠️ Refactoring, Maintenance, and Internal Changes
+
+### Cache management cleanup
+
+*   `cacheManager`, `cachePath`, `flushCache`, `updateCache` were refactored:
+    *   consistent `TRUE/FALSE`, clearer assignments, explicit `return(invisible(NULL))` [\[?web=1\]](?web=1), [\[2\]](?web=1)
+    *   updated jar URL naming consistency for 4.3.2/4.3.3 entries [\[?web=1\]](?web=1), [\[2\]](?web=1)
+
+***
+
+### Version parsing supports 4-part versions
+
+*   Version validation now accepts **`X.Y.Z.W`** in addition to `X`, `X.Y`, `X.Y.Z`. [\[2\]](?web=1), [\[?web=1\]](?web=1)
+
+***
+
+### Output trimming helper
+
+*   New `.trim_matrix()` drops trailing all-`NA` columns more safely when reading some outputs. [\[2\]](?web=1), [\[?web=1\]](?web=1)
+
+***
+
+### Minor consistency/documentation improvements
+
+*   Author name capitalization normalized (e.g., “Nicolas BARRIER”). [\[?web=1\]](?web=1), [\[2\]](?web=1)
+*   Roxygen imports expanded (notably `utils::relist/as.relistable` and several `calibrar` functions). [\[?web=1\]](?web=1), [\[2\]](?web=1)
+
+***
+
+## ⚠️ Notes for Upgraders
+
+### Potential breaking/behavioral changes
+
+*   **Fishery outputs**: previous `yieldByFishery` structures are replaced/extended by new arrays and reshaped derivatives (`landingsBy*`, `discardsBy*`, etc.). If you depended on legacy fields, update to the new names. [\[2\]](?web=1), [\[?web=1\]](?web=1)
+*   **`readOsmoseFiles()` grouping**: introducing `bySurvey` changes how files can be grouped/parsed; calling code may need to specify `bySpecies`/`bySurvey` explicitly. [\[?web=1\]](?web=1), [\[2\]](?web=1)
+*   **`get_var()` signature expanded**: if you were using `...` forwarding into `get_var.osmose()` you may want to ensure no name collisions with new formal args (`sp`, `srv`, `fsh`, `size`, etc.). [\[?web=1\]](?web=1), [\[2\]](?web=1)
+
+***
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 # OSMOSE Release Notes - Version 4.4.0
 
