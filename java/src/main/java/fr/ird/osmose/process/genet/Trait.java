@@ -108,7 +108,7 @@ public class Trait extends SimulationLinker {
         this.prefix = prefix;
         this.traitIndex = traitIndex;
 
-        if(getConfiguration().getBoolean("simulation.fixedseed.enabled", false)) {
+        if(getConfiguration().getBoolean("simulation.fixed.seed.enabled", false)) {
             // Assumes a seed of dimension [trait][nSimu]
             long seed = traitIndex * getConfiguration().getNSimulation() + getRank();
             generator = new Random(seed);

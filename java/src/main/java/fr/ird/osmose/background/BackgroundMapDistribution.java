@@ -82,14 +82,14 @@ public class BackgroundMapDistribution extends OsmoseLinker {
     public void init() {
 
         boolean fixedSeed = false;
-        if (!getConfiguration().isNull("simulation.fixedseed.enabled")) {
-            fixedSeed = getConfiguration().getBoolean("simulation.fixedseed.enabled");
+        if (!getConfiguration().isNull("simulation.fixed.seed.enabled")) {
+            fixedSeed = getConfiguration().getBoolean("simulation.fixed.seed.enabled");
         }
         if (fixedSeed) {
             rd1 = new Random(13L ^ iSpecies);
             rd2 = new Random(5L ^ iSpecies);
             rd3 = new Random(1982L ^ iSpecies);
-            warning("Parameter 'simulation.fixedseed.enabled' is set to true. It means that two simulations with strictly identical initial school distribution will lead to same movement.");
+            warning("Parameter 'simulation.fixed.seed.enabled' is set to true. It means that two simulations with strictly identical initial school distribution will lead to same movement.");
         } else {
             rd1 = new Random();
             rd2 = new Random();

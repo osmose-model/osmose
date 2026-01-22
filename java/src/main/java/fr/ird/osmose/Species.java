@@ -172,7 +172,7 @@ public class Species implements ISpecies {
         }
 
         boolean fixedSeed = false;
-        String key = "simulation.fixedseed.enabled";
+        String key = "simulation.fixed.seed.enabled";
         if (!cfg.isNull(key)) {
             fixedSeed = cfg.getBoolean(key);
         }

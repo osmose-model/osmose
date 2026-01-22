@@ -71,7 +71,7 @@ public class WeightedRandomDraft<E> extends OsmoseLinker {
   public void init() {
 
     boolean fixedSeed = false;
-    String key = "simulation.fixedseed.enabled";
+    String key = "simulation.fixed.seed.enabled";
     if(!getConfiguration().isNull(key)) {
       fixedSeed =  getConfiguration().getBoolean(key);
     }

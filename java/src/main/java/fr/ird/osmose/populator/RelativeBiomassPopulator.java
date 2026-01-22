@@ -109,7 +109,7 @@ public class RelativeBiomassPopulator extends AbstractPopulator {
         int cpt;
 
         // Init the random generator
-        if (cfg.getBoolean("simulation.fixedseed.enabled", false)) {
+        if (cfg.getBoolean("simulation.fixed.seed.enabled", false)) {
             long seed = getRank();
             rand = new Random(seed);
         } else {

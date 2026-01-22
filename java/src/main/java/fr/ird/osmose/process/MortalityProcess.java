@@ -179,7 +179,7 @@ public class MortalityProcess extends AbstractProcess {
         }
 
         // Possibility to use a seed in the definition of mortality algorithm
-        String key = "simulation.fixedseed.enabled";
+        String key = "simulation.fixed.seed.enabled";
         if (getConfiguration().getBoolean(key, false)) {
             random = new XSRandom(getRank());
         } else {

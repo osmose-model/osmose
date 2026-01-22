@@ -89,7 +89,7 @@ public class Locus extends OsmoseLinker {
         value = new double[N];
         int nSimulation = getConfiguration().getNSimulation();
 
-        if(getConfiguration().getBoolean("simulation.fixedseed.enabled", false)) {
+        if(getConfiguration().getBoolean("simulation.fixed.seed.enabled", false)) {
             // Assumes a seed array of dimemsion [loci][species][simulation]
             // Makes sure that random generator is different for each species/simulation/loci
             long seed = locus_index * nSimulation * getNSpecies() + spec_index * nSimulation + rank;
