@@ -541,7 +541,7 @@ New NetCDF-based fishery outputs are supported and integrated:
 
 ***
 
-
+<!--
 
 
 
@@ -863,3 +863,5 @@ Release notes capturing changes from OSMOSE 4.3.3 to 4.4.0
 -   Correct a bug in `Surveys` and `OutputRegion`. When school was out of the domain, the code crashed. Fixed by assuming that outside schools are out of the survey region.
 -   Added the background schools in the computation of diets.
 -   Correct a bug in resource output: background species are no longer managed with `ResourceForcing`.
+
+-->
