@@ -194,26 +194,33 @@ public class Species implements ISpecies {
 
         if (!cfg.isBioenEnabled()) {
 
+            stochasticReproduction = false;
             // If not bioen, initialize age at maturity
             // used for reproduction process and egg size
             // used for growth
-            if (cfg.canFind("species.maturity.l50.sp" + fileIndex)) {
-              stochasticReproduction = true;
-              matL50 = cfg.getDouble("species.maturity.l50.sp" + fileIndex);
-              matL75 = cfg.getDouble("species.maturity.l75.sp" + fileIndex);
-              matsd = (matL75 - matL50) / 0.674489750196082;
-              maturityDistrib = new NormalDistribution(matL50, matsd);
-              sizeMaturity = Float.MAX_VALUE;
-              ageMaturity  = Float.MAX_VALUE;
+            if (cfg.canFind("species.maturity.mode.sp" + fileIndex)) {
+                String mode = cfg.getString("species.maturity.mode.sp" + fileIndex);
+                if (mode.equalsIgnoreCase("stochastic")) {
+                    stochasticReproduction = true;
+                }
+            }
+
+            if (stochasticReproduction) {
+
+                matL50 = cfg.getDouble("species.maturity.l50.sp" + fileIndex);
+                matL75 = cfg.getDouble("species.maturity.l75.sp" + fileIndex);
+                matsd = (matL75 - matL50) / 0.674489750196082;
+                maturityDistrib = new NormalDistribution(matL50, matsd);
+                sizeMaturity = Float.MAX_VALUE;
+                ageMaturity = Float.MAX_VALUE;
             } else {
-              stochasticReproduction = false;
-              if (cfg.canFind("species.maturity.size.sp" + fileIndex)) {
-                  sizeMaturity = cfg.getFloat("species.maturity.size.sp" + fileIndex);
-                  ageMaturity  = Float.MAX_VALUE;
-              } else {
-                  ageMaturity = cfg.getFloat("species.maturity.age.sp" + fileIndex);
-                  sizeMaturity = Float.MAX_VALUE;
-              }
+                if (cfg.canFind("species.maturity.size.sp" + fileIndex)) {
+                    sizeMaturity = cfg.getFloat("species.maturity.size.sp" + fileIndex);
+                    ageMaturity = Float.MAX_VALUE;
+                } else {
+                    ageMaturity = cfg.getFloat("species.maturity.age.sp" + fileIndex);
+                    sizeMaturity = Float.MAX_VALUE;
+                }
             }
 
             starvationInterface = (School sch) -> this.isStarvationEnabledNoBioen(sch);
