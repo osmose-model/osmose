@@ -369,9 +369,9 @@ Developers integrating with the economy module must update:
 
 ## 🚀 Highlights
 
-*   **New end-to-end calibration workflow**: add setup, test, run-model, and check utilities for OSMOSE calibrations, including automatic generation of parameter bounds/templates and observed-data scaffolding. [\[2\]](?web=1)
-*   **Much richer output handling**: improved reading/structuring of fishery & survey outputs, including by-fishery-by-species arrays, time/class aggregation, and functional group rollups. [\[2\]](?web=1), [\[?web=1\]](?web=1)
-*   **Major `get_var()` upgrade**: new subsetting, safer behavior, and replicate sampling features make extraction of outputs more flexible and robust. [\[2\]](?web=1), [\[?web=1\]](?web=1)
+*   **New end-to-end calibration workflow**: add setup, test, run-model, and check utilities for OSMOSE calibrations, including automatic generation of parameter bounds/templates and observed-data scaffolding.
+*   **Much richer output handling**: improved reading/structuring of fishery & survey outputs, including by-fishery-by-species arrays, time/class aggregation, and functional group rollups.
+*   **Major `get_var()` upgrade**: new subsetting, safer behavior, and replicate sampling features make extraction of outputs more flexible and robust.
 
 ***
 
@@ -382,19 +382,19 @@ Developers integrating with the economy module must update:
 A complete set of calibration utilities was added, centered around:
 
 *   **`osmose_calibration_setup()`**
-    Creates a calibration directory structure, writes guess/min/max/phase parameter files, installs scripts/templates, runs pre-flight model checks, and creates (or consumes) observed-data templates plus calibration settings. [\[2\]](?web=1), [\[?web=1\]](?web=1)
+    Creates a calibration directory structure, writes guess/min/max/phase parameter files, installs scripts/templates, runs pre-flight model checks, and creates (or consumes) observed-data templates plus calibration settings.
 
 *   **`osmose_calibration_test()`**
-    Runs automated tests (data compatibility + sequential and parallel “smoke tests”) to validate that the calibration environment is correctly configured. [\[2\]](?web=1), [\[?web=1\]](?web=1)
+    Runs automated tests (data compatibility + sequential and parallel “smoke tests”) to validate that the calibration environment is correctly configured.
 
 *   **`osmose_calibration_runmodel()`**
-    Runs the calibration-ready model using the calibration directory and parameter sets, with safeguards against mixing calibrated vs non-calibrated parameters. [\[2\]](?web=1), [\[?web=1\]](?web=1)
+    Runs the calibration-ready model using the calibration directory and parameter sets, with safeguards against mixing calibrated vs non-calibrated parameters.
 
 *   **`osmose_calibration_check()`**
-    Re-runs the model with best parameters from results/restart and returns a calibration object combining simulated/observed/settings/cv. [\[2\]](?web=1), [\[?web=1\]](?web=1)
+    Re-runs the model with best parameters from results/restart and returns a calibration object combining simulated/observed/settings/cv.
 
 *   **`osmose_calibration_outputs()`**
-    Produces a curated list of calibration-ready outputs (surveys, landings, catch-at-length, penalties for growth/mortality/collapse/outburst, etc.). [\[2\]](?web=1), [\[?web=1\]](?web=1)
+    Produces a curated list of calibration-ready outputs (surveys, landings, catch-at-length, penalties for growth/mortality/collapse/outburst, etc.).
 
 ***
 
@@ -403,14 +403,14 @@ A complete set of calibration utilities was added, centered around:
 New helpers make it easier to transform, replicate, and write parameter sets:
 
 *   Parameter manipulation & transformations:
-    *   `set_par()`, `transform_par()`, `replicate_par()` [\[2\]](?web=1), [\[?web=1\]](?web=1)
-    *   `logit()`, `ilogit()` helpers [\[2\]](?web=1), [\[?web=1\]](?web=1)
+    *   `set_par()`, `transform_par()`, `replicate_par()`
+    *   `logit()`, `ilogit()` helpers
 *   Parameter extraction logic for calibration/grouped parameters:
-    *   `get_par2()`, `get_par_phase()`, `get_calibration_parameters()`, `get_osmose_parameter()` [\[2\]](?web=1), [\[?web=1\]](?web=1)
+    *   `get_par2()`, `get_par_phase()`, `get_calibration_parameters()`, `get_osmose_parameter()`
 *   Writers:
-    *   `write_osmose_parameter()` (writes guess/min/max/phase entries for a parameter block) [\[2\]](?web=1), [\[?web=1\]](?web=1)
+    *   `write_osmose_parameter()` (writes guess/min/max/phase entries for a parameter block)
 *   Calibration settings creators:
-    *   `.create_calibration_settings()` plus type-specific helpers (simple/survey) [\[2\]](?web=1), [\[?web=1\]](?web=1)
+    *   `.create_calibration_settings()` plus type-specific helpers (simple/survey)
 
 ***
 
@@ -418,8 +418,8 @@ New helpers make it easier to transform, replicate, and write parameter sets:
 
 New `head.*` and `tail.*` methods preserve OSMOSE output class when slicing:
 
-*   `tail.osmose.biomass`, `tail.osmose.abundance`, `tail.osmose.yield`, `tail.osmose.yieldN` [\[?web=1\]](?web=1), [\[2\]](?web=1)
-*   `head.osmose.biomass`, `head.osmose.abundance`, `head.osmose.yield`, `head.osmose.yieldN` [\[?web=1\]](?web=1), [\[2\]](?web=1)
+*   `tail.osmose.biomass`, `tail.osmose.abundance`, `tail.osmose.yield`, `tail.osmose.yieldN`
+*   `head.osmose.biomass`, `head.osmose.abundance`, `head.osmose.yield`, `head.osmose.yieldN`
 
 ***
 
@@ -427,7 +427,7 @@ New `head.*` and `tail.*` methods preserve OSMOSE output class when slicing:
 
 A new internal check warns when egg density appears unrealistic:
 
-*   `.check_density()` computes density from egg weight and egg size and emits warnings for “lower than seawater”, “abnormal”, or “wrong” density ranges. [\[2\]](?web=1), [\[?web=1\]](?web=1)
+*   `.check_density()` computes density from egg weight and egg size and emits warnings for “lower than seawater”, “abnormal”, or “wrong” density ranges.
 
 ***
 
@@ -435,9 +435,9 @@ A new internal check warns when egg density appears unrealistic:
 
 ### 1) `readOsmoseFiles()` gains survey-aware grouping and safer behavior
 
-*   New argument **`bySurvey`** (in addition to `bySpecies`) supports more structured output folder parsing. [\[2\]](?web=1), [\[?web=1\]](?web=1)
-*   Combined grouping (`bySpecies + bySurvey`) is supported, with logic based on how many “grouping dimensions” are requested. [\[?web=1\]](?web=1), [\[2\]](?web=1)
-*   Returns **`NULL` when no matching files exist**, avoiding downstream failures. [\[2\]](?web=1), [\[?web=1\]](?web=1)
+*   New argument **`bySurvey`** (in addition to `bySpecies`) supports more structured output folder parsing.
+*   Combined grouping (`bySpecies + bySurvey`) is supported, with logic based on how many “grouping dimensions” are requested.
+*   Returns **`NULL` when no matching files exist**, avoiding downstream failures.
 
 ***
 
@@ -446,28 +446,28 @@ A new internal check warns when egg density appears unrealistic:
 New NetCDF-based fishery outputs are supported and integrated:
 
 *   Added reading/representation of:
-    *   `yieldByFisheryBySpecies`, `yieldNByFisheryBySpecies`, `accessibleBiomassByFishery` [\[2\]](?web=1), [\[?web=1\]](?web=1)
+    *   `yieldByFisheryBySpecies`, `yieldNByFisheryBySpecies`, `accessibleBiomassByFishery`
 *   New reshaping and aggregation helpers:
-    *   `.reshapeFishery()` (with `by="fishery"|"species"` and `aggregate=TRUE/FALSE`) [\[2\]](?web=1), [\[?web=1\]](?web=1)
+    *   `.reshapeFishery()` (with `by="fishery"|"species"` and `aggregate=TRUE/FALSE`)
     *   Aggregations across time/class/year:
-        *   `.aggregate_catch_bytime()`, `.aggregate_catch_byclass()`, `.aggregate_catch_byyear()` [\[2\]](?web=1), [\[?web=1\]](?web=1)
-*   New “observed.\*” fields are produced from reshaped fishery catches (e.g., `observed.landings`, `observed.discards`) to feed calibration workflows. [\[2\]](?web=1), [\[?web=1\]](?web=1)
+        *   `.aggregate_catch_bytime()`, `.aggregate_catch_byclass()`, `.aggregate_catch_byyear()`
+*   New “observed.\*” fields are produced from reshaped fishery catches (e.g., `observed.landings`, `observed.discards`) to feed calibration workflows.
 
 ***
 
 ### 3) Surveys are treated as first-class outputs
 
-*   Survey outputs now support `bySurvey` and include additional survey datasets (e.g., mortality/predator pressure) where available. [\[2\]](?web=1), [\[?web=1\]](?web=1)
-*   Survey outputs can be filtered to their target species based on config. [\[?web=1\]](?web=1), [\[2\]](?web=1)
+*   Survey outputs now support `bySurvey` and include additional survey datasets (e.g., mortality/predator pressure) where available.
+*   Survey outputs can be filtered to their target species based on config.
 
 ***
 
 ### 4) More robust CSV/NetCDF reading
 
-*   CSV readers now fail gracefully and return `NULL` on read errors instead of erroring. [\[2\]](?web=1), [\[?web=1\]](?web=1)
+*   CSV readers now fail gracefully and return `NULL` on read errors instead of erroring.
 *   NetCDF reader `.read_osmose_ncdf()` was hardened:
-    *   uses `try(nc_open(...))` and returns `NULL` if opening fails [\[?web=1\]](?web=1), [\[2\]](?web=1)
-    *   adds dimension names (`time`, `species`, `fishery`, `replicates`) and handles `species_names` / `fisheries_names` attributes [\[?web=1\]](?web=1), [\[2\]](?web=1)
+    *   uses `try(nc_open(...))` and returns `NULL` if opening fails
+    *   adds dimension names (`time`, `species`, `fishery`, `replicates`) and handles `species_names` / `fisheries_names` attributes
 
 ***
 
@@ -478,27 +478,27 @@ New NetCDF-based fishery outputs are supported and integrated:
 `get_var.osmose()` now supports:
 
 *   hierarchical subsetting:
-    *   `sp`, `srv`, `fsh` arguments for species / survey / fishery selection [\[2\]](?web=1), [\[?web=1\]](?web=1)
+    *   `sp`, `srv`, `fsh` arguments for species / survey / fishery selection
 *   safer behavior:
-    *   `no.error=TRUE` returns `NULL` instead of throwing when variables are missing [\[?web=1\]](?web=1), [\[2\]](?web=1)
+    *   `no.error=TRUE` returns `NULL` instead of throwing when variables are missing
 *   output shaping and replicate sampling:
-    *   `drop`, `size`, `random`, `replace` for slicing/sampling replicates [\[?web=1\]](?web=1), [\[2\]](?web=1)
+    *   `drop`, `size`, `random`, `replace` for slicing/sampling replicates
 *   new generic helpers/methods:
-    *   `get_var.default()`, `get_var.osmose.calibration()`, `get_var.list`, `get_var.NULL` [\[2\]](?web=1), [\[?web=1\]](?web=1)
+    *   `get_var.default()`, `get_var.osmose.calibration()`, `get_var.list`, `get_var.NULL`
 
-> **Potential breaking change**: code that relied on `get_var()` erroring on missing variables may need updates if `no.error=TRUE` is used or propagated. [\[2\]](?web=1), [\[?web=1\]](?web=1)
+> **Potential breaking change**: code that relied on `get_var()` erroring on missing variables may need updates if `no.error=TRUE` is used or propagated.
 
 ***
 
 ### 2) Plotting behavior improved for `plot.osmose()`
 
-*   `plot.osmose()` now passes derived metadata (`initialYear`, `freq`) when plotting extracted variables, improving plot correctness for time axes. [\[?web=1\]](?web=1), [\[2\]](?web=1)
+*   `plot.osmose()` now passes derived metadata (`initialYear`, `freq`) when plotting extracted variables, improving plot correctness for time axes.
 
 ***
 
 ### 3) Printing `osmose` objects is more informative
 
-*   `print.osmose()` now prints model name/version from configuration, replicate count, species list, and a compact list of available outputs (excluding empty/system fields). [\[?web=1\]](?web=1), [\[2\]](?web=1)
+*   `print.osmose()` now prints model name/version from configuration, replicate count, species list, and a compact list of available outputs (excluding empty/system fields).
 
 ***
 
@@ -507,27 +507,27 @@ New NetCDF-based fishery outputs are supported and integrated:
 ### Cache management cleanup
 
 *   `cacheManager`, `cachePath`, `flushCache`, `updateCache` were refactored:
-    *   consistent `TRUE/FALSE`, clearer assignments, explicit `return(invisible(NULL))` [\[?web=1\]](?web=1), [\[2\]](?web=1)
-    *   updated jar URL naming consistency for 4.3.2/4.3.3 entries [\[?web=1\]](?web=1), [\[2\]](?web=1)
+    *   consistent `TRUE/FALSE`, clearer assignments, explicit `return(invisible(NULL))`
+    *   updated jar URL naming consistency for 4.3.2/4.3.3 entries
 
 ***
 
 ### Version parsing supports 4-part versions
 
-*   Version validation now accepts **`X.Y.Z.W`** in addition to `X`, `X.Y`, `X.Y.Z`. [\[2\]](?web=1), [\[?web=1\]](?web=1)
+*   Version validation now accepts **`X.Y.Z.W`** in addition to `X`, `X.Y`, `X.Y.Z`.
 
 ***
 
 ### Output trimming helper
 
-*   New `.trim_matrix()` drops trailing all-`NA` columns more safely when reading some outputs. [\[2\]](?web=1), [\[?web=1\]](?web=1)
+*   New `.trim_matrix()` drops trailing all-`NA` columns more safely when reading some outputs.
 
 ***
 
 ### Minor consistency/documentation improvements
 
-*   Author name capitalization normalized (e.g., “Nicolas BARRIER”). [\[?web=1\]](?web=1), [\[2\]](?web=1)
-*   Roxygen imports expanded (notably `utils::relist/as.relistable` and several `calibrar` functions). [\[?web=1\]](?web=1), [\[2\]](?web=1)
+*   Author name capitalization normalized (e.g., “Nicolas BARRIER”).
+*   Roxygen imports expanded (notably `utils::relist/as.relistable` and several `calibrar` functions).
 
 ***
 
@@ -535,9 +535,9 @@ New NetCDF-based fishery outputs are supported and integrated:
 
 ### Potential breaking/behavioral changes
 
-*   **Fishery outputs**: previous `yieldByFishery` structures are replaced/extended by new arrays and reshaped derivatives (`landingsBy*`, `discardsBy*`, etc.). If you depended on legacy fields, update to the new names. [\[2\]](?web=1), [\[?web=1\]](?web=1)
-*   **`readOsmoseFiles()` grouping**: introducing `bySurvey` changes how files can be grouped/parsed; calling code may need to specify `bySpecies`/`bySurvey` explicitly. [\[?web=1\]](?web=1), [\[2\]](?web=1)
-*   **`get_var()` signature expanded**: if you were using `...` forwarding into `get_var.osmose()` you may want to ensure no name collisions with new formal args (`sp`, `srv`, `fsh`, `size`, etc.). [\[?web=1\]](?web=1), [\[2\]](?web=1)
+*   **Fishery outputs**: previous `yieldByFishery` structures are replaced/extended by new arrays and reshaped derivatives (`landingsBy*`, `discardsBy*`, etc.). If you depended on legacy fields, update to the new names.
+*   **`readOsmoseFiles()` grouping**: introducing `bySurvey` changes how files can be grouped/parsed; calling code may need to specify `bySpecies`/`bySurvey` explicitly.
+*   **`get_var()` signature expanded**: if you were using `...` forwarding into `get_var.osmose()` you may want to ensure no name collisions with new formal args (`sp`, `srv`, `fsh`, `size`, etc.).
 
 ***
 
