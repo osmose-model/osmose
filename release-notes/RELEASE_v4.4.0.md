@@ -121,26 +121,16 @@ Release notes capturing changes from OSMOSE 4.3.3 to 4.4.0
 
 -   `grid.single.cell.enabled`: Enable single-cell mode simulation
 -   `output.cpu.performance.enabled`: Output CPU performance metrics
--   `species.biomass.spX`: Initialize background/resource species biomass by providing a time-series
--   `species.biomass.total.spX`: Initialize resource species biomass by providing a single value
--   `species.biomass.nsteps.year.spX`: Control biomass initialization timing
+- Background species:
+    -   `species.biomass.spX`: Initialize background species biomass by providing a time-series
+    -   `species.biomass.nsteps.year.spX`: Initialize background species biomass by providing a time-series
 -   `mortality.additional.rate.log.spX`: Additional mortality in log format
--   `simulation.bioen.fo2.enabled`: Control oxygen limitation computation
--   `simulation.bioen.phit.enabled`: Control thermal correction computation
--   `simulation.nfisheries`: Explicit number of fisheries parameter
 -   `simulation.nschool.multiplier`: Scale schools across focal species
--   `output.cutoff.size.sp#`: Size-based output filtering
--   `output.cutoff.age.sp#`: Age-based output filtering (now working correctly)
--   `genetics.randomseed.fixed`: Boolean to control stochasticity in genetics (Ev-OSMOSE)
--   `population.initialisation.biomass.sp#`: Population initialization biomass
--   `population.seeding.biomass.sp#`: Seeding biomass guarantee
--   `population.seeding.year.max`: Maximum seeding duration (years)
+-   `population.initialization.biomass.log.sp#`: Population initialization biomass in log mode.
 -   `reproduction.mode`: Specify reproduction mode (oviparous/viviparous/etc.)
 -   `species.weight.at.larvae.growth.threshold.age` (W0): Optional (default 0)
 -   `predation.success.disabled.sp`: Disable predation success for specific species
--   `module.population.initialisation.enabled`: Control population initialization
 -   `simulation.resource.computePercent.legacy`: Legacy resource computation mode
--   `simulation.nschool.sp%d`: Species-specific school counts
 -   `simulation.fixed.seed.enabled`: fix the seed for all the stochastic process (easy control for replicability)
 -   Fisheries grouping parameters for disaggregated analysis
 -   Survey selectivity and other survey-specific parameters
