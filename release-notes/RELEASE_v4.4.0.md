@@ -11,6 +11,7 @@ This release introduces **major architectural improvements**, **new biological c
 -   **New egg size bioenergetics formulation**
 -   **Reworked restart logic**
 -   **Large configuration key migration**
+-   **Simplified bioenergetics computation when lack of data** (see [Simplified Bioenergetics](https://github.com/osmose-model/osmose/wiki/Bioenergetic-module:-Simplified-equations))
 
 These changes modernize the modeling framework and extend its biological, ecological, and economic realism.
 
@@ -50,6 +51,7 @@ These renames are **mandatory for existing configurations**.
 
 ### Maturity ogive
 
+- `species.maturity.mode`
 -   `species.maturity.l50.sp#`
 -   `species.maturity.l75.sp#`
 
@@ -80,11 +82,37 @@ These renames are **mandatory for existing configurations**.
 -   `substitution.elasticity`
 -   `elasticity.demand.fish`
 
+### Gradient based movements
+
+- `movement.random.walk.coef.sp#`
+- `movement.base.search.radius.sp#`
+
+### Predation on LTL
+
+- `simulation.resources.computePercent.legacy`
+
+### Bioenergetics
+
+- `species.bioenergetics.model.sp`: `full` or `simple`
+- `predation.efficiency.critical.spX`
+- `species.temperature.tmin.spX`
+- `species.temperature.tmax.spX`
+- `species.temperature.topt.spX`
+- `predation.ingestion.rate.max.spX`
+
 ------------------------------------------------------------------------
 
 # 3. ⭐ User‑Facing Changes
 
 ## 3.1. Major New Features
+
+### Gradient-based movement distribution
+
+-   Gradient based spatial distribution has been included ([Gradient based movements](https://github.com/osmose-model/osmose/wiki/Movement:-gradient-based-movements))
+
+### LTL predation
+
+- Possibility to use a log version of the `computePercent` method
 
 ### ✔ Region‑specific mortality
 
@@ -115,7 +143,7 @@ A new full subsystem handles background species:
 
 ### ✔ Stochastic maturity ogive
 
-Optional probabilistic (not deterministic) maturity:
+Optional probabilistic (not deterministic) maturity (see [here](https://github.com/osmose-model/osmose/wiki/Reproduction#stochastic-maturity) for details):
 
 -   Uses parameters `species.maturity.l50.sp#` & `species.maturity.l75.sp#`
 -   A normal CDF calculates probability of maturing between timesteps
@@ -254,7 +282,7 @@ Internal arrays:
 ## 5.3. Configuration Parsing Changes
 
 -   Many key comparisons now use `equalsIgnoreCase()`
--   Path resolution uses `getAbsolutePath()` instead of `getCanonicalPath()`
+-   Path resolution uses `getAbsolutePath()` instead of `getCanonicalPath()` (fix for Windows)
 -   Restart key structure updated
 -   More defensive parsing for command-line arguments
 
@@ -282,20 +310,22 @@ Developers integrating with the economy module must update:
 
 # 6. 🐞 Bug Fixes
 
+-   Correction of the `BiomassDietStageOutput.write` method. There was a bug in the indexing during the conversion from 2D to 1D.
+-   In `SimulationStep`, `movementProcess.run()` is now called before `indicators.initStep()`. This in order to make sure that the initial biomass is always less than the total predated biomass.
+-   In spatial outputs (`SpatialAbundanceOutput.java` and `SpatialBiomassOutput.java`), only cut-off ages were working, not cut-off length. This has been corrected.
+-   Correction in MPA initialization when using restart files. In some cases, the `isUpToDate` variable of the `setMPA` method was always `true`, therefore the fishing effort was never modified. Besides, MPA index as defined in the configuration files (`.mpaXX`) were expected to start from 0 onward. Now any index can work, as for species.
+-   Correction in the reading of files from regular expressions. Canonical path was replaced by absolute paths to make it work on Windows
+-   Correct a bug in `Surveys` and `OutputRegion`. When school was out of the domain, the code crashed. Fixed by assuming that outside schools are out of the survey region.
+-   Correct a bug in the `NetcdfPopulator.java` when genetic is enabled. The genotype was not instanciated.
+-   Correct a bug in the `RelativeBiomassPopulator.java` when genetic and/or bioenegetic was on. Genotype was not instanciated and maturity and gonadic weight were not initialized
 -   Species name validation now supports hyphens
--   Numerous null-checks added to command line parsing
--   Improved restart error messages
--   More defensive array indexing
--   Movement map duplication and consistency checks
--   Background school null‑location handling corrected
--   Egg and biomass initialization clarified in several constructors
 
 ------------------------------------------------------------------------
 
 # 7. 📦 Summary Table
 
 | Category | Summary |
-|---------------|--------------------------------------------------------|
+|-----------------|-------------------------------------------------------|
 | **New Features** | Region‑specific mortality, stochastic maturity ogive, density-based egg size, background movement maps, expanded bioeconomics |
 | **Breaking Changes** | New fishing/discard APIs, mortality API requires timestep, config key renames, restart requirements, region dimension added |
 | **Behavioral Changes** | NetCDF chunking change, background school process rewrite, new maturity logic, numbers-based fishing |
@@ -306,15 +336,15 @@ Developers integrating with the economy module must update:
 
 # 8. ✔ Short Summary
 
-- Region‑specific mortality
-- Fishing/discards tracked in numbers
-- Background school overhaul (movement maps, biomass classes)
-- Stochastic maturity ogive (L50/L75)
-- Egg size from spherical-density model
-- Bioeconomics: costs, utility, prices, profit
-- Config key migration to module.* and simulation.restart.*
-- Restart requires global attribute 'step'
-- NetCDF chunking uses 'standard' by default
+-   Region‑specific mortality
+-   Fishing/discards tracked in numbers
+-   Background school overhaul (movement maps, biomass classes)
+-   Stochastic maturity ogive (L50/L75)
+-   Egg size from spherical-density model
+-   Bioeconomics: costs, utility, prices, profit
+-   Config key migration to module.\* and simulation.restart.\*
+-   Restart requires global attribute 'step'
+-   NetCDF chunking uses 'standard' by default
 
 # OSMOSE Release Notes - Version 4.4.0
 
@@ -421,12 +451,12 @@ Release notes capturing changes from OSMOSE 4.3.3 to 4.4.0
 
 ### Renamed Parameters
 
-- Homogenization of module names:
+-   Homogenization of module names:
     -   `simulation.bioen.enabled` → `module.bioenergetics.enabled`
     -   `simulation.genetic.enabled` → `module.genetics.enabled`
     -   `economy.enabled` → `module.bioeconomics.enabled`
     -   `fisheries.enabled` → `module.multispecies.fisheries.enabled`
-- Bioen-Osmose parameters for consistency with classical Osmose:
+-   Bioen-Osmose parameters for consistency with classical Osmose:
     -   `predation.ingestion.rate.max.bioen.spX` → `predation.ingestion.rate.max.spX` (consistency)
     -   `predation.coef.ingestion.rate.max.larvae.bioen.sp` → `predation.larval.ingestion.rate.increase.ratio.spX`
     -   `species.bioen.maturity.eta.spX` → `species.maturity.eta.spX`
@@ -434,13 +464,13 @@ Release notes capturing changes from OSMOSE 4.3.3 to 4.4.0
 -   `output.fishery.*` → `output.fisheries.*` (output parameters)
 -   `output.restart.*` → `simulation.restart.*` (output restart parameters)
 -   `fishing.mortality.enabled` → `simulation.fishing.mortality.enabled` (clarified)
-- `species.file.spX` renamed in `species.biomass.file.spX`
+-   `species.file.spX` renamed in `species.biomass.file.spX`
 
 ### New Parameters
 
 -   `grid.single.cell.enabled`: Enable single-cell mode simulation
 -   `output.cpu.performance.enabled`: Output CPU performance metrics
-- Background species:
+-   Background species:
     -   `species.biomass.spX`: Initialize background species biomass by providing a time-series
     -   `species.biomass.nsteps.year.spX`: Initialize background species biomass by providing a time-series
 -   `mortality.additional.rate.log.spX`: Additional mortality in log format
@@ -456,13 +486,12 @@ Release notes capturing changes from OSMOSE 4.3.3 to 4.4.0
 
 ### Deprecated Parameters
 
-- Paramters to fix seeds are now deprecated and replaced by `simulation.fixed.seed.enabled`:
-    - `population.initialization.randomseed.fixed`
-    - `genetics.randomseed.fixed`
-    - `movement.randomseed.fixed`
-    - `reproduction.randomseed.fixed`
-    - `stochastic.mortality.randomseed.fixed`
-
+-   Paramters to fix seeds are now deprecated and replaced by `simulation.fixed.seed.enabled`:
+    -   `population.initialization.randomseed.fixed`
+    -   `genetics.randomseed.fixed`
+    -   `movement.randomseed.fixed`
+    -   `reproduction.randomseed.fixed`
+    -   `stochastic.mortality.randomseed.fixed`
 
 ### Modified Parameter Behavior
 
@@ -612,5 +641,3 @@ Release notes capturing changes from OSMOSE 4.3.3 to 4.4.0
 -   Correct a bug in `Surveys` and `OutputRegion`. When school was out of the domain, the code crashed. Fixed by assuming that outside schools are out of the survey region.
 -   Added the background schools in the computation of diets.
 -   Correct a bug in resource output: background species are no longer managed with `ResourceForcing`.
--   Correct a bug in the `NetcdfPopulator.java` when genetic is enabled. The genotype was not instanciated.
--   Correct a bug in the `RelativeBiomassPopulator.java` when genetic and/or bioenegetic was on. Genotype was not instanciated and maturity and gonadic weight were not initialized
