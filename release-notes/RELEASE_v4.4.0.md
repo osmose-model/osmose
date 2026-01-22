@@ -1,3 +1,321 @@
+# 🌊 OSMOSE 4.4.0 — Release Notes
+
+# 1. 🎯 Overview
+
+This release introduces **major architectural improvements**, **new biological capabilities**, **expanded economic modeling**, and **significant refactoring** of internal processes, especially:
+
+-   **Background species system overhaul**
+-   **Region‑aware mortality**
+-   **Fishing & discards tracked in numbers**
+-   **Maturity ogive (stochastic reproduction)**
+-   **New egg size bioenergetics formulation**
+-   **Reworked restart logic**
+-   **Large configuration key migration**
+
+These changes modernize the modeling framework and extend its biological, ecological, and economic realism.
+
+------------------------------------------------------------------------
+
+# 1. ⚙️ Configuration Changes (User Level)
+
+## 1.1. Renamed (breaking) configuration keys
+
+### Module toggles
+
+| Old Key                      | New Key                                 |
+|------------------------------|-----------------------------------------|
+| `simulation.bioen.enabled`   | `module.bioenergetics.enabled`          |
+| `simulation.genetic.enabled` | `module.genetics.enabled`               |
+| `fisheries.enabled`          | `module.multispecies.fisheries.enabled` |
+| `economy.enabled`            | `module.bioeconomics.enabled`           |
+
+### Restart system
+
+| Old Key | New Key |
+|---------------------------------|---------------------------------------|
+| `output.restart.enabled` | `simulation.restart.enabled` |
+| `output.restart.recordfrequency.ndt` | `simulation.restart.recordfrequency.ndt` |
+| `output.restart.spinup` | `simulation.restart.spinup.nstep` / `.nyear` |
+
+These renames are **mandatory for existing configurations**.
+
+------------------------------------------------------------------------
+
+## 1.2. New configuration keys
+
+### Simulation & reproducibility
+
+-   `simulation.fixed.seed.enabled`
+-   `simulation.nschool.multiplier`
+
+### Maturity ogive
+
+-   `species.maturity.l50.sp#`
+-   `species.maturity.l75.sp#`
+
+### Egg size (bioenergetics)
+
+-   `species.egg.density.sp#`
+
+### Background species & biomass scaling
+
+-   `species.multiplier.sp#`
+-   `species.multiplier.log.sp#`
+
+### Background movement & map handling
+
+-   `movement.checks.enabled`
+-   `movement.randomwalk.range.sp#`
+-   `movement.netcdf.enabled`
+
+### Bioeconomics module
+
+-   `species.stock.elasticity.sp#`
+-   `baseline.costs.t0.sp#`
+-   `price.time.trend.sp#`
+-   `species.consumption.elasticity.sp#`
+-   `species.sizeconsumption.elasticity.sp#`
+-   `species.size.preference.sp#`
+-   `weight.fish.consumption`
+-   `substitution.elasticity`
+-   `elasticity.demand.fish`
+
+------------------------------------------------------------------------
+
+# 3. ⭐ User‑Facing Changes
+
+## 3.1. Major New Features
+
+### ✔ Region‑specific mortality
+
+Mortality is now tracked **per output region**. Arrays such as `nDead` and `ageDeath` are now 2‑dimensional: `[region][mortality_cause]`.
+
+### ✔ Fishing & discards tracked in numbers
+
+Fishing/discard tracking moved from **biomass** to **abundance**:
+
+-   `fishedBiomass` → `fishedAbundance`
+-   `discardedBiomass` → `discardedAbundance`
+-   Biomass now computed on demand using abundance × mass functions.
+
+### ✔ Background species & maps overhaul
+
+A new full subsystem handles background species:
+
+-   Background schools are now real “schools” integrated into the simulation
+-   Background movement powered by maps (CSV/NetCDF)
+-   New classes for background distribution and filtering
+-   Background schools populate the grid using class-based biomass and spatial maps
+-   Full per-timestep movement/redistribution support
+-   Consistent inclusion of background schools in outputs
+
+------------------------------------------------------------------------
+
+## 3.2. Biological Process Enhancements
+
+### ✔ Stochastic maturity ogive
+
+Optional probabilistic (not deterministic) maturity:
+
+-   Uses parameters `species.maturity.l50.sp#` & `species.maturity.l75.sp#`
+-   A normal CDF calculates probability of maturing between timesteps
+-   Once mature, always mature
+
+### ✔ Improved egg size under bioenergetics
+
+Under the bioenergetics module:
+
+-   Egg size uses a **spherical egg** model based on density
+-   New config key: `species.egg.density.sp#`
+
+This replaces the adult-coefficient-based egg mass–length conversion.
+
+------------------------------------------------------------------------
+
+## 3.3. Expanded Bioeconomics Module
+
+Economic modelling expanded significantly:
+
+-   Harvesting costs
+-   Consumer utility of fish consumption
+-   Species & size‑class prices
+-   Profit and profit margin
+-   Multi‑elasticity modeling
+-   Multi‑dimensional harvested/accessible biomass arrays: `[fishery][species][size-class]`
+
+New parameters include elasticities, cost time trends, size preferences and more.
+
+------------------------------------------------------------------------
+
+## 3.4. Simulation & Restart Enhancements
+
+### ✔ More robust restart system
+
+-   Restart keys migrated to `simulation.restart.*`
+-   Intelligent fallback between plain and per-rank files
+-   Required global attribute in restart NetCDF: `step`
+-   Improved error messages
+
+### ✔ Deterministic simulation mode
+
+`simulation.fixed.seed.enabled` enforces reproducible random number generation for:
+
+-   Movement
+-   Reproduction
+-   Genetics
+-   Resource forcing
+-   Fishing selectivity
+
+------------------------------------------------------------------------
+
+## 3.5. Output Behavior Improvements
+
+### ✔ NetCDF chunking default changed
+
+Default chunking now uses the **standard NetCDF-4 chunking strategy** for improved performance.
+
+### ✔ Background species always included in outputs
+
+Refactor ensures consistent treatment of background schools in spatial, fisheries, mortality, and predator-prey outputs.
+
+------------------------------------------------------------------------
+
+# 4. 💥 Breaking Changes
+
+### ⚠ Fishing/discards API changed
+
+-   `fishedBy()` / `discardedBy()` replaced by `fishedNBy()` / `discardedNBy()`
+-   Fishing inputs/outputs now primarily use **numbers**, not **biomass**
+
+### ⚠ Mortality API changed
+
+`incrementNdead()` now requires the timestep:
+
+``` java
+incrementNdead(MortalityCause cause, double nDead, int timeStep)
+```
+
+### ⚠ Region indexing mandatory
+
+`nDead`, `ageDeath`, caught fish, discards, mortality outputs and other arrays now include a **region dimension**.
+
+### ⚠ Restart NetCDF must include global attribute `step`
+
+Restart files missing this field will cause the simulation to abort.
+
+### ⚠ Many configuration keys renamed or restructured
+
+Old keys **will not work** without migration.
+
+### ⚠ Species background biomass reading and scaling logic changed
+
+Existing background configurations relying on older semantics may need adjustment.
+
+------------------------------------------------------------------------
+
+# 5. 👨‍💻 Developer‑Facing Notes
+
+## 5.1. Background Species Refactor
+
+A very large subsystem rewrite:
+
+-   `BackgroundProcess` executes each timestep
+-   `BackgroundMapDistribution` controls school movement
+-   `BackgroundMapSet` handles map loading (CSV/NetCDF)
+-   Schools moved to cells via probability maps
+-   Schools reinitialized/reset when maps change
+-   Background species are tracked with real biomass × class distributions
+
+This will impact any tool, plugin, or analysis code accessing background species.
+
+------------------------------------------------------------------------
+
+## 5.2. Aggregation Interface Changes
+
+New abstract methods required in `AbstractSchool` / `IAggregation`:
+
+-   `isMature()`
+-   `isAlive()`
+-   `getClassIndex()`
+-   `isOut()`
+
+Plus new utilities:
+
+-   `resetAccessiblePreyIndex()`
+-   `addAccessiblePreyIndex()`
+-   `getAccessiblePreyIndex()`
+
+Internal arrays:
+
+-   `nDead` and `ageDeath` become 2D arrays `[region][cause]`.
+
+------------------------------------------------------------------------
+
+## 5.3. Configuration Parsing Changes
+
+-   Many key comparisons now use `equalsIgnoreCase()`
+-   Path resolution uses `getAbsolutePath()` instead of `getCanonicalPath()`
+-   Restart key structure updated
+-   More defensive parsing for command-line arguments
+
+------------------------------------------------------------------------
+
+## 5.4. Bioeconomics Engine Rewrite
+
+Developers integrating with the economy module must update:
+
+-   New matrices for biomass accessibility and harvest
+-   New cost and price calculations
+-   Multi-parameter elasticity and preference models
+-   Utility & profit functions rewritten
+-   Many new configuration points
+
+------------------------------------------------------------------------
+
+## 5.5. Initialization & Restart Logic
+
+-   Genetic diversity and trait values may now be restored from restart files
+-   Population initialization more modular
+-   Schools created during reproduction have improved genetic initialization logic
+
+------------------------------------------------------------------------
+
+# 6. 🐞 Bug Fixes
+
+-   Species name validation now supports hyphens
+-   Numerous null-checks added to command line parsing
+-   Improved restart error messages
+-   More defensive array indexing
+-   Movement map duplication and consistency checks
+-   Background school null‑location handling corrected
+-   Egg and biomass initialization clarified in several constructors
+
+------------------------------------------------------------------------
+
+# 7. 📦 Summary Table
+
+| Category | Summary |
+|---------------|--------------------------------------------------------|
+| **New Features** | Region‑specific mortality, stochastic maturity ogive, density-based egg size, background movement maps, expanded bioeconomics |
+| **Breaking Changes** | New fishing/discard APIs, mortality API requires timestep, config key renames, restart requirements, region dimension added |
+| **Behavioral Changes** | NetCDF chunking change, background school process rewrite, new maturity logic, numbers-based fishing |
+| **Developer Refactors** | Background species subsystem, economy engine, school interface changes, initialization/restart logic |
+| **Bug Fixes** | Improved validation, safer parsing, corrected map logic, more robust biomass and egg handling |
+
+------------------------------------------------------------------------
+
+# 8. ✔ Short Summary
+
+- Region‑specific mortality
+- Fishing/discards tracked in numbers
+- Background school overhaul (movement maps, biomass classes)
+- Stochastic maturity ogive (L50/L75)
+- Egg size from spherical-density model
+- Bioeconomics: costs, utility, prices, profit
+- Config key migration to module.* and simulation.restart.*
+- Restart requires global attribute 'step'
+- NetCDF chunking uses 'standard' by default
+
 # OSMOSE Release Notes - Version 4.4.0
 
 Release notes capturing changes from OSMOSE 4.3.3 to 4.4.0
@@ -11,6 +329,7 @@ Release notes capturing changes from OSMOSE 4.3.3 to 4.4.0
 -   **Gradient-based Spatial Distribution**: New spatial distribution method for fish movements
 -   **Marine Ecological Outputs**: Enhanced outputs for Marine project simulations
 -   **Background Species Management**: Improved initialization and management of background and school species using biomass and `species.biomass.nsteps.year.spX` parameters
+-
 
 ### Genetics and Allele Frequency
 
@@ -143,13 +462,7 @@ Release notes capturing changes from OSMOSE 4.3.3 to 4.4.0
     - `movement.randomseed.fixed`
     - `reproduction.randomseed.fixed`
     - `stochastic.mortality.randomseed.fixed`
--   `population.initialisation.method`: Replaced by unified seeding mechanism
--   `population.initialisation.biomass.sp#`: Deprecated (use seeding mechanism)
--   `flux.incoming.season.file`, `flux.incoming.season.file.sp#`: Replaced by time-series approach
--   `flux.incoming.biomass.sp#`, `flux.incoming.size.sp#`, `flux.incoming.age.sp#`: Replaced by:
-    -   `flux.incoming.byDt.byAge.file.sp#` OR
-    -   `flux.incoming.byDt.bySize.file.sp#`
--   `simulation.onestep`: Removed (use debugging tools instead)
+
 
 ### Modified Parameter Behavior
 
