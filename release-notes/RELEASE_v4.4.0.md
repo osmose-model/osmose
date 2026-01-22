@@ -1,4 +1,4 @@
-# 🌊 OSMOSE 4.4.0 — Release Notes
+# 🌊 OSMOSE 4.4.0 — Java Release Notes
 
 # 1. 🎯 Overview
 
@@ -7,11 +7,12 @@ This release introduces **major architectural improvements**, **new biological c
 -   **Background species system overhaul**
 -   **Region‑aware mortality**
 -   **Fishing & discards tracked in numbers**
--   **Maturity ogive (stochastic reproduction)**
+-   **Maturity ogive (stochastic reproduction)** (see [here](https://github.com/osmose-model/osmose/wiki/Reproduction#stochastic-maturity) for details)
 -   **New egg size bioenergetics formulation**
 -   **Reworked restart logic**
 -   **Large configuration key migration**
 -   **Simplified bioenergetics computation when lack of data** (see [Simplified Bioenergetics](https://github.com/osmose-model/osmose/wiki/Bioenergetic-module:-Simplified-equations))
+-   **Post-reproduction mortality** (see [here](https://github.com/osmose-model/osmose/wiki/Mortality:-Post%E2%80%90reproduction-mortality))
 
 These changes modernize the modeling framework and extend its biological, ecological, and economic realism.
 
@@ -38,21 +39,38 @@ These changes modernize the modeling framework and extend its biological, ecolog
 | `output.restart.recordfrequency.ndt` | `simulation.restart.recordfrequency.ndt` |
 | `output.restart.spinup` | `simulation.restart.spinup.nstep` / `.nyear` |
 
+### Bioenergetic module
+
+| Old Key | New Key |
+|------------------------------------|------------------------------------|
+| `predation.ingestion.rate.max.bioen.spX` | `predation.ingestion.rate.max.bioen.spX` |
+| `predation.coef.ingestion.rate.max.larvae.bioen.sp` | `predation.larval.ingestion.rate.increase.ratio.spX` |
+| `species.bioen.maturity.eta.spX` | `species.maturity.eta.spX` |
+| `species.bioen.maturity.r.spX` | `species.maturity.r.spX` |
+| `species.bioen.maturity.m0.spX` | `species.bioen.maturity.m0.spX` |
+| `species.bioen.maturity.m1.spXX` | `species.maturity.m1.spX` |
+
 These renames are **mandatory for existing configurations**.
 
 ------------------------------------------------------------------------
 
 ## 1.2. New configuration keys
 
+### Post-reproduction mortality
+
+-   `species.reproduction.strategy.sp#` = `iteroparous` or `semelparous`
+-   `species.reproduction.postspawning.survivaltime.sp#` = post-reproduction survival time (in years). Used only for `semelparous`
+
 ### Simulation & reproducibility
 
--   `simulation.fixed.seed.enabled`
--   `simulation.nschool.multiplier`
+-   `simulation.fixed.seed.enabled`: used to control the stochasticity of a simulation and allow replicable runs
+-   `simulation.nschool.multiplier`: Parameter to multiply the number of schools for all species (default one):
 
 ### Maturity ogive
 
-- `species.maturity.mode`
--   `species.maturity.l50.sp#`
+See []()
+-   `species.maturity.mode`: controls whether stochastic (`stochastic`) or deterministic (`legacy`) production is used.
+-   `species.maturity.l50.sp#`: mean of the gaussian
 -   `species.maturity.l75.sp#`
 
 ### Egg size (bioenergetics)
@@ -84,21 +102,21 @@ These renames are **mandatory for existing configurations**.
 
 ### Gradient based movements
 
-- `movement.random.walk.coef.sp#`
-- `movement.base.search.radius.sp#`
+-   `movement.random.walk.coef.sp#`
+-   `movement.base.search.radius.sp#`
 
 ### Predation on LTL
 
-- `simulation.resources.computePercent.legacy`
+-   `simulation.resources.computePercent.legacy`
 
 ### Bioenergetics
 
-- `species.bioenergetics.model.sp`: `full` or `simple`
-- `predation.efficiency.critical.spX`
-- `species.temperature.tmin.spX`
-- `species.temperature.tmax.spX`
-- `species.temperature.topt.spX`
-- `predation.ingestion.rate.max.spX`
+-   `species.bioenergetics.model.sp`: `full` or `simple`
+-   `predation.efficiency.critical.spX`
+-   `species.temperature.tmin.spX`
+-   `species.temperature.tmax.spX`
+-   `species.temperature.topt.spX`
+-   `predation.ingestion.rate.max.spX`
 
 ------------------------------------------------------------------------
 
@@ -112,7 +130,7 @@ These renames are **mandatory for existing configurations**.
 
 ### LTL predation
 
-- Possibility to use a log version of the `computePercent` method
+-   Possibility to use a log version of the `computePercent` method
 
 ### ✔ Region‑specific mortality
 
@@ -325,7 +343,7 @@ Developers integrating with the economy module must update:
 # 7. 📦 Summary Table
 
 | Category | Summary |
-|-----------------|-------------------------------------------------------|
+|-------------------|-----------------------------------------------------|
 | **New Features** | Region‑specific mortality, stochastic maturity ogive, density-based egg size, background movement maps, expanded bioeconomics |
 | **Breaking Changes** | New fishing/discard APIs, mortality API requires timestep, config key renames, restart requirements, region dimension added |
 | **Behavioral Changes** | NetCDF chunking change, background school process rewrite, new maturity logic, numbers-based fishing |
@@ -345,6 +363,8 @@ Developers integrating with the economy module must update:
 -   Config key migration to module.\* and simulation.restart.\*
 -   Restart requires global attribute 'step'
 -   NetCDF chunking uses 'standard' by default
+
+------------------------------------------------------------------------
 
 # OSMOSE Release Notes - Version 4.4.0
 
@@ -596,9 +616,11 @@ Release notes capturing changes from OSMOSE 4.3.3 to 4.4.0
 -   **R Package**: Enhanced with new calibration functions and analysis capabilities
 -   **Configuration**: Automatic incremental updates from Osmose 3 and 4.x versions
 
-## Manually written release notes for OSMOSE 4.4.0
+------------------------------------------------------------------------
 
-### Parameter changes
+# Manually written release notes for OSMOSE 4.4.0
+
+## Parameter changes
 
 -   Renaming of output fisheries parameters (`output.fishery.*` to `output.fisheries.*`).
 -   Multispecies fisheries are activated using `process.multispecies.fisheries.enabled` (replaces fisheries.enabled).
@@ -615,7 +637,7 @@ Release notes capturing changes from OSMOSE 4.3.3 to 4.4.0
 -   Parameter `simulation.genetic.enabled` has been replaced by `module.genetics.enabled`
 -   Parameter `economy.enabled` has been replaced by `module.bioeconomics.enabled`
 
-### New features
+## New features
 
 -   Outputs:
     -   Add the bioenergetic output of size at maturity.
@@ -631,7 +653,7 @@ Release notes capturing changes from OSMOSE 4.3.3 to 4.4.0
 -   Fishing by fisheries is now computed in abundance rather than biomass (Ricardo Oliveros-Ramos change).
 -   **New**: fully functional economic module (Emy Cottrant's post-doct)
 
-### Bug fix
+## Bug fix
 
 -   Correction of the `BiomassDietStageOutput.write` method. There was a bug in the indexing during the conversion from 2D to 1D.
 -   In `SimulationStep`, `movementProcess.run()` is now called before `indicators.initStep()`. This in order to make sure that the initial biomass is always less than the total predated biomass.
