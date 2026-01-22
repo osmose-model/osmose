@@ -78,11 +78,11 @@ public class ResourceForcing extends OsmoseLinker {
      * configuration.
      */
     private double uBiomass;
-    
+
         /**
      * The biomass, in tonne, in a cell of the model, considering time variability. Parameter
      * 'species.biomass.sp#' provides the total biomass of a given resource
-     * group in the system in combination with species.biomass.nsteps.year.sp#. 
+     * group in the system in combination with species.biomass.nsteps.year.sp#.
      */
     private double[] fBiomass;
     private double tBiomass;
@@ -148,7 +148,7 @@ public class ResourceForcing extends OsmoseLinker {
             uBiomass = getConfiguration().getDouble("species.biomass.total.sp" + fileindex) / getGrid().getNOceanCell();
             uBiomass = multiplier * (uBiomass + offset);
 
-        } else if (!getConfiguration().isNull("species.file.sp" + fileindex)) {
+        } else if (!getConfiguration().isNull("species.biomass.file.sp" + fileindex)) {
             // biomass provided from NetCDF file
             // set negative value to uniform biomass
             uBiomass = -1.d;
@@ -171,24 +171,24 @@ public class ResourceForcing extends OsmoseLinker {
 
             this.forcingFile = new ForcingFile(name, ncFile, ncPerYear, 0.0, this.multiplier, caching);
             this.forcingFile.init();
-            
+
         } else if (!getConfiguration().isNull("species.biomass.sp" + fileindex)) {
-          
+
               uBiomass = -9999.d;
-              
+
               String keyVal = "species.biomass.sp" + fileindex;
               String keyShift = "species.biomass.nsteps.year.sp" + fileindex;
               ForcingTimeSeries biomassSeries = new ForcingTimeSeries(keyShift, keyVal);
               biomassSeries.init();
 
               fBiomass = biomassSeries.getValues();
-              
+
               for (int i = 0; i < fBiomass.length; i++) {
                 fBiomass[i] = multiplier * (fBiomass[i] + offset) / getGrid().getNOceanCell();
               }
-              
+
               tBiomass = fBiomass[0];
-          
+
         }
 
     }
@@ -205,7 +205,7 @@ public class ResourceForcing extends OsmoseLinker {
         if (uBiomass >= 0.d) {
             return;
         }
-        
+
         if (uBiomass < -9000.0) {
           tBiomass = fBiomass[iStepSimu];
           //String msg = String.format("tBiomass=%f", tBiomass);
@@ -218,7 +218,7 @@ public class ResourceForcing extends OsmoseLinker {
     }
 
     public double getBiomass(Cell cell) {
-        return (uBiomass >= 0) ? uBiomass : 
+        return (uBiomass >= 0) ? uBiomass :
                 (uBiomass < -9000.0) ? tBiomass : this.forcingFile.getVariable(cell);
     }
 

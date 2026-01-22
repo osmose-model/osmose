@@ -115,13 +115,14 @@ Release notes capturing changes from OSMOSE 4.3.3 to 4.4.0
 -   `output.fishery.*` → `output.fisheries.*` (output parameters)
 -   `output.restart.*` → `simulation.restart.*` (output restart parameters)
 -   `fishing.mortality.enabled` → `simulation.fishing.mortality.enabled` (clarified)
+- `species.file.spX` renamed in `species.biomass.file.spX`
 
 ### New Parameters
 
 -   `grid.single.cell.enabled`: Enable single-cell mode simulation
--   `simulation.cpu.performance.enabled`: Enable CPU performance tracking
 -   `output.cpu.performance.enabled`: Output CPU performance metrics
--   `species.biomass.spX`: Initialize background/school species biomass
+-   `species.biomass.spX`: Initialize background/resource species biomass by providing a time-series
+-   `species.biomass.total.spX`: Initialize resource species biomass by providing a single value
 -   `species.biomass.nsteps.year.spX`: Control biomass initialization timing
 -   `mortality.additional.rate.log.spX`: Additional mortality in log format
 -   `simulation.bioen.fo2.enabled`: Control oxygen limitation computation
