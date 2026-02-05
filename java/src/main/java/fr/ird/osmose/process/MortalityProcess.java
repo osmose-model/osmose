@@ -395,7 +395,7 @@ public class MortalityProcess extends AbstractProcess {
                     trophicLevel += 1;
                     school.setTrophicLevel((float) trophicLevel);
                 }
-            } // end of trophicLevel 
+            } // end of trophicLevel
         } // end of starvation and trophicLevel update
 
         // Apply Zout mortality on schools out of the simulated domain
