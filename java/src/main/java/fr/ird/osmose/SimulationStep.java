@@ -200,6 +200,13 @@ public class SimulationStep extends SimulationLinker {
             indicators.update(-1);
         }
 
+
+        getSimulation().resetSSB();
+        getSchoolSet().getSchools().forEach((school) -> {
+            getSimulation().incrementSSB(school);
+        });
+
+
         // Compute mortality
         // (predation + fishing + additional mortality + starvation)
         mortalityProcess.run();
