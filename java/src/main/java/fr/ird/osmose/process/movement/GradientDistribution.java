@@ -1,0 +1,222 @@
+/*
+ *
+ * OSMOSE (Object-oriented Simulator of Marine Ecosystems)
+ * http://www.osmose-model.org
+ *
+ * Copyright (C) IRD (Institut de Recherche pour le Développement) 2009-2020
+ *
+ * Osmose is a computer program whose purpose is to simulate fish
+ * populations and their interactions with their biotic and abiotic environment.
+ * OSMOSE is a spatial, multispecies and individual-based model which assumes
+ * size-based opportunistic predation based on spatio-temporal co-occurrence
+ * and size adequacy between a predator and its prey. It represents fish
+ * individuals grouped into schools, which are characterized by their size,
+ * weight, age, taxonomy and geographical location, and which undergo major
+ * processes of fish life cycle (growth, explicit predation, additional and
+ * starvation mortalities, reproduction and migration) and fishing mortalities
+ * (Shin and Cury 2001, 2004).
+ *
+ * Contributor(s):
+ * Yunne SHIN (yunne.shin@ird.fr),
+ * Morgane TRAVERS (morgane.travers@ifremer.fr)
+ * Ricardo OLIVEROS RAMOS (ricardo.oliveros@gmail.com)
+ * Philippe VERLEY (philippe.verley@ird.fr)
+ * Laure VELEZ (laure.velez@ird.fr)
+ * Nicolas Barrier (nicolas.barrier@ird.fr)
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation (version 3 of the License). Full description
+ * is provided on the LICENSE file.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ *
+ */
+
+package fr.ird.osmose.process.movement;
+
+import fr.ird.osmose.Cell;
+import fr.ird.osmose.util.GridMap;
+import fr.ird.osmose.School;
+import fr.ird.osmose.process.bioen.WeightedRandomDraft;
+import fr.ird.osmose.util.MapSet;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Random;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import ucar.ma2.InvalidRangeException;
+
+/**
+ *
+ * @author pverley
+ */
+public class GradientDistribution extends AbstractSpatialDistribution {
+
+    private final int iSpecies;
+    private final int iSpeciesFile;
+    private MapSet maps;
+    private int rank;
+    private int baseSearchRadius;
+    private float randomWalkCoef; // alpha
+    private static int radiusExpansions[] = new int[] { 0, 1, 2, 3, 5, 10 };
+    private final WeightedRandomDraft<Cell> randomDraft;
+
+    public GradientDistribution(int iSpeciesFile, int iSpecies, int rank) {
+        this.iSpeciesFile = iSpeciesFile;
+        this.iSpecies = iSpecies;
+        this.rank = rank;
+        randomDraft = new WeightedRandomDraft<>(this.rank);
+    }
+
+    @Override
+    public void init() {
+
+        randomDraft.init();
+
+        // List of probability maps
+        maps = new MapSet(iSpeciesFile, iSpecies, "movement");
+        try {
+            maps.init();
+        } catch (IOException | InvalidRangeException ex) {
+            Logger.getLogger(GradientDistribution.class.getName()).log(Level.SEVERE, null, ex);
+        }
+
+        baseSearchRadius = getConfiguration().getInt("movement.base.search.radius.sp" + iSpeciesFile);
+
+        randomWalkCoef = getConfiguration().getFloat("movement.random.walk.coef.sp" + iSpeciesFile);
+        if ((this.randomWalkCoef > 1) || (this.randomWalkCoef < 0)) {
+            error("The movement.random.walk.coef.sp" + iSpeciesFile + " parameter must be in [0, 1]", new Exception());
+        }
+
+    }
+
+    @Override
+    public void move(School school, int iStepSimu) {
+        if (!isOut(school, iStepSimu)) {
+            gradientDistribution(school, iStepSimu);
+        } else {
+            school.out();
+        }
+    }
+
+    private boolean isOut(School school, int iStepSimu) {
+        return (null == maps.getMap(school, iStepSimu));
+    }
+
+    private void gradientDistribution(School school, int iStepSimu) {
+
+        // Get current map and max probability of presence
+        int indexMap = maps.getIndexMap(school.getAgeDt(), iStepSimu);
+        GridMap map = maps.getMap(indexMap);
+
+        // Normalize probabilities
+        List<Cell> listOfCells = this.getAccessibleCells(school, map);
+        List<Float> listOfProba = new ArrayList<>();
+
+        float probaTot = 0;
+        for (Cell cell : listOfCells) {
+            listOfProba.add(map.getValue(cell));
+            probaTot += map.getValue(cell);
+        }
+
+        for (int k = 0; k < listOfProba.size(); k++) {
+            listOfProba.set(k, listOfProba.get(k) / probaTot);
+        }
+
+        float N = (float) listOfProba.size();
+
+        List<Float> listOfCombinedProba = new ArrayList<>();
+        for (int k = 0; k < listOfProba.size(); k++) {
+            listOfCombinedProba.add(randomWalkCoef * 1 / N + (1 - randomWalkCoef) * listOfProba.get(k));
+        }
+
+        randomDraft.reset();
+        for (int k = 0; k < listOfProba.size(); k++) {
+            randomDraft.add(listOfCombinedProba.get(k), listOfCells.get(k));
+        }
+
+        Cell destinationCell = randomDraft.next();
+        school.moveToCell(destinationCell);
+
+    }
+
+    /**
+     * Get the adjacent cells of a given school that are contained in the given map.
+     *
+     * @param school
+     * @param map
+     * @return
+     */
+    private List<Cell> getAccessibleCells(School school, GridMap map) {
+
+        // If the school is not located yet, move it anywhere on the grid where P > 0
+        if (school.isUnlocated()) {
+            return this.listGlobalCells(map);
+        }
+
+        Cell cell = school.getCell();
+
+        if (map.getValue(cell) <= 0.d) {
+            StringBuilder str = new StringBuilder("Inconsistency in moving ");
+            str.append(school.toString());
+            str.append("\n");
+            str.append("It is not in the geographical area it is supposed to be...");
+            warning(str.toString());
+        }
+
+        // List of all accessible cells.
+        // Starts searching from base radius and incrementing using the cell iterator
+        List<Cell> accessibleCells = new ArrayList<>();
+        for (int iterator = 0; iterator < radiusExpansions.length; iterator++) {
+            // List of all accessible cells, i.e. the cells for which probability is >0
+            accessibleCells.clear();
+            int range = baseSearchRadius + radiusExpansions[iterator];
+            Iterator<Cell> neighbours = getGrid().getNeighbourCells(cell, range).iterator();
+            while (neighbours.hasNext()) {
+                Cell neighbour = neighbours.next();
+                // 2. Eliminate cell that is on land or for which probability is 0
+                if (!neighbour.isLand() && (map.getValue(neighbour) > 0) && (!Double.isNaN(map.getValue(neighbour)))) {
+                    accessibleCells.add(neighbour);
+                }
+            }
+
+            // If the number of accessible cells > 0
+            // then we leave the loop
+            if (accessibleCells.isEmpty()) {
+                break;
+            }
+
+        } // end of loop on radius iterator
+
+        // If no cells is available, then all where P>0 are accessible
+        if (accessibleCells.isEmpty()) {
+            return this.listGlobalCells(map);
+        }
+
+        return accessibleCells;
+
+    }
+
+    List<Cell> listGlobalCells(GridMap map) {
+
+        List<Cell> accessibleCells = new ArrayList<>();
+        for (Cell oceanCell : getGrid().getOceanCells()) {
+            if ((map.getValue(oceanCell) > 0) && (!Double.isNaN(map.getValue(oceanCell)))) {
+                accessibleCells.add(oceanCell);
+            }
+        }
+
+        return accessibleCells;
+
+    }
+
+}

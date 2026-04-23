@@ -248,7 +248,7 @@ public class Resource extends OsmoseLinker implements IAggregation {
     //public void discardedBy(int fisheryIndex, double fishedBiomass) {
     //    throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     //}
-    
+
     @Override
     public void discardedNBy(int fisheryIndex, double fishedAbundance) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
@@ -280,6 +280,11 @@ public class Resource extends OsmoseLinker implements IAggregation {
     public List<Integer> getAccessiblePreyIndex() {
         // TODO Auto-generated method stub
         throw new UnsupportedOperationException("Unimplemented method 'getAccessiblePreyIndex'");
+    }
+
+    @Override
+    public boolean isMature() {
+        return false;
     }
 
 

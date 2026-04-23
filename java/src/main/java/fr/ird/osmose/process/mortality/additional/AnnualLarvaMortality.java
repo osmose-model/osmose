@@ -57,6 +57,8 @@ public class AnnualLarvaMortality extends AbstractMortalitySpecies {
     // Larval mortality rate expressed in [time_step^-1]
     final private String stage0;
     private double[] mortRate;
+    private double[] a;
+    private double referenceDensity;
 
     public AnnualLarvaMortality(int rank, Species species, String stage0) {
         super(rank, species);
@@ -72,42 +74,30 @@ public class AnnualLarvaMortality extends AbstractMortalitySpecies {
     @Override
     public void init() {
 
+        if (stage0.equals("larva")) {
+            // check if the parameter reference density exists
+            // if not, set a value to -999
+            String keyDens = String.format("mortality.additional.%s.referencedensity.sp%s", stage0, getFileSpeciesIndex());
+            if (getConfiguration().isNull(keyDens)) {
+                referenceDensity = -999;
+            } else {
+                referenceDensity = getConfiguration().getDouble(keyDens);
+            }
+        } else {
+            referenceDensity = -999;
+        }
+
         int nStepYear = getConfiguration().getNStepYear();
         // reading base mortality rate
         String keyShift = String.format("mortality.additional.%s.rate.shift.sp%d", this.stage0, getFileSpeciesIndex());
         String keyVal = String.format("mortality.additional.%s.rate.sp%d", this.stage0, getFileSpeciesIndex());
         //String keyValLog = String.format("mortality.additional.larva.rate.log.sp%d", getFileSpeciesIndex());
 
-        // test if only one of the two values exists
-        //if (!getConfiguration().isNull(keyValLog) && !getConfiguration().isNull(keyVal)) {
-        //    String message = String.format("Both %s and %s parameters are defined. Choose only one.\n", keyValLog, keyVal);
-        //    error(message, new Exception());
-        //}
-
         //boolean useLog;
         ByRegimeTimeSeries mortRateSeries;
         mortRateSeries = new ByRegimeTimeSeries(keyShift, keyVal);
         mortRateSeries.init();
         double[] mortRateBase = mortRateSeries.getValues();
-
-        //if(getConfiguration().isNull(keyValLog)) {
-        //    // If the key for log values is Null, assume fishing mort in standard mode
-        //    mortRateSeries = new ByRegimeTimeSeries(keyShift, keyVal);
-        //    useLog = false;
-        //} else {
-        //    // If the key for log values is not null, assume fishing mort in log
-        //    mortRateSeries = new ByRegimeTimeSeries(keyShift, keyValLog);
-        //    useLog = true;
-        //}
-
-        //mortRateSeries.init();
-        //double[] mortRateBase = mortRateSeries.getValues();
-
-        //if (useLog) {
-        //    for (int i = 0; i < mortRateBase.length; i++) {
-        //        mortRateBase[i] = Math.exp(mortRateBase[i]);
-        //    }
-        //}
 
         // reading multiplier
         double multiplier;
@@ -129,11 +119,28 @@ public class AnnualLarvaMortality extends AbstractMortalitySpecies {
         for(int i = 0; i < getConfiguration().getNStep(); i++) {
             mortRate[i] = multiplier * mortRateBase[i] * seasonValues[i] / nStepYear;
         }
+
+        a = new double[getConfiguration().getNStep()];
+
+        if (referenceDensity < 0) {
+            // if reference density does not exist, set the value of a to 1
+            for (int i = 0; i < getConfiguration().getNStep(); i++) {
+                a[i] = 0;
+            }
+        } else {
+            // if the reference density exits, set the value of a to log(2)/L
+            for (int i = 0; i < getConfiguration().getNStep(); i++) {
+                a[i] = Math.log(2) / mortRate[i];
+            }
+        }
+
     }
 
     @Override
     public double getRate(School school) {
-        return mortRate[getSimulation().getIndexTimeSimu()];
+        int timeIndex = getSimulation().getIndexTimeSimu();
+        double correctedMortRate = mortRate[timeIndex] * (1 + a[timeIndex] * getSimulation().getSSB(school) / referenceDensity);
+        return correctedMortRate;
     }
 
     public double[] getRates() {

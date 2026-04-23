@@ -1,4 +1,4 @@
-fisheries.enabled;true
+module.multispecies.fisheries.enabled;true
 
 ######################### Selectivities
 # Define age-selectivity for fisheries

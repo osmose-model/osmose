@@ -121,16 +121,23 @@ public class ForcingFile extends OsmoseLinker {
 
     private int previousNcStep = -1;
 
+    private boolean normalize;
+
     //////////////
     // Constructor
     //////////////
-    public ForcingFile(String varName, String filePattern, int ncPerYear, double offset, double factor, ForcingFileCaching caching) {
+    public ForcingFile(String varName, String filePattern, int ncPerYear, double offset, double factor, ForcingFileCaching caching, boolean normalize) {
         this.varName = varName;
         this.filePattern = filePattern;
         this.ncPerYear = ncPerYear;
         this.caching = caching;
         this.factor = factor;
         this.offset = offset;
+        this.normalize = normalize;
+    }
+
+    public ForcingFile(String varName, String filePattern, int ncPerYear, double offset, double factor, ForcingFileCaching caching) {
+        this(varName, filePattern, ncPerYear, offset, factor, caching, false);
     }
 
     ////////////////////////////
@@ -380,6 +387,24 @@ public class ForcingFile extends OsmoseLinker {
         } catch (IOException | InvalidRangeException ex) {
             error("File " + ncFile + ", variable " + this.varName + "cannot be read", ex);
         }
+
+        if(normalize) {
+            for(int t = 0; t < output.length; t++) {
+
+                double total = 0;
+                for(Cell cell : getConfiguration().getGrid().getOceanCells()) {
+                    int j = cell.get_jgrid();
+                    int i = cell.get_igrid();
+                    total += output[t][j][i];
+                } // end of cell loop for total computation
+
+                for(Cell cell : getConfiguration().getGrid().getOceanCells()) {
+                    int j = cell.get_jgrid();
+                    int i = cell.get_igrid();
+                    output[t][j][i] /= total;
+                } // enf of ell loop for normalization
+            } // end of layer loop
+        } // enf of normalize if statement
 
         return output;
 

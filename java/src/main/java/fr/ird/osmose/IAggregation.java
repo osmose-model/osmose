@@ -97,7 +97,7 @@ public interface IAggregation extends IMarineOrganism {
 
     /** Get the first feeding age. */
     public int getFirstFeedingAgeDt();
-    
+
     /**
      * Increment the number of dead individuals at current time step, for a
      * given mortality cause.
@@ -142,5 +142,7 @@ public interface IAggregation extends IMarineOrganism {
     public void addAccessiblePreyIndex(int index);
 
     public List<Integer> getAccessiblePreyIndex();
+
+    public boolean isMature();
 
 }

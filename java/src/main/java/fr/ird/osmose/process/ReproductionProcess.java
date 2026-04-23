@@ -334,7 +334,7 @@ public class ReproductionProcess extends AbstractProcess {
                     // increment the total number of eggs
                     total_species_eggs += school_nEgg;
                     // if a positive number of eggs, indicate the school has spawned
-                    if (school_nEgg > 0) school.setHasSpawned(true);
+                    if (school_nEgg > 0) school.setHasSpawned(true, getSimulation().getIndexTimeSimu());
                 }
             } // end of loop over the school that belong to species i
 
@@ -666,7 +666,7 @@ public class ReproductionProcess extends AbstractProcess {
                     total_species_eggs += school_nEgg;
                     weight_rand.add(school_nEgg, school);
                     // if a positive number of eggs, indicate the school has spawned
-                    if (school_nEgg > 0) school.setHasSpawned(true);
+                    if (school_nEgg > 0) school.setHasSpawned(true, getSimulation().getIndexTimeSimu());
                 }
 
             } // end of loop over the school that belong to species i

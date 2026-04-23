@@ -679,14 +679,14 @@ public class OutputManager extends SimulationLinker {
 
         if (getConfiguration().isBioenEnabled()) {
 
-            if (getConfiguration().getBoolean("output.fecundity.bysize.enabled", NO_WARNING)) {
-                outputs.add(new DistribOutput(rank, "SizeIndicators", "fecundity",
+            if (getConfiguration().getBoolean("output.number.of.eggs.bysize.enabled", NO_WARNING)) {
+                outputs.add(new DistribOutput(rank, "SizeIndicators", "number.of.eggs",
                         "Number of eggs by species and by size class",
                         school -> school.getNEggs(), sizeDistrib, false));
             }
 
-            if (getConfiguration().getBoolean("output.fecundity.byage.enabled", NO_WARNING)) {
-                outputs.add(new DistribOutput(rank, "AgeIndicators", "fecundity",
+            if (getConfiguration().getBoolean("output.number.of.eggs.byage.enabled", NO_WARNING)) {
+                outputs.add(new DistribOutput(rank, "AgeIndicators", "number.of.eggs",
                         "Number of eggs by species and by size class",
                         school -> school.getNEggs(), ageDistrib, false));
             }
