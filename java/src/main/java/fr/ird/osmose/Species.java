@@ -168,7 +168,6 @@ public class Species implements ISpecies {
     public Species(int fileIndex, int index) {
 
         String key;
-
         this.index = index;
 
 
@@ -183,6 +182,9 @@ public class Species implements ISpecies {
             reproductionStrategy = ReproductionStrategy.valueOf(cfg.getString(key).toUpperCase());
         }
 
+        // If species is SEMELPAROUS, then it has a postspawning survival time.
+        // If the species.reproduction.postspawning.survivaltime is null,
+        // then survival time is 0 after spawning
         if(reproductionStrategy == ReproductionStrategy.SEMELPAROUS) {
             key = String.format("species.reproduction.postspawning.survivaltime.sp", fileIndex);
             if(cfg.isNull(key)) {
@@ -229,6 +231,9 @@ public class Species implements ISpecies {
 
         if (!cfg.isBioenEnabled()) {
 
+            // If bioen is disabled, then look for
+            // wheter reproduction is 0 or not.
+
             stochasticReproduction = false;
             // If not bioen, initialize age at maturity
             // used for reproduction process and egg size
@@ -241,7 +246,8 @@ public class Species implements ISpecies {
             }
 
             if (stochasticReproduction) {
-
+                // If stochastic reproduction, then define some statistics for the
+                // maturity
                 matL50 = cfg.getDouble("species.maturity.l50.sp" + fileIndex);
                 matL75 = cfg.getDouble("species.maturity.l75.sp" + fileIndex);
                 matsd = (matL75 - matL50) / 0.674489750196082;
@@ -249,6 +255,7 @@ public class Species implements ISpecies {
                 sizeMaturity = Float.MAX_VALUE;
                 ageMaturity = Float.MAX_VALUE;
             } else {
+                // if not stochastic, then we define the maturity size/age
                 if (cfg.canFind("species.maturity.size.sp" + fileIndex)) {
                     sizeMaturity = cfg.getFloat("species.maturity.size.sp" + fileIndex);
                     ageMaturity = Float.MAX_VALUE;
@@ -269,10 +276,10 @@ public class Species implements ISpecies {
             starvationInterface = (School sch) -> this.isStarvationEnabledBioen(sch);
 
             key = String.format("species.maturity.m0.sp" + fileIndex);
-            m0 = cfg.getDouble(key);   // barrier.n: conversion from mm to cm
+            m0 = cfg.getDouble(key); // barrier.n: conversion from mm to cm
 
             key = String.format("species.maturity.m1.sp" + fileIndex);
-            m1 = cfg.getDouble(key);   // barrier.n: conversion from mm to cm
+            m1 = cfg.getDouble(key); // barrier.n: conversion from mm to cm
 
         }
 
