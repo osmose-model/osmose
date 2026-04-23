@@ -177,7 +177,7 @@ public class SchoolSet extends OsmoseLinker {
         while (it.hasNext()) {
             School tmpSchool = it.next();
             if (tmpSchool.dieFromSpawning(timeStep)) {
-                tmpSchool.incrementNdead(MortalityCause.SPAWNING, tmpSchool.getInstantaneousAbundance());
+                tmpSchool.incrementNdead(MortalityCause.SPAWNING, tmpSchool.getInstantaneousAbundance(), timeStep);
             }
         }
     }
