@@ -43,6 +43,7 @@ package fr.ird.osmose.process;
 
 import fr.ird.osmose.School;
 import fr.ird.osmose.process.movement.AbstractSpatialDistribution;
+import fr.ird.osmose.process.movement.GradientDistribution;
 import fr.ird.osmose.process.movement.MapDistribution;
 import fr.ird.osmose.process.movement.RandomDistribution;
 
@@ -71,6 +72,8 @@ public class MovementProcess extends AbstractProcess {
                 spatialDistribution[cpt] = new RandomDistribution(iSpecies, cpt, getRank());
             } else if (distributionMethod.equalsIgnoreCase("maps")) {
                 spatialDistribution[cpt] = new MapDistribution(iSpecies, cpt, getRank());
+            } else if (distributionMethod.equalsIgnoreCase("gradient")) {
+                spatialDistribution[cpt] = new GradientDistribution(iSpecies, cpt, getRank());
             } else {
                 throw new UnsupportedOperationException("Distribution method is either 'random' or 'maps'");
             }

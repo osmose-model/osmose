@@ -132,3 +132,5 @@ suppressions.txt
 
 sandbox
 build*
+
+output-vscode

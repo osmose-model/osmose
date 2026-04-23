@@ -1,3 +1,14 @@
+movement.distribution.method.sp0;gradient
+movement.base.search.radius.sp0;3
+movement.random.walk.coef.sp0;0.2
+
+movement.initialAge.map0;0
+movement.lastAge.map0;2
+movement.file.map0;maps/1Roussette_01_corrected.csv
+movement.steps.map0;0;1;2;3;4;5;6;7;8;9;10;11;12;13;14;15;16;17;18;19;20;21;22;23
+movement.species.map0;lesserSpottedDogfish
+
+
 movement.distribution.method.sp0;maps
 movement.distribution.method.sp1;maps
 movement.distribution.method.sp10;maps
