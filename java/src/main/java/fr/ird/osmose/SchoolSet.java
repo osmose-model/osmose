@@ -171,6 +171,17 @@ public class SchoolSet extends OsmoseLinker {
         }
     }
 
+    /** Increments the biomass of dead individuals that are going to die of spawning */
+    public void updateSpawningMortality(int timeStep) {
+        Iterator<School> it = schoolset.iterator();
+        while (it.hasNext()) {
+            School tmpSchool = it.next();
+            if (tmpSchool.dieFromSpawning(timeStep)) {
+                tmpSchool.incrementNdead(MortalityCause.SPAWNING, tmpSchool.getInstantaneousAbundance());
+            }
+        }
+    }
+
     /**
      * Returns all the schools.
      *

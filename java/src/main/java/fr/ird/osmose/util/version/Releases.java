@@ -50,579 +50,622 @@ import java.io.IOException;
 import java.util.List;
 
 /**
-*
-* @author pverley
-*/
+ *
+ * @author pverley
+ */
 public class Releases {
 
     final public static Release[] ALL = new Release[] {
-        // 2014/06/01
-        new Release("3.1") {
-            @Override
-            void updateParameters() {
-                // Renamed simulation.restart.recordfrequency.ndt into
-                // output.restart.recordfrequency.ndt
-                updateKey("simulation.restart.recordfrequency.ndt", "output.restart.recordfrequency.ndt");
+            // 2014/06/01
+            new Release("3.1") {
+                @Override
+                void updateParameters() {
+                    // Renamed simulation.restart.recordfrequency.ndt into
+                    // output.restart.recordfrequency.ndt
+                    updateKey("simulation.restart.recordfrequency.ndt", "output.restart.recordfrequency.ndt");
 
-                // Renamed simulation.restart.spinup into output.restart.spinup
-                updateKey("simulation.restart.spinup", "output.restart.spinup");
+                    // Renamed simulation.restart.spinup into output.restart.spinup
+                    updateKey("simulation.restart.spinup", "output.restart.spinup");
 
-                // Deleted output output.size.perSpecies.enabled
-                deprecateParameter("output.size.perSpecies.enabled");
+                    // Deleted output output.size.perSpecies.enabled
+                    deprecateParameter("output.size.perSpecies.enabled");
 
-                // Deleted output output.size.spectrum.perSpecies.B.enabled
-                deprecateParameter("output.size.spectrum.perSpecies.B.enabled");
+                    // Deleted output output.size.spectrum.perSpecies.B.enabled
+                    deprecateParameter("output.size.spectrum.perSpecies.B.enabled");
 
-                // Deleted output output.size.spectrum.perSpecies.N.enabled
-                deprecateParameter("output.size.spectrum.perSpecies.N.enabled");
+                    // Deleted output output.size.spectrum.perSpecies.N.enabled
+                    deprecateParameter("output.size.spectrum.perSpecies.N.enabled");
 
-                // Renamed output.size.spectrum.enabled into output.abundance.bySize.enabled
-                updateKey("output.size.spectrum.enabled", "output.abundance.bySize.enabled");
+                    // Renamed output.size.spectrum.enabled into output.abundance.bySize.enabled
+                    updateKey("output.size.spectrum.enabled", "output.abundance.bySize.enabled");
 
-                // Renamed output.size.spectrum.size.min into output.distrib.bySize.min
-                updateKey("output.size.spectrum.size.min", "output.distrib.bySize.min");
+                    // Renamed output.size.spectrum.size.min into output.distrib.bySize.min
+                    updateKey("output.size.spectrum.size.min", "output.distrib.bySize.min");
 
-                // Renamed output.size.spectrum.size.max into output.distrib.bySize.max
-                updateKey("output.size.spectrum.size.max", "output.distrib.bySize.max");
+                    // Renamed output.size.spectrum.size.max into output.distrib.bySize.max
+                    updateKey("output.size.spectrum.size.max", "output.distrib.bySize.max");
 
-                // Renamed output.size.spectrum.size.range into output.distrib.bySize.incr
-                updateKey("output.size.spectrum.size.range", "output.distrib.bySize.incr");
+                    // Renamed output.size.spectrum.size.range into output.distrib.bySize.incr
+                    updateKey("output.size.spectrum.size.range", "output.distrib.bySize.incr");
 
-                // Renamed output.TL.perAge.enabled into output.meanTL.byAge.enabled
-                updateKey("output.TL.perAge.enabled", "output.meanTL.byAge.enabled");
+                    // Renamed output.TL.perAge.enabled into output.meanTL.byAge.enabled
+                    updateKey("output.TL.perAge.enabled", "output.meanTL.byAge.enabled");
 
-                // Renamed output.TL.perSize.enabled into output.meanTL.bySize.enabled
-                updateKey("output.TL.perSize.enabled", "output.meanTL.bySize.enabled");
+                    // Renamed output.TL.perSize.enabled into output.meanTL.bySize.enabled
+                    updateKey("output.TL.perSize.enabled", "output.meanTL.bySize.enabled");
 
-                // Renamed output.TL.spectrum.enabled into output.biomass.byTL.enabled
-                updateKey("output.TL.spectrum.enabled", "output.biomass.byTL.enabled");
-            }
-        },
-        // 2015/03/01
-        new Release("3.2") {
-            @Override
-            void updateParameters() {
-                int nSpecies = getConfiguration().getInt("simulation.nspecies");
-
-                // Renamed population.initialization.biomass.sp# into
-                // population.seeding.biomass.sp#
-                for (int iSpec = 0; iSpec < nSpecies; iSpec++) {
-                    updateKey("population.initialization.biomass.sp" + iSpec, "population.seeding.biomass.sp" + iSpec);
+                    // Renamed output.TL.spectrum.enabled into output.biomass.byTL.enabled
+                    updateKey("output.TL.spectrum.enabled", "output.biomass.byTL.enabled");
                 }
+            },
+            // 2015/03/01
+            new Release("3.2") {
+                @Override
+                void updateParameters() {
+                    int nSpecies = getConfiguration().getInt("simulation.nspecies");
 
-                // Deprecated population.initialization.method
-                deprecateParameter("population.initialization.method");
-
-                // As we deprecate parameter 'population.initialization.method' make sure
-                // that 'population.initialization.file' does not interfere accidentaly
-                // in the initialisation process.
-                if (!getConfiguration().isNull("population.initialization.method")) {
-                    if (getConfiguration().getString("population.initialization.method").equalsIgnoreCase("biomass")
-                            && (!getConfiguration().isNull("population.initialization.file"))) {
-                        commentParameter("population.initialization.file",
-                                "Commented in order to avoid any interference with the new default seeding process");
+                    // Renamed population.initialization.biomass.sp# into
+                    // population.seeding.biomass.sp#
+                    for (int iSpec = 0; iSpec < nSpecies; iSpec++) {
+                        updateKey("population.initialization.biomass.sp" + iSpec,
+                                "population.seeding.biomass.sp" + iSpec);
                     }
-                }
 
-                // Deprecated the spectrum initialisation method
-                deprecateParameter("population.initialization.spectrum.intercept");
-                deprecateParameter("population.initialization.spectrum.range");
-                deprecateParameter("population.initialization.spectrum.slope");
+                    // Deprecated population.initialization.method
+                    deprecateParameter("population.initialization.method");
 
-                // Deprecated flux.incoming.season.file
-                deprecateParameter("flux.incoming.season.file");
-
-                for (int iSpec = 0; iSpec < nSpecies; iSpec++) {
-                    // Deprecated flux.incoming.season.file.sp#
-                    deprecateParameter("flux.incoming.season.file.sp" + iSpec);
-                    // Deprecated flux.incoming.annual.biomass.sp#
-                    deprecateParameter("flux.incoming.biomass.sp" + iSpec);
-                    // Deprecated flux.incoming.size.sp#
-                    deprecateParameter("flux.incoming.size.sp" + iSpec);
-                    // Deprecated flux.incoming.age.sp#
-                    deprecateParameter("flux.incoming.age.sp" + iSpec);
-                    if (!getConfiguration().isNull("flux.incoming.biomass.sp" + iSpec) && getConfiguration().getFloat("flux.incoming.biomass.sp" + iSpec) > 0.f) {
-                        // Added parameter flux.incoming.byDt.byAge.file.sp#
-                        addParameter("flux.incoming.byDt.byAge.file.sp" + iSpec, "null");
-                        // Added parameter flux.incoming.byDt.bySize.file.sp#
-                        addParameter("flux.incoming.byDt.bySize.file.sp" + iSpec, "null");
-                        // Warning because the incoming flux cannot be updated automatically
-                        StringBuilder msg = new StringBuilder();
-                        msg.append("Parameters for configuring the flux of ");
-                        msg.append(getConfiguration().getString("species.name.sp" + iSpec));
-                        msg.append(" biomass have changed. ");
-                        msg.append("You must provide time series of incoming biomass by time step, structured in age or size class, in a CSV file.\n");
-                        msg.append("Osmose cannot generate automatically this CSV file from the deprecated 'flux.incoming.*' parameters. Please create it manually and update the pathname of parameters flux.incoming.byDt.byAge/bySize.file.sp");
-                        msg.append(iSpec);
-                        msg.append("\nMore information is available on the Osmose website http://www.osmose-model.org/documentation/changes-osmose-3-update-2");
-                        warning(msg.toString());
-                    }
-                }
-
-                // Deprecate reproduction.season.file
-                deprecateParameter("reproduction.season.file");
-
-                // Replace previous reproduction seasonality by individual files
-                if (getConfiguration().canFind("reproduction.season.file")) {
-                    if (getConfiguration().isNull("reproduction.season.file")) {
-                        for (int iSpec = 0; iSpec < nSpecies; iSpec++) {
-                            addParameter("reproduction.season.file.sp" + iSpec, "null");
+                    // As we deprecate parameter 'population.initialization.method' make sure
+                    // that 'population.initialization.file' does not interfere accidentaly
+                    // in the initialisation process.
+                    if (!getConfiguration().isNull("population.initialization.method")) {
+                        if (getConfiguration().getString("population.initialization.method").equalsIgnoreCase("biomass")
+                                && (!getConfiguration().isNull("population.initialization.file"))) {
+                            commentParameter("population.initialization.file",
+                                    "Commented in order to avoid any interference with the new default seeding process");
                         }
-                    } else {
-                        // Split CSV file 'flux.incoming.season.file' into several CSV files
-                        String absFilename = getConfiguration().getFile("reproduction.season.file");
-                        String absNewname = absFilename.substring(0, absFilename.lastIndexOf(".")) + "-sp";
-                        String relFilename = getConfiguration().getString("reproduction.season.file");
-                        String relNewname = relFilename.substring(0, relFilename.lastIndexOf(".")) + "-sp";
-                        try (CSVReader reader = new CSVReader(new FileReader(absFilename), Separator.guess(absFilename).getSeparator())) {
-                            // Read the 'flux.incoming.season.file' CSV
+                    }
 
-                            List<String[]> lines = reader.readAll();
+                    // Deprecated the spectrum initialisation method
+                    deprecateParameter("population.initialization.spectrum.intercept");
+                    deprecateParameter("population.initialization.spectrum.range");
+                    deprecateParameter("population.initialization.spectrum.slope");
+
+                    // Deprecated flux.incoming.season.file
+                    deprecateParameter("flux.incoming.season.file");
+
+                    for (int iSpec = 0; iSpec < nSpecies; iSpec++) {
+                        // Deprecated flux.incoming.season.file.sp#
+                        deprecateParameter("flux.incoming.season.file.sp" + iSpec);
+                        // Deprecated flux.incoming.annual.biomass.sp#
+                        deprecateParameter("flux.incoming.biomass.sp" + iSpec);
+                        // Deprecated flux.incoming.size.sp#
+                        deprecateParameter("flux.incoming.size.sp" + iSpec);
+                        // Deprecated flux.incoming.age.sp#
+                        deprecateParameter("flux.incoming.age.sp" + iSpec);
+                        if (!getConfiguration().isNull("flux.incoming.biomass.sp" + iSpec)
+                                && getConfiguration().getFloat("flux.incoming.biomass.sp" + iSpec) > 0.f) {
+                            // Added parameter flux.incoming.byDt.byAge.file.sp#
+                            addParameter("flux.incoming.byDt.byAge.file.sp" + iSpec, "null");
+                            // Added parameter flux.incoming.byDt.bySize.file.sp#
+                            addParameter("flux.incoming.byDt.bySize.file.sp" + iSpec, "null");
+                            // Warning because the incoming flux cannot be updated automatically
+                            StringBuilder msg = new StringBuilder();
+                            msg.append("Parameters for configuring the flux of ");
+                            msg.append(getConfiguration().getString("species.name.sp" + iSpec));
+                            msg.append(" biomass have changed. ");
+                            msg.append(
+                                    "You must provide time series of incoming biomass by time step, structured in age or size class, in a CSV file.\n");
+                            msg.append(
+                                    "Osmose cannot generate automatically this CSV file from the deprecated 'flux.incoming.*' parameters. Please create it manually and update the pathname of parameters flux.incoming.byDt.byAge/bySize.file.sp");
+                            msg.append(iSpec);
+                            msg.append(
+                                    "\nMore information is available on the Osmose website http://www.osmose-model.org/documentation/changes-osmose-3-update-2");
+                            warning(msg.toString());
+                        }
+                    }
+
+                    // Deprecate reproduction.season.file
+                    deprecateParameter("reproduction.season.file");
+
+                    // Replace previous reproduction seasonality by individual files
+                    if (getConfiguration().canFind("reproduction.season.file")) {
+                        if (getConfiguration().isNull("reproduction.season.file")) {
                             for (int iSpec = 0; iSpec < nSpecies; iSpec++) {
-                                String csvfile = absNewname + String.valueOf(iSpec) + ".csv";
-                                try (CSVWriter writer = new CSVWriter(new FileWriter(csvfile), ';')) {
-                                    for (String[] line : lines) {
-                                        String[] newline = new String[] {line[0], line[iSpec + 1]};
-                                        writer.writeNext(newline);
-                                    }
-                                    info("  Created reproduction seasonality file for species " + iSpec + " " + csvfile);
-                                } catch (IOException ex) {
-                                    error("Error writing CSV file " + csvfile, ex);
-                                }
-                                String filename = relNewname + String.valueOf(iSpec) + ".csv";
-                                addParameter("reproduction.season.file.sp" + iSpec, filename);
+                                addParameter("reproduction.season.file.sp" + iSpec, "null");
                             }
-                        } catch (IOException ex) {
-                            error("Error reading CSV file " + absFilename, ex);
+                        } else {
+                            // Split CSV file 'flux.incoming.season.file' into several CSV files
+                            String absFilename = getConfiguration().getFile("reproduction.season.file");
+                            String absNewname = absFilename.substring(0, absFilename.lastIndexOf(".")) + "-sp";
+                            String relFilename = getConfiguration().getString("reproduction.season.file");
+                            String relNewname = relFilename.substring(0, relFilename.lastIndexOf(".")) + "-sp";
+                            try (CSVReader reader = new CSVReader(new FileReader(absFilename),
+                                    Separator.guess(absFilename).getSeparator())) {
+                                // Read the 'flux.incoming.season.file' CSV
+
+                                List<String[]> lines = reader.readAll();
+                                for (int iSpec = 0; iSpec < nSpecies; iSpec++) {
+                                    String csvfile = absNewname + String.valueOf(iSpec) + ".csv";
+                                    try (CSVWriter writer = new CSVWriter(new FileWriter(csvfile), ';')) {
+                                        for (String[] line : lines) {
+                                            String[] newline = new String[] { line[0], line[iSpec + 1] };
+                                            writer.writeNext(newline);
+                                        }
+                                        info("  Created reproduction seasonality file for species " + iSpec + " "
+                                                + csvfile);
+                                    } catch (IOException ex) {
+                                        error("Error writing CSV file " + csvfile, ex);
+                                    }
+                                    String filename = relNewname + String.valueOf(iSpec) + ".csv";
+                                    addParameter("reproduction.season.file.sp" + iSpec, filename);
+                                }
+                            } catch (IOException ex) {
+                                error("Error reading CSV file " + absFilename, ex);
+                            }
                         }
                     }
                 }
-            }
-        },
-        // 2018/01/15
-        new Release("3.3") {
-            @Override
-            void updateParameters() {
+            },
+            // 2018/01/15
+            new Release("3.3") {
+                @Override
+                void updateParameters() {
 
-                // Count the old version map parameters
-                String prefix = "movement";
-                int nMapMax = getConfiguration().findKeys(prefix + ".map*.species").size();
-                int cpt = 0;
-                int value = 0;
-                while (cpt < nMapMax) {
-                    if (getConfiguration().canFind(prefix + ".map" + value + ".file")) {
-                        updateKey(prefix + ".map" + value + ".species", prefix + ".species.map" + cpt);
-                        updateKey(prefix + ".map" + value + ".age.min", prefix + ".age.min.map" + cpt);
-                        updateKey(prefix + ".map" + value + ".age.max", prefix + ".age.max.map" + cpt);
-                        updateKey(prefix + ".map" + value + ".season", prefix + ".season.map" + cpt);
-                        updateKey(prefix + ".map" + value + ".year.min", prefix + ".year.min.map" + cpt);
-                        updateKey(prefix + ".map" + value + ".year.max", prefix + ".year.max.map" + cpt);
-                        updateKey(prefix + ".map" + value + ".file", prefix + ".file.map" + cpt);
-                        cpt++;
-                    }
-                    value++;
-                }
-            }
-        },
-        // 2018/11/28
-        new Release("3.3.3") {
-            @Override
-            void updateParameters() {
-
-                this.updateKey("grid.ncolumn", "grid.nlon");
-                this.updateKey("grid.nline", "grid.nlat");
-
-            }
-        },
-        // 2019/09/19
-        new Release("4.2.1") {
-            @Override
-            void updateParameters() {
-
-                updateKey("output.yieldN.enabled", "output.yield.abundance.enabled");
-                updateKey("output.yield.enabled", "output.yield.biomass.enabled");
-
-            }
-        },
-        // 2019/10/11
-        new Release("4.2.2") {
-            @Override
-            void updateParameters() {
-
-                updateKey("simulation.use.bioen", "simulation.bioen.enabled");
-
-                // got rid of iterative mortality process, so only one mortality algorithm left
-                deprecateParameter("mortality.algorithm");
-            }
-        },
-        // 2019/11/25
-        new Release("4.2.3") {
-            @Override
-            void updateParameters() {
-
-                // time length of the resource groups is defined in the NetCDF file
-                // consistency of the tiem length can be done with value from NetCDF
-                // file, no need for overparametrisation.
-                deprecateParameter("ltl.nstep");
-
-                // rename simulation.nplankton into simulation.nresource
-                updateKey("simulation.nplankton", "simulation.nresource");
-
-                // update every plankton.*.plk# parameter into resource.*.rsc#
-                int nRsc = getConfiguration().findKeys("plankton.name.plk*").size();
-                for (int index = 0; index < nRsc; index++) {
-                    updateKey("plankton.name.plk" + index, "resource.name.rsc" + index);
-                    updateKey("plankton.TL.plk" + index, "resource.TL.rsc" + index);
-                    updateKey("plankton.size.min.plk" + index, "resource.size.min.rsc" + index);
-                    updateKey("plankton.size.max.plk" + index, "resource.size.max.rsc" + index);
-                    updateKey("plankton.accessibility2fish.file.plk" + index, "resource.accessibility2fish.file.rsc" + index);
-                    updateKey("plankton.accessibility2fish.plk" + index, "resource.accessibility2fish.rsc" + index);
-                    updateKey("plankton.biomass.total.plk" + index, "resource.biomass.total.rsc" + index);
-                    updateKey("plankton.file.plk" + index, "resource.file.rsc" + index);
-                    updateKey("plankton.multiplier.plk" + index, "resource.multiplier.rsc" + index);
-                    deprecateParameter("plankton.conversion2tons.plk" + index);
-                }
-
-                // deprecate every other old parameters related to ltl management
-                deprecateParameter("ltl.netcdf.grid.file");
-                deprecateParameter("ltl.netcdf.var.lon");
-                deprecateParameter("ltl.netcdf.var.lat");
-                deprecateParameter("ltl.netcdf.var.bathy");
-                deprecateParameter("ltl.netcdf.var.csr");
-                deprecateParameter("ltl.netcdf.var.hc");
-                deprecateParameter("ltl.integration.depth");
-                deprecateParameter("ltl.netcdf.dim.ntime");
-                deprecateParameter("ltl.netcdf.var.zlevel");
-                deprecateParameter("ltl.netcdf.var.bathy");
-                deprecateParameter("ltl.netcdf.grid.file");
-                for (int index = 0; index < nRsc; index++) {
-                    deprecateParameter("ltl.netcdf.var.plankton.plk" + index);
-                }
-                for (int t = 0; t < getConfiguration().findKeys("ltl.netcdf.file.t*").size(); t++) {
-                    deprecateParameter("ltl.netcdf.file.t" + t);
-                }
-
-            }
-        },
-        // 2019/11/25
-        new Release("4.2.4") {
-            @Override
-            void updateParameters() {
-                deprecateParameter("ltl.java.classname");
-            }
-        },
-        // 2019/11/26
-        new Release("4.2.5") {
-            @Override
-            void updateParameters() {
-
-                int nSpecies = getConfiguration().getInt("simulation.nspecies");
-
-                // outputs
-                updateKey("output.mortality.natural.bySize.enabled", "output.mortality.additional.bySize.enabled");
-                updateKey("output.mortality.natural.byAge.enabled", "output.mortality.additional.byAge.enabled");
-                updateKey("output.mortality.naturalN.bySize.enabled", "output.mortality.additionalN.bySize.enabled");
-                updateKey("output.mortality.naturalN.byAge.enabled", "output.mortality.additionalN.byAge.enabled");
-
-                // rename *mortality.natural* into *mortality.additional*
-                for (int i = 0; i < nSpecies; i++) {
-                    // time series
-                    updateKey("mortality.natural.rate.sp" + i, "mortality.additional.rate.sp" + i);
-                    updateKey("mortality.natural.rate.bytDt.file.sp" + i, "mortality.additional.rate.bytDt.file.sp" + i);
-                    updateKey("mortality.natural.rate.byDt.byAge.file.sp" + i, "mortality.additional.rate.byDt.byAge.file.sp" + i);
-                    updateKey("mortality.natural.rate.byDt.bySize.file.sp" + i, "mortality.additional.rate.byDt.bySize.file.sp" + i);
-                    updateKey("mortality.natural.larva.rate.sp" + i, "mortality.additional.larva.rate.sp" + i);
-                    updateKey("mortality.natural.larva.rate.bytDt.file.sp" + i, "mortality.additional.larva.rate.bytDt.file.sp" + i);
-                    // spatial
-                    updateKey("mortality.natural.spatial.distrib.file.sp" + i, "mortality.additional.spatial.distrib.file.sp" + i);
-                }
-            }}, 
-        //    
-        new Release("4.2.6") {
-            @Override
-            void updateParameters() {
-
-                Configuration cfg = this.getConfiguration();
-
-                cfg.findKeys("movement.age.min.map*").stream().mapToInt(rgKey -> Integer.valueOf(rgKey.substring(rgKey.lastIndexOf(".map") + 4))).forEach(i -> updateKey("movement.age.min.map" + i, "movement.initialAge.map" + i));
-                cfg.findKeys("movement.age.max.map*").stream().mapToInt(rgKey -> Integer.valueOf(rgKey.substring(rgKey.lastIndexOf(".map") + 4))).forEach(i -> updateKey("movement.age.max.map" + i, "movement.lastAge.map" + i));
-                cfg.findKeys("movement.season.map*").stream().mapToInt(rgKey -> Integer.valueOf(rgKey.substring(rgKey.lastIndexOf(".map") + 4))).forEach(i -> updateKey("movement.season.map" + i, "movement.steps.map" + i));
-
-            }
-        },
-        //
-        new Release("4.3.0") {
-            @Override
-            void updateParameters() {
-
-                Configuration cfg = this.getConfiguration();
-                cfg.findKeys("plankton.conversion2tons*").stream().forEach(key -> deprecateParameter(key));
-
-                if (cfg.findKeys("predation.accessibility.stage.threshold*").size() > 0) {
-                    String message = "The accessibility stage are now set directly from the accessibility matrix";
-                    this.getLogger().info(message);
-                    cfg.findKeys("predation.accessibility.stage.threshold*").stream().forEach(key -> deprecateParameter(key));
-                }
-
-                int nspecies = cfg.getInt("simulation.nspecies");
-                int nresources = cfg.getInt("simulation.nresource");
-
-                int nbackground;
-                if (cfg.canFind("simulation.nbackground")) {
-                    nbackground = cfg.getInt("simulation.nbackground");
-                } else {
-                    nbackground = 0;
-                }
-
-                // Add the parameters relative to species types
-                for (int i = 0; i < nspecies; i++) {
-                    this.addParameter("species.type.sp" + i, "focal");
-                }
-
-                for (int i = 0; i < nbackground; i++) {
-                    this.addParameter("species.type.sp" + (i + nspecies), "background");
-                }
-
-                for (int i = 0; i < nresources; i++) {
-                    this.addParameter("species.type.sp" + (i + nspecies + nbackground), "resource");
-                }
-
-                for (int index = 0; index < nresources; index++) {
-                    int newindex = index + nspecies + nbackground;
-                    updateKey("resource.name.rsc" + index, "species.name.sp" + newindex);
-                    updateKey("resource.TL.rsc" + index, "species.TL.sp" + newindex);
-                    updateKey("resource.size.min.rsc" + index, "species.size.min.sp" + newindex);
-                    updateKey("resource.size.max.rsc" + index, "species.size.max.sp" + newindex);
-                    updateKey("resource.accessibility2fish.file.rsc" + index, "species.accessibility2fish.file.sp" + newindex);
-                    updateKey("resource.accessibility2fish.rsc" + index, "species.accessibility2fish.sp" + newindex);
-                    updateKey("resource.biomass.total.rsc" + index, "species.biomass.total.sp" + newindex);
-                    updateKey("resource.file.rsc" + index, "species.file.sp" + newindex);
-                    updateKey("resource.multiplier.rsc" + index, "species.multiplier.sp" + newindex);
-                }
-
-                this.deprecateParameter("grid.java.classname");
-
-            } // end of update parameters
-        }, // end of release constructor
-
-        new Release("4.3.1") {
-            @Override
-            void updateParameters() {
-            }
-        },
-
-        new Release("4.3.2") {
-            @Override
-            void updateParameters() {
-            }
-        },
-
-        new Release("4.3.3") {
-            @Override
-            void updateParameters() {
-
-                Configuration cfg = this.getConfiguration();
-
-                if(cfg.canFind("stochastic.mortality.seed")) {
-                    String message = "Parameter replaced by the 'stochastic.mortality.randomseed.fixed' boolean parameter";
-                    commentParameter("stochastic.mortality.seed", message);
-                    addParameter("stochastic.mortality.randomseed.fixed", "true");
-                }
-
-                if(cfg.canFind("population.initialization.seed")) {
-                    String message = "Parameter replaced by the 'stochastic.mortality.randomseed.fixed' boolean parameter";
-                    commentParameter("population.initialization.seed", message);
-                    addParameter("population.initialization.randomseed.fixed", "true");
-                }
-
-
-                // update name of spatial outputs
-                if(cfg.canFind("output.spatialabundance.enabled")) {
-                    updateKey("output.spatialabundance.enabled", "output.spatial.abundance.enabled");
-                }
-                if(cfg.canFind("output.spatialbiomass.enabled")) {
-                    updateKey("output.spatialbiomass.enabled", "output.spatial.biomass.enabled");
-                }
-                if(cfg.canFind("output.spatialsize.enabled")) {
-                    updateKey("output.spatialsize.enabled", "output.spatial.size.enabled");
-                }
-                if(cfg.canFind("output.spatialenet.enabled")) {
-                    updateKey("output.spatialenet.enabled", "output.spatial.enet.enabled");
-                }
-                if(cfg.canFind("output.spatialenetlarvae.enabled")) {
-                    updateKey("output.spatialenetlarvae.enabled", "output.spatial.enet.larvae.enabled");
-                }
-                if(cfg.canFind("output.spatialenetjuv.enabled")) {
-                    updateKey("output.spatialenetjuv.enabled", "output.spatial.enet.juv.enabled");
-                }
-                if(cfg.canFind("output.spatialMstarv.enabled")) {
-                    updateKey("output.spatialMstarv.enabled", "output.spatial.mstarv.enabled");
-                }
-                if(cfg.canFind("output.spatialMpred.enabled")) {
-                    updateKey("output.spatialMpred.enabled", "output.spatial.mpred.enabled");
-                }
-                if(cfg.canFind("output.spatialdg.enabled")) {
-                    updateKey("output.spatialdg.enabled", "output.spatial.dg.enabled");
-                }
-                if(cfg.canFind("output.spatialegg.enabled")) {
-                    updateKey("output.spatialegg.enabled", "output.spatial.egg.enabled");
-                }
-
-
-                deprecateParameter("simulation.onestep");
-
-                int focalIndex[] = cfg.findKeys("species.type.sp*").stream().filter(k -> cfg.getString(k).equals("focal")).mapToInt(rgKey -> Integer.valueOf(rgKey.substring(rgKey.lastIndexOf(".sp") + 3))).sorted().toArray();
-
-                for (int index : focalIndex) {
-                    if (cfg.canFind("species.larva2adults.agethres.sp" + index)) {
-                        updateKey("species.larva2adults.agethres.sp" + index, "species.first.feeding.age.sp" + index);
+                    // Count the old version map parameters
+                    String prefix = "movement";
+                    int nMapMax = getConfiguration().findKeys(prefix + ".map*.species").size();
+                    int cpt = 0;
+                    int value = 0;
+                    while (cpt < nMapMax) {
+                        if (getConfiguration().canFind(prefix + ".map" + value + ".file")) {
+                            updateKey(prefix + ".map" + value + ".species", prefix + ".species.map" + cpt);
+                            updateKey(prefix + ".map" + value + ".age.min", prefix + ".age.min.map" + cpt);
+                            updateKey(prefix + ".map" + value + ".age.max", prefix + ".age.max.map" + cpt);
+                            updateKey(prefix + ".map" + value + ".season", prefix + ".season.map" + cpt);
+                            updateKey(prefix + ".map" + value + ".year.min", prefix + ".year.min.map" + cpt);
+                            updateKey(prefix + ".map" + value + ".year.max", prefix + ".year.max.map" + cpt);
+                            updateKey(prefix + ".map" + value + ".file", prefix + ".file.map" + cpt);
+                            cpt++;
+                        }
+                        value++;
                     }
                 }
+            },
+            // 2018/11/28
+            new Release("3.3.3") {
+                @Override
+                void updateParameters() {
 
-                cfg.findKeys("fisheries.rate.bySeason.fsh*").stream().mapToInt(rgKey -> Integer.valueOf(rgKey.substring(rgKey.lastIndexOf(".fsh") + 4))).forEach(i -> updateKey("fisheries.rate.bySeason" + i, "fisheries.rate.byPeriod.fsh" + i));
-                cfg.findKeys("fisheries.season.start.fsh*").stream().mapToInt(rgKey -> Integer.valueOf(rgKey.substring(rgKey.lastIndexOf(".fsh") + 4))).forEach(i -> updateKey("fisheries.season.start.fsh" + i, "fisheries.period.start.fsh" + i));
-                cfg.findKeys("fisheries.season.number.fsh*").stream().mapToInt(rgKey -> Integer.valueOf(rgKey.substring(rgKey.lastIndexOf(".fsh") + 4))).forEach(i -> updateKey("fisheries.season.number.fsh" + i, "fisheries.period.number.fsh" + i));
+                    this.updateKey("grid.ncolumn", "grid.nlon");
+                    this.updateKey("grid.nline", "grid.nlat");
 
-                if (cfg.isBioenEnabled()) {
-                    // Update in parameters from Alaia
-                    for (int index : this.getFocalIndex()) {
-                        updateKey("predation.ingestion.rate.max.larvae.bioen.sp" + index, "predation.coef.ingestion.rate.max.larvae.bioen.sp" + index);
+                }
+            },
+            // 2019/09/19
+            new Release("4.2.1") {
+                @Override
+                void updateParameters() {
+
+                    updateKey("output.yieldN.enabled", "output.yield.abundance.enabled");
+                    updateKey("output.yield.enabled", "output.yield.biomass.enabled");
+
+                }
+            },
+            // 2019/10/11
+            new Release("4.2.2") {
+                @Override
+                void updateParameters() {
+
+                    updateKey("simulation.use.bioen", "simulation.bioen.enabled");
+
+                    // got rid of iterative mortality process, so only one mortality algorithm left
+                    deprecateParameter("mortality.algorithm");
+                }
+            },
+            // 2019/11/25
+            new Release("4.2.3") {
+                @Override
+                void updateParameters() {
+
+                    // time length of the resource groups is defined in the NetCDF file
+                    // consistency of the tiem length can be done with value from NetCDF
+                    // file, no need for overparametrisation.
+                    deprecateParameter("ltl.nstep");
+
+                    // rename simulation.nplankton into simulation.nresource
+                    updateKey("simulation.nplankton", "simulation.nresource");
+
+                    // update every plankton.*.plk# parameter into resource.*.rsc#
+                    int nRsc = getConfiguration().findKeys("plankton.name.plk*").size();
+                    for (int index = 0; index < nRsc; index++) {
+                        updateKey("plankton.name.plk" + index, "resource.name.rsc" + index);
+                        updateKey("plankton.TL.plk" + index, "resource.TL.rsc" + index);
+                        updateKey("plankton.size.min.plk" + index, "resource.size.min.rsc" + index);
+                        updateKey("plankton.size.max.plk" + index, "resource.size.max.rsc" + index);
+                        updateKey("plankton.accessibility2fish.file.plk" + index,
+                                "resource.accessibility2fish.file.rsc" + index);
+                        updateKey("plankton.accessibility2fish.plk" + index, "resource.accessibility2fish.rsc" + index);
+                        updateKey("plankton.biomass.total.plk" + index, "resource.biomass.total.rsc" + index);
+                        updateKey("plankton.file.plk" + index, "resource.file.rsc" + index);
+                        updateKey("plankton.multiplier.plk" + index, "resource.multiplier.rsc" + index);
+                        deprecateParameter("plankton.conversion2tons.plk" + index);
                     }
 
-                    // Update for oxygen functions
-                    for (int index : this.getFocalIndex()) {
-                        updateKey("species.c1.sp" + index, "species.oxygen.c1.sp" + index);
-                        updateKey("species.c2.sp" + index, "species.oxygen.c2.sp" + index);
+                    // deprecate every other old parameters related to ltl management
+                    deprecateParameter("ltl.netcdf.grid.file");
+                    deprecateParameter("ltl.netcdf.var.lon");
+                    deprecateParameter("ltl.netcdf.var.lat");
+                    deprecateParameter("ltl.netcdf.var.bathy");
+                    deprecateParameter("ltl.netcdf.var.csr");
+                    deprecateParameter("ltl.netcdf.var.hc");
+                    deprecateParameter("ltl.integration.depth");
+                    deprecateParameter("ltl.netcdf.dim.ntime");
+                    deprecateParameter("ltl.netcdf.var.zlevel");
+                    deprecateParameter("ltl.netcdf.var.bathy");
+                    deprecateParameter("ltl.netcdf.grid.file");
+                    for (int index = 0; index < nRsc; index++) {
+                        deprecateParameter("ltl.netcdf.var.plankton.plk" + index);
+                    }
+                    for (int t = 0; t < getConfiguration().findKeys("ltl.netcdf.file.t*").size(); t++) {
+                        deprecateParameter("ltl.netcdf.file.t" + t);
                     }
 
+                }
+            },
+            // 2019/11/25
+            new Release("4.2.4") {
+                @Override
+                void updateParameters() {
+                    deprecateParameter("ltl.java.classname");
+                }
+            },
+            // 2019/11/26
+            new Release("4.2.5") {
+                @Override
+                void updateParameters() {
+
+                    int nSpecies = getConfiguration().getInt("simulation.nspecies");
+
+                    // outputs
+                    updateKey("output.mortality.natural.bySize.enabled", "output.mortality.additional.bySize.enabled");
+                    updateKey("output.mortality.natural.byAge.enabled", "output.mortality.additional.byAge.enabled");
+                    updateKey("output.mortality.naturalN.bySize.enabled",
+                            "output.mortality.additionalN.bySize.enabled");
+                    updateKey("output.mortality.naturalN.byAge.enabled", "output.mortality.additionalN.byAge.enabled");
+
+                    // rename *mortality.natural* into *mortality.additional*
+                    for (int i = 0; i < nSpecies; i++) {
+                        // time series
+                        updateKey("mortality.natural.rate.sp" + i, "mortality.additional.rate.sp" + i);
+                        updateKey("mortality.natural.rate.bytDt.file.sp" + i,
+                                "mortality.additional.rate.bytDt.file.sp" + i);
+                        updateKey("mortality.natural.rate.byDt.byAge.file.sp" + i,
+                                "mortality.additional.rate.byDt.byAge.file.sp" + i);
+                        updateKey("mortality.natural.rate.byDt.bySize.file.sp" + i,
+                                "mortality.additional.rate.byDt.bySize.file.sp" + i);
+                        updateKey("mortality.natural.larva.rate.sp" + i, "mortality.additional.larva.rate.sp" + i);
+                        updateKey("mortality.natural.larva.rate.bytDt.file.sp" + i,
+                                "mortality.additional.larva.rate.bytDt.file.sp" + i);
+                        // spatial
+                        updateKey("mortality.natural.spatial.distrib.file.sp" + i,
+                                "mortality.additional.spatial.distrib.file.sp" + i);
+                    }
+                }
+            },
+            //
+            new Release("4.2.6") {
+                @Override
+                void updateParameters() {
+
+                    Configuration cfg = this.getConfiguration();
+
+                    cfg.findKeys("movement.age.min.map*").stream()
+                            .mapToInt(rgKey -> Integer.valueOf(rgKey.substring(rgKey.lastIndexOf(".map") + 4)))
+                            .forEach(i -> updateKey("movement.age.min.map" + i, "movement.initialAge.map" + i));
+                    cfg.findKeys("movement.age.max.map*").stream()
+                            .mapToInt(rgKey -> Integer.valueOf(rgKey.substring(rgKey.lastIndexOf(".map") + 4)))
+                            .forEach(i -> updateKey("movement.age.max.map" + i, "movement.lastAge.map" + i));
+                    cfg.findKeys("movement.season.map*").stream()
+                            .mapToInt(rgKey -> Integer.valueOf(rgKey.substring(rgKey.lastIndexOf(".map") + 4)))
+                            .forEach(i -> updateKey("movement.season.map" + i, "movement.steps.map" + i));
+
+                }
+            },
+            //
+            new Release("4.3.0") {
+                @Override
+                void updateParameters() {
+
+                    Configuration cfg = this.getConfiguration();
+                    cfg.findKeys("plankton.conversion2tons*").stream().forEach(key -> deprecateParameter(key));
+
+                    if (cfg.findKeys("predation.accessibility.stage.threshold*").size() > 0) {
+                        String message = "The accessibility stage are now set directly from the accessibility matrix";
+                        this.getLogger().info(message);
+                        cfg.findKeys("predation.accessibility.stage.threshold*").stream()
+                                .forEach(key -> deprecateParameter(key));
+                    }
+
+                    int nspecies = cfg.getInt("simulation.nspecies");
+                    int nresources = cfg.getInt("simulation.nresource");
+
+                    int nbackground;
+                    if (cfg.canFind("simulation.nbackground")) {
+                        nbackground = cfg.getInt("simulation.nbackground");
+                    } else {
+                        nbackground = 0;
+                    }
+
+                    // Add the parameters relative to species types
+                    for (int i = 0; i < nspecies; i++) {
+                        this.addParameter("species.type.sp" + i, "focal");
+                    }
+
+                    for (int i = 0; i < nbackground; i++) {
+                        this.addParameter("species.type.sp" + (i + nspecies), "background");
+                    }
+
+                    for (int i = 0; i < nresources; i++) {
+                        this.addParameter("species.type.sp" + (i + nspecies + nbackground), "resource");
+                    }
+
+                    for (int index = 0; index < nresources; index++) {
+                        int newindex = index + nspecies + nbackground;
+                        updateKey("resource.name.rsc" + index, "species.name.sp" + newindex);
+                        updateKey("resource.TL.rsc" + index, "species.TL.sp" + newindex);
+                        updateKey("resource.size.min.rsc" + index, "species.size.min.sp" + newindex);
+                        updateKey("resource.size.max.rsc" + index, "species.size.max.sp" + newindex);
+                        updateKey("resource.accessibility2fish.file.rsc" + index,
+                                "species.accessibility2fish.file.sp" + newindex);
+                        updateKey("resource.accessibility2fish.rsc" + index,
+                                "species.accessibility2fish.sp" + newindex);
+                        updateKey("resource.biomass.total.rsc" + index, "species.biomass.total.sp" + newindex);
+                        updateKey("resource.file.rsc" + index, "species.file.sp" + newindex);
+                        updateKey("resource.multiplier.rsc" + index, "species.multiplier.sp" + newindex);
+                    }
+
+                    this.deprecateParameter("grid.java.classname");
+
+                } // end of update parameters
+            }, // end of release constructor
+
+            new Release("4.3.1") {
+                @Override
+                void updateParameters() {
+                }
+            },
+
+            new Release("4.3.2") {
+                @Override
+                void updateParameters() {
+                }
+            },
+
+            new Release("4.3.3") {
+                @Override
+                void updateParameters() {
+
+                    Configuration cfg = this.getConfiguration();
+
+                    if (cfg.canFind("stochastic.mortality.seed")) {
+                        String message = "Parameter replaced by the 'stochastic.mortality.randomseed.fixed' boolean parameter";
+                        commentParameter("stochastic.mortality.seed", message);
+                        addParameter("stochastic.mortality.randomseed.fixed", "true");
+                    }
+
+                    if (cfg.canFind("population.initialization.seed")) {
+                        String message = "Parameter replaced by the 'stochastic.mortality.randomseed.fixed' boolean parameter";
+                        commentParameter("population.initialization.seed", message);
+                        addParameter("population.initialization.randomseed.fixed", "true");
+                    }
+
+                    // update name of spatial outputs
+                    if (cfg.canFind("output.spatialabundance.enabled")) {
+                        updateKey("output.spatialabundance.enabled", "output.spatial.abundance.enabled");
+                    }
+                    if (cfg.canFind("output.spatialbiomass.enabled")) {
+                        updateKey("output.spatialbiomass.enabled", "output.spatial.biomass.enabled");
+                    }
+                    if (cfg.canFind("output.spatialsize.enabled")) {
+                        updateKey("output.spatialsize.enabled", "output.spatial.size.enabled");
+                    }
+                    if (cfg.canFind("output.spatialenet.enabled")) {
+                        updateKey("output.spatialenet.enabled", "output.spatial.enet.enabled");
+                    }
+                    if (cfg.canFind("output.spatialenetlarvae.enabled")) {
+                        updateKey("output.spatialenetlarvae.enabled", "output.spatial.enet.larvae.enabled");
+                    }
+                    if (cfg.canFind("output.spatialenetjuv.enabled")) {
+                        updateKey("output.spatialenetjuv.enabled", "output.spatial.enet.juv.enabled");
+                    }
+                    if (cfg.canFind("output.spatialMstarv.enabled")) {
+                        updateKey("output.spatialMstarv.enabled", "output.spatial.mstarv.enabled");
+                    }
+                    if (cfg.canFind("output.spatialMpred.enabled")) {
+                        updateKey("output.spatialMpred.enabled", "output.spatial.mpred.enabled");
+                    }
+                    if (cfg.canFind("output.spatialdg.enabled")) {
+                        updateKey("output.spatialdg.enabled", "output.spatial.dg.enabled");
+                    }
+                    if (cfg.canFind("output.spatialegg.enabled")) {
+                        updateKey("output.spatialegg.enabled", "output.spatial.egg.enabled");
+                    }
+
+                    deprecateParameter("simulation.onestep");
+
+                    int focalIndex[] = cfg.findKeys("species.type.sp*").stream()
+                            .filter(k -> cfg.getString(k).equals("focal"))
+                            .mapToInt(rgKey -> Integer.valueOf(rgKey.substring(rgKey.lastIndexOf(".sp") + 3))).sorted()
+                            .toArray();
+
+                    for (int index : focalIndex) {
+                        if (cfg.canFind("species.larva2adults.agethres.sp" + index)) {
+                            updateKey("species.larva2adults.agethres.sp" + index,
+                                    "species.first.feeding.age.sp" + index);
+                        }
+                    }
+
+                    cfg.findKeys("fisheries.rate.bySeason.fsh*").stream()
+                            .mapToInt(rgKey -> Integer.valueOf(rgKey.substring(rgKey.lastIndexOf(".fsh") + 4)))
+                            .forEach(i -> updateKey("fisheries.rate.bySeason" + i, "fisheries.rate.byPeriod.fsh" + i));
+                    cfg.findKeys("fisheries.season.start.fsh*").stream()
+                            .mapToInt(rgKey -> Integer.valueOf(rgKey.substring(rgKey.lastIndexOf(".fsh") + 4))).forEach(
+                                    i -> updateKey("fisheries.season.start.fsh" + i, "fisheries.period.start.fsh" + i));
+                    cfg.findKeys("fisheries.season.number.fsh*").stream()
+                            .mapToInt(rgKey -> Integer.valueOf(rgKey.substring(rgKey.lastIndexOf(".fsh") + 4)))
+                            .forEach(i -> updateKey("fisheries.season.number.fsh" + i,
+                                    "fisheries.period.number.fsh" + i));
+
+                    if (cfg.isBioenEnabled()) {
+                        // Update in parameters from Alaia
+                        for (int index : this.getFocalIndex()) {
+                            updateKey("predation.ingestion.rate.max.larvae.bioen.sp" + index,
+                                    "predation.coef.ingestion.rate.max.larvae.bioen.sp" + index);
+                        }
+
+                        // Update for oxygen functions
+                        for (int index : this.getFocalIndex()) {
+                            updateKey("species.c1.sp" + index, "species.oxygen.c1.sp" + index);
+                            updateKey("species.c2.sp" + index, "species.oxygen.c2.sp" + index);
+                        }
+
+                        // Update parameters for EnergyBudget.java
+                        for (int index : this.getFocalIndex()) {
+                            updateKey("bioen.maint.energy.csmr.sp" + index,
+                                    "species.bioen.maint.energy.c_m.sp" + index);
+                            updateKey("bioen.maturity.r.sp" + index, "species.bioen.maturity.r.sp" + index);
+                            updateKey("bioen.maturity.m0.sp" + index, "species.bioen.maturity.m0.sp" + index);
+                            updateKey("bioen.maturity.m1.sp" + index, "species.bioen.maturity.m1.sp" + index);
+                            updateKey("bioen.forage.k_for.sp" + index, "species.bioen.forage.k_for.sp" + index);
+                        }
+
+                        // Deprecates old parameters for temperature function.
+                        for (int index : this.getFocalIndex()) {
+                            deprecateParameter("bioen.gross.energy.km.sp" + index);
+                            deprecateParameter("bioen.gross.energy.gamma.sp" + index);
+                            deprecateParameter("bioen.arrh.ct.sp" + index);
+                            deprecateParameter("bioen.maint.energy.Tr.sp" + index);
+                        }
+                    } // end of bioen condition
+                } // end of updatePara
+            }, // end of Release(4.3.3)
+
+            new Release("4.4.0") {
+                @Override
+                void updateParameters() {
+
+                    Configuration cfg = this.getConfiguration();
+
+                    // update parameter names
+                    if (cfg.canFind("fisheries.enabled")) {
+                        updateKey("fisheries.enabled", "process.multispecies.fisheries.enabled");
+                    }
+
+                    if (cfg.canFind("output.fishery.enabled")) {
+                        updateKey("output.fishery.enabled", "output.fisheries.enabled");
+                    }
+
+                    if (cfg.canFind("output.fishery.byage.enabled")) {
+                        updateKey("output.fishery.byage.enabled", "output.fisheries.byage.enabled");
+                    }
+
+                    if (cfg.canFind("output.fishery.bysize.enabled")) {
+                        updateKey("output.fishery.bysize.enabled", "output.fisheries.bysize.enabled");
+                    }
+
+                    // restart parameters
+                    if (cfg.canFind("output.restart.enabled")) {
+                        updateKey("output.restart.enabled", "simulation.restart.enabled");
+                    }
+
+                    if (cfg.canFind("output.restart.spinup")) {
+                        updateKey("output.restart.spinup", "simulation.restart.spinup.nyear");
+                    }
+
+                    if (cfg.canFind("output.restart.recordFrequency.ndt")) {
+                        updateKey("output.restart.recordFrequency.ndt", "simulation.restart.recordFrequency.ndt");
+                    }
+
+                    if (cfg.canFind("output.spatial.fishery.enabled")) {
+                        updateKey("output.spatial.fishery.enabled", "output.spatial.fisheries.enabled");
+                    }
+
+                    if (cfg.canFind("output.fishery.enabled")) {
+                        updateKey("output.fishery.enabled", "output.fisheries.enabled");
+                    }
+
+                    if (cfg.canFind("output.fishery.byage.enabled")) {
+                        updateKey("output.fishery.byage.enabled", "output.fisheries.byage.enabled");
+                    }
+
+                    if (cfg.canFind("output.fishery.bysize.enabled")) {
+                        updateKey("output.fishery.bysize.enabled", "output.fisheries.bysize.enabled");
+                    }
+
+                    if (cfg.canFind("process.multispecies.fisheries.enabled")) {
+                        updateKey("process.multispecies.fisheries.enabled", "module.multispecies.fisheries.enabled");
+                    }
+
+                    if (cfg.canFind("simulation.bioen.enabled")) {
+                        updateKey("simulation.bioen.enabled", "module.bioenergetics.enabled");
+                    }
+
+                    if (cfg.canFind("simulation.genetic.enabled")) {
+                        updateKey("simulation.genetic.enabled", "module.genetics.enabled");
+                    }
+
+                    if (cfg.canFind("economy.enabled")) {
+                        updateKey("economy.enabled", "module.bioeconomics.enabled");
+                    }
+                }
+            },
+
+            new Release("4.4.1") {
+                @Override
+                void updateParameters() {
+
+                    Configuration cfg = this.getConfiguration();
+
+                    if (cfg.canFind("output.fecundity.bysize.enabled")) {
+                        updateKey("output.fecundity.bysize.enabled", "output.number.of.eggs.bysize.enabled"); // to be
+                                                                                                              // updated.
+                    }
+
+                    if (cfg.canFind("population.initialization.relativebiomass.enabled")) {
+                        updateKey("population.initialization.relativebiomass.enabled",
+                                "module.population.initialisation.enabled"); // to be updated.
+                    }
+
+                    // info("hello");
+                    // info(this.getFocalIndex()[1]);
                     // Update parameters for EnergyBudget.java
-                    for (int index : this.getFocalIndex()) {
-                        updateKey("bioen.maint.energy.csmr.sp" + index, "species.bioen.maint.energy.c_m.sp" + index);
-                        updateKey("bioen.maturity.r.sp" + index, "species.bioen.maturity.r.sp" + index);
-                        updateKey("bioen.maturity.m0.sp" + index, "species.bioen.maturity.m0.sp" + index);
-                        updateKey("bioen.maturity.m1.sp" + index, "species.bioen.maturity.m1.sp" + index);
-                        updateKey("bioen.forage.k_for.sp" + index, "species.bioen.forage.k_for.sp" + index);
+                    int focalIndex[] = cfg.findKeys("species.type.sp*").stream()
+                            .filter(k -> cfg.getString(k).equals("focal"))
+                            .mapToInt(rgKey -> Integer.valueOf(rgKey.substring(rgKey.lastIndexOf(".sp") + 3))).sorted()
+                            .toArray();
+
+                    // for (int index : this.getFocalIndex()) {
+                    for (int index : focalIndex) {
+
+                        // update parameter names
+                        if (cfg.canFind("predation.coef.ingestion.rate.max.larvae.bioen.sp" + index)) {
+                            updateKey("predation.coef.ingestion.rate.max.larvae.bioen.sp" + index,
+                                    "predation.larval.ingestion.rate.increase.ratio.sp" + index); // to be updated.
+                        }
+
+                        if (cfg.canFind("species.bioen.maturity.r.sp" + index)) {
+                            updateKey("species.bioen.maturity.r.sp" + index, "species.maturity.r.sp" + index);
+                        }
+                        if (cfg.canFind("species.bioen.maturity.m0.sp" + index)) {
+                            updateKey("species.bioen.maturity.m0.sp" + index, "species.maturity.m0.sp" + index);
+                        }
+                        if (cfg.canFind("species.bioen.maturity.m1.sp" + index)) {
+                            updateKey("species.bioen.maturity.m1.sp" + index, "species.maturity.m1.sp" + index);
+                        }
+                        if (cfg.canFind("species.bioen.maturity.eta.sp" + index)) {
+                            updateKey("species.bioen.maturity.eta.sp" + index, "species.maturity.eta.sp" + index);
+                        }
                     }
-
-                    // Deprecates old parameters for temperature function.
-                    for (int index : this.getFocalIndex()) {
-                        deprecateParameter("bioen.gross.energy.km.sp" + index);
-                        deprecateParameter("bioen.gross.energy.gamma.sp" + index);
-                        deprecateParameter("bioen.arrh.ct.sp" + index);
-                        deprecateParameter("bioen.maint.energy.Tr.sp" + index);
-                    }
-                } // end of bioen condition
-            } // end of updatePara
-        }, // end of Release(4.3.3)
-
-        new Release("4.4.0") {
-            @Override
-            void updateParameters() {
-
-                Configuration cfg = this.getConfiguration();
-
-                // update parameter names
-                if(cfg.canFind("fisheries.enabled")) {
-                    updateKey("fisheries.enabled", "process.multispecies.fisheries.enabled");
                 }
-
-                if(cfg.canFind("output.fishery.enabled")) {
-                    updateKey("output.fishery.enabled", "output.fisheries.enabled");
-                }
-
-                if(cfg.canFind("output.fishery.byage.enabled")) {
-                    updateKey("output.fishery.byage.enabled", "output.fisheries.byage.enabled");
-                }
-
-                if(cfg.canFind("output.fishery.bysize.enabled")) {
-                    updateKey("output.fishery.bysize.enabled", "output.fisheries.bysize.enabled");
-                }
-
-                // restart parameters
-                if(cfg.canFind("output.restart.enabled")) {
-                    updateKey("output.restart.enabled", "simulation.restart.enabled");
-                }
-
-                if(cfg.canFind("output.restart.spinup")) {
-                    updateKey("output.restart.spinup", "simulation.restart.spinup.nyear");
-                }
-
-                if(cfg.canFind("output.restart.recordFrequency.ndt")) {
-                    updateKey("output.restart.recordFrequency.ndt", "simulation.restart.recordFrequency.ndt");
-                }
-
-                if (cfg.canFind("output.spatial.fishery.enabled")) {
-                    updateKey("output.spatial.fishery.enabled", "output.spatial.fisheries.enabled");
-                }
-
-                if (cfg.canFind("output.fishery.enabled")) {
-                    updateKey("output.fishery.enabled", "output.fisheries.enabled");
-                }
-
-                if (cfg.canFind("output.fishery.byage.enabled")) {
-                    updateKey("output.fishery.byage.enabled", "output.fisheries.byage.enabled");
-                }
-
-                if (cfg.canFind("output.fishery.bysize.enabled")) {
-                    updateKey("output.fishery.bysize.enabled", "output.fisheries.bysize.enabled");
-                }
-
-                if (cfg.canFind("process.multispecies.fisheries.enabled")) {
-                    updateKey("process.multispecies.fisheries.enabled", "module.multispecies.fisheries.enabled");
-                }
-
-                if (cfg.canFind("simulation.bioen.enabled")) {
-                    updateKey("simulation.bioen.enabled", "module.bioenergetics.enabled");
-                }
-
-                if (cfg.canFind("simulation.genetic.enabled")) {
-                    updateKey("simulation.genetic.enabled", "module.genetics.enabled");
-                }
-
-                if (cfg.canFind("economy.enabled")) {
-                    updateKey("economy.enabled", "module.bioeconomics.enabled");
-                }
-            }
-        },
-        
-        new Release("4.4.1") {
-            @Override
-            void updateParameters() {
-
-                Configuration cfg = this.getConfiguration();
-
-                // update parameter names
-                if(cfg.canFind("predation.coef.ingestion.rate.max.larvae.bioen.sp")) {
-                    updateKey("predation.coef.ingestion.rate.max.larvae.bioen.sp", 
-                        "predation.larval.ingestion.rate.increase.ratio.sp"); // to be updated.
-                }
-                
-                if(cfg.canFind("population.initialization.relativebiomass.enabled")) {
-                    updateKey("population.initialization.relativebiomass.enabled", 
-                        "module.population.initialisation.enabled"); // to be updated.
-                }   
-                
-                //info("hello");             
-                //info(this.getFocalIndex()[1]);             
-                // Update parameters for EnergyBudget.java
-                int focalIndex[] = cfg.findKeys("species.type.sp*").stream().filter(k -> cfg.getString(k).equals("focal")).mapToInt(rgKey -> Integer.valueOf(rgKey.substring(rgKey.lastIndexOf(".sp") + 3))).sorted().toArray();
-                
-                //for (int index : this.getFocalIndex()) {
-                for (int index : focalIndex) {
-                  if(cfg.canFind("species.bioen.maturity.r.sp" + index)) {
-                      updateKey("species.bioen.maturity.r.sp" + index, "species.maturity.r.sp" + index);
-                  }   
-                  if(cfg.canFind("species.bioen.maturity.m0.sp" + index)) {
-                      updateKey("species.bioen.maturity.m0.sp" + index, "species.maturity.m0.sp" + index);
-                  }   
-                  if(cfg.canFind("species.bioen.maturity.m1.sp" + index)) {
-                      updateKey("species.bioen.maturity.m1.sp" + index, "species.maturity.m1.sp" + index);
-                  }   
-                  if(cfg.canFind("species.bioen.maturity.eta.sp" + index)) {
-                      updateKey("species.bioen.maturity.eta.sp" + index, "species.maturity.eta.sp" + index);
-                  }   
-                }
-            }
-        }
-    }; // end of ALL array
+            } }; // end of ALL array
 } // end of class

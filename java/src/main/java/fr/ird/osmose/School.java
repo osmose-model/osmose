@@ -167,6 +167,8 @@ public class School extends AbstractSchool {
     private double e_net_faced; // mean net energy faced during life
     private double nEggs;  // number of eggs that is released by the school
 
+    private double timeAtSpawing = -999;
+
 ///////////////
 // Constructors
 ///////////////
@@ -677,8 +679,11 @@ public class School extends AbstractSchool {
     /**
      * Set whether the individual has spawned.
      */
-    public void setHasSpawned(boolean spawned) {
+    public void setHasSpawned(boolean spawned, double timeStep) {
         this.hasSpawned = spawned;
+        if(this.timeAtSpawing < 0) {
+            this.timeAtSpawing = timeStep;
+        }
     }
     /**
      * Returns the age at maturity (only used for outputs).
@@ -705,6 +710,21 @@ public class School extends AbstractSchool {
      */
     public void setAgeMat(double agemature) {
         this.ageMature = agemature;
+    }
+
+    /** Determines whether the school should die from spawning
+     *
+     * If the spawning has occurred and the time delta between the spawning
+     * timestep and the actual time-step is true, then the school should die
+     * from spawning.
+     *
+     * Note that for by default, species.getSpawningSurvivalTime() returns infinity.
+     *
+     * @param timeStep the actual timeStep of the simulation
+     *
+    */
+    public boolean dieFromSpawning(int timeStep) {
+       return (this.hasSpawned) && (timeStep - timeAtSpawing) >= species.getSpawningSurvivalTime();
     }
 
     /**

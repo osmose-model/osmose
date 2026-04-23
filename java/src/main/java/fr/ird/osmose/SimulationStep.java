@@ -216,6 +216,9 @@ public class SimulationStep extends SimulationLinker {
         // Updates the aging mortality variable
         getSchoolSet().updateAgingMortality();
 
+        // Updates the aging mortality variable
+        getSchoolSet().updateSpawningMortality(iStepSimu);
+
         // Reproduction
         reproductionProcess.run();
 
