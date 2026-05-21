@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="http://documentation.osmose-model.org/_images/logo-osmose.svg">
+  <img src="https://github.com/osmose-model/osmose-logos/blob/master/logos-cynara/new-osmose-logo-small-nobkg.png">
 </div>
 
 OSMOSE: Modelling Exploited Marine Ecosystems
