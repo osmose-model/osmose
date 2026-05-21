@@ -617,14 +617,6 @@ public class Releases {
                     if (cfg.canFind("economy.enabled")) {
                         updateKey("economy.enabled", "module.bioeconomics.enabled");
                     }
-                }
-            },
-
-            new Release("4.4.1") {
-                @Override
-                void updateParameters() {
-
-                    Configuration cfg = this.getConfiguration();
 
                     if (cfg.canFind("output.fecundity.bysize.enabled")) {
                         updateKey("output.fecundity.bysize.enabled", "output.number.of.eggs.bysize.enabled"); // to be
@@ -735,6 +727,7 @@ public class Releases {
                     if (cfg.canFind("economy.enabled")) {
                         updateKey("economy.enabled", "module.bioeconomics.enabled");
                     }
-                }
+
+                } // end of update parameters
             } }; // end of ALL array
 } // end of class

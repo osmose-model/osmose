@@ -11,6 +11,7 @@ OSMOSE: Modelling Exploited Marine Ecosystems
 [![R Build Status](https://github.com/osmose-model/osmose/workflows/r-build/badge.svg)](https://github.com/osmose-model/osmose/actions)
 [![Java Build Status](https://github.com/osmose-model/osmose/workflows/java-build/badge.svg)](https://github.com/osmose-model/osmose/actions)
 [![GitHub issues](https://img.shields.io/github/issues/osmose-model/osmose.svg)](https://github.com/osmose-model/osmose/issues)
+[![GitHub issues](https://img.shields.io/badge/Documentation-8A2BE2)](https://github.com/osmose-model/osmose/wiki)
 
 ## Overview
 

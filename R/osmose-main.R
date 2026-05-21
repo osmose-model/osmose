@@ -76,13 +76,13 @@
 #' }
 #' @export
 run_osmose = function(input, parameters = NULL, output = NULL, log = "osmose.log",
-                      version = "4.3.3", osmose = NULL, java = "java",
+                      version = "4.4.0", osmose = NULL, java = "java",
                       options = NULL, verbose = TRUE, clean = TRUE, force = FALSE) {
 
   package_version = packageVersion("osmose")
 
   if(is.null(version)) version = as.character(package_version)
-  
+
   # Print message with version
   # if version argument is null, Java version is the same as the package version
   if (isTRUE(verbose)) {
@@ -233,7 +233,7 @@ read_osmose = function(path = NULL, input = NULL, version = "4.3.2",
   if(.is_calibration_dir(path)) {
     return(.read_osmose_calibration(path=path))
   }
-  
+
   # If config is not NULL, then read it
   recursive = TRUE
   if(is.null(input)) {
