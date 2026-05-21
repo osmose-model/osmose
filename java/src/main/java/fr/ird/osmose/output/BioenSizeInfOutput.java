@@ -79,7 +79,7 @@ public class BioenSizeInfOutput extends AbstractOutput {
     }
 
     @Override
-    String getDescription() {
+    protected String getDescription() {
         return "Maximum size observed on the timespan (centimeter)";
     }
 

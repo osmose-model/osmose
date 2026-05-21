@@ -58,32 +58,36 @@
 #' @export
 #' @method plot osmose
 plot.osmose = function(x, what = "biomass", ...) {
+
+  other_arguments = list(...)  
+  other_arguments$initialYear = get_par(x$config, "simulation.time.start")
+  other_arguments$freq = get_par(x$config, "simulation.time.ndtPerYear")/get_par(x$config, "output.recordfrequency.ndt")
   
   x = get_var(x, what = what, expected = FALSE)
-  plot(x, ...)
+  do.call(plot, c(list(x=x), other_arguments))
   
   return(invisible())
 }
 
-#' get_var method for osmose outputs objects
-#' @description Get a variable from an \code{osmose} object. 
-#'
 #' @param object Object of \code{osmose} class (see the \code{\link{read_osmose}} 
 #' function).
 #' @param what Name of variable to extract. See Details.
 #' @param how How to return the object. Current options are "matrix" and "list".
-#' @param expected A logical parameter. If \code{TRUE}, the average over the 
+#' @param expected Logical. If \code{TRUE}, the average over the 
 #' last dimensions will be performed (only if the output is an array).
+#' @param no.error Return NULL instead of and error if variable not found.
+#' @param drop Logical. If \code{TRUE}, degenerated dimensions are droped.
+#' @param size A positive integer indicating how many replicate to sample, possibly at random.
+#' @param random Logical. If \code{TRUE}, \code{n} replicates are taken, after sampling. 
+#' @param replace should sampling be with replacement?
 #' @param ... Additional arguments of the function.
-#' 
-#' @details \code{what} can be any available variable contained on \code{object}
-#' (e.g. biomass, abundance, yield, yieldN, etc).
-#'
-#' @return An matrix or a list containing the data.
-#' @export
+#' @rdname get_var
 #' @method get_var osmose
-get_var.osmose = function(object, what, how = c("matrix", "list"), 
-                          expected = FALSE, ...){
+#' @export
+get_var.osmose = function(object, what, sp=NULL, srv=NULL, fsh=NULL, 
+                          how = c("matrix", "list"), 
+                          expected = FALSE, no.error=FALSE, drop=TRUE, 
+                          size=NULL, random=FALSE, replace=FALSE, ...){
   
   # Argument verification of 'how' using partial matching
   how = match.arg(how)
@@ -92,23 +96,101 @@ get_var.osmose = function(object, what, how = c("matrix", "list"),
   if(how == "list") expected = TRUE
   
   # Extract variable from object
-  out = object[[what]]
-  
-  # If it's NULL, then show an error message
-  if(is.null(out)) {
-    message = paste("The", sQuote(what), "variable is NULL.", sep="")
-    stop(message) 
+  out = get_var.default(object=object, what=what, no.error=no.error)
+  if(!is.null(srv)) out = get_var.default(object=out, what=srv, no.error=no.error)
+  if(!is.null(fsh)) out = get_var.default(object=out, what=fsh, no.error=no.error)
+  if(!is.null(sp)) out = get_var.default(object=out, what=sp, no.error=no.error)
+
+  if(!is.null(size)) {
+    
+    if(length(size)>1) stop("Size for sampling replicates must be an integer.")
+
+    if(is.array(out)) nrep = tail(dim(out), 1)
+    if(is.list(out)) nrep = tail(dim(out[[1]]), 1)
+
+    .get_sample = function(x, ind) {
+      oclass = class(x)
+      if(length(dim(x))==2) x = x[, ind, drop=FALSE]
+      if(length(dim(x))==3) x = x[, , ind, drop=FALSE]
+      if(length(dim(x))==4) x = x[, , , ind, drop=FALSE]
+      class(x) = oclass
+      return(x)
+    }
+    
+    if(isTRUE(random)) {
+      ind = sample(x=nrep, size=size, replace=replace)
+    } else {
+      if(size>nrep) {
+        warning("Size is greter than number of replicates, returning all.")
+        size = nrep
+      }
+      ind = seq_len(size)  
+    }
+       
+    if(is.array(out)) out = .get_sample(out, ind)
+    if(is.list(out))  out = lapply(out, FUN=.get_sample, ind=ind)
+    
   }
   
-  if(inherits(out, "array") & isTRUE(expected)){
-    out = apply(out, c(1, 2), mean, na.rm = TRUE)
+  .expected = function(x, drop) {
+    out = apply(x, c(1, 2), mean, na.rm = TRUE)
+    if(isTRUE(drop)) out = drop(out)
+    if(is.null(dim(out))) names(out) = NULL
+    try(class(out) <- class(x), silent = TRUE)
+    return(out)
+  }
+    
+  if(is.array(out) & isTRUE(expected)) {
+    out = .expected(out, drop=drop)
   }
   
-  if(how == "matrix") return(out)
+  if(is.list(out) & isTRUE(expected)){
+    out = lapply(out, FUN=.expected, drop=drop)
+  }
+  
+  if(how == "matrix" | is.list(out)) return(out)
   
   if(how == "list") return(as.list(as.data.frame(out, check.names = FALSE)))
   
   return(out)
+}
+
+#' @rdname get_var
+#' @export
+get_var.list = get_var.osmose
+
+#' @rdname get_var
+#' @export
+get_var.NULL = function(object, ...) {
+  return(NULL)
+}
+
+#' @rdname get_var
+#' @export
+get_var.osmose.calibration = function(object, what, how, ...) {
+  
+  x = object[[what]]
+  return(x)
+  
+}
+
+#' @rdname get_var
+#' @export
+get_var.default = function(object, what=NULL, no.error=FALSE, ...) {
+  if(is.null(object)) return(NULL)
+  if(is.null(what)) return(object)
+  if(!is.list(object)) {
+    warning(sprintf("Object is not a list, ignoring '%s' subsetting.", what))
+    return(object)
+  }
+  if(length(what)>1) stop("Only one name is allowed in 'what'.")
+  x = object[[what]]
+  if(is.null(x)) {
+    msg = "The variable '%s' was not found in OSMOSE outputs."
+    if(isTRUE(no.error)) return(NULL)
+    stop(sprintf(msg, what)) 
+  }
+  return(x)
 }
 
 
@@ -121,10 +203,15 @@ get_var.osmose = function(object, what, how = c("matrix", "list"),
 #' @method print osmose
 #' @export
 print.osmose = function(x, ...) {
-  cat(paste0("OSMOSE v.", x$model$version, "\n"))
-  cat("Model", sQuote(x$model$model),"\n\n")
-  cat(sprintf("%s species modeled (%s simulations):", x$model$nsp, x$model$simus))
-  cat(sprintf("\n\t[sp%s] %s", seq(0, x$model$nsp - 1), x$species), "\n")
+  cat("Model", sprintf("OSMOSE-%s (v%s)", 
+                       toupper(get_par(x$conf, "output.file.prefix")),
+                       get_par(x$conf, "osmose.version")),"\n\n")
+  cat(sprintf("Running model with %d replicates.\n\n", x$model$simus))
+  spp = get_species(x$config)
+  spp_code = get_species(x$config, code=TRUE)
+  cat(sprintf("%s species modeled:\n\n", length(spp)))
+  cat(paste(sprintf("[sp%s] %s", spp_code, spp), collapse=", "), "\n")
+  
   
   # Get dimension (no vector classes) or length (vector classes) for each level
   infoLevels = sapply(x, function(x) if(is.array(x)) dim(x) else length(x))
@@ -132,21 +219,20 @@ print.osmose = function(x, ...) {
   # Check which levels are empty (dim or length equal to zero)
   infoLevels = sapply(infoLevels, function(x) isTRUE(all.equal(x, 0)))
   
-  # Add a mark (*) for those empty level's' names
+  # remove empty fields
+  infoLevels = infoLevels[!infoLevels]
+  
+  # # Add a mark (*) for those empty level's' names
   infoLevels = paste0(names(infoLevels), ifelse(infoLevels, " (*)", ""))
-  
+  infoLevels = setdiff(infoLevels, c("model", "species", "config", "elapsed"))
   # If length of level (of names) vector is odd, add an empty value
-  infoLevels = c(infoLevels, 
-                 if(length(infoLevels) %% 2 != 0) "---------" else NULL)
-  
-  # Sort vector (of names) as a 2 columns matrix
-  infoLevels = matrix(data = infoLevels, ncol = 2)
-  dimnames(infoLevels) = list(rep("", nrow(infoLevels)), rep("", ncol(infoLevels)))
-  
+ 
+  infoLevels = paste(infoLevels, collapse=", ")
+ 
   # Show available variables
-  cat("\nAvailable fields:\n")
-  print(infoLevels)
-  cat("\n(*) Empty fields.\n")
+  cat(sprintf("\nAvailable outputs:\n %s\n", infoLevels))
+
+  # cat("\n(*) Empty fields.\n")
 }
 
 #' @title \code{osmose} object summaries

@@ -48,6 +48,9 @@ import fr.ird.osmose.populator.PopulatingProcess;
 import fr.ird.osmose.process.genet.Trait;
 import fr.ird.osmose.resource.ResourceForcing;
 import fr.ird.osmose.util.OsmoseLinker;
+
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -55,6 +58,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
+import ucar.nc2.Attribute;
 import ucar.nc2.NetcdfFile;
 import ucar.nc2.dataset.NetcdfDatasets;
 
@@ -103,6 +107,9 @@ public class Simulation extends OsmoseLinker {
      */
     private int i_step_simu;
 
+    /** Initial time-step of the simulation */
+    private int init_step_simu;
+
     /**
      * The object that controls what should be done during one time step.
      */
@@ -118,6 +125,8 @@ public class Simulation extends OsmoseLinker {
      */
     private List<Trait> evolvingTrait;
     private int nEvolvingTrait;
+
+    private double simulationSSB[];
 
     //////////////
     // Constructor
@@ -153,21 +162,48 @@ public class Simulation extends OsmoseLinker {
         // Create a new school set, empty at the moment
         schoolSet = new SchoolSet();
 
+        simulationSSB = new double[getConfiguration().getNSpecies()];
+
         // barrier.n: init a set of background schools (used to save fisheries and
         // discards)
         this.backSchoolSet = new BackgroundSchoolSet();
-        this.backSchoolSet.init();
 
-        i_step_simu = 0;
+        init_step_simu = 0;
 
         // Look for restart file if restart is enabled
         if(getConfiguration().isRestart()) {
-            String ncfile = getConfiguration().getFile("simulation.restart.file") + "." + rank;
-            i_step_simu = 0;
+
+            String key = "simulation.restart.file";
+            String plainFilename = getConfiguration().getFile(key);
+            String rankedFilename = plainFilename + "." + getRank();
+            boolean plainFile = false, rankedFile = false;
+            if (new File(plainFilename).exists()) {
+                plainFile = true;
+            }
+            if (new File(rankedFilename).exists()) {
+                rankedFile = true;
+            }
+            if (!plainFile && !rankedFile) {
+                error("Could not find any NetCDF initialization file (check parameter " + key + ").",
+                        new FileNotFoundException(
+                                "Neither file " + plainFilename + " nor " + rankedFilename + " exist."));
+            } else if (plainFile && rankedFile) {
+                warning("Found two suitable NetCDF initialization files: " + plainFilename + " and " + rankedFilename
+                        + ". Osmose will use the latest " + rankedFilename);
+            }
+            String ncfile = rankedFile ? rankedFilename : plainFilename;
+
+            init_step_simu = 0;
             try {
                 NetcdfFile nc = NetcdfDatasets.openDataset(ncfile);
-                i_step_simu = Integer.valueOf(nc.findGlobalAttribute("step").getStringValue()) + 1;
-                info("Restarting simulation from year {0} step {1}", new Object[] { this.getYear(),  this.getIndexTimeYear()});
+                Attribute ncAttribute = nc.findGlobalAttribute("step");
+                if (ncAttribute != null) {
+                    init_step_simu = Integer.valueOf(ncAttribute.getStringValue()) + 1;
+                    info("Restarting simulation from year {0} step {1}",
+                            new Object[] { this.getYear(), this.getIndexTimeYear() });
+                } else {
+                    error("The restart file is missing a 'step' global attribute", new Exception());
+                }
             } catch (IOException ex) {
                 error("Failed to open restart file " + ncfile, ex);
             }
@@ -239,23 +275,24 @@ public class Simulation extends OsmoseLinker {
      */
     private void initResourceForcing() {
 
-        int nTot = this.getNBkgSpecies() + this.getNRscSpecies();
+        // int nTot = this.getNBkgSpecies() + this.getNRscSpecies();
+        int nTot = this.getNRscSpecies();
         resourceForcing = new ResourceForcing[nTot];
 
         int resourceIndex = 0;
 
-        // Init resources for background species
-        for (int fileIndex : this.getConfiguration().getBackgroundIndex()) {
-            ResourceForcing resForcing = new ResourceForcing(fileIndex, resourceIndex);
-            try {
-                resForcing.init();
-            } catch (IOException ex) {
-                Logger.getLogger(Simulation.class.getName()).log(Level.SEVERE, null, ex);
-            }
-            resourceForcing[resourceIndex] = resForcing;
-            resourceIndex++;
-            // Name must contain only alphanumerical characters
-        }
+        // // Init resources for background species
+        // for (int fileIndex : this.getConfiguration().getBackgroundIndex()) {
+        //     ResourceForcing resForcing = new ResourceForcing(fileIndex, resourceIndex);
+        //     try {
+        //         resForcing.init();
+        //     } catch (IOException ex) {
+        //         Logger.getLogger(Simulation.class.getName()).log(Level.SEVERE, null, ex);
+        //     }
+        //     resourceForcing[resourceIndex] = resForcing;
+        //     resourceIndex++;
+        //     // Name must contain only alphanumerical characters
+        // }
 
         for (int fileIndex : this.getConfiguration().getResourceIndex()) {
             ResourceForcing resForcing = new ResourceForcing(fileIndex, resourceIndex);
@@ -275,9 +312,12 @@ public class Simulation extends OsmoseLinker {
      */
     public void run() {
 
+        i_step_simu = init_step_simu;
+
         while (i_step_simu < getConfiguration().getNStep()) {
 
             int year = getYear();
+            int spinupRestart = getConfiguration().getSpinupRestart();
 
             // Print progress in console at the beginning of the year
             if (getIndexTimeYear() == 0) {
@@ -288,8 +328,8 @@ public class Simulation extends OsmoseLinker {
             step.step(i_step_simu);
 
             // Create a restart file
-            if (getConfiguration().isWriteRestartEnabled() && (year >= getConfiguration().getSpinupRestart())
-                    && ((i_step_simu + 1) % getConfiguration().getRestartFrequency() == 0)) {
+            if (getConfiguration().isWriteRestartEnabled() && (i_step_simu >= (spinupRestart - 1))
+                    && ((i_step_simu - spinupRestart + 1) % getConfiguration().getRestartFrequency() == 0)) {
                 snapshot.makeSnapshot(i_step_simu);
             }
 
@@ -337,6 +377,10 @@ public class Simulation extends OsmoseLinker {
      */
     public int getIndexTimeSimu() {
         return i_step_simu;
+    }
+
+    public boolean isFirstTimeStep() {
+        return i_step_simu == init_step_simu;
     }
 
     /**
@@ -400,6 +444,35 @@ public class Simulation extends OsmoseLinker {
 
     public EconomicModule getEconomicModule() {
         return this.economicModule;
+    }
+
+    public int getRank() {
+        return this.rank;
+    }
+
+    /** Increment the total spawning biomass */
+    public void incrementSSB(School school) {
+        if(school.isMature()) {
+            simulationSSB[school.getSpeciesIndex()] += school.getInstantaneousBiomass();
+        }
+    }
+
+    /** Resets the total SSB biomass */
+    public void resetSSB() {
+        for(int s = 0; s < getConfiguration().getNSpecies(); s++) {
+            simulationSSB[s] = 0;
+        }
+    }
+
+    /** Removes SSB biomass */
+    public void removeSSB(IAggregation school, double nDead) {
+        simulationSSB[school.getSpeciesIndex()] -= nDead * school.getWeight();
+        simulationSSB[school.getSpeciesIndex()] = Math.max(simulationSSB[school.getSpeciesIndex()], 0);
+    }
+
+    /** Gets SSB biomass */
+    public double getSSB(IAggregation school) {
+        return simulationSSB[school.getSpeciesIndex()];
     }
 
 }

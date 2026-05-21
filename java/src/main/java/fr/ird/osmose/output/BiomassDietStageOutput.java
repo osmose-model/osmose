@@ -81,7 +81,7 @@ public class BiomassDietStageOutput extends AbstractOutput {
     }
 
     @Override
-    String getDescription() {
+    protected String getDescription() {
         return "\\ Biomass (tons) of preys at the beginning of the time step (before all sources of mortality - fishing, predation, starvation, others)";
     }
 
@@ -97,14 +97,14 @@ public class BiomassDietStageOutput extends AbstractOutput {
             biomassStage[school.getSpeciesIndex()][dietOutputStage.getStage(school)] += school.getBiomass();
         });
 
-        this.getBkgSchoolSet().getAllSchools().forEach(school -> {
+        this.getBkgSchoolSet().getSchools().forEach(school -> {
             biomassStage[school.getSpeciesIndex()][dietOutputStage.getStage(school)] += school.getBiomass();
         });
 
         int nSpecies = this.getNSpecies();
         int nBkg = this.getNBkgSpecies();
         for (int cpt = 0; cpt < this.getNRscSpecies(); cpt++) {
-            biomassStage[nSpecies + nBkg + cpt][0] += getTotalBiomass(cpt + nBkg);
+            biomassStage[nSpecies + nBkg + cpt][0] += getTotalBiomass(cpt);
         }
 
     }
@@ -132,9 +132,11 @@ public class BiomassDietStageOutput extends AbstractOutput {
     public void write(float time) {
         double[] biomass = new double[nColumns];
         double nsteps = getRecordFrequency();
+        int cpt = 0;
         for (int k = 0; k < this.getNAllSpecies(); k++) {
             for (int s = 0; s < dietOutputStage.getNStage(k); s++) {
-                biomass[k] = biomassStage[k][s] / nsteps;
+                biomass[cpt] = biomassStage[k][s] / nsteps;
+                cpt += 1;
             }
         } // end of species loop
         writeVariable(time, biomass);

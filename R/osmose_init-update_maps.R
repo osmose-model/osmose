@@ -7,37 +7,36 @@
 #' @param sep Separator used in the csv maps, default to comma.
 #' @param na.strings Value used for 'land' in the maps, default to -99.
 #'
-#' @return
+#' @return The side effect is to create ncdf files with the maps.
 #' @export
 #'
-#' @examples
 update_maps = function(input, output, conf, sep = ",", na.strings = -99, test=FALSE) {
 
   xconf = .readConfiguration(input)
-  ndt = .getPar(xconf, "simulation.time.ndtperyear")
+  ndt = get_par(xconf, "simulation.time.ndtperyear")
   
-  if(!is.null(.getPar(xconf, "grid.netcdf.file"))) {
-    gfile = .getPar(xconf, "grid.netcdf.file")
+  if(!is.null(get_par(xconf, "grid.netcdf.file"))) {
+    gfile = get_par(xconf, "grid.netcdf.file")
     gfile = file.path(attr(gfile, "path"), gfile)
-    gvar  = .getPar(xconf, "grid.var.mask") 
+    gvar  = get_par(xconf, "grid.var.mask") 
     grid = nc_open(gfile)
     on.exit(nc_close(grid))
     mask = ncvar_get(grid, varid=gvar)
     ncol = dim(mask)[1]
     nrow = dim(mask)[2]
   } else {
-    nrow = .getPar(xconf, "nline")
-    ncol = .getPar(xconf, "ncol")
+    nrow = get_par(xconf, "nline")
+    ncol = get_par(xconf, "ncol")
   }
   
-  mcon = .getPar(.getPar(xconf, "movement"), "map")
-  smap = .getPar(mcon, "species")
+  mcon = get_par(get_par(xconf, "movement"), "map")
+  smap = get_par(mcon, "species")
   allsp = unique(unlist(smap))
 
   rpath = getRelativePath(output, relativeTo=dirname(conf))
 
-  amin0 = .getPar(mcon, "age.min")
-  amin1 = .getPar(mcon, "initialage")
+  amin0 = get_par(mcon, "age.min")
+  amin1 = get_par(mcon, "initialage")
   if(length(amin0) > length(amin1)) {
     minkey = "age.min"
     maxkey = "age.max"
@@ -45,13 +44,15 @@ update_maps = function(input, output, conf, sep = ",", na.strings = -99, test=FA
     minkey = "initialage"
     maxkey = "lastage"
   }
-  step0 = .getPar(mcon, "season")
-  step1 = .getPar(mcon, "steps")
+  step0 = get_par(mcon, "season")
+  step1 = get_par(mcon, "steps")
   skey = ifelse(length(step0) > length(step1), "season", "steps")
   
   out = NULL
   nmap = 0
   for(i in seq_along(allsp)) {
+    msg = sprintf("Processing species '%s'", allsp[i])
+    message(msg)
     ind = names(smap)[unlist(smap)==allsp[i]]
     mat = data.frame(sp=unlist(mcon[ind]),
                      min=unlist(mcon[gsub(ind, pattern="species", replacement = minkey)]),

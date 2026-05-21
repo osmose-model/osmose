@@ -6,3 +6,5 @@ simulation.time.ndtPerYear;24
 simulation.time.nyear;120
 simulation.nfisheries;14
 fishing.mortality.enabled;false
+module.multispecies.fisheries.enabled;true
+module.bioeconomics.enabled;false

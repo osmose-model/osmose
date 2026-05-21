@@ -67,7 +67,7 @@ public class AgeAtDeathOutput extends AbstractOutput {
     }
 
     @Override
-    String getDescription() {
+    protected String getDescription() {
         return "Total (Mtot), Predation (Mpred), Starvation (Mstarv), Additional mortality (Madd), Fishing (F) & Out-of-domain (Z) ages at death (years)";
     }
 
@@ -127,7 +127,7 @@ public class AgeAtDeathOutput extends AbstractOutput {
 
     @Override
     public String[] getHeaders() {
-        return new String[]{"Age Mtot", "Age Mpred", "Age Mstar", "Age Mnat", "Age MF", "Age MZ", "Age Mfor", "Age MDis", "Age MAge"};
+        return new String[]{"Age Mtot", "Age Mpred", "Age Mstar", "Age Madd", "Age MF", "Age MZ", "Age Mfor", "Age MDis", "Age MAge"};
     }
 
     @Override

@@ -41,13 +41,16 @@
 
 package fr.ird.osmose.output.distribution;
 
+import java.util.Arrays;
+
 import fr.ird.osmose.IMarineOrganism;
 import fr.ird.osmose.stage.ClassGetter;
 import fr.ird.osmose.util.OsmoseLinker;
 
-/** Species belong to distribution (T) class s if
+/**
+ * Species belong to distribution (T) class s if
  *
- *   T(s) <=  L(s) < T(s + 1)
+ * T(s) <= L(s) < T(s + 1)
  *
  *
  * @author pverley
@@ -78,10 +81,14 @@ public class OutputDistribution extends OsmoseLinker {
     private final String key;
     private ClassGetter classGetter;
 
-    public OutputDistribution(DistributionType type, int indexSpecies) {
+    public OutputDistribution(String key, DistributionType type, int indexSpecies) {
         this.type = type;
         this.fileSpeciesIndex = indexSpecies;
-        this.key = "output.distrib";
+        this.key = key;
+    }
+
+    public OutputDistribution(DistributionType type, int indexSpecies) {
+        this("output.distrib", type, indexSpecies);
     }
 
     public OutputDistribution(DistributionType type) {
@@ -107,41 +114,69 @@ public class OutputDistribution extends OsmoseLinker {
         }
 
         // Minimal class of the distribution
-        float min;
+        float min = -999;
         // Maximal class of the distribution
-        float max;
+        float max = -999;
         // Increment between two contiguous classes of the distribution
-        float incr;
+        float incr = -999;
+        boolean useClass = false;
+        float[] classValues = new float[1];
 
         if (fileSpeciesIndex >= 0 && speciesDistribExist()) {
-            min = getConfiguration().getFloat(getKeyMinSpecies());
-            max = getConfiguration().getFloat(getKeyMaxSpecies());
-            incr = getConfiguration().getFloat(getKeyIncrSpecies());
+            if (!getConfiguration().isNull(getKeyClassSpecies())) {
+                useClass = true;
+                classValues = getConfiguration().getArrayFloat(getKeyClassSpecies());
+            } else {
+                min = getConfiguration().getFloat(getKeyMinSpecies());
+                max = getConfiguration().getFloat(getKeyMaxSpecies());
+                incr = getConfiguration().getFloat(getKeyIncrSpecies());
+            }
         } else if (distribExist()) {
-            min = getConfiguration().getFloat(getKeyMin());
-            max = getConfiguration().getFloat(getKeyMax());
-            incr = getConfiguration().getFloat(getKeyIncr());
+            if (!getConfiguration().isNull(getKeyClass())) {
+                useClass = true;
+                classValues = getConfiguration().getArrayFloat(getKeyClass());
+            } else {
+                min = getConfiguration().getFloat(getKeyMin());
+                max = getConfiguration().getFloat(getKeyMax());
+                incr = getConfiguration().getFloat(getKeyIncr());
+            }
         } else {
             min = getDefaultMin();
             max = getDefaultMax();
             incr = getDefaultIncr();
         }
 
-        if(min == 0) {
-            String message = "The minimum value was set equal to 0. It has been corrected to " + String.valueOf(incr);
-            warning(message);
-            min = incr;
+        if (!useClass) {
+
+            if (min == 0) {
+                String message = "The minimum value was set equal to 0. It has been corrected to "
+                        + String.valueOf(incr);
+                warning(message);
+                min = incr;
+            }
+
+            // Number of classes
+            // if thresholds are from 5 to 30 by 5,
+            // thresholds class are [0, 5[, [5, 10[, .... [30, inf[
+            int nClass = (int) Math.ceil((max - min) / incr) + 1;
+
+            thresholds = new float[nClass];
+            thresholds[0] = min;
+            for (int i = 1; i < nClass; i++) {
+                thresholds[i] = min + i * incr;
+            }
         }
 
-        // Number of classes
-        // if thresholds are from 5 to 30 by 5,
-        // thresholds class are [0, 5[, [5, 10[, .... [30, inf[
-        int nClass = (int) Math.ceil((max - min) / incr) + 1;
-
-        thresholds = new float[nClass];
-        thresholds[0] = min;
-        for (int i = 1; i < nClass; i++) {
-            thresholds[i] = min + i * incr;
+        else {
+            Arrays.sort(classValues);
+            if (classValues[0] == 0) {
+                thresholds = new float[classValues.length - 1];
+                for (int i = 0; i < classValues.length - 1; i++) {
+                    thresholds[i] = classValues[i + 1];
+                }
+            } else {
+                thresholds = classValues.clone();
+            }
         }
     }
 
@@ -200,16 +235,28 @@ public class OutputDistribution extends OsmoseLinker {
         return getKeyIncr() + ".sp" + fileSpeciesIndex;
     }
 
+    private String getKeyClassSpecies() {
+        return getKeyClass() + ".sp" + fileSpeciesIndex;
+    }
+
+    private String getKeyClass() {
+        return key + ".by" + type.toString() + ".class";
+    }
+
     private boolean speciesDistribExist() {
-        return (!getConfiguration().isNull(getKeyMinSpecies()))
+        boolean test1 = (!getConfiguration().isNull(getKeyMinSpecies()))
                 && (!getConfiguration().isNull(getKeyMaxSpecies()))
                 && (!getConfiguration().isNull(getKeyIncrSpecies()));
+
+        boolean test2 = !getConfiguration().isNull(getKeyClassSpecies());
+        return (test1 || test2);
     }
 
     private boolean distribExist() {
-        return (!getConfiguration().isNull(getKeyMin()))
-                && (!getConfiguration().isNull(getKeyMax()))
+        boolean test1 = (!getConfiguration().isNull(getKeyMin())) && (!getConfiguration().isNull(getKeyMax()))
                 && (!getConfiguration().isNull(getKeyIncr()));
+        boolean test2 = (!getConfiguration().isNull(getKeyClass()));
+        return test1 || test2;
     }
 
     private float getDefaultMin() {
@@ -230,7 +277,7 @@ public class OutputDistribution extends OsmoseLinker {
                 break;
         }
 
-        if(output < 0) {
+        if (output < 0) {
             error("Type " + type.toString() + "is not supported", null);
         }
 
@@ -256,7 +303,7 @@ public class OutputDistribution extends OsmoseLinker {
                 break;
         }
 
-        if(output < 0) {
+        if (output < 0) {
             error("Type " + type.toString() + "is not supported", null);
         }
 
@@ -282,13 +329,12 @@ public class OutputDistribution extends OsmoseLinker {
                 break;
         }
 
-        if(output < 0) {
+        if (output < 0) {
             error("Type " + type.toString() + "is not supported", null);
         }
 
         return output;
 
     }
-
 
 }

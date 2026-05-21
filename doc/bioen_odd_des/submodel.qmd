@@ -1,0 +1,13 @@
+# Submodels
+
+```{toctree}
+:caption: 'Contents:'
+:maxdepth: 1
+
+submodel/energy_uptake.qmd
+submodel/maintenance.qmd
+submodel/new_tissue.qmd
+submodel/maturation.qmd
+submodel/reproduction.qmd
+submodel/mortality.qmd
+```

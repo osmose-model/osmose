@@ -113,16 +113,14 @@ public class SpeciesOutput extends AbstractOutput {
         });
 
         // Init the biomass of background species by using the ResourceForcing class
-        for (List<BackgroundSchool> bkgSchoolList : this.getBkgSchoolSet().getValues()) { // loop over the cells
-            for (BackgroundSchool bkg : bkgSchoolList) { // loop over the resources
-                int irg = 0;
-                for (AbstractOutputRegion region : getOutputRegions()) {
-                    if (region.contains(timeStep, bkg)) {
-                        double select = region.getSelectivity(timeStep, bkg);
-                        value[bkg.getSpeciesIndex()][irg] += select * schoolVariable.getVariable(bkg);
-                    }
-                    irg++;
+        for (BackgroundSchool bkg : this.getBkgSchoolSet().getSchools()) { // loop over the resources
+            int irg = 0;
+            for (AbstractOutputRegion region : getOutputRegions()) {
+                if (region.contains(timeStep, bkg)) {
+                    double select = region.getSelectivity(timeStep, bkg);
+                    value[bkg.getSpeciesIndex()][irg] += select * schoolVariable.getVariable(bkg);
                 }
+                irg++;
             }
         }
     }
@@ -158,7 +156,7 @@ public class SpeciesOutput extends AbstractOutput {
     }
 
     @Override
-    String getDescription() {
+    protected String getDescription() {
         return description;
     }
 }

@@ -212,7 +212,8 @@ public class FisheryOutputDistrib extends SimulationLinker implements IOutput {
     @Override
     public void update() {
 
-        getSchoolSet().getAliveSchools().forEach((school) -> {
+        //getSchoolSet().getAliveSchools().forEach((school) -> {
+        getSchoolSet().getSchools().forEach((school) -> {
             int iSpecies = school.getSpeciesIndex();
             int iClass = distrib.getClass(school);
             for (int iFishery = 0; iFishery < nFishery; iFishery++) {
@@ -223,7 +224,7 @@ public class FisheryOutputDistrib extends SimulationLinker implements IOutput {
         });
 
 
-        this.getBkgSchoolSet().getAllSchools().forEach((bkgSch) -> {
+        this.getBkgSchoolSet().getSchools().forEach((bkgSch) -> {
             int iSpecies = bkgSch.getSpeciesIndex();
             int iClass = distrib.getClass(bkgSch);
             for (int iFishery = 0; iFishery < nFishery; iFishery++) {

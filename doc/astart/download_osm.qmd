@@ -1,0 +1,160 @@
+
+# Installing Osmose {#sec-osm-inst}
+
+The Osmose model is provided as a combination of a Java numerical core (referred to as Osmose Java), linked to an Osmose R package (referred to as Osmose R). The code is available on a [GitHub repository](https://github.com/osmose-model/osmose).
+
+It is strongly recommended to install Osmose from R, in order to have access to all the features provided
+by the package. There are several ways to install Osmose from the Git repository.
+
+## Install using ``devtools``
+
+It is possible to install the Osmose package using the ``install_github`` function of the ``devtools`` package.
+First, open an R session (by typing ``R`` from a terminal or CMD prompt). In the R console, type:
+
+```R
+library(devtools)
+install_github("osmose-model/osmose/")
+```
+
+This will download the latest commit from the ``master`` branch and use it to compile the Osmose package.
+
+:::{.callout-note}
+The ``devtools`` package is required
+:::
+
+## Install from RStudio
+
+To install Osmose using RStudio, click on the `File --> New Project` menu and
+open the `Version Control --> Git` menu.
+
+Set the package URL to [https://github.com/osmose-model/osmose](https://github.com/osmose-model/osmose).
+
+Once the project is open, click on the
+`Build & Reload` button to install the package.
+
+:::{.callout-note}
+The ``devtools`` package need to be installed.
+:::
+
+## Java executable {#sec-java-executable}
+
+When installing the Osmose R package, no java executable is provided. The latter is automatically downloaded by
+the R package when the ``run_osmose`` package function is called.
+
+The location where the executables are to be downloaded must be specified in a ``.Renviron`` file (see
+[this article](https://support.posit.co/hc/en-us/articles/360047157094-Managing-R-with-Rprofile-Renviron-Rprofile-site-Renviron-site-rsession-conf-and-repos-conf) for a description of ``.Renviron``
+files).
+
+Create or edit the ``.Renviron`` file and set the ``OSMOSE_DIR`` variable to your destination folder. For example:
+
+```bash
+OSMOSE_DIR=/home/barrier/Work/codes/osmose-executables
+```
+
+If no ``.Renviron`` file exists or if the ``OSMOSE_DIR`` variable does not exist, the Java executables are downloaded to a temporary folder anytime the ``run_osmose``
+function is called.
+
+Note that the Java executables are available in the [Releases](https://github.com/osmose-model/osmose/releases) section
+of the Github repository. The Java executables are named ``osmose-X.Y.Z-jar-with-dependencies.jar``,
+where ``X.Y.Z`` is the Osmose version. These Java executables contain all the external Java libraries required
+by Osmose (NetCDF, etc.).
+
+```{mermaid}
+%%| label: fig-run-osmose-diagram
+%%| fig-cap: "Process for downloading Osmose Java executable when running Osmose from R"
+%%| fig-align: "center"
+graph TD;
+    id0("run_osmose(version='vX.Y.Z') function called")
+    id1([Is OSMOSE_DIR defined?])
+    id2("Download executable for vX.Y.Z<br>in temporary folder")
+    id3("Download executable for vX.Y.Z<br>in OSMOSE_DIR folder")
+
+    id4([Does executable for vX.Y.Z exist?])
+    id5(Use executable for vX.Y.Z)
+    id0 --> id1
+    id1 -->|no| id2
+    id1 -->|yes| id4
+    id4 -->|no| id3
+
+    id3 --> id5
+    id2 --> id5
+    id4 -->|yes| id5
+
+```
+
+
+## Install from source files {#sec-install-sources}
+
+To install Osmose from source files, you first need to download the Java compilation tool [Maven](https://maven.apache.org/install.html).
+
+Next, download the code. You can either download it from the [archive file](https://github.com/osmose-model/osmose/archive/refs/heads/master.zip) or by using the ``git clone`` command, as follows:
+
+```bash
+git clone https://github.com/osmose-model/osmose.git
+```
+
+:::{.callout-tip}
+It is strongly recommended that your Git installation was built with Large File Storage (LFS) support. This is the case on Windows, not on Linux or Mac Os X. Visit [LFS website](https://git-lfs.com/) for more informations
+:::
+
+When the code has been downloaded, go into the `osmose` folder and compile the Java code as follows:
+
+```
+mvn package
+```
+
+:::{.callout-tip}
+The Java compilation can also be performed using any Java IDE, such as [NetBeana](https://netbeans.org/downloads/) or [VSCode](https://code.visualstudio.com/)
+:::
+
+This step will generate the ``osmose-X.Y.Z-jar-with-dependencies.jar`` executable and put it into the `inst` folder, which will be used in the R package
+install process.
+
+Next, install the package using the following command:
+
+```bash
+R CMD INSTALL .
+```
+
+:::{.callout-tip}
+This step can be achieved by using RStudio. After opening the `osmose` folder as a new project, click on the
+`Build & Reload` button to install the package.
+:::
+
+:::{.callout-note}
+The ``devtools`` package need to be installed.
+:::
+
+During this operation, the Java executable, which was stored in the `inst` folder, will be copied into the R libs folder. **Therefore,
+the R package must be reinstalled any time the Java core is recompiled**. These steps are summarized below.
+
+```{mermaid}
+%%| label: fig-install-sources
+%%| fig-cap: "Process for installing osmose from source files"
+%%| fig-align: "center"
+graph TD;
+    id4("GitHub sources")
+    id0("Local sources")
+    id1("Create JAR executable\nin inst folder")
+    id2("Copy JAR executable\nin R libs folder.\nInstall R package")
+
+    id0 -->|mvn package| id1
+    id1 -->|R CMD INSTALL .| id2
+    id4 -->|git clone\ngit pull| id0
+
+```
+
+:::{.callout-tip}
+We strongly recommend that you favour the ``git clone`` method. Updating the code
+can be simply done by pulling changes from the remote folder using ``git pull``
+:::
+
+:::{.callout-important}
+Any time the Java sources are updated, both the Java and the R must be recompiled as shown in @fig-install-sources
+:::
+
+## For developers {#sec-install-dev}
+
+The development version of Osmose is available on a private GitHub repository: [https://github.com/osmose-model/osmose-private.git](https://github.com/osmose-model/osmose-private.git).
+
+To be able to clone the private repository, you will need to authentify to GitHub (see [here](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/about-authentication-to-github) for details).

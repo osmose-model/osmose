@@ -64,7 +64,8 @@ public class DistribOutput extends AbstractOutput {
 
     private final boolean computeAverage;
 
-    /** Default constructor, in which temporal average is computed.
+    /**
+     * Default constructor, in which temporal average is computed.
      *
      * @param rank
      * @param subfolder
@@ -74,13 +75,10 @@ public class DistribOutput extends AbstractOutput {
      * @param variable
      * @param distrib
      */
-    public DistribOutput(int rank, String subfolder,
-            String name, String description,
-            Species species,
-            SchoolVariableGetter variable,
-            OutputDistribution distrib) {
+    public DistribOutput(int rank, String subfolder, String name, String description, Species species,
+            SchoolVariableGetter variable, OutputDistribution distrib) {
 
-        this(rank, subfolder, name, description, species, variable, distrib, true);
+        this(rank, subfolder, name, description, species, variable, distrib, true, true);
 
     }
 
@@ -96,19 +94,20 @@ public class DistribOutput extends AbstractOutput {
      * @param distrib
      * @param computeAverage
      */
-    public DistribOutput(int rank, String subfolder,
-            String name, String description,
-            Species species,
-            SchoolVariableGetter variable,
-            OutputDistribution distrib, boolean computeAverage) {
-        super(rank, subfolder, name + "DistribBy" + distrib.getType() + (null != species ? "-" + species.getName() : ""));
+    public DistribOutput(int rank, String subfolder, String name, String description, Species species,
+            SchoolVariableGetter variable, OutputDistribution distrib, boolean computeAverage,
+            boolean includeOnlyAlive) {
+        super(rank, subfolder,
+                name + "DistribBy" + distrib.getType() + (null != species ? "-" + species.getName() : ""),
+                includeOnlyAlive);
         this.distrib = distrib;
         this.variable = variable;
         this.description = description;
         this.computeAverage = computeAverage;
     }
 
-    /** Constructor with compute average but not species.
+    /**
+     * Constructor with compute average but not species.
      *
      * @param rank
      * @param subfolder
@@ -118,11 +117,19 @@ public class DistribOutput extends AbstractOutput {
      * @param distrib
      * @param computeAverage
      */
-    public DistribOutput(int rank, String subfolder, String name, String description, SchoolVariableGetter schoolVariable, OutputDistribution distrib, boolean computeAverage) {
-        this(rank, subfolder, name, description, null, schoolVariable, distrib, computeAverage);
+    public DistribOutput(int rank, String subfolder, String name, String description,
+            SchoolVariableGetter schoolVariable, OutputDistribution distrib, boolean computeAverage) {
+        this(rank, subfolder, name, description, null, schoolVariable, distrib, computeAverage, true);
     }
 
-    /** Constructor without species and compute_average.
+    public DistribOutput(int rank, String subfolder, String name, String description,
+            SchoolVariableGetter schoolVariable, OutputDistribution distrib, boolean computeAverage,
+            boolean includeOnlyAlive) {
+        this(rank, subfolder, name, description, null, schoolVariable, distrib, computeAverage, includeOnlyAlive);
+    }
+
+    /**
+     * Constructor without species and compute_average.
      *
      * @param rank
      * @param subfolder
@@ -131,15 +138,16 @@ public class DistribOutput extends AbstractOutput {
      * @param schoolVariable
      * @param distrib
      */
-    public DistribOutput(int rank, String subfolder, String name, String description, SchoolVariableGetter schoolVariable, OutputDistribution distrib) {
-        this(rank, subfolder, name, description, null, schoolVariable, distrib, true);
+    public DistribOutput(int rank, String subfolder, String name, String description,
+            SchoolVariableGetter schoolVariable, OutputDistribution distrib) {
+        this(rank, subfolder, name, description, null, schoolVariable, distrib, true, true);
     }
 
     @Override
     public void reset() {
         int nSpecies = this.getNSpecies();
         values = new double[nSpecies][][];
-        for(int i = 0; i<nSpecies; i++) {
+        for (int i = 0; i < nSpecies; i++) {
             values[i] = new double[getNOutputRegion()][distrib.getNClass()];
         }
     }
@@ -147,7 +155,7 @@ public class DistribOutput extends AbstractOutput {
     @Override
     public void update() {
         int timeStep = this.getSimulation().getIndexTimeSimu();
-        getSchoolSet().getAliveSchools().forEach(school -> {
+        this.getOutputSchoolStream().forEach(school -> {
             int classSchool = getClass(school);
             if (classSchool >= 0) {
                 double var = variable.getVariable(school);
@@ -164,7 +172,7 @@ public class DistribOutput extends AbstractOutput {
     }
 
     @Override
-    String getDescription() {
+    protected String getDescription() {
         StringBuilder sb = new StringBuilder();
         sb.append(description);
         sb.append(" by ").append(getType().getDescription());
@@ -191,7 +199,7 @@ public class DistribOutput extends AbstractOutput {
             double[][] array = new double[nClass][getNSpecies() + 1];
             for (int iClass = 0; iClass < nClass; iClass++) {
                 int cpt = 0;
-                array[iClass][cpt++] = (iClass == 0) ? 0: distrib.getThreshold(iClass - 1);
+                array[iClass][cpt++] = (iClass == 0) ? 0 : distrib.getThreshold(iClass - 1);
                 if (this.computeAverage) {
                     for (int iSpec = 0; iSpec < nSpecies; iSpec++) {
                         array[iClass][cpt++] = values[iSpec][irg][iClass] / nsteps;
@@ -211,7 +219,7 @@ public class DistribOutput extends AbstractOutput {
         String[] headers = new String[getNSpecies() + 1];
         int cpt = 0;
         headers[cpt++] = distrib.getType().toString();
-        for (int i  = 0; i < getNSpecies(); i++) {
+        for (int i = 0; i < getNSpecies(); i++) {
             headers[cpt++] = getSpecies(i).getName();
         }
         return headers;

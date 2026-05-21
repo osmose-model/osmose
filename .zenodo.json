@@ -1,0 +1,54 @@
+{
+    "title": "Object-oriented Simulator of Marine ecOSystEms (OSMOSE)",
+    "notes": "If you use this software, please cite it as below.",
+    "creators": [
+        {
+            "orcid": "0000-0002-1693-4719",
+            "name": "Barrier, Nicolas"
+        },
+        {
+            "orcid": "0000-0002-8069-2101",
+            "name": "Oliveros-Ramos, Ricardo"
+        },
+        {
+            "orcid": "0000-0002-5686-2764",
+            "name": "Verley, Philippe"
+        },
+        {
+            "orcid": "0000-0002-0727-5774",
+            "name": "Ernande, Bruno"
+        },
+        {
+            "orcid": "0000-0002-7979-9710",
+            "name": "Lau-Medrano, Wencheng"
+        },
+        {
+            "orcid": "0000-0003-2658-7340",
+            "name": "Luj\u00e1n, Criscely"
+        },
+        {
+            "orcid": "0000-0003-3719-4462",
+            "name": "Morell, Alaia"
+        },
+        {
+            "orcid": "0000-0003-1493-662X",
+            "name": "Travers-Trolet, Morgane"
+        },
+        {
+            "orcid": "0000-0001-9555-6770",
+            "name": "Velez, Laure"
+        },
+        {
+            "orcid": "0000-0002-7259-9265",
+            "name": "Shin, Yunne-Jai"
+        }
+    ],
+    "communities": [
+        {
+            "identifier": "osmose"
+        },
+        {
+            "identifier": "umr-marbec"
+        }
+    ]
+}

@@ -1,10 +1,10 @@
-/* 
- * 
+/*
+ *
  * OSMOSE (Object-oriented Simulator of Marine Ecosystems)
  * http://www.osmose-model.org
- * 
+ *
  * Copyright (C) IRD (Institut de Recherche pour le Développement) 2009-2020
- * 
+ *
  * Osmose is a computer program whose purpose is to simulate fish
  * populations and their interactions with their biotic and abiotic environment.
  * OSMOSE is a spatial, multispecies and individual-based model which assumes
@@ -15,31 +15,32 @@
  * processes of fish life cycle (growth, explicit predation, additional and
  * starvation mortalities, reproduction and migration) and fishing mortalities
  * (Shin and Cury 2001, 2004).
- * 
+ *
  * Contributor(s):
  * Yunne SHIN (yunne.shin@ird.fr),
  * Morgane TRAVERS (morgane.travers@ifremer.fr)
  * Ricardo OLIVEROS RAMOS (ricardo.oliveros@gmail.com)
  * Philippe VERLEY (philippe.verley@ird.fr)
  * Laure VELEZ (laure.velez@ird.fr)
- * Nicolas Barrier (nicolas.barrier@ird.fr)
- * 
+ * Nicolas BARRIER (nicolas.barrier@ird.fr)
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation (version 3 of the License). Full description
  * is provided on the LICENSE file.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
- * 
+ *
  */
 package fr.ird.osmose.resource;
 
+import fr.ird.osmose.util.OsmoseLinker;
 import fr.ird.osmose.Configuration;
 import fr.ird.osmose.ISpecies;
 import fr.ird.osmose.Osmose;
@@ -99,10 +100,24 @@ public class ResourceSpecies implements ISpecies {
      * exceed one to avoid any numerical problem when converting from float to
      * double.
      */
-    private final double accessMax = 0.99d;
+    private final double accessMax = 0.9999d;
 
     private final int index;
     private final int offset;
+
+    /** Use legacy computePercent in linear scale?
+     * Read parameter simulation.resource.computePercent.legacy,
+     * defaults to FALSE.
+     */
+
+    private final boolean legacy;
+
+    @FunctionalInterface
+    public interface ComputePercentInterface {
+        public double computePercent(double accessibleSizeMin, double accessibleSizeMax);
+    }
+
+    ComputePercentInterface computePercentInterface;
 
 ///////////////
 // Constructors
@@ -125,12 +140,44 @@ public class ResourceSpecies implements ISpecies {
         sizeMin = cfg.getDouble("species.size.min.sp" + fileindex);
         sizeMax = cfg.getDouble("species.size.max.sp" + fileindex);
         trophicLevel = cfg.getFloat("species.tl.sp" + fileindex);
+
+        if(cfg.isNull("simulation.resources.computePercent.legacy")) {
+            // check the case when the parameter is not defined (insure backward compatibility)
+            legacy = true;
+        } else {
+            legacy = cfg.getBoolean("simulation.resources.computePercent.legacy");
+        }
+
+        if(legacy) {
+            computePercentInterface = (accessibleSizeMin, accessibleSizeMax) -> (computePercentLegacy(accessibleSizeMin, accessibleSizeMax));
+        } else {
+            computePercentInterface = (accessibleSizeMin, accessibleSizeMax) -> (computePercentLog(accessibleSizeMin, accessibleSizeMax));
+        }
+
         if (!cfg.isNull("species.accessibility2fish.file.sp" + fileindex)) {
             SingleTimeSeries ts = new SingleTimeSeries();
             ts.read(cfg.getFile("species.accessibility2fish.file.sp" + fileindex));
             accessibilityCoeff = ts.getValues();
         } else {
-            double accessibility = cfg.getDouble("species.accessibility2fish.sp" + fileindex);
+
+        String keyVal = String.format("species.accessibility2fish.sp%d", fileindex);
+        String keyValLog = String.format("species.accessibility2fish.logit.sp%d", fileindex);
+
+        // test if only one of the two values exists
+        if (!cfg.isNull(keyValLog) && !cfg.isNull(keyVal)) {
+            String message = String.format("Both %s and %s parameters are defined. Choose only one.\n", keyValLog, keyVal);
+            //error(message, new Exception());
+        }
+
+        double accessibility;
+        if(cfg.isNull(keyValLog)) {
+            // If the key for logit values is Null, assume accessibility in standard mode
+            accessibility = cfg.getDouble("species.accessibility2fish.sp" + fileindex);
+        } else {
+            // If the key for logit values is not null, assume accessibility in logit
+            accessibility = 1.0 / (1.0 + Math.exp(-1.0*cfg.getDouble("species.accessibility2fish.logit.sp" + fileindex)));
+        }
+
             accessibilityCoeff = new double[cfg.getNStep()];
             for (int i = 0; i < accessibilityCoeff.length; i++) {
                 accessibilityCoeff[i] = (accessibility >= 1) ? accessMax : accessibility;
@@ -158,12 +205,23 @@ public class ResourceSpecies implements ISpecies {
      * predator can prey upon
      * @return the fraction of the resource size range that matches the size
      * range given as parameter.
+     * Assuming a power-law distribution of biomass, the distribution of biomass
+     * is uniform in log scale, reason why is better to compute the proportion
+     * available after log transformation. The legacy method, computing the proportion
+     * in the linear scale, is provided for back compatibility.
      */
-    public double computePercent(double accessibleSizeMin, double accessibleSizeMax) {
-        double tempPercent;
-        tempPercent = (Math.min(sizeMax, accessibleSizeMax) - Math.max(sizeMin, accessibleSizeMin)) / (sizeMax - sizeMin);
-        return tempPercent;
+    public double computePercentLegacy(double accessibleSizeMin, double accessibleSizeMax) {
+        return (Math.min(sizeMax, accessibleSizeMax) - Math.max(sizeMin, accessibleSizeMin)) / (sizeMax - sizeMin);
     }
+
+    public double computePercentLog(double accessibleSizeMin, double accessibleSizeMax) {
+        return (Math.log(Math.min(sizeMax, accessibleSizeMax)) - Math.log(Math.max(sizeMin, accessibleSizeMin))) / (Math.log(sizeMax) - Math.log(sizeMin));
+    }
+
+    public double computePercent(double accessibleSizeMin, double accessibleSizeMax) {
+        return computePercentInterface.computePercent(accessibleSizeMin, accessibleSizeMax);
+    }
+
 
     /**
      * Returns the maximal size of the organisms in the resource group.

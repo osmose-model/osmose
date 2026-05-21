@@ -61,18 +61,29 @@ public class WeightedSpeciesOutput extends AbstractOutput {
     public WeightedSpeciesOutput(int rank,
             String subfolder, String name, String description,
             Predicate<School> predicate,
-            SchoolVariableGetter variable, SchoolVariableGetter weight) {
-        super(rank, subfolder, name);
+            SchoolVariableGetter variable, SchoolVariableGetter weight, boolean includeOnlyAlive) {
+        super(rank, subfolder, name, includeOnlyAlive);
         this.description = description;
         this.predicate = predicate;
         this.variable = variable;
         this.weight = weight;
     }
 
+
     public WeightedSpeciesOutput(int rank,
-            String subfolder, String name, String description,
-            SchoolVariableGetter schoolVariable, SchoolVariableGetter weight) {
-        this(rank, subfolder, name, description, school -> true, schoolVariable, weight);
+    String subfolder, String name, String description,
+    SchoolVariableGetter schoolVariable, SchoolVariableGetter weight) {
+        this(rank, subfolder, name, description, school -> true, schoolVariable, weight, true);
+    }
+
+    public WeightedSpeciesOutput(int rank, String subfolder, String name, String description,
+            Predicate<School> predicate, SchoolVariableGetter variable, SchoolVariableGetter weight) {
+        this(rank, subfolder, name, description, predicate, variable, weight, true);
+    }
+
+    public WeightedSpeciesOutput(int rank, String subfolder, String name, String description,
+            SchoolVariableGetter schoolVariable, SchoolVariableGetter weight, boolean includeOnlyAlive) {
+        this(rank, subfolder, name, description, school -> true, schoolVariable, weight, includeOnlyAlive);
     }
 
     @Override
@@ -95,7 +106,7 @@ public class WeightedSpeciesOutput extends AbstractOutput {
     public void update() {
 
         int timeStep = this.getSimulation().getIndexTimeSimu();
-        getSchoolSet().getAliveSchools().stream()
+        this.getOutputSchoolStream()
                 .filter(predicate)
                 .forEach(school -> {
                     double w = weight.getVariable(school);
@@ -138,7 +149,7 @@ public class WeightedSpeciesOutput extends AbstractOutput {
     }
 
     @Override
-    String getDescription() {
+    protected String getDescription() {
         return description;
     }
 }

@@ -98,7 +98,7 @@ public class DietDistribOutput_Netcdf extends AbstractDistribOutput_Netcdf {
     }
 
     @Override
-    String getDescription() {
+    protected String getDescription() {
         StringBuilder description = new StringBuilder();
         description.append("Distribution of the biomass (tonne) of prey species (in columns) in the diet of ");
         description.append(species.getName());

@@ -55,21 +55,54 @@ write_osmose.default = function(x, file, sep = ",", col.names = NA, quote = FALS
 #' @author Ricardo Oliveros-Ramos
 #' 
 #' @export
+#' @method write_osmose data.frame
+write_osmose.data.frame = function(x, file, sep = ",", col.names = TRUE, quote = FALSE, 
+                                row.names = FALSE, append=FALSE, ...) {
+  
+  if(isTRUE(append)) cat("\n", file=file, append=TRUE)
+  write.table(x = x, file = file, sep = sep, col.names = col.names, quote = quote,
+              row.names = row.names, append=append, ...)
+  
+}
+
+#' @author Ricardo Oliveros-Ramos
+#' 
+#' @export
 #' @method write_osmose osmose.configuration
 write_osmose.osmose.configuration = function(x, file, sep = " = ", append=FALSE, 
-                                            par.sep=",", ...) {
+                                            par.sep=",", justify=FALSE, digits=NULL, ...) {
 
-  .format_par = function(x, sep=",") {
+  .format_par = function(x, sep=",", digits=NULL) {
+    if(!is.null(digits)) x = round(x, digits=digits)
     if(length(x)<2) return(x)
     out = paste(x, collapse=sep)
     return(out)
   }
   
-  x = as.matrix(lapply(x, FUN=.format_par, sep=par.sep))
+  if(isTRUE(justify)) {
+    n = max(nchar(names(x))) - nchar(names(x))
+    ns = sapply(n, function(times, x) paste(rep(x, times), collapse=""), x=" ")
+    names(x) = apply(cbind(names(x), ns), 1, paste, collapse="")
+  }
+  
+  x = as.matrix(lapply(x, FUN=.format_par, sep=par.sep, digits=digits))
   
   write_osmose.default(x=x, file=file, sep=sep, col.names=FALSE, quote = FALSE, 
                                   row.names = TRUE, append=append, ...)
   
+}
+
+#' @author Ricardo Oliveros-Ramos
+#' 
+#' @export
+#' @method c osmose.configuration
+c.osmose.configuration = function(...) {
+  args = list(...)
+  out = c(unlist(args, recursive=FALSE))
+  # print(out)
+  out = as.list(out)
+  class(out) = "osmose.configuration"
+  return(out)
 }
 
 #' @author Ricardo Oliveros-Ramos
@@ -104,4 +137,12 @@ write_osmose.osmose.initialization = function(x, file, sep=" = ", append=FALSE, 
   
 }
 
-
+#' @author Ricardo Oliveros-Ramos
+#' 
+#' @export
+#' @method write_osmose NULL 
+write_osmose.NULL = function(x, file, sep = ",", ...) {
+  
+  return(invisible(NULL))
+  
+}

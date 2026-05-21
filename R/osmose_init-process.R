@@ -3,12 +3,21 @@
 
 VB = function(age, this, method=3) {
   
-  k = .getPar(this, "species.k") 
-  Linf = .getPar(this, "species.linf")
-  t0 = .getPar(this, "species.t0")
-  t_thr = .getPar(this, "species.vonbertalanffy.threshold.age")
-  L_egg = .getPar(this, "species.egg.size")
+  k = get_par(this, "species.k") 
+  Linf = get_par(this, "species.linf")
+  t0 = get_par(this, "species.t0")
+  t_thr = get_par(this, "species.vonbertalanffy.threshold.age")
+  L_egg = get_par(this, "species.egg.size")
   L_thr = Linf*(1 - exp(-k*(t_thr - t0)))
+  
+  spname = get_par(this, "species.name")
+  
+  msg = "Value not found for growth parameter '%s' (%s)."
+  if(is.null(k)) stop(sprintf(msg, "k", spname))
+  if(is.null(Linf)) stop(sprintf(msg, "Linf", spname))
+  if(is.null(t0)) stop(sprintf(msg, "t0", spname))
+  if(is.null(t_thr)) stop(sprintf(msg, "vonbertalanffy.threshold.age", spname))
+  if(is.null(L_egg)) stop(sprintf(msg, "egg.size", spname))
   
   if(method==0) {
     # original VB
@@ -44,13 +53,13 @@ VB = function(age, this, method=3) {
 
 VB_inv = function(size, this, method=3) {
   
-  k = .getPar(this, "species.k") 
-  Linf = .getPar(this, "species.linf")
-  t0 = .getPar(this, "species.t0")
-  t_thr = .getPar(this, "species.vonbertalanffy.threshold.age")
-  L_egg = .getPar(this, "species.egg.size")
+  k = get_par(this, "species.k") 
+  Linf = get_par(this, "species.linf")
+  t0 = get_par(this, "species.t0")
+  t_thr = get_par(this, "species.vonbertalanffy.threshold.age")
+  L_egg = get_par(this, "species.egg.size")
   L_thr = Linf*(1 - exp(-k*(t_thr - t0)))
-  A = .getPar(this, "species.lifespan")
+  A = get_par(this, "species.lifespan")
   
   .invVB = function(size, k, Linf, t0, A) {
     out = suppressWarnings((-1/k)*log(1-size/Linf) + t0)
@@ -127,28 +136,54 @@ calculateMLF = function(conf, sp) {
   }
   
   ndt = conf$simulation.time.ndtperyear
-  this = .getPar(conf, sp=sp)
+  this = get_par(conf, sp=sp)
   
-  a = .getPar(this, "species.length2weight.condition.factor")
-  b = .getPar(this, "species.length2weight.allometric.power")
-  tn = .getPar(this, "species.lifespan")
+  a = get_par(this, "species.length2weight.condition.factor")
+  b = get_par(this, "species.length2weight.allometric.power")
+  tn = get_par(this, "species.lifespan")
   
   age = seq(from=0+0.5/ndt, to=tn, by=1/ndt)
   size = VB(age, this, method=3)
   weight = a*size^b
   
-  repfile = .getPar(this, "reproduction.season.file")
+  msg = sprintf("Failure in Mean Lifetime Fecundity calculation, check growth parameters for %s.", get_par(this, "species.name"))
+  
+  if(any(is.na(weight))) stop(msg, call. = FALSE)
+  
+  repfile = get_par(this, "reproduction.season.file")
+  mode = get_par(this, "species.reproduction.mode")
+  if(is.null(mode)) mode = "oviparity"
   
   fecundity = read.fecundity(conf = conf, sp=sp)
   
-  isMature = size >= .getPar(this, "species.maturity.size")
+  matsize = .get_matsize(this)
+  isMature = size >= matsize
   
+  if(all(!isMature)) {
+    msg0 = sprintf("Failure in Mean Lifetime Fecundity calculation, check maturity and growth parameters for %s.", 
+                  get_par(this, "species.name"))
+    msg1 = sprintf("No mature individuals are produced, maximum length in the model (%0.2f cm) is lower than maturity size (%0.2f cm).", 
+                   max(size), matsize)
+    stop(paste(msg0, msg1, collapse="/n"), call. = FALSE)
+  }
+  
+  if(mode=="viviparity") weight=1 # MLF use absolute fecundity
   MLF = .calculateMLF(fecundity, isMature, weight)
   
   return(MLF)
   
 }
 
+.get_matsize = function(this, method=3) {
+  matsize = get_par(this, "species.maturity.size")
+  if(is.null(matsize)) matsize = get_par(this, "species.maturity.l50")
+  if(is.null(matsize)) {
+    matsize = VB(get_par(this, "species.maturity.age"), this, method=method)
+  }
+  msg0 = sprintf("No maturity parameters for %s.", get_par(this, "species.name"))
+  if(is.null(matsize)) stop(msg0)
+  return(matsize)
+}
 
 # Mortality ---------------------------------------------------------------
 
@@ -164,18 +199,19 @@ calculateMortality = function(conf, sp) {
     return(all(diff(Mi) < 0))
   }
   
-  this = .getPar(conf, sp=sp)
-  d1 = .getPar(this, "species.egg.stage.duration") # days
-  if(is.null(d1)) d1 = 2
-  d1 = d1/365 # transformed to years
-  
   tsMLF = calculateMLF(conf, sp=sp)
   MLF = mean(tsMLF) 
   
-  this = .getPar(conf, sp=sp)
+  this = get_par(conf, sp=sp)
   
-  tn = .getPar(this, "species.lifespan")
-  ratio = .getPar(this, "species.sexratio")
+  rmode = get_par(this, "species.reproduction.mode") # is viviparous?
+  d1 = get_par(this, "species.egg.stage.duration") # days
+  if(is.null(d1)) d1 = 2
+  d1 = d1/365 # transformed to years
+  
+  tn    = get_par(this, "species.lifespan")
+  ratio = get_par(this, "species.sexratio")
+  ndt   = get_par(conf, "time.ndtPerYear")
   
   ind = sapply(2:20, .getM, ratio=ratio, MLF=MLF, tn=tn, d1=d1, value=FALSE)
   n = which.min(ind)
@@ -184,11 +220,19 @@ calculateMortality = function(conf, sp) {
   Mi = tmp$Mi
   di = tmp$di
   
-  ti = cumsum(di)
+  ti = c(0, cumsum(di))
   
-  size = VB(c(0, ti), this, method=3)
+  size = VB(ti, this, method=3)
   size[length(size)] = Inf
-  out = list(age = c(0, ti), size=size, M=Mi)
+  
+  xndt = 15*ndt
+  xage = seq(from=0+0.5/xndt, to=tn, by=1/xndt)
+
+  # average mortality by age in time steps of the model
+  m = colMeans(matrix(Mi[cut(xage, breaks=ti, labels = FALSE)], nrow=15))
+  
+  out = list(age=ti, size=size, M=Mi, Mage=m)
+  
   return(out)
   
 }

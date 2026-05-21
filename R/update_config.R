@@ -42,45 +42,45 @@
 #' @param input path to the main configuration file
 #' @param log File to save OSMOSE execution messages.
 #' @param version target OSMOSE version for the update.
-#' @param osmose Path to a OSMOSE .jar executable. By default (NULL), uses the stable 
+#' @param osmose Path to a OSMOSE .jar executable. By default (NULL), uses the stable
 #' jar for the current version.
-#' @param java Path to the java executable. The default assumes 'java' is 
-#' on the search path. 
+#' @param java Path to the java executable. The default assumes 'java' is
+#' on the search path.
 #' @param verbose Show messages? (output in the log file if FALSE).
 #' @param absolute Whether the input file uses absolute (\code{TRUE}, default) or relative (\code{FALSE}) paths.
 #'
 #' @export
 update_osmose = function(input, log = "osmose.log",
-                         version = "4.3.2", osmose = NULL, java = "java",
+                         version = "4.4.0", osmose = NULL, java = "java",
                          verbose = TRUE, absolute = TRUE) {
-  
+
   if(isTRUE(verbose)) message(sprintf("This is OSMOSE version %s", version))
-  
+
   # update to provide by release executables
   if(is.null(osmose)){
     osmose_name = sprintf("osmose_%s.jar", version)
     lib = cacheManager("lib")
     osmose = shQuote(cacheManager(osmose_name))
   }
-  
+
   args = paste("-jar", osmose, "-update", input)
-  
+
   stdout = ifelse(interactive() & verbose, "", log)
   stderr = ifelse(interactive() & verbose, "", log)
-  
+
   command = paste(c(shQuote(java), args), collapse = " ")
-  
+
   if(isTRUE(verbose)) message(sprintf("Running: %s", command))
- 
+
   # update LTL ncdf if ltl.netcdf.file is found in input file (if version 4)
   if(.compareVersion(version, "4") >= 0) {
     update_ltl(input = input, absolute=absolute)
   }
   # update configuration file
   system2(java, args=args, stdout=stdout, stderr=stderr, wait=TRUE)
-  
+
   return(invisible(command))
-  
+
 }
 
 
@@ -91,46 +91,50 @@ update_osmose = function(input, log = "osmose.log",
 #' @param absolute Whether the input file uses absolute (TRUE) or relative (FALSE) paths.
 #'
 update_ltl = function(input, filename=NULL, absolute=TRUE) {
-  
+
   # get path from config
-  
+
   # Reads the CSV parameter files
-  param = readOsmoseConfiguration(input, absolute=absolute)
+  param = .readOsmoseConfiguration(input, absolute=absolute)
   if(is.null(filename)) {
-    filename = param$ltl$netcdf$file
+    filename = get_par(param, "ltl.netcdf.file")
     if(is.null(filename)) {
-      message("old LTL filename parameter not found in configuration file, nothing to do.")
+      message("old LTL filename parameter ('ltl.netcdf.file') not found in configuration file, nothing to do.")
       return(invisible())
     }
   }
-  
-  # recovers the index for plk as 
-  pltindex = names(param$plankton$name)
-  
+
+  # recovers the index for plk as
+  # pltindex = names(get_par(param, "species.name"))
+  pltindex = get_species(param, code=TRUE)
+  nspecies = strtoi(get_par(param, "simulation.nspecies"))
+  index = (nspecies + 1):length(pltindex)
+  pltindex = pltindex[index]
+
   # create back up file
   isOK = FALSE
-  bck = sprintf("%s.backup%s", filename, 
+  bck = sprintf("%s.backup%s", filename,
                 suppressWarnings(format(Sys.time(), "%Y%m%d%H%M", tz="")))
   tmp = sprintf("%s.temp", filename)
   file.copy(from=filename, to=bck)
   on.exit(if(!isOK) file.remove(bck))
-  
+
   # Opens the old netcdf file
   ncin = nc_open(filename)
   if(length(ncin$var)!=1) {
     warning("More than one variable in ncdf file, skipping LTL update.")
     return(invisible())
   }
-  
+
   if(ncin$ndims!=4) {
     warning("Wrong number of dimensions in ncdf file, skipping LTL update.")
     return(invisible())
   }
-  
+
   varlon  = names(ncin$dim)[1]
   varlat  = names(ncin$dim)[2]
   vartime = names(ncin$dim)[4]
-  
+
   # Recover spatial coordinates
   if(length(ncin$var[[varlon]]$varsize) == 2) {
     # if coordinates are 2D, then extract data as 1D
@@ -141,7 +145,7 @@ update_ltl = function(input, filename=NULL, absolute=TRUE) {
     lon = ncvar_get(ncin, varid=varlon)
     lat = ncvar_get(ncin, varid=varlat)
   }
-  
+
   # Recovers the original time coordinates and attributes (for units)
   if(is.null(ncin$var[[vartime]])) {
     attr_time = ncatt_get(ncin, vartime)
@@ -150,48 +154,50 @@ update_ltl = function(input, filename=NULL, absolute=TRUE) {
     attr_time = ncatt_get(ncin, vartime)
     time = ncvar_get(ncin, varid=vartime)
   }
-  
+
   # recovers the number of plankton within the file
   n_ltl_file = ncin$dim$ltl$len
-  
+
   # biomass is of size (lon, lat, ltl, time)
   biomass_units = ncatt_get(ncin, "ltl_biomass")$units
   biomass = ncvar_get(ncin, varid='ltl_biomass')
-  
+
   # Creates the output dimensions (lon, lat, time)
   dim_time = ncdim_def("time", attr_time$units, time)
   dim_lon = ncdim_def("longitude", "", lon)
   dim_lat = ncdim_def("latitude", "", lat)
   dims = list(dim_lon=dim_lon, dim_lat=dim_lat, dim_time=dim_time)
-  
+
   # Loop over all the plankton classes to initialise variables in the NetCDF
   list_vars = c()
   for(i in 1:n_ltl_file) {
-    ltl_var = param$plankton$name[[pltindex[i]]]
+    # ltl_var = get_par(param, "species.name")[[pltindex[i]]]
+    ltl_var = get_par(get_par(param, sp=as.integer(pltindex[i])), "species.name")
     var_nc = ncvar_def(ltl_var, biomass_units, dims, longname=ltl_var)
     list_vars[[i]] = var_nc
   }
-  
+
   # Opens the output NetCDF file
   ncout = nc_create(tmp, list_vars)
-  
-  # loops over all the LTL classes and write data into 
+
+  # loops over all the LTL classes and write data into
   # the file
   for(i in 1:n_ltl_file) {
-    ltl_var = param$plankton$name[[pltindex[i]]]
+    # ltl_var = param$species$name[[pltindex[i]]]
+    ltl_var = get_par(get_par(param, sp=as.integer(pltindex[i])), "species.name")
     ncvar_put(ncout, ltl_var, biomass[, , i, ])
   }
-  
+
   # Add the calendar attribute to the time variable
   if(!is.null(attr_time$calendar)) {
     ncatt_put(ncout, "time", "calendar", attr_time$calendar)
   }
-  
+
   nc_close(ncout)
   nc_close(ncin)
-  
+
   on.exit(if(file.exists(tmp)) file.remove(tmp), add = TRUE)
-  
+
   isOK = file.remove(filename)
   if(!isOK) stop("Updated file could not be written, permission denied.")
   isOK = file.rename(tmp, filename)
@@ -199,10 +205,51 @@ update_ltl = function(input, filename=NULL, absolute=TRUE) {
     file.copy(from=bck, to=filename)
     stop("Updated file could not be written, permission denied.")
   }
-  
+
   msg = sprintf("LTL file successfully updated, original file saved as %s.", bck)
-  message(msg) 
-  
+  message(msg)
+
   return(invisible())
-  
+
+}
+
+
+# Auxiliar functions ------------------------------------------------------
+
+
+.add_section = function(txt, file, append=TRUE, trailing=1) {
+  n = nchar(txt)
+  if(n > 69) txt = strtrim(txt, 69)
+  tt = paste(rep("-", 73-n-1), collapse="")
+  out = paste(c("\n#", txt, tt, rep("\n", trailing)), collapse=" ")
+  cat(out, file=file, append = TRUE)
+  return(invisible(out))
+}
+
+.add_comment = function(txt, file, append=TRUE, trailing=1) {
+  out = paste(c("\n#", txt, rep("\n", trailing)), collapse=" ")
+  cat(out, file=file, append = TRUE)
+  return(invisible(out))
+}
+
+.update_and_move_on = function(conf, file, par=NULL,
+                               sp=NULL, fsh=NULL, invert=FALSE, linear=FALSE, align=TRUE, default=FALSE) {
+  out = list()
+  for(ipar in par) {
+    tmp = get_par(conf, par=ipar, sp=sp, fsh=fsh, invert=invert, linear=linear, as.is=TRUE)
+    if(length(tmp)==0) {
+      tmp = list(as.character(default))
+      names(tmp) = ipar
+    }
+    out = c(out, tmp)
+    conf = get_par(conf, par=ipar, sp=sp, fsh=fsh, invert = !invert)
+  }
+  if(length(out)==0) return(invisible(conf))
+  if(isTRUE(align)) {
+    n = max(nchar(names(out)), na.rm=TRUE)
+    names(out) = paste(names(out), strrep(" ", n-nchar(names(out))), sep="")
+  }
+  write_osmose(x=as.matrix(out), file=file, append=TRUE, col.names = FALSE, sep=" = ")
+  return(invisible(conf))
+
 }

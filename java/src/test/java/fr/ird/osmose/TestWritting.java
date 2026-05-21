@@ -123,7 +123,7 @@ public class TestWritting {
         cmd.put("simulation.nsimulation", "1");
         cmd.put("simulation.time.nyear", "1");
 
-        cmd.put("economy.enabled", "true");
+        cmd.put("module.bioeconomics.enabled", "false");
         cmd.put("economic.output.stage.structure", "weight");
 
         cmd.put("output.biomass.enabled", "true");
@@ -166,9 +166,9 @@ public class TestWritting {
         cmd.put("output.spatialagespecies.enabled", bool);
         cmd.put("output.fishing.accessible.biomass", bool);
         cmd.put("output.fishing.harvested.biomass", bool);
-        cmd.put("output.fishery.enabled", bool);
-        cmd.put("output.fishery.byage.enabled", bool);
-        cmd.put("output.fishery.bysize.enabled", bool);
+        cmd.put("output.fisheries.enabled", bool);
+        cmd.put("output.fisheries.byage.enabled", bool);
+        cmd.put("output.fisheries.bysize.enabled", bool);
         cmd.put("output.biomass.bysize.enabled", bool);
         cmd.put("output.biomass.byage.enabled", bool);
         cmd.put("output.abundance.age1.enabled", bool);
@@ -224,8 +224,8 @@ public class TestWritting {
         cmd.put("output.ndeadschool.byage.enabled", bool);
         cmd.put("output.ndeadschool.bysize.enabled", bool);
         cmd.put("output.individual.enabled", bool);
-        cmd.put("output.fecondity.bysize.enabled", bool);
-        cmd.put("output.fecondity.byage.enabled", bool);
+        cmd.put("output.fecundity.bysize.enabled", bool);
+        cmd.put("output.fecundity.byage.enabled", bool);
         cmd.put("output.bioen.mature.age.enabled", bool);
         cmd.put("output.bioen.ingest.enabled", bool);
         cmd.put("output.bioen.ingest.tot.enabled", bool);

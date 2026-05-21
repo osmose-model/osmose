@@ -51,6 +51,7 @@ public class WeightedRandomDraft<E> extends OsmoseLinker {
 
   private NavigableMap<Double, E> map = new TreeMap<>();
   private double total = 0;
+  private final String prefix;
 
   /** Random generator */
   private Random rdDraft;
@@ -59,13 +60,18 @@ public class WeightedRandomDraft<E> extends OsmoseLinker {
 
   public WeightedRandomDraft(int rank) {
     this.rank = rank;
+    prefix = "reproduction";
+  }
+
+  public WeightedRandomDraft(int rank, String prefix) {
+    this.rank = rank;
+    this.prefix = prefix;
   }
 
   public void init() {
 
     boolean fixedSeed = false;
-    String key = "reproduction.randomseed.fixed";
-
+    String key = "simulation.fixed.seed.enabled";
     if(!getConfiguration().isNull(key)) {
       fixedSeed =  getConfiguration().getBoolean(key);
     }
@@ -82,7 +88,7 @@ public class WeightedRandomDraft<E> extends OsmoseLinker {
   }
 
   public void add(double weight, E result) {
-    if (weight <= 0 || map.containsValue(result))
+    if (weight <= 0 || map.containsValue(result) || Double.isNaN(weight))
       return;
     total += weight;
     map.put(total, result);

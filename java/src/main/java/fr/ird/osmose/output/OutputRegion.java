@@ -22,7 +22,7 @@
  * Ricardo OLIVEROS RAMOS (ricardo.oliveros@gmail.com)
  * Philippe VERLEY (philippe.verley@ird.fr)
  * Laure VELEZ (laure.velez@ird.fr)
- * Nicolas Barrier (nicolas.barrier@ird.fr)
+ * Nicolas BARRIER (nicolas.barrier@ird.fr)
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -42,7 +42,7 @@
 package fr.ird.osmose.output;
 
 import fr.ird.osmose.AbstractSchool;
-
+import fr.ird.osmose.Cell;
 import fr.ird.osmose.process.mortality.fishery.FisheryMapSet;
 
 /**
@@ -142,7 +142,15 @@ public class OutputRegion extends AbstractOutputRegion {
      */
     @Override
     public boolean contains(int timeStep, AbstractSchool school) {
-        return (this.mapSet.getValue(timeStep, school.getCell()) > 0);
+        if (school.isOut()) {
+            return false;
+        }
+        return this.contains(timeStep, school.getCell());
+    }
+
+    @Override
+    public boolean contains(int timeStep, Cell cell) {
+        return (this.mapSet.getValue(timeStep, cell) > 0);
     }
 
     @Override

@@ -1,0 +1,13 @@
+# Osmose model
+
+In this section, a detailed description of the Osmose model is provided.
+
+```{toctree}
+:caption: 'Contents:'
+:maxdepth: 1
+
+osmose/grid.qmd
+osmose/ltl.qmd
+osmose/bkg.qmd
+osmose/forcing.qmd
+```

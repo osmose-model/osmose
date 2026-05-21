@@ -124,9 +124,13 @@ public class FishingMortality extends AbstractMortality {
         // Loads the MPAs
         int nMPA = getConfiguration().findKeys("mpa.file.mpa*").size();
         mpas = new ArrayList<>(nMPA);
-        for (int iMPA = 0; iMPA < nMPA; iMPA++) {
-            mpas.add(new MPA(getRank(), iMPA));
+        int[] mpaIndex = getConfiguration().findKeys("mpa.file.mpa*").stream().mapToInt(rgKey -> Integer.valueOf(rgKey.substring(rgKey.lastIndexOf(".mpa") + 4))).sorted().toArray();
+        for (int iMPA : mpaIndex) {
+            if (!getConfiguration().isNull("mpa.file.mpa" + iMPA)) {
+                mpas.add(new MPA(getRank(), iMPA));
+            }
         }
+
 
         for (MPA mpa : mpas) {
             mpa.init();
@@ -166,18 +170,21 @@ public class FishingMortality extends AbstractMortality {
 
                     float average = sum / nCells;
 
-                    if (Math.abs(average - 1.f) > 1e-2) {
-                        StringBuilder msg = new StringBuilder();
-                        msg.append("The means of the factors in spatial fishing distribution file ");
-                        msg.append(getConfiguration()
-                                .getFile("mortality.fishing.spatial.distrib.file.sp" + fileSpeciesIndex));
-                        msg.append(" must be equal to one over fished areas.");
-                        msg.append("Spatial factor will be normalized");
-                        warning(msg.toString());
-                        for (Cell cell : getGrid().getCells()) {
-                            spatialFactor[cpt].setValue(cell, spatialFactor[cpt].getValue(cell) / average);
-                        }
-                    }
+                   String key = "fisheries.movement.normalisation.disabled";
+                   if (!getConfiguration().getBoolean(key)) {
+                      if (Math.abs(average - 1.f) > 1e-2) {
+                          StringBuilder msg = new StringBuilder();
+                          msg.append("The means of the factors in spatial fishing distribution file ");
+                          msg.append(getConfiguration()
+                                  .getFile("mortality.fishing.spatial.distrib.file.sp" + fileSpeciesIndex));
+                          msg.append(" must be equal to one over fished areas.");
+                          msg.append("Spatial factor will be normalized");
+                          warning(msg.toString());
+                          for (Cell cell : getGrid().getCells()) {
+                              spatialFactor[cpt].setValue(cell, spatialFactor[cpt].getValue(cell) / average);
+                          }
+                      }
+                   }
 
                 } // end of existence test
 
@@ -232,15 +239,20 @@ public class FishingMortality extends AbstractMortality {
 
         int nX = getGrid().get_nx();
         int nY = getGrid().get_ny();
-            
-        boolean isUpToDate = true;
+        boolean isUpToDate;
         int iStep = getSimulation().getIndexTimeSimu();
-        for (MPA mpa : mpas) {
-            isUpToDate &= (mpa.isActive(iStep - 1) == mpa.isActive(iStep));
+
+        if (getSimulation().isFirstTimeStep()) {
+            isUpToDate = false;
+        } else {
+            isUpToDate = true;
+            for (MPA mpa : mpas) {
+                isUpToDate &= (mpa.isActive(iStep - 1) == mpa.isActive(iStep));
+            }
         }
 
         if (!isUpToDate) {
-            
+
             for (int iSpecies = 0; iSpecies < this.getNSpecies(); iSpecies++) {
 
                 GridMap spatialMap = this.spatialFactor[iSpecies];
@@ -265,12 +277,12 @@ public class FishingMortality extends AbstractMortality {
                         mpaGridMap.setValue(cell, 0);
                     }
                 }
-                
+
                 // compute the fishing effort by dividing fishing mort
-                // by the total (excluding 0s). 
+                // by the total (excluding 0s).
                 // we also integrate the correction factor
                 float correction = 0;
-                           
+
                 float totalEffort = spatialMap.count(true);
                 GridMap effort = new GridMap();
                 for (int j = 0; j < nY; j++) {
@@ -286,7 +298,7 @@ public class FishingMortality extends AbstractMortality {
                 }
 
                 correction = 1 / correction;
-                
+
                 // apply the correction to the mpaFactor.
                 for (int j = 0; j < nY; j++) {
                     for (int i = 0; i < nX; i++) {
@@ -335,7 +347,7 @@ public class FishingMortality extends AbstractMortality {
                     * mpaFactor[iSpec].getValue(school.getCell())
                     * spatialFactor[iSpec].getValue(school.getCell());
     }
-    
+
     /** Returns the correction factor induced by the inclusion of MPA and
      * spatial factor. Used only for testing.
      */

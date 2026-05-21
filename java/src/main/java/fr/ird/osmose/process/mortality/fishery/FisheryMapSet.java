@@ -120,7 +120,7 @@ public class FisheryMapSet extends OsmoseLinker {
 
     public FisheryMapSet(String fisheryName, String prefix, String suffix, boolean removeDuplicate) {
         this.fisheryName = fisheryName;
-        this.prefix = prefix;  // should be fishery.movement
+        this.prefix = prefix;  // should be fisheries.movement
         this.suffix = suffix;
         this.removeDuplicate = removeDuplicate;
     }
@@ -157,7 +157,11 @@ public class FisheryMapSet extends OsmoseLinker {
         }
 
         // Normalize all maps
+        key = prefix + ".normalisation.disabled";
+        if (!getConfiguration().getBoolean(key)) {
         this.normalizeAllMaps();
+        }
+        
 
     }
 

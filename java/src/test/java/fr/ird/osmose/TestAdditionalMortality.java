@@ -51,7 +51,7 @@ public class TestAdditionalMortality {
         mort1 = new AnnualAdditionalMortality(0, spec);
         mort1.init();
 
-        mort1larva = new AnnualLarvaMortality(0, spec);
+        mort1larva = new AnnualLarvaMortality(0, spec, "larva");
         mort1larva.init();
 
         // Setting values for species 1
@@ -59,7 +59,7 @@ public class TestAdditionalMortality {
         mort2 = new AnnualAdditionalMortality(0, spec);
         mort2.init();
 
-        mort2larva = new AnnualLarvaMortality(0, spec);
+        mort2larva = new AnnualLarvaMortality(0, spec, "larva");
         mort2larva.init();
 
     }
@@ -81,7 +81,7 @@ public class TestAdditionalMortality {
         double[] actual = mort1larva.getRates();
         double[] expected = new double[cfg.getNStep()];
         for (int i = 0; i < expected.length; i++) {
-            expected[i] = 3.;
+            expected[i] = 3. / cfg.getNStepYear();
         }
 
         assertArrayEquals(expected, actual, 1e-5);
@@ -105,7 +105,7 @@ public class TestAdditionalMortality {
         double[] actual = mort2larva.getRates();
         double[] expected = new double[cfg.getNStep()];
         for (int i = 0; i < expected.length; i++) {
-            expected[i] = 100.;
+            expected[i] = 100. / cfg.getNStepYear();
         }
 
         assertArrayEquals(expected, actual, 1e-5);

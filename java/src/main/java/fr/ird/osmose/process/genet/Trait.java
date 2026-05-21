@@ -42,6 +42,17 @@
 package fr.ird.osmose.process.genet;
 
 import fr.ird.osmose.util.SimulationLinker;
+import ucar.ma2.ArrayFloat;
+import ucar.ma2.ArrayInt;
+import ucar.nc2.NetcdfFile;
+import ucar.nc2.Variable;
+import ucar.nc2.dataset.NetcdfDatasets;
+
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 
 /**
@@ -78,9 +89,11 @@ public class Trait extends SimulationLinker {
      * Diversity matrix, used to initialize genotypes. One matrix for each
      * species
      */
-    private double[][][] diversity;
+    private double diversity[][][];
 
     private Random generator;
+
+    private int traitIndex;
 
     /**
      * Locus constructor.
@@ -93,8 +106,9 @@ public class Trait extends SimulationLinker {
         super(rank);
         // Trait eyecolor = new Trait(rank, "eyecol")
         this.prefix = prefix;
+        this.traitIndex = traitIndex;
 
-        if(getConfiguration().getBoolean("genetics.randomseed.fixed", false)) {
+        if(getConfiguration().getBoolean("simulation.fixed.seed.enabled", false)) {
             // Assumes a seed of dimension [trait][nSimu]
             long seed = traitIndex * getConfiguration().getNSimulation() + getRank();
             generator = new Random(seed);
@@ -154,6 +168,13 @@ public class Trait extends SimulationLinker {
             nVal[cpt] = this.getConfiguration().getInt(key + ".sp" + iSpeciesFile);
             cpt++;
         }
+
+        // If restart is enabled, recover the diversity from restart file
+        if(getConfiguration().isRestart()) {
+            this.restartDiversity();
+            return;
+        }
+
 
         diversity = new double[nspecies][][];
 
@@ -246,6 +267,120 @@ public class Trait extends SimulationLinker {
         double std = Math.sqrt(this.envVar[index]);
         double val = generator.nextGaussian() * std;
         return val;
+    }
+
+
+    public void restartDiversity() {
+
+        NetcdfFile nc = null;
+        String key = "simulation.restart.file";
+
+        String plainFilename = getConfiguration().getFile(key);
+        String rankedFilename = plainFilename + "." + getRank();
+        boolean plainFile = false, rankedFile = false;
+        if (new File(plainFilename).exists()) {
+            plainFile = true;
+        }
+        if (new File(rankedFilename).exists()) {
+            rankedFile = true;
+        };
+
+        if (!plainFile && !rankedFile) {
+            error("Could not find any NetCDF initialization file (check parameter " + key + ").", new FileNotFoundException("Neither file " + plainFilename + " nor " + rankedFilename + " exist."));
+        } else if (plainFile && rankedFile) {
+            warning("Found two suitable NetCDF initialization files: " + plainFilename + " and " + rankedFilename + ". Osmose will use the latest " + rankedFilename);
+        }
+
+        String ncfile = rankedFile ? rankedFilename : plainFilename;
+        try {
+
+            nc = NetcdfDatasets.openDataset(ncfile);
+        } catch (IOException ex) {
+            error("Failed to open restart file " + ncfile, ex);
+        }
+
+        // Recover the list of species indexes from the restart
+        ArrayInt.D1 species = null;
+        try {
+            species = (ArrayInt.D1) nc.findVariable("species").read();
+        } catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+
+        Variable genetVar = null;
+        ArrayFloat.D4 genotype = null;   // data array containing the Netcdf genotype array
+        genetVar = nc.findVariable("genotype");
+        try {
+            genotype = (ArrayFloat.D4) genetVar.read();
+        } catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+
+        // Recover the dimensions of the genotype variable
+        int restart_nSchool = genetVar.getDimension(0).getLength();
+        int restart_nTrait = genetVar.getDimension(1).getLength();
+        int restart_nMaxLoci = genetVar.getDimension(2).getLength();
+        int restart_nValue = genetVar.getDimension(3).getLength();
+
+        int nSpecies = getNSpecies();
+
+        //  genotype.set(s, iTrait, iLoci, 0, (float) gen.getLocus(iTrait, iLoci).getValue(0));
+
+        // Initialize the list of biodiversity values for each species and locus
+        // Create the list by species
+        List<List<List<Double>>> values = new ArrayList<>();
+        for(int ispec = 0; ispec < nSpecies; ispec++) {
+
+            // Get the number of locus for the species
+            int nLocus = this.nLocus[ispec];
+            // Initialize the list of locus for the species
+            List<List<Double>> list_locus = new ArrayList<>();
+            for(int i  = 0; i < nLocus; i++) {
+                // For each locus, initialize the list of values
+                List<Double> list_values = new ArrayList<>();
+                list_locus.add(list_values); // Initializes the list of values for the locus
+            }
+            values.add(list_locus);  // Initializes the list of locus for the species
+        }
+
+        // Loop over all the saved variables in restart (one value per school)
+        for (int ischool = 0; ischool < restart_nSchool; ischool++) {
+            int speciesIndex = species.get(ischool);
+            // Loop over all the locus for the trait and the species index
+            for (int locus = 0; locus < this.nLocus[speciesIndex]; locus++) {
+                for (int k = 0; k < 2; k++) {
+                    double value = genotype.get(ischool, traitIndex, locus, k);
+                    if (!values.get(speciesIndex).get(locus).contains(value)) {
+                        values.get(speciesIndex).get(locus).add(value);
+                    }
+                }
+            }
+        }
+
+        diversity = new double[nSpecies][][];
+
+        // Initialize the diversity array for the trait
+        for(int indexSpecies = 0; indexSpecies < getNSpecies(); indexSpecies++) {
+            int nLocus = this.nLocus[indexSpecies];
+            diversity[indexSpecies] = new double[nLocus][];
+            for(int locus = 0; locus < nLocus; locus++) {
+                int nValues = values.get(indexSpecies).get(locus).size();
+                diversity[indexSpecies][locus] = new double[nValues];
+                for(int k = 0; k < nValues; k++) {
+                    diversity[indexSpecies][locus][k] = values.get(indexSpecies).get(locus).get(k);
+                }
+            }
+        }
+
+        try {
+            nc.close();
+        } catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+
     }
 
 }

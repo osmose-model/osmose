@@ -4,12 +4,12 @@ authors:
   - family-names: Barrier
     given-names: Nicolas
     orcid: https://orcid.org/0000-0002-1693-4719
-  - family-names: Oliveros-Ramos
-    given-names: Ricardo
-    orcid: https://orcid.org/0000-0002-8069-2101
   - family-names: Verley
     given-names: Philippe
     orcid: https://orcid.org/0000-0002-5686-2764
+  - family-names: Oliveros-Ramos
+    given-names: Ricardo
+    orcid: https://orcid.org/0000-0002-8069-2101
   - family-names: Ernande
     given-names: Bruno
     orcid:  https://orcid.org/0000-0002-0727-5774
@@ -33,6 +33,6 @@ authors:
     orcid: https://orcid.org/0000-0002-7259-9265
 
 title: Object-oriented Simulator of Marine ecOSystEms (OSMOSE)
-version: 4.3.3
+version: 4.4.0
 date-released: 2023-02-10
-doi: 10.5281/zenodo.7629326
+doi: 10.5281/zenodo.7628348

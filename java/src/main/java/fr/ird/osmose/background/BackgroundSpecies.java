@@ -22,7 +22,7 @@
  * Ricardo OLIVEROS RAMOS (ricardo.oliveros@gmail.com)
  * Philippe VERLEY (philippe.verley@ird.fr)
  * Laure VELEZ (laure.velez@ird.fr)
- * Nicolas Barrier (nicolas.barrier@ird.fr)
+ * Nicolas BARRIER (nicolas.barrier@ird.fr)
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -44,6 +44,9 @@ import fr.ird.osmose.Configuration;
 import fr.ird.osmose.Osmose;
 import fr.ird.osmose.util.OsmoseLinker;
 import fr.ird.osmose.util.timeseries.ByClassTimeSeries;
+import fr.ird.osmose.util.timeseries.ByRegimeTimeSeries;
+import fr.ird.osmose.util.timeseries.ForcingTimeSeries;
+
 import java.io.IOException;
 import ucar.ma2.InvalidRangeException;
 import fr.ird.osmose.ISpecies;
@@ -64,7 +67,6 @@ public class BackgroundSpecies extends OsmoseLinker implements ISpecies {
 
 
     private final Proportion proportion;
-
 
     /**
      * Index of the species. [0 : number of background - 1]
@@ -107,6 +109,8 @@ public class BackgroundSpecies extends OsmoseLinker implements ISpecies {
 
     private double betaBioen;
 
+    private double[][] biomass;
+
     /**
      * Constructor of background species.
      *
@@ -128,9 +132,13 @@ public class BackgroundSpecies extends OsmoseLinker implements ISpecies {
         // Initialiaze the index of the Background species
         this.fileindex = fileindex;
 
-        if(getConfiguration().isBioenEnabled()) {
-            String key = String.format("species.beta.sp%d", fileindex);
-            betaBioen = cfg.getDouble(key);
+        // not exclusive of bioenergetics anymore, default to 1
+        String ikey = String.format("species.beta.sp%d", fileindex);
+        if (cfg.canFind(ikey)) {
+            betaBioen = cfg.getDouble(ikey);
+        } else {
+            // if no parameter exists, species become larva when ageDt = 1
+            betaBioen = 1;
         }
 
         // Initialization of parameters
@@ -169,7 +177,7 @@ public class BackgroundSpecies extends OsmoseLinker implements ISpecies {
             length = cfg.getArrayFloat("species.length.sp" + fileindex);
 
             if (classProportion.length != nClass) {
-                message = String.format("Length of species.size.proportion.sp%d is "
+                message = message + String.format("Length of species.size.proportion.sp%d is "
                         + "not consistent with species.nclass.cp%d", fileindex, fileindex);
                 isOk = false;
             }
@@ -181,7 +189,7 @@ public class BackgroundSpecies extends OsmoseLinker implements ISpecies {
             }
 
             if (sum != 1.f) {
-                message = String.format("species.size.proportion.sp%d must sum to 1.0", fileindex);
+                message = message + String.format("species.size.proportion.sp%d must sum to 1.0", fileindex);
                 isOk = false;
             }
 
@@ -190,27 +198,72 @@ public class BackgroundSpecies extends OsmoseLinker implements ISpecies {
         }
 
         if (trophicLevel.length != nClass) {
-            message = String.format("Length of species.trophic.level.sp%d is "
+            message = message + String.format("Length of species.trophic.level.sp%d is "
                     + "not consistent with species.nclass.cp%d", fileindex, fileindex);
             isOk = false;
         }
 
         if (age.length != nClass) {
-            message = String.format("Length of species.age.sp%d is "
+            message = message + String.format("Length of species.age.sp%d is "
                     + "not consistent with species.nclass.cp%d", fileindex, fileindex);
             isOk = false;
         }
 
         if (length.length != nClass) {
-            message = String.format("Length of species.length.sp%d is "
+            message = message + String.format("Length of species.length.sp%d is "
                     + "not consistent with species.nclass.cp%d", fileindex, fileindex);
             isOk = false;
         }
 
         if (!isOk) {
-            error(message, new IOException());
+          // This is only throwing the last message! FIXED: But needs formatting.
+          error(message, new IOException());
         }
 
+        String keyMul = String.format("species.multiplier.sp%s", fileindex);
+        String keyMulLog = String.format("species.multiplier.log.sp%s", fileindex);
+
+        // test if only one of the two values exists
+        if (!getConfiguration().isNull(keyMulLog) && !getConfiguration().isNull(keyMul)) {
+            message = String.format("Both %s and %s parameters are defined. Choose only one.\n", keyMulLog, keyMul);
+            error(message, new Exception());
+        }
+
+        double multiplier = 1.d;
+
+        if (!getConfiguration().isNull(keyMulLog)) {
+            multiplier = Math.exp(getConfiguration().getFloat("species.multiplier.log.sp" + fileindex));
+            warning("Biomass for background group " + fileindex + " will be multiplied by " + multiplier
+                    + " accordingly to parameter "
+                    + getConfiguration().printParameter("species.multiplier.log.sp" + fileindex));
+        } else {
+            multiplier = getConfiguration().getFloat("species.multiplier.sp" + fileindex);
+            warning("Biomass for background group " + fileindex + " will be multiplied by " + multiplier
+                    + " accordingly to parameter "
+                    + getConfiguration().printParameter("species.multiplier.sp" + fileindex));
+        }
+
+        // Reading the biomass time-series. So far, it is a yearly time-series
+        // to see if we update that to any kind of time-series
+        String keyVal = "species.biomass.sp" + fileindex;
+        String keyShift = "species.biomass.nsteps.year.sp" + fileindex;
+        //ByRegimeTimeSeries biomassSeries = new ByRegimeTimeSeries(keyShift, keyVal);
+        ForcingTimeSeries biomassSeries = new ForcingTimeSeries(keyShift, keyVal);
+        biomassSeries.init();
+
+        // Combine yearly time-series and size-proportion to reconstruct
+        // by time/ by size time series of biomass.
+        double[] biomassVect = biomassSeries.getValues();
+        biomass = new double[biomassVect.length][nClass];
+        for (int t = 0; t < biomassVect.length; t++) {
+            for (int s = 0; s < nClass; s++) {
+                biomass[t][s] = multiplier * biomassVect[t] * proportion.getProportion(s, t);
+            }
+        }
+    }
+
+    public double getBiomass(int timeStep, int iClass) {
+        return this.biomass[timeStep][iClass];
     }
 
     /** Get the species index as defined in the file.

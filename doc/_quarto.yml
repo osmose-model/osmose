@@ -1,0 +1,51 @@
+project:
+  type: book
+
+book:
+  title: "Osmose documentation"
+  author: "Norah Jones"
+  chapters:
+    - index.qmd
+    - part: user_guide.qmd
+      chapters:
+        - astart/down_java.qmd
+        - astart/download_osm.qmd
+        - astart/datarmor.qmd
+        - astart/running.qmd
+
+    - part: odd_des.qmd
+      chapters:
+        - odd_des/purpose.qmd
+        - odd_des/statevar.qmd
+        - odd_des/proc_sche.qmd
+        - odd_des/design_concepts.qmd
+        - odd_des/init.qmd
+        - odd_des/input.qmd
+        - odd_des/submodel.qmd
+
+  search: true
+  repo-url: https://github.com/osmose-model/osmose/
+  repo-actions: [edit]
+  downloads: [pdf]
+  sidebar:
+    style: "docked"
+    logo: _static/logo-osmose.svg
+  favicon: _static/logo-osmose.svg
+  page-navigation: true
+  issue-url: "https://github.com/osmose-model/osmose/issues"
+
+
+bibliography: _static/biblio.bib
+
+execute:
+  cache: true
+
+jupyter: ir
+
+format:
+  html:
+    number-sections: true
+    theme: cosmo
+
+  pdf:
+    fontfamily: libertinus

@@ -52,6 +52,7 @@ import fr.ird.osmose.util.filter.PresentSchoolFilter;
 import fr.ird.osmose.util.filter.SpeciesFilter;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -93,6 +94,9 @@ public class SchoolSet extends OsmoseLinker {
      */
     private final boolean[] hasSpeciesChanged;
 
+    // Define a school comparator
+    Comparator<School> schoolComparator = (School sch1, School sch2) -> Double.compare(sch1.getLength(), sch2.getLength());
+
     SchoolSet() {
         schoolset = new FilteredSet<>();
         newSchoolset = new FilteredSet<>();
@@ -114,6 +118,7 @@ public class SchoolSet extends OsmoseLinker {
      */
     public void add(School school) {
         schoolset.add(school);
+        // schoolset.sort(schoolComparator);
     }
 
     public void addReproductionSchool(School school) {
@@ -122,6 +127,7 @@ public class SchoolSet extends OsmoseLinker {
 
     public void mergeSchoolSets() {
         schoolset.addAll(newSchoolset);
+        // schoolset.sort(schoolComparator);
         newSchoolset.clear();
     }
 
@@ -155,12 +161,23 @@ public class SchoolSet extends OsmoseLinker {
     }
 
     /** Increments the biomass of dead individuals that are going to die of aging */
-    public void updateAgingMortality() {
+    public void updateAgingMortality(int timeStep) {
         Iterator<School> it = schoolset.iterator();
         while (it.hasNext()) {
             School tmpSchool = it.next();
             if (tmpSchool.diesAging()) {
-                tmpSchool.incrementNdead(MortalityCause.AGING, tmpSchool.getInstantaneousAbundance());
+                tmpSchool.incrementNdead(MortalityCause.AGING, tmpSchool.getInstantaneousAbundance(), timeStep);
+            }
+        }
+    }
+
+    /** Increments the biomass of dead individuals that are going to die of spawning */
+    public void updateSpawningMortality(int timeStep) {
+        Iterator<School> it = schoolset.iterator();
+        while (it.hasNext()) {
+            School tmpSchool = it.next();
+            if (tmpSchool.dieFromSpawning(timeStep)) {
+                tmpSchool.incrementNdead(MortalityCause.SPAWNING, tmpSchool.getInstantaneousAbundance(), timeStep);
             }
         }
     }
@@ -182,7 +199,7 @@ public class SchoolSet extends OsmoseLinker {
      * this species
      * @return a list of schools of this {@code species}
      */
-    public List<School> getSchools(Species species, boolean update) {
+    public List<School> getSchools(ISpecies species, boolean update) {
         if (update || hasSpeciesChanged[species.getSpeciesIndex()]) {
             schoolBySpecies.put(species.getSpeciesIndex(), FilteredSets.subset(schoolset, new ArrayList<>(Arrays.asList(new SpeciesFilter(species.getSpeciesIndex()), new AliveSchoolFilter()))));
             hasSpeciesChanged[species.getSpeciesIndex()] = false;

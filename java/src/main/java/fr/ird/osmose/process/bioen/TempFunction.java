@@ -22,7 +22,7 @@
  * Ricardo OLIVEROS RAMOS (ricardo.oliveros@gmail.com)
  * Philippe VERLEY (philippe.verley@ird.fr)
  * Laure VELEZ (laure.velez@ird.fr)
- * Nicolas Barrier (nicolas.barrier@ird.fr)
+ * Nicolas BARRIER (nicolas.barrier@ird.fr)
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -113,35 +113,15 @@ public class TempFunction extends AbstractProcess {
             lambdaPhiT = (school) -> 1.0;
         }
 
-        key = "species.bioen.mobilized.e.mobi";
         cpt = 0;
         for (int i : getConfiguration().getFocalIndex()) {
-            String keytmp = String.format("%s.sp%d", key, i);
-            e_M[cpt] = getConfiguration().getDouble(keytmp);
-            cpt++;
-        }
-
-        key = "species.bioen.mobilized.e.D";
-        cpt = 0;
-        for (int i : getConfiguration().getFocalIndex()) {
-            String keytmp = String.format("%s.sp%d", key, i);
-            e_D[cpt] = getConfiguration().getDouble(keytmp);
-            cpt++;
-        }
-
-        key = "species.bioen.mobilized.Tp";
-        cpt = 0;
-        for (int i : getConfiguration().getFocalIndex()) {
-            String keytmp = String.format("%s.sp%d", key, i);
-            Tp[cpt] = getConfiguration().getDouble(keytmp);
-            cpt++;
-        }
-
-        cpt = 0;
-        key = "species.bioen.maint.e.maint";
-        for (int i : getConfiguration().getFocalIndex()) {
-            String keytmp = String.format("%s.sp%d", key, i);
-            e_m[cpt] = getConfiguration().getDouble(keytmp);
+            key = String.format("species.bioenergetics.model.sp%d", i);
+            if (getConfiguration().isNull(key) || getConfiguration().getString(key).equals("full")) {
+              e_M[cpt]  = getConfiguration().getDouble(String.format("species.bioen.mobilized.e.mobi.sp%d", i));
+              e_D[cpt]  = getConfiguration().getDouble(String.format("species.bioen.mobilized.e.D.sp%d", i));
+              Tp[cpt]   = getConfiguration().getDouble(String.format("species.bioen.mobilized.Tp.sp%d", i));
+              e_m[cpt]  = getConfiguration().getDouble(String.format("species.bioen.maint.e.maint.sp%d", i));
+            }
             cpt++;
         }
 

@@ -20,7 +20,7 @@
 # Ricardo OLIVEROS RAMOS (ricardo.oliveros@gmail.com)
 # Philippe VERLEY (philippe.verley@ird.fr)
 # Laure VELEZ (laure.velez@ird.fr)
-# Nicolas Barrier (nicolas.barrier@ird.fr)
+# Nicolas BARRIER (nicolas.barrier@ird.fr)
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -37,7 +37,9 @@
 
 # osmose package: Modelling Marine Exploited Ecosystems
 
-#' OSMOSE: Modelling Marine Exploited Ecosystems
+#' OSMOSE: Modelling Exploited Marine Ecosystems
+#' 
+#' \if{html}{\figure{sticker_osmose.png}{options: align='right' alt='logo' width='150'}}
 #' 
 #' OSMOSE is a multispecies and Individual-based model (IBM) which 
 #' focuses on fish species. This model assumes opportunistic predation based on 
@@ -89,4 +91,4 @@
 #' @references \href{http://www.osmose-model.org/}{Official website}
 #' \href{https://documentation.osmose-model.org/index.html}{Documentation website}
 #' @keywords modelling marine ecosystems
-NULL
+"_PACKAGE"

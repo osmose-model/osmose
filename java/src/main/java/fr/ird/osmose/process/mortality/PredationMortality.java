@@ -22,7 +22,7 @@
  * Ricardo OLIVEROS RAMOS (ricardo.oliveros@gmail.com)
  * Philippe VERLEY (philippe.verley@ird.fr)
  * Laure VELEZ (laure.velez@ird.fr)
- * Nicolas Barrier (nicolas.barrier@ird.fr)
+ * Nicolas BARRIER (nicolas.barrier@ird.fr)
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -48,6 +48,8 @@ import fr.ird.osmose.stage.ClassGetter;
 import fr.ird.osmose.stage.SchoolStage;
 import fr.ird.osmose.util.AccessibilityManager;
 import fr.ird.osmose.util.Matrix;
+
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -119,16 +121,14 @@ public class PredationMortality extends AbstractMortality {
                     .getArrayDouble("predation.predPrey.sizeRatio.max.sp" + fileSpeciesIndex);
             predPreySizesMin[cpt] = getConfiguration()
                     .getArrayDouble("predation.predPrey.sizeRatio.min.sp" + fileSpeciesIndex);
-            if (!getConfiguration().isBioenEnabled()) {
-                predationRate[cpt] = getConfiguration().getDouble("predation.ingestion.rate.max.sp" + fileSpeciesIndex);
-            }
+            predationRate[cpt] = getConfiguration().getDouble("predation.ingestion.rate.max.sp" + fileSpeciesIndex);
 
             // Check that the predator/prey ratios are properly set
             for (int k = 0; k < predPreySizesMin[cpt].length; k++) {
                 if (predPreySizesMax[cpt][k] > predPreySizesMin[cpt][k]) {
-                    String message = String.format("Parameter %s and %s must be reordered for index %d",
+                    String message = String.format("Parameter %s is greater than %s for stage %d, must be reordered.",
                             "predation.predPrey.sizeRatio.max.sp" + fileSpeciesIndex,
-                            "predation.predPrey.sizeRatio.max.sp" + fileSpeciesIndex, k);
+                            "predation.predPrey.sizeRatio.min.sp" + fileSpeciesIndex, k);
                     warning(message);
                     double temp = predPreySizesMax[cpt][k];
                     predPreySizesMax[cpt][k] = predPreySizesMin[cpt][k];
@@ -171,7 +171,12 @@ public class PredationMortality extends AbstractMortality {
             double biomAccessibleTot = sum(accessibleBiomass);
 
             // Compute the maximum biomass that the predator could prey upon
-            double maxBiomassToPredate = getMaxPredationRate(predator) * predator.getInstantaneousBiomass() / subdt;
+            //double maxBiomassToPredate = getMaxPredationRate(predator) * predator.getInstantaneousBiomass() / subdt;
+            // Same calculation as bioen, but with default beta=1 for classical osmosis.
+            double maxBiomassToPredate = getMaxPredationRate(predator) * Math.pow(predator.getWeight() * 1e6f, predator.getBetaBioen()) / subdt;
+            maxBiomassToPredate *= predator.getInstantaneousAbundance() * 1e-6f;
+            
+            
             // By default the predator will eat as much as it can
             double biomassToPredate = maxBiomassToPredate;
 
@@ -252,7 +257,7 @@ public class PredationMortality extends AbstractMortality {
      */
     public double getMaxPredationRate(IAggregation predator) {
         if (getConfiguration().isBioenEnabled()) {
-            error("The getMaxPredationRate method of PredationMortality not suitable in Osmose-PHYSIO",
+            error("The getMaxPredationRate method of PredationMortality is not suitable with bioenergetic module.",
                     new Exception());
         }
         return predationRate[predator.getSpeciesIndex()] / getConfiguration().getNStepYear();
@@ -273,12 +278,14 @@ public class PredationMortality extends AbstractMortality {
      */
     public double[] getAccessibility(IAggregation predator, List<IAggregation> preys) {
 
+        predator.resetAccessiblePreyIndex();
+        List<Double> accessibility = new ArrayList<>();
+
         int iAccessPred = accessibilityMatrix.getIndexPred(predator);
 
         // Number of predators species. Used to offeset resource percentage index
         int nSpecies = this.getNSpecies() + this.getNBkgSpecies();
 
-        double[] accessibility = new double[preys.size()];
         int iSpecPred = predator.getSpeciesIndex();
         int iPredPreyStage = predPreyStage.getStage(predator);
         double preySizeMax = predator.getLength() / predPreySizesMax[iSpecPred][iPredPreyStage];
@@ -294,19 +301,28 @@ public class PredationMortality extends AbstractMortality {
                 }
                 if (prey.getLength() >= preySizeMin && prey.getLength() < preySizeMax) {
                     int iAccessPrey = accessibilityMatrix.getIndexPrey(prey);
-                    accessibility[iPrey] = accessibilityMatrix.getValue(iAccessPrey, iAccessPred);
-                } else {
-                    accessibility[iPrey] = 0.d; // no need to do it since initialization already set it to zero
+                    double tempAccess = accessibilityMatrix.getValue(iAccessPrey, iAccessPred);
+                    if (tempAccess > 0) {
+                        accessibility.add(tempAccess);
+                        predator.addAccessiblePreyIndex(iPrey);
+                    }
                 }
             } else {
                 int iAccessPrey = accessibilityMatrix.getIndexPrey(prey);
                 int iSpecPrey = preys.get(iPrey).getSpeciesIndex(); // get species index with offset
                 // The prey is a resource group
-                accessibility[iPrey] = accessibilityMatrix.getValue(iAccessPrey, iAccessPred)
+                double tempAccess = accessibilityMatrix.getValue(iAccessPrey, iAccessPred)
                         * percentResource[iSpecPrey - nSpecies];
+                if(tempAccess > 0) {
+                    predator.addAccessiblePreyIndex(iPrey);
+                    accessibility.add(tempAccess);
+                }
             }
         }
-        return accessibility;
+
+        double[] accessibilityArray = accessibility.stream().mapToDouble(v -> v).toArray();
+
+        return accessibilityArray;
     }
 
     @Override

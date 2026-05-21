@@ -22,7 +22,7 @@
  * Ricardo OLIVEROS RAMOS (ricardo.oliveros@gmail.com)
  * Philippe VERLEY (philippe.verley@ird.fr)
  * Laure VELEZ (laure.velez@ird.fr)
- * Nicolas Barrier (nicolas.barrier@ird.fr)
+ * Nicolas BARRIER (nicolas.barrier@ird.fr)
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -130,7 +130,7 @@ public class ByDtByClassAdditionalMortality extends AbstractMortalitySpecies {
             // 3. age >= threshold[last]
             return m[iSimu][ageClasses.length - 1];
         }
-        // We should never reach that stage. If we do it is because there is
+        // We should never reach this stage. If we do it is because there is
         // something wrong in the thresholds and then we return a NaN value.
         return Double.NaN;
     }

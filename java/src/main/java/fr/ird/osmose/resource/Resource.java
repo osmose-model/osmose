@@ -1,10 +1,10 @@
-/* 
- * 
+/*
+ *
  * OSMOSE (Object-oriented Simulator of Marine Ecosystems)
  * http://www.osmose-model.org
- * 
+ *
  * Copyright (C) IRD (Institut de Recherche pour le Développement) 2009-2020
- * 
+ *
  * Osmose is a computer program whose purpose is to simulate fish
  * populations and their interactions with their biotic and abiotic environment.
  * OSMOSE is a spatial, multispecies and individual-based model which assumes
@@ -15,7 +15,7 @@
  * processes of fish life cycle (growth, explicit predation, additional and
  * starvation mortalities, reproduction and migration) and fishing mortalities
  * (Shin and Cury 2001, 2004).
- * 
+ *
  * Contributor(s):
  * Yunne SHIN (yunne.shin@ird.fr),
  * Morgane TRAVERS (morgane.travers@ifremer.fr)
@@ -23,26 +23,29 @@
  * Philippe VERLEY (philippe.verley@ird.fr)
  * Laure VELEZ (laure.velez@ird.fr)
  * Nicolas Barrier (nicolas.barrier@ird.fr)
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation (version 3 of the License). Full description
  * is provided on the LICENSE file.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
- * 
+ *
  */
 
 package fr.ird.osmose.resource;
 
+import java.util.List;
+
 import fr.ird.osmose.Cell;
 import fr.ird.osmose.IAggregation;
+import fr.ird.osmose.output.AbstractOutputRegion;
 import fr.ird.osmose.process.mortality.MortalityCause;
 import fr.ird.osmose.util.OsmoseLinker;
 
@@ -66,7 +69,7 @@ public class Resource extends OsmoseLinker implements IAggregation {
      * Pointer to the cell where this swarm is located
      */
     final private Cell cell;
-    
+
     /**
      * Number of organisms in the swarm at the beginning of the time step
      */
@@ -149,7 +152,7 @@ public class Resource extends OsmoseLinker implements IAggregation {
      * mortality cause
      */
     @Override
-    public void incrementNdead(MortalityCause cause, double nDead) {
+    public void incrementNdead(MortalityCause cause, double nDead, int timeStep) {
         if (cause != MortalityCause.PREDATION) {
             throw new UnsupportedOperationException("MortalityCause for Swarm must be PREDATION only.");
         }
@@ -226,8 +229,13 @@ public class Resource extends OsmoseLinker implements IAggregation {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
+    //@Override
+    //public void fishedBy(int fisheryIndex, double fishedBiomass) {
+    //    throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    //}
+
     @Override
-    public void fishedBy(int fisheryIndex, double fishedBiomass) {
+    public void fishedNBy(int fisheryIndex, double fishedAbundance) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
@@ -236,8 +244,13 @@ public class Resource extends OsmoseLinker implements IAggregation {
         return this.species.getName();
     }
 
+    //@Override
+    //public void discardedBy(int fisheryIndex, double fishedBiomass) {
+    //    throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    //}
+
     @Override
-    public void discardedBy(int fisheryIndex, double fishedBiomass) {
+    public void discardedNBy(int fisheryIndex, double fishedAbundance) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
@@ -249,6 +262,29 @@ public class Resource extends OsmoseLinker implements IAggregation {
     @Override
     public int getFirstFeedingAgeDt() {
         throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    @Override
+    public void resetAccessiblePreyIndex() {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'resetAccessiblePreyIndex'");
+    }
+
+    @Override
+    public void addAccessiblePreyIndex(int index) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'addAccessiblePreyIndex'");
+    }
+
+    @Override
+    public List<Integer> getAccessiblePreyIndex() {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'getAccessiblePreyIndex'");
+    }
+
+    @Override
+    public boolean isMature() {
+        return false;
     }
 
 

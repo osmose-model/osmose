@@ -16,9 +16,8 @@
             "request": "launch",
             "mainClass": "fr.ird.osmose.Osmose",
             "projectName": "osmose",
-            "cwd": "/home/barrier/Work/osmose/alaia-ns-config",
-            "args": "-force calib_config.csv",
-
+            "cwd": "/home/BARRIER/Codes/osmose/osmose-peru/osmose-peru_v4.x_develop",
+            "args": "osmose-peru.R -Psimulation.fixedseed.enabled=true -Poutput.dir.path=output-vscode -Psimulation.time.nyear=1",
         }
     ]
 }

@@ -71,7 +71,7 @@ public class MeanSizeDistribOutput_Netcdf extends AbstractMeanDistribOutput_Netc
     }
 
     @Override
-    String getDescription() {
+    protected String getDescription() {
         StringBuilder description = new StringBuilder();
         description.append("Mean size of fish (centimeter) by ");
         description.append(getType().getDescription());

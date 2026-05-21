@@ -22,7 +22,7 @@
  * Ricardo OLIVEROS RAMOS (ricardo.oliveros@gmail.com)
  * Philippe VERLEY (philippe.verley@ird.fr)
  * Laure VELEZ (laure.velez@ird.fr)
- * Nicolas Barrier (nicolas.barrier@ird.fr)
+ * Nicolas BARRIER (nicolas.barrier@ird.fr)
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -87,7 +87,10 @@ public class AdditionalMortality extends AbstractMortality {
             debug("Larva Additional Mortality scenario for " + species.getName() + " set to " + scenarioLarva.toString());
             switch (scenarioLarva) {
                 case CONSTANT:
-                    larvaAdditionalMortality[cpt] = new AnnualLarvaMortality(rank, species);
+                    larvaAdditionalMortality[cpt] = new AnnualLarvaMortality(rank, species, "larva");
+                    break;
+                case VCONSTANT:
+                    larvaAdditionalMortality[cpt] = new AnnualLarvaMortality(rank, species, "neonate");
                     break;
                 case BY_DT:
                     larvaAdditionalMortality[cpt] = new ByDtLarvaMortality(rank, species);
@@ -270,6 +273,7 @@ public class AdditionalMortality extends AbstractMortality {
     public enum ScenarioLarva {
 
         CONSTANT("mortality.additional.larva.rate.sp"),
+        VCONSTANT("mortality.additional.neonate.rate.sp"),
         BY_DT("mortality.additional.larva.rate.bytDt.file.sp");
 
         private final String key;

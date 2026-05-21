@@ -14,7 +14,7 @@
 
 # RStudio files
 .Rproj.user/
-*.Rproj
+./*.Rproj
 
 # produced vignettes
 vignettes/*.html
@@ -89,3 +89,48 @@ random_drift.pdf
 random_drift.svg
 /*.sh
 doc/bioen_odd_des/submodel/_static/repfonct_bioen.pdf
+doc/odd_des/_static/mermaid/scheduling_files
+doc/build.sh
+*/_book
+*/.quarto
+
+doc/**/*_files
+**/.jupyter_cache
+doc/index.pdf
+doc/index.tex
+doc/index.toc
+doc/index.synctex.gz
+doc/index.fls
+doc/index.fdb_latexmk
+doc/rename.sh
+doc/**/*_cache
+
+doc/user_guide/.quarto
+doc/user_guide/site_libs
+doc/user_guide/index*
+doc/*/_book
+doc/user_guide/.gitignore
+!doc/user_guide/index.qmd
+!doc/user_guide/_static/*svg
+
+**/index.toc
+**/index.tex
+**/index.pdf
+**/site_libs
+
+doc/odd_des/test.csv
+doc/user_guide/Osmose-User-Guide.tex
+doc/user_guide/Osmose-User-Guide.toc
+doc/user_guide/Osmose-User-Guide.synctex.gz
+doc/user_guide/Osmose-User-Guide.pdf
+doc/user_guide/Osmose-User-Guide.fls
+doc/user_guide/Osmose-User-Guide.fdb_latexmk
+doc/odd_des/Osmose-ODD-Description.tex
+/.quarto/
+
+suppressions.txt
+
+sandbox
+build*
+
+output-vscode

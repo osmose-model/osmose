@@ -60,7 +60,7 @@ public class NSchoolDistribOutput extends AbstractDistribOutput {
     }
 
     @Override
-    String getDescription() {
+    protected String getDescription() {
         StringBuilder description = new StringBuilder();
         description.append("Distribution of the number of school by ");
         description.append(getType().getDescription());

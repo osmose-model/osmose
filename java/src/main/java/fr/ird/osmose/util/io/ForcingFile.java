@@ -22,7 +22,7 @@
  * Ricardo OLIVEROS RAMOS (ricardo.oliveros@gmail.com)
  * Philippe VERLEY (philippe.verley@ird.fr)
  * Laure VELEZ (laure.velez@ird.fr)
- * Nicolas Barrier (nicolas.barrier@ird.fr)
+ * Nicolas BARRIER (nicolas.barrier@ird.fr)
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -121,16 +121,23 @@ public class ForcingFile extends OsmoseLinker {
 
     private int previousNcStep = -1;
 
+    private boolean normalize;
+
     //////////////
     // Constructor
     //////////////
-    public ForcingFile(String varName, String filePattern, int ncPerYear, double offset, double factor, ForcingFileCaching caching) {
+    public ForcingFile(String varName, String filePattern, int ncPerYear, double offset, double factor, ForcingFileCaching caching, boolean normalize) {
         this.varName = varName;
         this.filePattern = filePattern;
         this.ncPerYear = ncPerYear;
         this.caching = caching;
         this.factor = factor;
         this.offset = offset;
+        this.normalize = normalize;
+    }
+
+    public ForcingFile(String varName, String filePattern, int ncPerYear, double offset, double factor, ForcingFileCaching caching) {
+        this(varName, filePattern, ncPerYear, offset, factor, caching, false);
     }
 
     ////////////////////////////
@@ -165,7 +172,7 @@ public class ForcingFile extends OsmoseLinker {
 
         if (this.nFiles == 0) {
             StringBuilder msg = new StringBuilder();
-            msg.append("No file has been found to match the patter " + this.filePattern + "\n");
+            msg.append("No file has been found to match the pattern " + this.filePattern + "\n");
             msg.append("The program will stop");
             error("Error reading resource file", new IOException(msg.toString()));
         }
@@ -237,7 +244,7 @@ public class ForcingFile extends OsmoseLinker {
 
         /*
         if ((timeLength < getConfiguration().getNStep()) && (timeLength % getConfiguration().getNStepYear() != 0)) {
-            throw new IOException("Time dimension of the NetCDF variale " + this.varName
+            throw new IOException("Time dimension of the NetCDF variable " + this.varName
                     + " must be a multiple of the number of time steps per year");
         }
         */
@@ -324,6 +331,7 @@ public class ForcingFile extends OsmoseLinker {
 
         int nlayer;
         double[][][] output = null;
+        boolean singleCell = this.getConfiguration().getBoolean("grid.single.cell.enabled", false);
 
         // String ncFile = getConfiguration().getFile("species.file.sp" + index);
         try (NetcdfFile nc = NetcdfDatasets.openDataset(ncFile)) {
@@ -334,7 +342,10 @@ public class ForcingFile extends OsmoseLinker {
             Array ncArray;
             if (ncVariable.getShape().length == 3) {
                 nlayer = 1;
-                ncArray = ncVariable.read(new int[] { iStep, 0, 0 }, new int[] { 1, ny, nx }).reduce();
+                ncArray = ncVariable.read(new int[] { iStep, 0, 0 }, new int[] { 1, ny, nx });
+                if(!singleCell) {
+                    ncArray = ncArray.reduce();
+                }
                 Index ncindex = ncArray.getIndex();
                 output = new double[1][ny][nx];
                 for (Cell cell : getGrid().getCells()) {
@@ -348,7 +359,10 @@ public class ForcingFile extends OsmoseLinker {
                 }
             } else if (ncVariable.getShape().length == 4) {
                 nlayer = ncVariable.getShape()[1];
-                ncArray = ncVariable.read(new int[] { iStep, 0, 0, 0 }, new int[] { 1, nlayer, ny, nx }).reduce();
+                ncArray = ncVariable.read(new int[] { iStep, 0, 0, 0 }, new int[] { 1, nlayer, ny, nx });
+                if(!singleCell) {
+                    ncArray = ncArray.reduce();
+                }
                 Index ncindex = ncArray.getIndex();
                 output = new double[nlayer][ny][nx];
                 for (Cell cell : getGrid().getCells()) {
@@ -373,6 +387,24 @@ public class ForcingFile extends OsmoseLinker {
         } catch (IOException | InvalidRangeException ex) {
             error("File " + ncFile + ", variable " + this.varName + "cannot be read", ex);
         }
+
+        if(normalize) {
+            for(int t = 0; t < output.length; t++) {
+
+                double total = 0;
+                for(Cell cell : getConfiguration().getGrid().getOceanCells()) {
+                    int j = cell.get_jgrid();
+                    int i = cell.get_igrid();
+                    total += output[t][j][i];
+                } // end of cell loop for total computation
+
+                for(Cell cell : getConfiguration().getGrid().getOceanCells()) {
+                    int j = cell.get_jgrid();
+                    int i = cell.get_igrid();
+                    output[t][j][i] /= total;
+                } // enf of ell loop for normalization
+            } // end of layer loop
+        } // enf of normalize if statement
 
         return output;
 

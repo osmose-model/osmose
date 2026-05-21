@@ -119,4 +119,4 @@ for ax in [ax3, ax4]:
 for ax in [ax0, ax2, ax4]:
     ax.set_ylabel('Fishing rate')
 
-plt.savefig('odd_des/submodel/mort/_static/fisheries/time/plot_timevar', bbox_inches='tight')
+plt.savefig('submodel/mort/_static/fisheries/time/plot_timevar.svg', bbox_inches='tight')

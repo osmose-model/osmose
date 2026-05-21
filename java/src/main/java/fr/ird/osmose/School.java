@@ -22,7 +22,7 @@
  * Ricardo OLIVEROS RAMOS (ricardo.oliveros@gmail.com)
  * Philippe VERLEY (philippe.verley@ird.fr)
  * Laure VELEZ (laure.velez@ird.fr)
- * Nicolas Barrier (nicolas.barrier@ird.fr)
+ * Nicolas BARRIER  (nicolas.barrier@ird.fr)
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -157,16 +157,17 @@ public class School extends AbstractSchool {
     double ingestionTot = 0; // sum of all the food ingested during life of the
     // school
 
-
-
     // Initialisation of maturity variables.
-    // by default the school is imature.
+    // by default the school is immature.
     private double ageMature = 0;
     private double sizeMature = 0;
     private boolean isMature = false;
+    private boolean hasSpawned = false;
 
     private double e_net_faced; // mean net energy faced during life
     private double nEggs;  // number of eggs that is released by the school
+
+    private double timeAtSpawing = -999;
 
 ///////////////
 // Constructors
@@ -228,8 +229,8 @@ public class School extends AbstractSchool {
     public School(Species species, float x, float y, double abundance, float length, float weight, int ageDt, float trophicLevel, float gonadWeight) {
         this.abundance = abundance;
         instantaneousAbundance = abundance;
-        this.weight = weight * 1.e-6f;
-        this.gonadWeight = gonadWeight * 1.e-6f;
+        this.weight = weight * 1.e-6f;  // weight is converted from g to tons
+        this.gonadWeight = gonadWeight * 1.e-6f;  // gonadic weight is converted from g to tons
         biomass = instantaneousBiomass = abundance * (this.weight + this.gonadWeight);
         abundanceHasChanged = false;
         this.trophicLevel = trophicLevel;
@@ -245,8 +246,10 @@ public class School extends AbstractSchool {
         out = false;
         preys = new HashMap<>();
         starvationRate = 0.d;
-        fishedBiomass = new double[getConfiguration().getNFishery()];
-        discardedBiomass = new double[getConfiguration().getNFishery()];
+        //fishedBiomass = new double[getConfiguration().getNFishery()];
+        fishedAbundance = new double[getConfiguration().getNFishery()];
+        //discardedBiomass = new double[getConfiguration().getNFishery()];
+        discardedAbundance = new double[getConfiguration().getNFishery()];
         this.accessibleBiomassToFishery = new double[getConfiguration().getNFishery()];
 
     }
@@ -278,8 +281,10 @@ public class School extends AbstractSchool {
         // reset ingestion at beginning of time step;
         ingestion = 0.d;
         // reset fished biomass
-        reset(this.fishedBiomass);
-        reset(this.discardedBiomass);
+        //reset(this.fishedBiomass);
+        reset(this.fishedAbundance);
+        //reset(this.discardedBiomass);
+        reset(this.discardedAbundance);
         reset(this.accessibleBiomassToFishery);
         nEggs = 0;
     }
@@ -304,7 +309,7 @@ public class School extends AbstractSchool {
      * @param subdt, the sub time step of the mortality algorithm
      */
     public void releaseEgg(int subdt) {
-        eggRetained = Math.max(0.d, eggRetained - (abundance - nDead[MortalityCause.ADDITIONAL.index]) / (double) subdt);
+        eggRetained = Math.max(0.d, eggRetained - (abundance - nDead[0][MortalityCause.ADDITIONAL.index]) / (double) subdt);
         abundanceHasChanged = true;
     }
 
@@ -315,7 +320,7 @@ public class School extends AbstractSchool {
      * call the {@link #releaseEgg} function to release some eggs.
      */
     public void retainEgg() {
-        eggRetained = abundance - nDead[MortalityCause.ADDITIONAL.index];
+        eggRetained = abundance - nDead[0][MortalityCause.ADDITIONAL.index];
         abundanceHasChanged = true;
     }
 
@@ -370,8 +375,8 @@ public class School extends AbstractSchool {
      * @param nDead, the number of dead fish for this mortality cause
      */
     public void setNdead(MortalityCause cause, double nDead) {
-        this.nDead[cause.index] = nDead;
-        this.ageDeath[cause.index] += nDead * this.getAge();
+        this.nDead[0][cause.index] = nDead;
+        this.ageDeath[0][cause.index] += nDead * this.getAge();
 
         double factor = 1;
         if (this.getInstantaneousAbundance() != 0) {
@@ -385,10 +390,15 @@ public class School extends AbstractSchool {
     }
 
     @Override
-    public void incrementNdead(MortalityCause cause, double nDead) {
+    public void incrementNdead(MortalityCause cause, double nDead, int timeStep) {
 
-        this.nDead[cause.index] += nDead;
-        this.ageDeath[cause.index] += nDead * this.getAge();
+        for (int indexRegion = 0; indexRegion < getConfiguration().getOutputRegions().size(); indexRegion++) {
+            if (getConfiguration().getOutputRegions().get(indexRegion).contains(timeStep, this)) {
+                this.nDead[indexRegion][cause.index] += nDead;
+                this.ageDeath[indexRegion][cause.index] += nDead * this.getAge();
+            }
+        }
+
         double factor = 1;
 
         if (this.getInstantaneousAbundance() != 0) {
@@ -408,7 +418,9 @@ public class School extends AbstractSchool {
      * @param cause, the mortality cause
      */
     public void resetNdead(MortalityCause cause) {
-        nDead[cause.index] = 0;
+        for (int iRegion = 0; iRegion < nDead.length; iRegion++) {
+            nDead[iRegion][cause.index] = 0;
+        }
         abundanceHasChanged = true;
     }
 
@@ -580,7 +592,7 @@ public class School extends AbstractSchool {
 
     @Override
     public void updateBiomAndAbd() {
-        instantaneousAbundance = (abundance - eggRetained) - sum(nDead) + nDead[MortalityCause.AGING.index];
+        instantaneousAbundance = (abundance - eggRetained) - sum(nDead[0]) + nDead[0][MortalityCause.AGING.index];
         if (instantaneousAbundance < 1.d) {
             instantaneousAbundance = 0.d;
         }
@@ -619,7 +631,7 @@ public class School extends AbstractSchool {
 
     /**
      * Increments the weight of the fish from given number of tons. Length is
-     * recomputed thereafter from the new weigth
+     * recomputed thereafter from the new weight
      *
      * @param dw Weight increment (in ton)
      */
@@ -663,6 +675,24 @@ public class School extends AbstractSchool {
     }
 
     /**
+     * Returns true if the individual has spawned.
+     *
+     * @return
+     */
+    public boolean hasSpawned() {
+        return this.hasSpawned;
+    }
+
+    /**
+     * Set whether the individual has spawned.
+     */
+    public void setHasSpawned(boolean spawned, double timeStep) {
+        this.hasSpawned = spawned;
+        if(this.timeAtSpawing < 0) {
+            this.timeAtSpawing = timeStep;
+        }
+    }
+    /**
      * Returns the age at maturity (only used for outputs).
      *
      * @return
@@ -672,7 +702,7 @@ public class School extends AbstractSchool {
     }
 
     /**
-     * Returns the age at maturity (only used for outputs).
+     * Returns the size at maturity (only used for outputs).
      *
      * @return
      */
@@ -689,8 +719,23 @@ public class School extends AbstractSchool {
         this.ageMature = agemature;
     }
 
+    /** Determines whether the school should die from spawning
+     *
+     * If the spawning has occurred and the time delta between the spawning
+     * timestep and the actual time-step is true, then the school should die
+     * from spawning.
+     *
+     * Note that for by default, species.getSpawningSurvivalTime() returns infinity.
+     *
+     * @param timeStep the actual timeStep of the simulation
+     *
+    */
+    public boolean dieFromSpawning(int timeStep) {
+       return (this.hasSpawned) && (timeStep - timeAtSpawing) >= species.getSpawningSurvivalTime();
+    }
+
     /**
-     * Sets the age at maturity (only used for outputs).
+     * Sets the size at maturity (only used for outputs).
      *
      * @param sizemat
      */
@@ -774,7 +819,7 @@ public class School extends AbstractSchool {
     public void setRho(double value) {
         this.rho = value;
     }
-    
+
 
     public void incrementEnet(double d) {
         this.e_net += d;
@@ -800,7 +845,11 @@ public class School extends AbstractSchool {
     }
 
     public boolean existsTrait(String key) throws Exception {
-        return this.getGenotype().existsTrait(key);
+        if (this.getGenotype() == null) {
+            return false;
+        } else {
+            return this.getGenotype().existsTrait(key);
+        }
     }
 
     public double getgenet_value(String key) throws Exception {
@@ -881,5 +930,42 @@ public class School extends AbstractSchool {
     public boolean isSexuallyMature() {
         return this.getSpecies().isSexuallyMature(this);
     }
+
+    @Override
+    public int getClassIndex() {
+        error("Not implemented yet", new Exception());
+        return 0;
+    }
+
+    public void updateBioenMaturation() throws Exception {
+
+        // If the school is mature, nothing is done and returns 1
+        if (this.isMature()) {
+            return;
+        }
+
+        String key = "m0";
+        double m0_temp = this.existsTrait(key) ? this.getTrait(key) : this.species.getMaturityM0();
+
+        key = "m1";
+        double m1_temp = this.existsTrait(key) ? this.getTrait(key) : this.species.getMaturityM1();
+
+        // If the this is not mature yet, maturation is computed following equation 8
+        double age = this.getAge();  // returns the age in years
+        double length = this.getLength();   // warning: length in cm.
+        double llim = m0_temp + m1_temp * age ;   // computation of a maturity
+
+        int output = (length >= llim) ? 1 : 0;
+        if (output == 1) {
+            this.setAgeMat(age);
+            this.setSizeMat(length);
+            this.setIsMature(true);
+        }
+
+        return;
+
+    }
+
+
 
 }

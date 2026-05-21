@@ -42,6 +42,7 @@
 package fr.ird.osmose.output;
 
 import fr.ird.osmose.AbstractSchool;
+import fr.ird.osmose.Cell;
 
 /**
  *
@@ -59,6 +60,11 @@ public class OutputWholeRegion extends OutputRegion {
 
     @Override
     public boolean contains(int timeStep, AbstractSchool school) {
+        return true;
+    }
+
+    @Override
+    public boolean contains(int timeStep, Cell cell) {
         return true;
     }
 

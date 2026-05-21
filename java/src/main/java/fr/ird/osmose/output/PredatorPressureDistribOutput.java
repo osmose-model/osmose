@@ -58,7 +58,7 @@ public class PredatorPressureDistribOutput extends AbstractDistribOutput {
     }
 
     @Override
-    String getDescription() {
+    protected String getDescription() {
         StringBuilder description = new StringBuilder();
         description.append("Distribution of the preyed biomass (tonne) of ");
         description.append(species.getName());
@@ -81,6 +81,18 @@ public class PredatorPressureDistribOutput extends AbstractDistribOutput {
                         }
                     });
         });
+
+        getBkgSchoolSet().getSchools().forEach(predator -> {
+            predator.getPreys().stream()
+                    .filter(prey -> (prey.getFileSpeciesIndex() == species.getFileSpeciesIndex()))
+                    .forEach(prey -> {
+                        int classPrey = getClass(prey);
+                        if (classPrey >= 0) {
+                            values[predator.getSpeciesIndex()][classPrey] += prey.getBiomass();
+                        }
+                    });
+        });
+
     }
 
     @Override

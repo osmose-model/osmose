@@ -66,7 +66,7 @@ public class Locus extends OsmoseLinker {
     private final Trait trait;
 
     /** Locus index within the given trait. */
-    private final int index;
+    private final int locus_index;
 
     /** Species associated with the index. */
     private final int spec_index;
@@ -77,22 +77,22 @@ public class Locus extends OsmoseLinker {
      * Locus constructor.
      *
      * @param rank
-     * @param index
+     * @param locus_index
      * @param spec_index
      * @param trait
      */
-    public Locus(int index, Trait trait, int spec_index, int rank) {
+    public Locus(int locus_index, Trait trait, int spec_index, int rank) {
 
-        this.index = index;
+        this.locus_index = locus_index;
         this.trait = trait;
         this.spec_index = spec_index;
         value = new double[N];
         int nSimulation = getConfiguration().getNSimulation();
 
-        if(getConfiguration().getBoolean("genetics.randomseed.fixed", false)) {
+        if(getConfiguration().getBoolean("simulation.fixed.seed.enabled", false)) {
             // Assumes a seed array of dimemsion [loci][species][simulation]
             // Makes sure that random generator is different for each species/simulation/loci
-            long seed = index * nSimulation * getNSpecies() + spec_index * nSimulation + rank;
+            long seed = locus_index * nSimulation * getNSpecies() + spec_index * nSimulation + rank;
             generator = new Random(seed);
         } else {
             generator = new Random();
@@ -110,11 +110,11 @@ public class Locus extends OsmoseLinker {
 
         // Random draft of a given value in the diversity value for 1st allel
         valindex = (int) (generator.nextDouble() * this.trait.getNValues(spec_index));
-        value[0] = this.trait.getDiv(spec_index, index, valindex);
+        value[0] = this.trait.getDiv(spec_index, locus_index, valindex);
 
         // Random draft of a given value in the diversity value for 1st allel
         valindex = (int) (generator.nextDouble() * this.trait.getNValues(spec_index));
-        value[1] = this.trait.getDiv(spec_index, index, valindex);
+        value[1] = this.trait.getDiv(spec_index, locus_index, valindex);
 
     }
 

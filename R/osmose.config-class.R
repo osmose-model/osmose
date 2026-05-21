@@ -20,7 +20,7 @@
 # Ricardo OLIVEROS RAMOS (ricardo.oliveros@gmail.com)
 # Philippe VERLEY (philippe.verley@ird.fr)
 # Laure VELEZ (laure.velez@ird.fr)
-# Nicolas Barrier (nicolas.barrier@ird.fr)
+# Nicolas BARRIER (nicolas.barrier@ird.fr)
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -48,10 +48,10 @@
 #' @param ... Additional arguments for the plot function.
 #' 
 #' @export
-#' @method plot osmose.config
-plot.osmose.config = function(x, what = "predation", ...) {
+#' @method plot osmose.configuration
+plot.osmose.configuration = function(x, what = "predation", ...) {
   
-  x = get_var.osmose.config(x, what = what)
+  x = get_var.osmose.configuration(x, what = what)
   plot(x, ...)
   
   return(invisible())
@@ -68,8 +68,8 @@ plot.osmose.config = function(x, what = "predation", ...) {
 #' @return An object of \code{list} class containing all the relevant information about 
 #' the variable extracted.
 #' @export
-#' @method get_var osmose.config
-get_var.osmose.config = function(object, what, ...) {
+#' @method get_var osmose.configuration
+get_var.osmose.configuration = function(object, what, ...) {
   
   what = getWhats(x = what)
   

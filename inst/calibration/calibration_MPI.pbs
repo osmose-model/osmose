@@ -1,0 +1,28 @@
+#!/bin/csh
+#PBS -N osmose_calibration
+#PBS -q mpi_2
+#PBS -l select=2:ncpus=28:mpiprocs=14:mem=256g
+#PBS -l walltime=48:00:00
+
+source /usr/share/Modules/3.2.10/init/csh
+
+# change to work directory
+cd $PBS_O_WORKDIR
+
+# list of nodes
+setenv mpiproc `cat $PBS_NODEFILE | wc -l`
+
+# export R_LIBS with the desired version of osmose and calibrar
+setenv R_LIBS /home1/datawork/$USER/libs/R/lib
+
+# Load modules (if available, choose versions working in parallel)
+module load R/3.6.3-intel-cc-17.0.2.174
+module load java/openjdk-16.0.2
+module load nco
+
+# Load conda environment (if available)
+#conda activate r4
+
+# Run R in parallel mode.
+$MPI_LAUNCH /appli/R/3.6.3-intel-cc-17.0.2.174/lib64/R/library/snow/RMPISNOW \
+--no-save -q < .calibration.R >>& mycalibration.log

@@ -41,7 +41,7 @@
 osmosePlots2D = function(x, species, speciesNames, start, end, initialYear, ts, 
                          type, replicates, freq, horizontal, conf, factor, 
                          xlim, ylim, col, alpha, border, lty, lwd, axes, legend, 
-                         units, ci = TRUE, zero=FALSE, ...){
+                         units, ci = TRUE, zero=FALSE, intype="l", ...){
   
   # CHECK ARGUMENTS
   if(!is.null(species)){
@@ -90,7 +90,8 @@ osmosePlots2D = function(x, species, speciesNames, start, end, initialYear, ts,
   if(end > dim(x)[1] | end < start) stop("Incorrect value for 'end' argument")
   
   # Subset x (colummns) by using start and end
-  x = x[seq(start, end), , ,drop = FALSE]
+  if(length(dim(x))==2) dim(x) = c(dim(x), 1)
+  x = x[seq(start, end), , , drop = FALSE]
   
   # Define default values for initialYear
   if(is.null(initialYear)) initialYear = 0
@@ -109,7 +110,7 @@ osmosePlots2D = function(x, species, speciesNames, start, end, initialYear, ts,
                                conf = conf, factor = factor, col = col, 
                                alpha = alpha, speciesNames = speciesNames, 
                                lty = lty, lwd = lwd, axes = axes, units = units,
-                               border = border, legend = legend, zero=zero, ...),
+                               border = border, legend = legend, zero=zero, type=intype, ...),
            "2" = plot2DTsType2(x = x, replicates = replicates, 
                                ci = ci, times = times, xlim = xlim, ylim = ylim,
                                conf = conf, factor = factor, col = col, 
@@ -128,7 +129,7 @@ osmosePlots2D = function(x, species, speciesNames, start, end, initialYear, ts,
                                speciesNames = speciesNames, axes = axes, 
                                units = units, ...),
            stop(msg))
-  }else{
+  } else {
     # Plot types for ts = FALSE    
     switch(as.character(type),
            "1" = plot2DType1(x, ci = ci, horizontal = horizontal, col = col,
@@ -154,7 +155,7 @@ osmosePlots2D = function(x, species, speciesNames, start, end, initialYear, ts,
 
 plot2DTsType1 = function(x, replicates, ci, times, xlim, ylim, conf, 
                          factor, col, alpha, speciesNames, lty, lwd, axes, 
-                         units, border, legend, zero=FALSE, ...){
+                         units, border, legend, zero=FALSE, type="l", ...){
   
   # Define name of species
   if(is.null(speciesNames)) speciesNames = toupper(colnames(x))
@@ -198,7 +199,8 @@ plot2DTsType1 = function(x, replicates, ci, times, xlim, ylim, conf,
   for(i in seq_len(ncol(x))) {
     # Extract values for spp i
     xsp = factor*x[, i, ,drop = FALSE]
-    if(is.null(ylim_fix)) ylim = c(lmin, 1.25)*range(as.numeric(xsp)) else ylim_fix*factor
+    xxsp = as.numeric(xsp)
+    if(is.null(ylim_fix)) ylim = c(lmin, 1.25)*range(xxsp[is.finite(xxsp)]) else ylim_fix*factor
     # Set an empty canvas
     plot.new()
     plot.window(xlim = xlim, ylim = ylim)
@@ -206,7 +208,7 @@ plot2DTsType1 = function(x, replicates, ci, times, xlim, ylim, conf,
     # Draw the plot
     plotCI(x = times, y = xsp, replicates = replicates, ci = ci,  
            prob = 1 - conf, col = col[i], alpha = alpha, lty = lty[i], 
-           lwd = lwd[i], border = border, ...)
+           lwd = lwd[i], border = border, type=type, ...)
     
     # Add species names
     if(isTRUE(legend)){
@@ -328,13 +330,13 @@ plot2DTsType2 = function(x, replicates, ci, times, xlim, ylim, conf,
   return(invisible())
 }
 
-plotCI = function(x, y, replicates, ci, prob, col, alpha, lty, lwd, border, 
+plotCI = function(x, y, replicates, ci, prob, col, alpha, lty, lwd, border, type="l",
                   ...){
   
   # If there is just one replicate, plot it directly 
-  if(dim(y)[3] == 1){
+  if(dim(y)[3] == 1) {
     lines(x = x, y = apply(y, 1, median, na.rm = TRUE), col = col, lty = lty, 
-          lwd = lwd)
+          lwd = lwd, type=type)
     
     return(invisible())
   }
@@ -355,7 +357,7 @@ plotCI = function(x, y, replicates, ci, prob, col, alpha, lty, lwd, border,
   
   # Calculate and add median value
   x.50  = apply(y, 1, median)
-  lines(x = x, y = x.50, col = col, lty = lty, lwd = lwd)
+  lines(x = x, y = x.50, col = col, lty = lty, lwd = lwd, type=type)
   
   return(invisible())
 }

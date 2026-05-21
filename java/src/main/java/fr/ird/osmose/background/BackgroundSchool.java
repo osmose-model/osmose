@@ -22,7 +22,7 @@
  * Ricardo OLIVEROS RAMOS (ricardo.oliveros@gmail.com)
  * Philippe VERLEY (philippe.verley@ird.fr)
  * Laure VELEZ (laure.velez@ird.fr)
- * Nicolas Barrier (nicolas.barrier@ird.fr)
+ * Nicolas BARRIER (nicolas.barrier@ird.fr)
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -71,11 +71,34 @@ public class BackgroundSchool extends AbstractSchool {
         this.bkgSpecies = species;
         abundanceHasChanged = false;
         preys = new HashMap<>();
-        fishedBiomass = new double[getConfiguration().getNFishery()];
-        discardedBiomass = new double[getConfiguration().getNFishery()];
+        //fishedBiomass = new double[getConfiguration().getNFishery()];
+        fishedAbundance = new double[getConfiguration().getNFishery()];
+        //discardedBiomass = new double[getConfiguration().getNFishery()];
+        discardedAbundance = new double[getConfiguration().getNFishery()];
         accessibleBiomassToFishery = new double[getConfiguration().getNFishery()];
         this.classIndex = classIndex;
         this.moveToCell(cell);
+    }
+
+     /**
+     * Public constructor.Initialisation from background species, class index
+ and time step.
+     *
+     * @param species
+     * @param classIndex
+     * @param cell
+     */
+    public BackgroundSchool(BackgroundSpecies species, int classIndex) {
+        this.bkgSpecies = species;
+        abundanceHasChanged = false;
+        preys = new HashMap<>();
+        //fishedBiomass = new double[getConfiguration().getNFishery()];
+        fishedAbundance = new double[getConfiguration().getNFishery()];
+        //discardedBiomass = new double[getConfiguration().getNFishery()];
+        discardedAbundance = new double[getConfiguration().getNFishery()];
+        accessibleBiomassToFishery = new double[getConfiguration().getNFishery()];
+        this.classIndex = classIndex;
+        this.setOffGrid();
     }
 
     /**
@@ -89,8 +112,10 @@ public class BackgroundSchool extends AbstractSchool {
         preys.clear();
         preyedBiomass = 0.d;
         predSuccessRate = 0.f;
-        reset(fishedBiomass);
-        reset(discardedBiomass);
+        //reset(fishedBiomass);
+        reset(fishedAbundance);
+        //reset(discardedBiomass);
+        reset(discardedAbundance);
         reset(this.accessibleBiomassToFishery);
     }
 
@@ -118,7 +143,7 @@ public class BackgroundSchool extends AbstractSchool {
 
     @Override
     public void updateBiomAndAbd() {
-        this.instantaneousAbundance = this.abundance - sum(nDead);
+        this.instantaneousAbundance = this.abundance - sum(nDead[0]);
         if (instantaneousAbundance < 1.d) {
             instantaneousAbundance = 0.d;
         }
@@ -187,8 +212,8 @@ public class BackgroundSchool extends AbstractSchool {
         return this.bkgSpecies.getProportion(this.classIndex, step);
     }
 
-    public void setBiomass(double biomass, int step) {
-        this.biomass = this.instantaneousBiomass = biomass * this.getProportion(step);
+    public void setBiomass(double biomass) {
+        this.biomass = this.instantaneousBiomass = biomass;
         this.abundance = this.instantaneousAbundance = this.biom2abd(biomass);
     }
 
@@ -207,6 +232,10 @@ public class BackgroundSchool extends AbstractSchool {
         return this.bkgSpecies.getSpeciesIndex();
     }
 
+    public BackgroundSpecies getSpecies() {
+        return this.bkgSpecies;
+    }
+
     @Override
     public int getFirstFeedingAgeDt() {
         return -1;
@@ -214,13 +243,11 @@ public class BackgroundSchool extends AbstractSchool {
 
     @Override
     public double getEMaint() {
-        // TODO Auto-generated method stub
         return 0;
     }
 
     @Override
     public double getENet() {
-        // TODO Auto-generated method stub
         return 0;
     }
 
@@ -232,44 +259,55 @@ public class BackgroundSchool extends AbstractSchool {
 
     @Override
     public double getIngestion() {
-        // TODO Auto-generated method stub
         return 0;
     }
 
     @Override
     public float getGonadWeight() {
-        // TODO Auto-generated method stub
         return 0;
     }
 
     @Override
     public double getIngestionTot() {
-        // TODO Auto-generated method stub
         return 0;
     }
 
     @Override
     public double getAgeMat() {
-        // TODO Auto-generated method stub
         return 0;
     }
 
     @Override
     public boolean isSexuallyMature() {
-        // TODO Auto-generated method stub
         return false;
     }
 
     @Override
     public double getSizeMat() {
-        // TODO Auto-generated method stub
         return 0;
+    }
+
+    public boolean isAlive() {
+        return true;
     }
 
     @Override
     public double getNEggs() {
-        // TODO Auto-generated method stub
         return 0;
+    }
+
+    public int getClassIndex() {
+        return this.classIndex;
+    }
+
+    @Override
+    public boolean isOut() {
+        return false;
+    }
+
+    @Override
+    public boolean isMature() {
+        return false;
     }
 
 }

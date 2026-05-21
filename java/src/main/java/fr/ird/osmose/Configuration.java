@@ -414,16 +414,14 @@ public class Configuration extends OLogger {
         // barrier.n: reads the parameter that defines whether
         // the bioen module should be used.
         // String keybioen = "simulation.use.bioen";
-        String keybioen = "simulation.bioen.enabled";
+        String keybioen = "module.bioenergetics.enabled";
         this.bioenEnabled = this.getBoolean(keybioen);
 
         this.checkPreyRecord();
 
         this.geneticEnabled = false;
-        if (this.bioenEnabled) {
-            String key = "simulation.genetic.enabled";
-            this.geneticEnabled = this.getBoolean(key);
-        }
+        String key = "module.genetics.enabled";
+        this.geneticEnabled = this.getBoolean(key);
 
         String keyincom = "simulation.incoming.flux.enabled";
         this.incomingFluxEnabled = this.getBoolean(keyincom);
@@ -433,11 +431,22 @@ public class Configuration extends OLogger {
 
         this.flushEnabled = getBoolean("output.flush.enabled");
 
-        writeRestart = true;
-        if (!this.isNull("output.restart.enabled")) {
-            writeRestart = this.getBoolean("output.restart.enabled");
+        nSimulation = getInt("simulation.nsimulation");
+
+        nStepYear = getInt("simulation.time.ndtperyear");
+        // PhV 20160203, new parameter simulation.time.nstep
+        if (canFind("simulation.time.nstep")) {
+            nStep = getInt("simulation.time.nstep");
         } else {
-            warning("Could not find parameter 'output.restart.enabled'. Osmose assumes it is true and a NetCDF restart file will be created at the end of the simulation (or more, depending on parameters 'simulation.restart.recordfrequency.ndt' and 'simulation.restart.spinup').");
+            // if simulation.time.nstep not defined, use old parameter simulation.time.nyear
+            nStep = nStepYear * getInt("simulation.time.nyear");
+        }
+
+        writeRestart = true;
+        if (!this.isNull("simulation.restart.enabled")) {
+            writeRestart = this.getBoolean("simulation.restart.enabled");
+        } else {
+            warning("Could not find parameter 'simulation.restart.enabled'. Osmose assumes it is true and a NetCDF restart file will be created at the end of the simulation (or more, depending on parameters 'simulation.restart.recordfrequency.ndt' and 'simulation.restart.spinup').");
         }
 
         restart = false;
@@ -446,14 +455,21 @@ public class Configuration extends OLogger {
         }
 
         restartFrequency = Integer.MAX_VALUE;
-        if (!this.isNull("output.restart.recordfrequency.ndt")) {
-            restartFrequency = this.getInt("output.restart.recordfrequency.ndt");
+        if (!this.isNull("simulation.restart.recordfrequency.ndt")) {
+            restartFrequency = this.getInt("simulation.restart.recordfrequency.ndt");
         }
 
         spinupRestart = 0;
-        if (!this.isNull("output.restart.spinup")) {
-            spinupRestart = this.getInt("output.restart.spinup") - 1;
+        if (!this.isNull("simulation.restart.spinup.nstep")) {
+            spinupRestart = this.getInt("simulation.restart.spinup.nstep");
+        } else {
+            if (!this.isNull("simulation.restart.spinup.nyear")) {
+              spinupRestart = nStepYear * this.getInt("simulation.restart.spinup.nyear");
+          }
         }
+
+        // Show the output folder
+        info("Simulation restart spinup is " + spinupRestart);
 
         // Show the output folder
         info("Output folder set to " + outputPathname);
@@ -487,21 +503,21 @@ public class Configuration extends OLogger {
 
         // barrier.n: new way to count the number of species, resource and background
         // based on types.
-        nSpecies = (int) this.findKeys("species.type.sp*").stream().filter((k) -> (getString(k).equals("focal")))
+        nSpecies = (int) this.findKeys("species.type.sp*").stream().filter((k) -> (getString(k).equalsIgnoreCase("focal")))
                 .count();
-        nResource = (int) this.findKeys("species.type.sp*").stream().filter(k -> getString(k).equals("resource"))
+        nResource = (int) this.findKeys("species.type.sp*").stream().filter(k -> getString(k).equalsIgnoreCase("resource"))
                 .count();
-        nBackground = (int) this.findKeys("species.type.sp*").stream().filter(k -> getString(k).equals("background"))
+        nBackground = (int) this.findKeys("species.type.sp*").stream().filter(k -> getString(k).equalsIgnoreCase("background"))
                 .count();
 
         // Extract the species indexes for the focal, backgroud and resource species.
-        this.focalIndex = this.findKeys("species.type.sp*").stream().filter(k -> getString(k).equals("focal"))
+        this.focalIndex = this.findKeys("species.type.sp*").stream().filter(k -> getString(k).equalsIgnoreCase("focal"))
                 .mapToInt(rgKey -> Integer.valueOf(rgKey.substring(rgKey.lastIndexOf(".sp") + 3))).sorted().toArray();
 
-        this.bkgIndex = this.findKeys("species.type.sp*").stream().filter(k -> getString(k).equals("background"))
+        this.bkgIndex = this.findKeys("species.type.sp*").stream().filter(k -> getString(k).equalsIgnoreCase("background"))
                 .mapToInt(rgKey -> Integer.valueOf(rgKey.substring(rgKey.lastIndexOf(".sp") + 3))).sorted().toArray();
 
-        this.rscIndex = this.findKeys("species.type.sp*").stream().filter(k -> getString(k).equals("resource"))
+        this.rscIndex = this.findKeys("species.type.sp*").stream().filter(k -> getString(k).equalsIgnoreCase("resource"))
                 .mapToInt(rgKey -> Integer.valueOf(rgKey.substring(rgKey.lastIndexOf(".sp") + 3))).sorted().toArray();
 
         // Check that the number of focal species match the number of focal types
@@ -522,47 +538,33 @@ public class Configuration extends OLogger {
             error(errorMsg, null);
         }
 
-        nSimulation = getInt("simulation.nsimulation");
-
-        nStepYear = getInt("simulation.time.ndtperyear");
-        // PhV 20160203, new parameter simulation.time.nstep
-        if (canFind("simulation.time.nstep")) {
-            nStep = getInt("simulation.time.nstep");
-        } else {
-            // if simulation.time.nstep not defined, use old parameter simulation.time.nyear
-            nStep = nStepYear * getInt("simulation.time.nyear");
-        }
-
         nSchool = new int[nSpecies];
-        if (findKeys("simulation.nschool.sp*").size() == nSpecies) {
-            int cpt = 0;
-            for (int i : this.focalIndex) {
-                nSchool[cpt] = getInt("simulation.nschool.sp" + i);
-                cpt++;
-            }
-        } else if (canFind("simulation.nschool")) {
-            int n = getInt("simulation.nschool");
-            for (int i = 0; i < nSpecies; i++) {
-                nSchool[i] = n;
-            }
-        } else {
-            for (int i = 0; i < nSpecies; i++) {
-                nSchool[i] = 10;
-            }
+
+        int n, nSchoolDef, ntmp;
+        double mul;
+        nSchoolDef = 10; // roliveros: hardcoded, to review
+        mul = canFind("simulation.nschool.multiplier") ? getDouble("simulation.nschool.multiplier") : 1.0;
+        n   = canFind("simulation.nschool") ? getInt("simulation.nschool") : nSchoolDef;
+
+        int cpt = 0;
+        for (int i : this.focalIndex) {
+              ntmp = canFind("simulation.nschool.sp" + i) ? getInt("simulation.nschool.sp" + i) : n;
+              nSchool[cpt] = (int) (mul * (float) ntmp);
+              cpt++;
         }
 
         // Create the grid
         initGrid();
 
         // Create the species
-        int cpt = 0;
+        cpt = 0;
         species = new Species[nSpecies];
         for (int fileIndex : this.focalIndex) {
             // Species are now instanciated from the fileIndex and the species index (cpt in
             // [0, nSpecies])
             species[cpt] = new Species(fileIndex, cpt);
             // Name must contain only alphanumerical characters
-            if (!species[cpt].getName().matches("^[a-zA-Z0-9]*$")) {
+            if (!species[cpt].getName().matches("^[a-zA-Z0-9-]+$")) {
                 error("Species name must contain alphanumeric characters only. Please rename " + species[cpt].getName(),
                         null);
             }
@@ -577,7 +579,7 @@ public class Configuration extends OLogger {
             // species index (cpt in [0, nResources])
             rscSpecies[cpt] = new ResourceSpecies(fileIndex, cpt);
             // Name must contain only alphanumerical characters
-            if (!rscSpecies[cpt].getName().matches("^[a-zA-Z0-9]*$")) {
+            if (!rscSpecies[cpt].getName().matches("^[a-zA-Z0-9-]+$")) {
                 error("Resource name must contain alphanumeric characters only. Please rename "
                         + rscSpecies[cpt].getName(), null);
             }
@@ -585,7 +587,7 @@ public class Configuration extends OLogger {
         }
 
         // barrier.n: add number of background species
-        String key = "simulation.nbackground";
+        key = "simulation.nbackground";
         int nBackground_test = 0;
         if (canFind(key)) {
             nBackground_test = getInt(key);
@@ -607,7 +609,7 @@ public class Configuration extends OLogger {
             // BackgroundSpecies are now instanciated from the fileIndex (fileIndex) and the
             // species index (cpt in [0, nResources])
             bkgSpecies[cpt] = new BackgroundSpecies(fileIndex, cpt);
-            if (!bkgSpecies[cpt].getName().matches("^[a-zA-Z0-9]*$")) {
+            if (!bkgSpecies[cpt].getName().matches("^[a-zA-Z0-9-]+$")) {
                 error("Background species name must contain alphanumeric characters only. Please rename "
                         + bkgSpecies[cpt].getName(), null);
             }
@@ -615,8 +617,8 @@ public class Configuration extends OLogger {
         }
 
         // Fisheries
-        boolean fisheryEnabled = getBoolean("fisheries.enabled");
-        this.isEconomyEnabled = getBoolean("economy.enabled");
+        boolean fisheryEnabled = getBoolean("module.multispecies.fisheries.enabled");
+        this.isEconomyEnabled = getBoolean("module.bioeconomics.enabled");
 
         // true if fishingMortality is enabled or not (v3 or v4)
         if (!isNull("simulation.fishing.mortality.enabled")) {
@@ -1237,9 +1239,12 @@ public class Configuration extends OLogger {
      */
     public String resolve(String filename, String relativeTo) {
         String pathname = filename;
+        if(relativeTo == "command line") {
+            relativeTo = mainFilename;
+        }
         try {
             File file = new File(relativeTo);
-            pathname = new File(file.toURI().resolve(filename)).getCanonicalPath();
+            pathname = new File(file.toURI().resolve(filename)).getAbsolutePath();
         } catch (Exception ex) {
             // do nothing, just return the argument
         }
@@ -1748,7 +1753,7 @@ public class Configuration extends OLogger {
             shuffle = getBoolean(key, false);
         }
 
-        Nc4Chunking.Strategy strategy = Nc4Chunking.Strategy.none;
+        Nc4Chunking.Strategy strategy = Nc4Chunking.Strategy.standard;
         key = "output.netcdf.chunk";
         if (!this.isNull(key)) {
             switch (getString(key)) {
@@ -1762,7 +1767,7 @@ public class Configuration extends OLogger {
                     strategy = Nc4Chunking.Strategy.none;
                     break;
                 default:
-                    strategy = Nc4Chunking.Strategy.none;
+                    strategy = Nc4Chunking.Strategy.standard;
             }
         }
 

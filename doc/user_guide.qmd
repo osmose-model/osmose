@@ -1,0 +1,5 @@
+# User guide: basics
+
+## Introduction
+
+In this section, the Osmose install and running process is described. In addition, some basic principles in configuring Osmose are also provided.

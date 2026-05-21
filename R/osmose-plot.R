@@ -20,7 +20,7 @@
 # Ricardo OLIVEROS RAMOS (ricardo.oliveros@gmail.com)
 # Philippe VERLEY (philippe.verley@ird.fr)
 # Laure VELEZ (laure.velez@ird.fr)
-# Nicolas Barrier (nicolas.barrier@ird.fr)
+# Nicolas BARRIER (nicolas.barrier@ird.fr)
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -237,7 +237,31 @@ plot.osmose.yield = function(x, species = NULL, speciesNames = NULL,
                 horizontal = horizontal, conf = conf, factor = factor,
                 xlim = xlim, ylim = ylim, col = col, alpha = alpha, 
                 border = border, lty = lty, lwd = lwd, axes = axes, 
-                legend = legend, units = units, ...)
+                legend = legend, units = units, intype="h", ...)
+  
+  return(invisible())
+}
+
+#' @rdname plot.osmose
+#' @method plot osmose.yieldByYear
+plot.osmose.yieldByYear = function(x, species = NULL, speciesNames = NULL, 
+                                   start = NULL, end = NULL, 
+                                   initialYear = NULL, ts = TRUE, type = 1, 
+                                   replicates = TRUE, freq = 12, 
+                                   horizontal = FALSE, conf = 0.95, factor = 1e-3, 
+                                   xlim = NULL, ylim = NULL, col = NULL, alpha = NULL, 
+                                   border = NULL, lty = 1, lwd = 2, axes = TRUE, 
+                                   legend = TRUE, units = "tonnes", ...){
+  
+  # Run the plot
+  osmosePlots2D(x = x, species = species, speciesNames = speciesNames, 
+                start = start, end = end, 
+                initialYear = initialYear, ts = ts, type = type, 
+                replicates = replicates, freq = 1, 
+                horizontal = horizontal, conf = conf, factor = factor,
+                xlim = xlim, ylim = ylim, col = col, alpha = alpha, 
+                border = border, lty = lty, lwd = lwd, axes = axes, 
+                legend = legend, units = units, intype="h", ...)
   
   return(invisible())
 }
@@ -467,3 +491,38 @@ plot.osmose.yieldByAge = function(x, type = 1, species = NULL,
   
   return(invisible())
 }
+
+
+# Calibration -------------------------------------------------------------
+
+#' @rdname plot.osmose
+#' @method plot osmose.calibration
+#' @export
+plot.osmose.calibration = function(x, ...) {
+  
+  opar = par(no.readonly=TRUE)
+  on.exit(par(opar))
+  
+  par = get_var(x, "par") 
+  likelihood = get_var(x, "value")
+  
+  .basepar = function(x) paste(head(unlist(strsplit(x, spli="\\.")), -1), collapse=".")
+  basepar = sapply(colnames(par), FUN=.basepar)
+  basepar = gsub(basepar, pattern=".base", replacement="")
+  ind = split(seq_along(basepar), f = basepar)
+  n = length(ind) + 1
+  ix = floor(sqrt(n))
+  iy = ceiling(n/ix)
+  fac = min(floor(log10(range(likelihood[is.finite(likelihood)]))))
+  par(mfrow=sort(c(ix, iy), decreasing = TRUE), mar=c(3,3,3,1), oma=c(1,1,1,1))
+  for(i in seq_along(ind)) {
+    matplot(par[,ind[[i]]], pch=19, type="b", cex=0.5, main=names(ind)[i], las=1, ylab="")
+  }
+  expr = sprintf("log-likelihood (x10^%d)", fac)
+  plot((10^-fac)*likelihood, type="l", las=1, ylab="", main=expr)
+  
+  return(invisible(NULL))
+  
+}
+
+

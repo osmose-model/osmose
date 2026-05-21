@@ -22,7 +22,7 @@
  * Ricardo OLIVEROS RAMOS (ricardo.oliveros@gmail.com)
  * Philippe VERLEY (philippe.verley@ird.fr)
  * Laure VELEZ (laure.velez@ird.fr)
- * Nicolas Barrier (nicolas.barrier@ird.fr)
+ * Nicolas BARRIER (nicolas.barrier@ird.fr)
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -41,6 +41,7 @@
 
 package fr.ird.osmose;
 
+import fr.ird.osmose.background.BackgroundProcess;
 import fr.ird.osmose.output.OutputManager;
 import fr.ird.osmose.process.GrowthProcess;
 import fr.ird.osmose.process.IncomingFluxProcess;
@@ -61,10 +62,15 @@ import fr.ird.osmose.resource.ResourceForcing;
  */
 public class SimulationStep extends SimulationLinker {
 
+
+    /* Background process. */
+    private BackgroundProcess backgroundProcess;
+
     /*
      * Growth process
      */
     private GrowthProcess growthProcess;
+
     /*
      * Reproduction process
      */
@@ -106,6 +112,9 @@ public class SimulationStep extends SimulationLinker {
         // Initialize general mortality process
         mortalityProcess = new MortalityProcess(getRank());
         mortalityProcess.init();
+
+        backgroundProcess = new BackgroundProcess(getRank());
+        backgroundProcess.init();
 
         // If the bioen module is activated, no more use of the
         // GrowthProcess class, use of the EnergyBudget module instead.
@@ -164,6 +173,12 @@ public class SimulationStep extends SimulationLinker {
             incomingFLuxProcess.run();
         }
 
+        // Reset the background schools for the given time step
+        backgroundProcess.run();
+        getBkgSchoolSet().getSchools().forEach((school) -> {
+            school.init();
+        });
+
         // Reset some school state variables
         getSchoolSet().getSchools().forEach((school) -> {
             school.init();
@@ -173,17 +188,24 @@ public class SimulationStep extends SimulationLinker {
             resource.update(iStepSimu);
         }
 
+        // Spatial distribution
+        movementProcess.run();
+
         // Some indicators might need a snapshot of the population
         // at the beginning of the step
         indicators.initStep();
-
-        // Spatial distribution
-        movementProcess.run();
 
         // Save 1st time step
         if (recordStep0 && iStepSimu == 0) {
             indicators.update(-1);
         }
+
+
+        getSimulation().resetSSB();
+        getSchoolSet().getSchools().forEach((school) -> {
+            getSimulation().incrementSSB(school);
+        });
+
 
         // Compute mortality
         // (predation + fishing + additional mortality + starvation)
@@ -199,7 +221,10 @@ public class SimulationStep extends SimulationLinker {
         }
 
         // Updates the aging mortality variable
-        getSchoolSet().updateAgingMortality();
+        getSchoolSet().updateAgingMortality(iStepSimu);
+
+        // Updates the aging mortality variable
+        getSchoolSet().updateSpawningMortality(iStepSimu);
 
         // Reproduction
         reproductionProcess.run();

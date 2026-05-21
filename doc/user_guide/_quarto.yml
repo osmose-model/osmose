@@ -1,0 +1,65 @@
+project:
+  type: book
+
+book:
+  title: "Osmose User Guide"
+  author:
+    - name: Nicolas Barrier
+      orcid: 0000-0002-1693-4719
+    - name: Philippe Verley
+      given-names: Philippe
+      orcid: 0000-0002-5686-2764
+    - name: Ricardo Oliveros-Ramos
+      orcid: 0000-0002-8069-2101
+    - name: Bruno Ernande
+      orcid:  0000-0002-0727-5774
+    - name: Wencheng Lau-Medrano
+      orcid:  0000-0002-7979-9710
+    - name: Criscely Luján
+      orcid: 0000-0003-2658-7340
+    - name: Alaia Morell
+      given-names: Alaia
+      orcid: 0000-0003-3719-4462
+    - name: Morgane Travers-Trolet
+      orcid: 0000-0003-1493-662X
+    - name: Laure Velez
+      orcid: 0000-0001-9555-6770
+    - name: Yunne-Jai Shin
+      orcid: 0000-0002-7259-9265
+
+  chapters:
+    - index.qmd
+    - 1_download_requirements.qmd
+    - 2_install_osmose.qmd
+    - 3_datarmor_install.qmd
+    - 4_running_osmose.qmd
+    - 5_input.qmd
+    - biblio.qmd
+
+  search: true
+  repo-url: https://github.com/osmose-model/osmose/
+  repo-actions: [edit]
+  downloads: [pdf]
+  sidebar:
+    style: "docked"
+    logo: _static/logo-osmose.svg
+  favicon: _static/logo-osmose.svg
+  page-navigation: true
+  issue-url: "https://github.com/osmose-model/osmose/issues"
+
+
+bibliography: _static/biblio.bib
+
+execute:
+  cache: true
+
+jupyter: ir
+
+format:
+  html:
+    number-sections: true
+    theme: cosmo
+
+  pdf:
+    fontfamily: libertinus
+    keep-tex: true
