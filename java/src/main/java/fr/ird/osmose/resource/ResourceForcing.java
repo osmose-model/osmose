@@ -213,7 +213,7 @@ public class ResourceForcing extends OsmoseLinker {
 
             String prefix = (resourceForcingMode == ResourceForcingMode.NETCDF_BIOMASS) ? "species.biomass" : "species.relative.biomass";
 
-            if (!getConfiguration().isNull(prefix + ".varname.sp" + fileindex)) {
+            if (!getConfiguration().isNull(prefix + ".file.sp" + fileindex)) {
 
                 // check resource is properly defined in the NetCDF file
                 String name = getConfiguration().getString(prefix + ".varname.sp" + fileindex);
