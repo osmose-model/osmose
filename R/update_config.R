@@ -51,7 +51,7 @@
 #'
 #' @export
 update_osmose = function(input, log = "osmose.log",
-                         version = "4.4.0", osmose = NULL, java = "java",
+                         version = "4.4.1", osmose = NULL, java = "java",
                          verbose = TRUE, absolute = TRUE) {
 
   if(isTRUE(verbose)) message(sprintf("This is OSMOSE version %s", version))
