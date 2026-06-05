@@ -277,6 +277,7 @@ public class Configuration extends OLogger {
 
     private boolean cutoffEnabled;
     private int recordFrequency;
+    private boolean kill_if_no_schools = false;
 
     /**
      * Threshold age (year) for age class zero. This parameter allows to discard
@@ -440,6 +441,11 @@ public class Configuration extends OLogger {
         } else {
             // if simulation.time.nstep not defined, use old parameter simulation.time.nyear
             nStep = nStepYear * getInt("simulation.time.nyear");
+        }
+
+         // PhV 20160203, new parameter simulation.time.nstep
+        if (canFind("simulation.kill.if.no.school")) {
+            kill_if_no_schools = getBoolean("simulation.kill.if.no.school");
         }
 
         writeRestart = true;
@@ -1776,6 +1782,10 @@ public class Configuration extends OLogger {
 
     public Nc4Chunking getChunker() {
         return this.chunker;
+    }
+
+    public boolean killIfNoSchool() {
+        return this.kill_if_no_schools;
     }
 
     private void initFisheries() {
