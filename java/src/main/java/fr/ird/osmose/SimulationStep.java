@@ -259,7 +259,7 @@ public class SimulationStep extends SimulationLinker {
 
         double abundance_totale [] = new double[getConfiguration().getNSpecies()];
 
-        if (getConfiguration().killIfNoSchool() && this.getSimulation().getYear() > yearMaxSeeding) {
+        if (getConfiguration().killIfNoSchool() && this.getSimulation().getIndexTimeSimu() > yearMaxSeeding) {
             // if enabled, check whether abundance for each species is > 0
             int error = 0;
             for (int iSpecies = 0; iSpecies < getConfiguration().getNSpecies(); iSpecies++) {
