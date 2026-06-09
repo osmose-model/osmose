@@ -257,26 +257,33 @@ public class SimulationStep extends SimulationLinker {
         // merge schools obtained by reproduction into the classic pool.
         getSchoolSet().mergeSchoolSets();
 
+        // Printing error message when no abundance for a given species.
         double abundance_totale [] = new double[getConfiguration().getNSpecies()];
+        for (int iSpecies = 0; iSpecies < getConfiguration().getNSpecies(); iSpecies++) {
+            abundance_totale[iSpecies] = 0;
+            for (IAggregation sch : getSchoolSet().getSchools(getConfiguration().getSpecies(iSpecies))) {
+                abundance_totale[iSpecies] += sch.getInstantaneousAbundance();
+            }
+            if (abundance_totale[iSpecies] == 0) {
+                warning("No abundance for species " + getConfiguration().getSpecies(iSpecies).getName() + " at step "
+                        + this.getSimulation().getIndexTimeSimu());
+            }
+        }
 
+        // If the kill if no school parameter is on and the time is greater than the seeding period, we
+        // kill the simulation
         if (getConfiguration().killIfNoSchool() && this.getSimulation().getIndexTimeSimu() > yearMaxSeeding) {
-            // if enabled, check whether abundance for each species is > 0
             int error = 0;
             for (int iSpecies = 0; iSpecies < getConfiguration().getNSpecies(); iSpecies++) {
-                abundance_totale[iSpecies] = 0;
-                for (IAggregation sch : getSchoolSet().getSchools(getConfiguration().getSpecies(iSpecies))) {
-                    abundance_totale[iSpecies] += sch.getInstantaneousAbundance();
-                }
-
                 // increments the error message.
                 if (abundance_totale[iSpecies] == 0) {
-                    warning("No school survived for species " + getConfiguration().getSpecies(iSpecies).getName() + ". The simulation will stop");
-                    error += 1;
+                    error += 1; // increment error message if at least one of the species collapsed.
                 }
             } // end of loop on species
 
             // if at least one species is collapsing, kill the simulation
-            if(error > 0)  {
+            if (error > 0) {
+                warning("At least one species collapsed. The simulation will stop");
                 System.exit(1);
             }
         } // end of check on whether to shut down the simu if collapse
