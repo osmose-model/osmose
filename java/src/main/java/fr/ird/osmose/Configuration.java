@@ -517,8 +517,39 @@ public class Configuration extends OLogger {
                 .count();
 
         // Extract the species indexes for the focal, backgroud and resource species.
-        this.focalIndex = this.findKeys("species.type.sp*").stream().filter(k -> getString(k).equalsIgnoreCase("focal"))
+        int [] tempFocalIndex = this.findKeys("species.type.sp*").stream().filter(k -> getString(k).equalsIgnoreCase("focal"))
                 .mapToInt(rgKey -> Integer.valueOf(rgKey.substring(rgKey.lastIndexOf(".sp") + 3))).sorted().toArray();
+
+
+        // adding a test to enable a species or not
+        boolean isSpeciesEnabled[] = new boolean[nSpecies];
+        int cpt = 0; // 0-based species index
+        int numberEnabledSpecies = 0;  // number of enabled species
+        for (int iSpecies : tempFocalIndex) {  // loop over the species file index
+            String keyEnabled = "species.is.enabled.sp" + iSpecies;
+            // if the deactivation key is found, set boolean. Else, force to true
+            isSpeciesEnabled[cpt] = canFind(keyEnabled) ? getBoolean(keyEnabled) : true;
+            if(isSpeciesEnabled[cpt]) {
+                // if species enabled, increment the number of enabled species
+                numberEnabledSpecies++;
+            }
+            cpt++;
+        }
+
+        // Initialize the focal (i.e. file-based) species index
+        this.focalIndex = new int[numberEnabledSpecies];
+        cpt = 0;
+        for(int i = 0; i < nSpecies; i++) { // loop over all the file species
+            if(isSpeciesEnabled[i]) {
+                this.focalIndex[cpt] = tempFocalIndex[i];
+                cpt++;
+            }
+        }
+
+        int numberDeactivatedSpecies = nSpecies - numberEnabledSpecies;
+
+        // correct the number of species.
+        nSpecies = numberEnabledSpecies;
 
         this.bkgIndex = this.findKeys("species.type.sp*").stream().filter(k -> getString(k).equalsIgnoreCase("background"))
                 .mapToInt(rgKey -> Integer.valueOf(rgKey.substring(rgKey.lastIndexOf(".sp") + 3))).sorted().toArray();
@@ -527,7 +558,7 @@ public class Configuration extends OLogger {
                 .mapToInt(rgKey -> Integer.valueOf(rgKey.substring(rgKey.lastIndexOf(".sp") + 3))).sorted().toArray();
 
         // Check that the number of focal species match the number of focal types
-        int nSpecies_test = getInt("simulation.nspecies");
+        int nSpecies_test = getInt("simulation.nspecies") - numberDeactivatedSpecies;
         if (nSpecies_test != nSpecies) {
             String errorMsg = String.format(
                     "Focal species may be badly defined. simulation.species=%d, number of focal types=%d",
@@ -552,7 +583,7 @@ public class Configuration extends OLogger {
         mul = canFind("simulation.nschool.multiplier") ? getDouble("simulation.nschool.multiplier") : 1.0;
         n   = canFind("simulation.nschool") ? getInt("simulation.nschool") : nSchoolDef;
 
-        int cpt = 0;
+        cpt = 0;
         for (int i : this.focalIndex) {
               ntmp = canFind("simulation.nschool.sp" + i) ? getInt("simulation.nschool.sp" + i) : n;
               nSchool[cpt] = (int) (mul * (float) ntmp);
