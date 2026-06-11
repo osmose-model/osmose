@@ -1,0 +1,125 @@
+name: Notify on Wiki Update
+
+on:
+  gollum:  # Fires on every wiki page create or edit
+
+jobs:
+  send-email:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout wiki repository
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ github.repository }}.wiki
+          fetch-depth: 2  # Needed to compute diff against previous commit
+
+      - name: Gather wiki commit info
+        id: wiki_info
+        run: |
+          echo "short_sha=${GITHUB_SHA::7}"                                     >> $GITHUB_OUTPUT
+          echo "sha=$GITHUB_SHA"                                                 >> $GITHUB_OUTPUT
+          echo "author_name=$(git log -1 --pretty=%an)"                         >> $GITHUB_OUTPUT
+          echo "author_email=$(git log -1 --pretty=%ae)"                        >> $GITHUB_OUTPUT
+          echo "commit_date=$(git log -1 --pretty='%ci')"                       >> $GITHUB_OUTPUT
+          echo "commit_subject=$(git log -1 --pretty=%s)"                       >> $GITHUB_OUTPUT
+
+          # Body (up to 20 lines)
+          BODY=$(git log -1 --pretty=%b | head -20)
+          echo "commit_body<<EOF"                                                >> $GITHUB_OUTPUT
+          echo "$BODY"                                                           >> $GITHUB_OUTPUT
+          echo "EOF"                                                             >> $GITHUB_OUTPUT
+
+          # Files changed with status (A=added, M=modified, D=deleted)
+          FILES=$(git diff --name-status HEAD~1 HEAD 2>/dev/null || git diff --name-status $(git hash-object -t tree /dev/null) HEAD)
+          echo "files_changed<<EOF"                                             >> $GITHUB_OUTPUT
+          echo "$FILES"                                                         >> $GITHUB_OUTPUT
+          echo "EOF"                                                            >> $GITHUB_OUTPUT
+
+          # Diff stats summary line
+          STATS=$(git diff --stat HEAD~1 HEAD 2>/dev/null | tail -1 || echo "Initial commit")
+          echo "diff_stats=$STATS"                                              >> $GITHUB_OUTPUT
+
+          # Actual content diff (first 100 lines, stripped of binary noise)
+          DIFF=$(git diff HEAD~1 HEAD 2>/dev/null | grep '^[+-]' | grep -v '^[+-]\{3\}' | head -100 || echo "(no diff available)")
+          echo "diff_content<<EOF"                                              >> $GITHUB_OUTPUT
+          echo "$DIFF"                                                          >> $GITHUB_OUTPUT
+          echo "EOF"                                                            >> $GITHUB_OUTPUT
+
+      - name: Send email via Gmail
+        uses: dawidd6/action-send-mail@v3
+        with:
+          server_address: smtp.gmail.com
+          server_port: 465
+          secure: true
+          username: ${{ secrets.GMAIL_USERNAME }}
+          password: ${{ secrets.GMAIL_APP_PASSWORD }}
+          to: ${{ secrets.NOTIFY_EMAIL }}
+          from: ${{ secrets.GMAIL_USERNAME }}
+          subject: "[Wiki] ${{ github.repository }} — ${{ steps.wiki_info.outputs.commit_subject }}"
+          html_body: |
+            <html>
+            <body style="font-family: Arial, sans-serif; color: #333; max-width: 720px;">
+
+              <h2 style="background:#24292e; color:#fff; padding:12px 16px; border-radius:6px 6px 0 0; margin:0;">
+                📖 Wiki Updated — ${{ github.repository }}
+              </h2>
+
+              <table style="width:100%; border-collapse:collapse; border:1px solid #e1e4e8; border-top:none;">
+                <tr style="background:#f6f8fa;">
+                  <td style="padding:8px 12px; font-weight:bold; width:150px;">🔑 Commit SHA</td>
+                  <td style="padding:8px 12px; font-family:monospace;">
+                    <a href="${{ github.server_url }}/${{ github.repository }}/wiki/_history">
+                      ${{ steps.wiki_info.outputs.short_sha }}
+                    </a>
+                    &nbsp;(full: <code>${{ steps.wiki_info.outputs.sha }}</code>)
+                  </td>
+                </tr>
+                <tr>
+                  <td style="padding:8px 12px; font-weight:bold;">✉️ Subject</td>
+                  <td style="padding:8px 12px;">${{ steps.wiki_info.outputs.commit_subject }}</td>
+                </tr>
+                <tr style="background:#f6f8fa;">
+                  <td style="padding:8px 12px; font-weight:bold; vertical-align:top;">📝 Body</td>
+                  <td style="padding:8px 12px; white-space:pre-wrap;">${{ steps.wiki_info.outputs.commit_body }}</td>
+                </tr>
+                <tr>
+                  <td style="padding:8px 12px; font-weight:bold;">👤 Author</td>
+                  <td style="padding:8px 12px;">${{ steps.wiki_info.outputs.author_name }} &lt;${{ steps.wiki_info.outputs.author_email }}&gt;</td>
+                </tr>
+                <tr style="background:#f6f8fa;">
+                  <td style="padding:8px 12px; font-weight:bold;">📅 Date</td>
+                  <td style="padding:8px 12px;">${{ steps.wiki_info.outputs.commit_date }}</td>
+                </tr>
+                <tr>
+                  <td style="padding:8px 12px; font-weight:bold;">📊 Stats</td>
+                  <td style="padding:8px 12px;">${{ steps.wiki_info.outputs.diff_stats }}</td>
+                </tr>
+              </table>
+
+              <h3 style="margin-top:24px;">📁 Pages Changed</h3>
+              <pre style="background:#f6f8fa; padding:12px; border:1px solid #e1e4e8; border-radius:4px; font-size:13px;">${{ steps.wiki_info.outputs.files_changed }}</pre>
+
+              <h3 style="margin-top:24px;">🔍 Content Diff (first 100 changed lines)</h3>
+              <pre style="background:#1e1e1e; color:#d4d4d4; padding:12px; border-radius:4px; font-size:12px; overflow-x:auto; white-space:pre-wrap;">${{ steps.wiki_info.outputs.diff_content }}</pre>
+
+              <p style="margin-top:20px;">
+                <a href="${{ github.server_url }}/${{ github.repository }}/wiki"
+                   style="background:#0366d6; color:#fff; padding:8px 16px; text-decoration:none; border-radius:4px;">
+                  View Wiki →
+                </a>
+                &nbsp;
+                <a href="${{ github.server_url }}/${{ github.repository }}/wiki/_history"
+                   style="background:#6c757d; color:#fff; padding:8px 16px; text-decoration:none; border-radius:4px;">
+                  View History →
+                </a>
+              </p>
+
+              <hr style="margin-top:32px; border:none; border-top:1px solid #e1e4e8;">
+              <p style="font-size:11px; color:#999;">
+                Triggered by GitHub Actions · ${{ github.repository }} · Run
+                <a href="${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}">#${{ github.run_number }}</a>
+              </p>
+
+            </body>
+            </html>
