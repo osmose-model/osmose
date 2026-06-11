@@ -46,80 +46,107 @@ jobs:
           echo "$DIFF"                                                          >> $GITHUB_OUTPUT
           echo "EOF"                                                            >> $GITHUB_OUTPUT
 
-      - name: Send email via Gmail
-        uses: dawidd6/action-send-mail@v3
+
+      - name: Send mail
+        uses: dawidd6/action-send-mail@v8
+        env:
+            # Optional http proxy:
+            HTTP_PROXY: http://proxy.example.test:3128
         with:
-          server_address: smtp.gmail.com
-          server_port: 465
-          secure: true
-          username: ${{ secrets.GMAIL_USERNAME }}
-          password: ${{ secrets.GMAIL_APP_PASSWORD }}
-          to: ${{ secrets.NOTIFY_EMAIL }}
-          from: ${{ secrets.GMAIL_USERNAME }}
-          subject: "[Wiki] ${{ github.repository }} — ${{ steps.wiki_info.outputs.commit_subject }}"
-          html_body: |
-            <html>
-            <body style="font-family: Arial, sans-serif; color: #333; max-width: 720px;">
+            # # Specify connection via URL (replaces server_address, server_port, secure,
+            # # username and password)
+            # #
+            # # Format:
+            # #
+            # #  * smtp://user:password@server:port
+            # #  * smtp+starttls://user:password@server:port
+            # connection_url: ${{secrets.MAIL_CONNECTION}}
 
-              <h2 style="background:#24292e; color:#fff; padding:12px 16px; border-radius:6px 6px 0 0; margin:0;">
-                📖 Wiki Updated — ${{ github.repository }}
-              </h2>
+            # Required mail server address if not connection_url:
+            server_address: smtp.gmail.com
 
-              <table style="width:100%; border-collapse:collapse; border:1px solid #e1e4e8; border-top:none;">
-                <tr style="background:#f6f8fa;">
-                  <td style="padding:8px 12px; font-weight:bold; width:150px;">🔑 Commit SHA</td>
-                  <td style="padding:8px 12px; font-family:monospace;">
-                    <a href="${{ github.server_url }}/${{ github.repository }}/wiki/_history">
-                      ${{ steps.wiki_info.outputs.short_sha }}
+            # Server port, default 25:
+            server_port: 465
+
+            # Optional whether this connection use TLS (default is true if server_port is 465)
+            secure: true
+
+            # Optional (recommended) mail server username:
+            username: ${{secrets.GMAIL_USERNAME}}
+
+            # Optional (recommended) mail server password:
+            password: ${{secrets.GMAIL_APP_PASSWORD}}
+
+            # Optional recipients. Separate multiple addresses by a comma (possibly surrounded by whitespace):
+            to: ${{secrets.NOTIFY_EMAIL}}
+
+            # Required sender (supported formats: see "Supported address formats" below)
+            from: ${{secrets.SENDING_ADDRESS}}
+
+            subject: "[Wiki] ${{ github.repository }} — ${{ steps.wiki_info.outputs.commit_subject }}"
+            html_body: |
+                <html>
+                <body style="font-family: Arial, sans-serif; color: #333; max-width: 720px;">
+
+                <h2 style="background:#24292e; color:#fff; padding:12px 16px; border-radius:6px 6px 0 0; margin:0;">
+                    📖 Wiki Updated — ${{ github.repository }}
+                </h2>
+
+                <table style="width:100%; border-collapse:collapse; border:1px solid #e1e4e8; border-top:none;">
+                    <tr style="background:#f6f8fa;">
+                    <td style="padding:8px 12px; font-weight:bold; width:150px;">🔑 Commit SHA</td>
+                    <td style="padding:8px 12px; font-family:monospace;">
+                        <a href="${{ github.server_url }}/${{ github.repository }}/wiki/_history">
+                        ${{ steps.wiki_info.outputs.short_sha }}
+                        </a>
+                        &nbsp;(full: <code>${{ steps.wiki_info.outputs.sha }}</code>)
+                    </td>
+                    </tr>
+                    <tr>
+                    <td style="padding:8px 12px; font-weight:bold;">✉️ Subject</td>
+                    <td style="padding:8px 12px;">${{ steps.wiki_info.outputs.commit_subject }}</td>
+                    </tr>
+                    <tr style="background:#f6f8fa;">
+                    <td style="padding:8px 12px; font-weight:bold; vertical-align:top;">📝 Body</td>
+                    <td style="padding:8px 12px; white-space:pre-wrap;">${{ steps.wiki_info.outputs.commit_body }}</td>
+                    </tr>
+                    <tr>
+                    <td style="padding:8px 12px; font-weight:bold;">👤 Author</td>
+                    <td style="padding:8px 12px;">${{ steps.wiki_info.outputs.author_name }} &lt;${{ steps.wiki_info.outputs.author_email }}&gt;</td>
+                    </tr>
+                    <tr style="background:#f6f8fa;">
+                    <td style="padding:8px 12px; font-weight:bold;">📅 Date</td>
+                    <td style="padding:8px 12px;">${{ steps.wiki_info.outputs.commit_date }}</td>
+                    </tr>
+                    <tr>
+                    <td style="padding:8px 12px; font-weight:bold;">📊 Stats</td>
+                    <td style="padding:8px 12px;">${{ steps.wiki_info.outputs.diff_stats }}</td>
+                    </tr>
+                </table>
+
+                <h3 style="margin-top:24px;">📁 Pages Changed</h3>
+                <pre style="background:#f6f8fa; padding:12px; border:1px solid #e1e4e8; border-radius:4px; font-size:13px;">${{ steps.wiki_info.outputs.files_changed }}</pre>
+
+                <h3 style="margin-top:24px;">🔍 Content Diff (first 100 changed lines)</h3>
+                <pre style="background:#1e1e1e; color:#d4d4d4; padding:12px; border-radius:4px; font-size:12px; overflow-x:auto; white-space:pre-wrap;">${{ steps.wiki_info.outputs.diff_content }}</pre>
+
+                <p style="margin-top:20px;">
+                    <a href="${{ github.server_url }}/${{ github.repository }}/wiki"
+                    style="background:#0366d6; color:#fff; padding:8px 16px; text-decoration:none; border-radius:4px;">
+                    View Wiki →
                     </a>
-                    &nbsp;(full: <code>${{ steps.wiki_info.outputs.sha }}</code>)
-                  </td>
-                </tr>
-                <tr>
-                  <td style="padding:8px 12px; font-weight:bold;">✉️ Subject</td>
-                  <td style="padding:8px 12px;">${{ steps.wiki_info.outputs.commit_subject }}</td>
-                </tr>
-                <tr style="background:#f6f8fa;">
-                  <td style="padding:8px 12px; font-weight:bold; vertical-align:top;">📝 Body</td>
-                  <td style="padding:8px 12px; white-space:pre-wrap;">${{ steps.wiki_info.outputs.commit_body }}</td>
-                </tr>
-                <tr>
-                  <td style="padding:8px 12px; font-weight:bold;">👤 Author</td>
-                  <td style="padding:8px 12px;">${{ steps.wiki_info.outputs.author_name }} &lt;${{ steps.wiki_info.outputs.author_email }}&gt;</td>
-                </tr>
-                <tr style="background:#f6f8fa;">
-                  <td style="padding:8px 12px; font-weight:bold;">📅 Date</td>
-                  <td style="padding:8px 12px;">${{ steps.wiki_info.outputs.commit_date }}</td>
-                </tr>
-                <tr>
-                  <td style="padding:8px 12px; font-weight:bold;">📊 Stats</td>
-                  <td style="padding:8px 12px;">${{ steps.wiki_info.outputs.diff_stats }}</td>
-                </tr>
-              </table>
+                    &nbsp;
+                    <a href="${{ github.server_url }}/${{ github.repository }}/wiki/_history"
+                    style="background:#6c757d; color:#fff; padding:8px 16px; text-decoration:none; border-radius:4px;">
+                    View History →
+                    </a>
+                </p>
 
-              <h3 style="margin-top:24px;">📁 Pages Changed</h3>
-              <pre style="background:#f6f8fa; padding:12px; border:1px solid #e1e4e8; border-radius:4px; font-size:13px;">${{ steps.wiki_info.outputs.files_changed }}</pre>
+                <hr style="margin-top:32px; border:none; border-top:1px solid #e1e4e8;">
+                <p style="font-size:11px; color:#999;">
+                    Triggered by GitHub Actions · ${{ github.repository }} · Run
+                    <a href="${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}">#${{ github.run_number }}</a>
+                </p>
 
-              <h3 style="margin-top:24px;">🔍 Content Diff (first 100 changed lines)</h3>
-              <pre style="background:#1e1e1e; color:#d4d4d4; padding:12px; border-radius:4px; font-size:12px; overflow-x:auto; white-space:pre-wrap;">${{ steps.wiki_info.outputs.diff_content }}</pre>
-
-              <p style="margin-top:20px;">
-                <a href="${{ github.server_url }}/${{ github.repository }}/wiki"
-                   style="background:#0366d6; color:#fff; padding:8px 16px; text-decoration:none; border-radius:4px;">
-                  View Wiki →
-                </a>
-                &nbsp;
-                <a href="${{ github.server_url }}/${{ github.repository }}/wiki/_history"
-                   style="background:#6c757d; color:#fff; padding:8px 16px; text-decoration:none; border-radius:4px;">
-                  View History →
-                </a>
-              </p>
-
-              <hr style="margin-top:32px; border:none; border-top:1px solid #e1e4e8;">
-              <p style="font-size:11px; color:#999;">
-                Triggered by GitHub Actions · ${{ github.repository }} · Run
-                <a href="${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}">#${{ github.run_number }}</a>
-              </p>
-
-            </body>
-            </html>
+                </body>
+                </html>
