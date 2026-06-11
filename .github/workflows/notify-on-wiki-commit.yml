@@ -1,7 +1,6 @@
 name: Notify on Wiki Update
 
 on:
-  gollum:
   schedule:
     - cron: '0 19 * * *'
 
@@ -10,6 +9,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      # This step is needed to write in the osmose main folder the latest sha emailed by the wiki system
       - name: Checkout main repo (for storing last seen SHA)
         uses: actions/checkout@v4
         with:
