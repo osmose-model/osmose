@@ -43,6 +43,7 @@ jobs:
             BASE_SHA=$(git rev-parse HEAD~1 2>/dev/null || echo "")
           else
             # Scheduled run: use persisted SHA, fall back to parent
+            # Check whether the last sha file exists and if so, that the latest sha commit exists
             if [ -f "$LAST_SHA_FILE" ] && git cat-file -e "$(cat $LAST_SHA_FILE)^{commit}" 2>/dev/null; then
               BASE_SHA=$(cat "$LAST_SHA_FILE")
             else
