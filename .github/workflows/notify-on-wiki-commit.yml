@@ -1,8 +1,9 @@
 name: Notify on Wiki Update
 
 on:
+  gollum:
   schedule:
-    - cron: '*/2 * * * *'  # Every 15 minutes
+    - cron: '0 19 * * *'
 
 jobs:
   send-email:
