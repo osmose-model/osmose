@@ -1,4 +1,4 @@
-name: Notify on Wiki Update
+name: Wiki update notification
 
 on:
   schedule:
