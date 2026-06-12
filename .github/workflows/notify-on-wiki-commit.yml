@@ -2,7 +2,8 @@ name: Notify on Wiki Update
 
 on:
   schedule:
-    - cron: '0 19 * * *'
+    - cron: '35 9,10 * * *'
+      timezone: 'Europe/Lisbon'
 
 jobs:
   send-email:
