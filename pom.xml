@@ -46,7 +46,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
     <modelVersion>4.0.0</modelVersion>
     <groupId>fr.ird</groupId>
     <artifactId>osmose</artifactId>
-    <version>4.4.0</version>
+    <version>4.4.1</version>
     <packaging>jar</packaging>
     <name>Osmose</name>
     <description></description>
@@ -97,7 +97,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-lang3</artifactId>
-            <version>3.12.0</version>
+            <version>3.18.0</version>
         </dependency>
         <dependency>
             <groupId>org.junit.jupiter</groupId>

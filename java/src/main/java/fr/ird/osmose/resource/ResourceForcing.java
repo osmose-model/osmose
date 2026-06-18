@@ -186,9 +186,9 @@ public class ResourceForcing extends OsmoseLinker {
             uBiomass = new double[getConfiguration().getNStep()];
 
             // If we have uniform biomass, two cases: constant biomass
-            if (!getConfiguration().isNull("species.constant.biomass.sp" + fileindex)) {
+            if (!getConfiguration().isNull("species.biomass.constant.sp" + fileindex)) {
 
-                double constantuBiomass = getConfiguration().getDouble("species.constant.biomass.sp" + fileindex);
+                double constantuBiomass = getConfiguration().getDouble("species.biomass.constant.sp" + fileindex);
                 constantuBiomass = multiplier * (constantuBiomass + offset) / getGrid().getNOceanCell();
                 for (int t = 0; t < getConfiguration().getNStep(); t++) {
                     uBiomass[t] = constantuBiomass;
@@ -213,7 +213,7 @@ public class ResourceForcing extends OsmoseLinker {
 
             String prefix = (resourceForcingMode == ResourceForcingMode.NETCDF_BIOMASS) ? "species.biomass" : "species.relative.biomass";
 
-            if (!getConfiguration().isNull("species.file.sp" + fileindex)) {
+            if (!getConfiguration().isNull(prefix + ".file.sp" + fileindex)) {
 
                 // check resource is properly defined in the NetCDF file
                 String name = getConfiguration().getString(prefix + ".varname.sp" + fileindex);

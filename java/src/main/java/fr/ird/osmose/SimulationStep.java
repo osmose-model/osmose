@@ -99,6 +99,8 @@ public class SimulationStep extends SimulationLinker {
     /** Adding a class for the management of bioenergetic module */
     private EnergyBudget bioenProcess;
 
+    int yearMaxSeeding;
+
     public SimulationStep(int rank) {
         super(rank);
     }
@@ -108,6 +110,23 @@ public class SimulationStep extends SimulationLinker {
      * It is called once at the beginning of the simulation.
      */
     public void init() {
+
+
+        // Seeding duration (expressed in number of time steps)
+        yearMaxSeeding = 0;
+        if (!getConfiguration().isNull("population.seeding.year.max")) {
+            yearMaxSeeding = getConfiguration().getInt("population.seeding.year.max")
+                    * getConfiguration().getNStepYear();
+        } else {
+            if(!getConfiguration().getBoolean("population.initialization.relativebiomass.enabled")) {
+                for (int i = 0; i < getConfiguration().getNSpecies(); i++) {
+                    yearMaxSeeding = Math.max(yearMaxSeeding, getSpecies(i).getLifespanDt());
+                }
+                warning("Did not find parameter population.seeding.year.max. Osmose set it to "
+                        + ((float) yearMaxSeeding / getConfiguration().getNStepYear())
+                        + " years, the lifespan of the longest-lived species.");
+            }
+        }
 
         // Initialize general mortality process
         mortalityProcess = new MortalityProcess(getRank());
@@ -237,6 +256,37 @@ public class SimulationStep extends SimulationLinker {
 
         // merge schools obtained by reproduction into the classic pool.
         getSchoolSet().mergeSchoolSets();
+
+        // Printing error message when no abundance for a given species.
+        double total_abundance [] = new double[getConfiguration().getNSpecies()];
+        for (int iSpecies = 0; iSpecies < getConfiguration().getNSpecies(); iSpecies++) {
+            total_abundance[iSpecies] = 0;
+            for (IAggregation sch : getSchoolSet().getSchools(getConfiguration().getSpecies(iSpecies))) {
+                total_abundance[iSpecies] += sch.getInstantaneousAbundance();
+            }
+            if (total_abundance[iSpecies] == 0) {
+                warning("No abundance for species " + getConfiguration().getSpecies(iSpecies).getName() + " at step "
+                        + this.getSimulation().getIndexTimeSimu());
+            }
+        }
+
+        // If the kill if no school parameter is on and the time is greater than the seeding period, we
+        // kill the simulation
+        if (getConfiguration().killIfNoSchoolEnabled() && this.getSimulation().getIndexTimeSimu() > yearMaxSeeding) {
+            int error = 0;
+            for (int iSpecies = 0; iSpecies < getConfiguration().getNSpecies(); iSpecies++) {
+                // increments the error message.
+                if (total_abundance[iSpecies] == 0) {
+                    error += 1; // increment error message if at least one of the species collapsed.
+                }
+            } // end of loop on species
+
+            // if at least one species is collapsing, kill the simulation
+            if (error > 0) {
+                warning("At least one species collapsed. The simulation will stop");
+                System.exit(1);
+            }
+        } // end of check on whether to shut down the simu if collapse
     }
 
     /**
