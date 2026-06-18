@@ -729,5 +729,30 @@ public class Releases {
                     }
 
                 } // end of update parameters
-            } }; // end of ALL array
+            },
+
+            new Release("4.4.1") {
+                @Override
+                void updateParameters() {
+
+                    Configuration cfg = getConfiguration();
+                    int focalIndex[] = cfg.findKeys("species.type.sp*").stream()
+                            .filter(k -> cfg.getString(k).equals("focal"))
+                            .mapToInt(rgKey -> Integer.valueOf(rgKey.substring(rgKey.lastIndexOf(".sp") + 3))).sorted()
+                            .toArray();
+
+                    for (int index : focalIndex) {
+                        if (cfg.canFind("species.constant.biomass.sp" + index)) {
+                            updateKey("species.constant.biomass.sp" + index, "species.biomass.constant.sp" + index);
+                        }
+
+                        if(cfg.canFind("species.file.sp" + index)) {
+                            updateKey("species.file.sp" + index, "species.biomass.file.sp" + index);
+                        }
+                    }
+
+                }
+            }
+
+    }; // end of ALL array
 } // end of class
