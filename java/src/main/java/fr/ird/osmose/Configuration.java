@@ -1815,7 +1815,7 @@ public class Configuration extends OLogger {
         return this.chunker;
     }
 
-    public boolean killIfNoSchool() {
+    public boolean killIfNoSchoolEnabled() {
         return this.kill_if_no_schools_enabled;
     }
 

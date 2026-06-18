@@ -258,13 +258,13 @@ public class SimulationStep extends SimulationLinker {
         getSchoolSet().mergeSchoolSets();
 
         // Printing error message when no abundance for a given species.
-        double abundance_totale [] = new double[getConfiguration().getNSpecies()];
+        double total_abundance [] = new double[getConfiguration().getNSpecies()];
         for (int iSpecies = 0; iSpecies < getConfiguration().getNSpecies(); iSpecies++) {
-            abundance_totale[iSpecies] = 0;
+            total_abundance[iSpecies] = 0;
             for (IAggregation sch : getSchoolSet().getSchools(getConfiguration().getSpecies(iSpecies))) {
-                abundance_totale[iSpecies] += sch.getInstantaneousAbundance();
+                total_abundance[iSpecies] += sch.getInstantaneousAbundance();
             }
-            if (abundance_totale[iSpecies] == 0) {
+            if (total_abundance[iSpecies] == 0) {
                 warning("No abundance for species " + getConfiguration().getSpecies(iSpecies).getName() + " at step "
                         + this.getSimulation().getIndexTimeSimu());
             }
@@ -272,11 +272,11 @@ public class SimulationStep extends SimulationLinker {
 
         // If the kill if no school parameter is on and the time is greater than the seeding period, we
         // kill the simulation
-        if (getConfiguration().killIfNoSchool() && this.getSimulation().getIndexTimeSimu() > yearMaxSeeding) {
+        if (getConfiguration().killIfNoSchoolEnabled() && this.getSimulation().getIndexTimeSimu() > yearMaxSeeding) {
             int error = 0;
             for (int iSpecies = 0; iSpecies < getConfiguration().getNSpecies(); iSpecies++) {
                 // increments the error message.
-                if (abundance_totale[iSpecies] == 0) {
+                if (total_abundance[iSpecies] == 0) {
                     error += 1; // increment error message if at least one of the species collapsed.
                 }
             } // end of loop on species
