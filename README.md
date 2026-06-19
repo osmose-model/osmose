@@ -70,7 +70,7 @@ vignette(package = "osmose", topic = "create_run_read")
 ## References
 
 [Official website](http://www.osmose-model.org/) of the model, including info about the development of the project as well as references.
-[Documentation website](https://documentation.osmose-model.org/index.html) with information of parameters of java model (the core).
+[Documentation Wiki](https://github.com/osmose-model/osmose/wiki) with information of parameters of java model (the core).
 [Github site](https://github.com/osmose-model/osmose) where the development code is placed.
 
 ## Using documentation plugins
