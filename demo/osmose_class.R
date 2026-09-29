@@ -21,7 +21,7 @@ readline("Press any key to continue...")
 # Run OSMOSE --------------------------------------------------------------
 
 # Run an example using 'run_osmose' function
-run_osmose(input = demoPaths$config_file)
+run_osmose(input = demoPaths$config_file, version = "4.3.3")
 
 readline("Press any key to continue...")
 
